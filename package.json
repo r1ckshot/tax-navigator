@@ -1,0 +1,8 @@
+{
+  "name": "tax-navigator",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "verify": "node scripts/verify.mjs"
+  }
+}
