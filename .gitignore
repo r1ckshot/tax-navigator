@@ -1,0 +1,23 @@
+# Секрети
+.env
+.env.*
+
+# Build / deps
+node_modules/
+.next/
+dist/
+
+# Сесії / credentials
+*.session*
+session.json
+
+# Матеріали курсу (вкладені git-репозиторії)
+docs/course/
+
+# Local tier (персональні override, не для команди)
+.claude/settings.local.json
+
+# Приватне: нотатки, чернетки фіч, tg-mining pipeline (дані + протокол)
+docs/notes/
+docs/features/
+research/
