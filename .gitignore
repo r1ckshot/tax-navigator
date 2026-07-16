@@ -1,11 +1,15 @@
 # Секрети
 .env
 .env.*
+!.env.example
 
 # Build / deps
 node_modules/
 .next/
 dist/
+
+# Крах-дампи Git Bash на Windows
+*.stackdump
 
 # Сесії / credentials
 *.session*
@@ -17,7 +21,8 @@ docs/course/
 # Local tier (персональні override, не для команди)
 .claude/settings.local.json
 
-# Приватне: нотатки, чернетки фіч, tg-mining pipeline (дані + протокол)
+# Приватне: нотатки, чернетки здачі, чернетки фіч, tg-mining pipeline (дані + протокол)
 docs/notes/
+docs/capstones/
 docs/features/
 research/
