@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm ci)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(npm test)",
+      "Bash(npx tsc *)",
+      "Bash(npx tsx *)",
+      "Bash(npx eslint *)",
+      "Bash(npx prettier *)",
+      "Bash(npx vitest *)",
+      "Bash(npx next *)",
+      "Bash(npx drizzle-kit *)",
+      "Bash(node --version)",
+      "Bash(git diff *)",
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git stash *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(make verify*)",
+      "Bash(make test)",
+      "Bash(make build)",
+      "Bash(make clean)",
+      "Read",
+      "Glob",
+      "Grep"
+    ],
+    "ask": [
+      "Bash(git commit *)",
+      "Bash(git push *)"
+    ],
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(chmod 777 *)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)",
+      "Bash(wget * | bash)",
+      "Bash(wget * -O- *)",
+      "Read(.env)",
+      "Read(.env.local)",
+      "Read(.env.development.local)",
+      "Read(.env.production.local)",
+      "Read(.env.test.local)",
+      "Read(**/.env)",
+      "Read(**/.env.local)",
+      "Read(**/.env.development.local)",
+      "Read(**/.env.production.local)",
+      "Read(**/.env.test.local)",
+      "Read(**/credentials*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*secret*)",
+      "Read(**/*.sops.*)",
+      "Read(**/*.tfstate)",
+      "Read(**/*.tfstate.backup)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.kube/config)",
+      "Read(research/tg-mining/data/**)",
+      "Read(research/tg-mining/data-round2/**)",
+      "Read(**/*.session*)",
+      "Edit(.env)",
+      "Edit(.env.local)",
+      "Edit(.env.development.local)",
+      "Edit(.env.production.local)",
+      "Edit(.env.test.local)",
+      "Edit(**/.env)",
+      "Edit(**/.env.local)",
+      "Edit(**/.env.development.local)",
+      "Edit(**/.env.production.local)",
+      "Edit(**/.env.test.local)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyRead": [
+        "~/.ssh",
+        "~/.aws",
+        "~/.gnupg",
+        "~/.kube/config"
+      ],
+      "allowWrite": [
+        "/tmp/build"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "api.anthropic.com",
+        "github.com",
+        "api.github.com",
+        "objects.githubusercontent.com",
+        "codeload.github.com",
+        "registry.npmjs.org",
+        "vercel.com",
+        "api.vercel.com",
+        "neon.tech",
+        "console.neon.tech"
+      ],
+      "allowManagedDomainsOnly": false
+    },
+    "excludedCommands": [
+      "docker"
+    ],
+    "allowUnsandboxedCommands": true
+  },
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "300000",
+    "BASH_MAX_TIMEOUT_MS": "900000",
+    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1",
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_FEEDBACK_COMMAND": "1",
+    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
+  }
+}
