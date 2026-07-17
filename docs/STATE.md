@@ -4,7 +4,7 @@
 Курс: Module 3 (Claude Code Setup), дедлайн модуля ~1 тиждень. Продукт: pre-code.
 
 ## Поточні задачі
-1. [x] M3 capstone (Шлях B): Рівні 1–4 повністю готові й верифіковані. `npm run verify` (хост) — OK. `make verify-devcontainer`/`verify-whitelist`/`verify-sandbox`/`verify-firewall` (реально всередині запущеного devcontainer, Docker Desktop + WSL2-бекенд) — усі 4 пройшли. Чернетка здачі готова (`docs/capstones/m3.md`).
+1. [x] M3 capstone (Шлях B): здано (`docs/capstones/m3.md`). Post-submission: реальне відкриття devcontainer виявило 3 нові баги (CRLF checkout, домени логіну, права на named volumes) — виправлено й закомічено окремою сесією, деталі DECISIONS.md 2026-07-17. Стан capstone-чернетки лишається як здано, без змін заднім числом.
 2. [ ] Репо: git-репо ініціалізовано з паку (див. "Зроблено" нижче). Порожній Next.js + деплой на Vercel (internal URL, без домену) — окрема майбутня сесія.
 3. [ ] Лендінг+waitlist (G1) — окрема задача: одна сторінка з болем (голоси з EVIDENCE §3, дослівні цитати тепер у research/tg-mining/EVIDENCE-QUOTES.md) + email; пости за DISTRIBUTION §1.
 
@@ -32,6 +32,6 @@
 - Bash-редирект (`> .env`) обходить `Edit`/`Write`-permission-деny — закривається лише OS-рівнем sandbox (devcontainer/WSL2), не на native Windows. Тримати в увазі, не виправлено технічно (свідомо, per розмову цієї сесії).
 
 ## Наступне після поточних
-- Здати M3 capstone (чернетка готова в `docs/capstones/m3.md`, з фінальним output `make verify` — усі 4 рівні реально пройшли).
+- M3 capstone здано. Devcontainer тепер реально працює end-to-end (rebuild, firewall, логін Claude Code) — перевірено сесією 2026-07-17, деталі DECISIONS.md.
 - Задача 2 (окрема сесія): порожній Next.js + деплой Vercel.
 - M6 очікування: перед SDLC — фіналізувати P1-matrix числа web-fetch'ем з офіційних джерел.
