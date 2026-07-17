@@ -17,6 +17,8 @@ Tax Navigator — інформаційний податковий навігат
 - Гілка на фічу (`feat/*`, `fix/*`); у `main` напряму не пушимо, тільки merge після підтвердження Mike.
 - Conventional Commits: `type(scope): description`, **англійською** (subject і тіло, включно з "чому"). Один логічний крок = один коміт.
 - Subject короткий (imperative); тіло коміта — тільки "чому", коли неочевидно з diff (не переказ what).
+- Docs-only коміти (STATE.md/DECISIONS.md/README) — тіло практично ніколи не потрібне: сам diff вже проза.
+- У тілі fix-коміта — лише root-cause/insight, без речень, що починаються з переказу "що змінилось".
 - Нові коміти замість `--amend`; без `--no-verify`; без force-push до `main`.
 - Стейджити файли за іменем, не `git add -A` наосліп — перевіряти `git status` перед комітом.
 - `.env` ніколи в git, тільки `.env.example`.
