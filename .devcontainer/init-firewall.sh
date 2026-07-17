@@ -3,6 +3,12 @@
 # Запускається у postStartCommand devcontainer або entrypoint docker compose.
 # Потребує capabilities NET_ADMIN і NET_RAW (cap_add у Docker Compose або runArgs у devcontainer).
 #
+# Також виправляє власника named volumes (/home/node/.claude, /commandhistory) на node:node.
+# Docker створює точку монтування named volume від root незалежно від USER у Dockerfile,
+# тому без цього node не міг писати туди (Claude Code login мовчки провалювався).
+# Виконується тут, а не окремим postCreateCommand, щоб не розширювати sudoers на нову команду -
+# цей скрипт і так вже дозволений через /etc/sudoers.d/node-firewall.
+#
 # Захист:
 # - IPv4 (iptables) і IPv6 (ip6tables) обидва default-deny на OUTPUT
 # - DNS обмежений до nameserver з /etc/resolv.conf (захист від DNS rebinding через arbitrary resolver)
@@ -14,6 +20,9 @@
 # DISABLE_TELEMETRY/DISABLE_ERROR_REPORTING вимикають ці канали на рівні Claude Code (DECISIONS.md).
 
 set -euo pipefail
+
+# 0. Власник named volumes - node, не root (див. коментар вище)
+chown -R node:node /home/node/.claude /commandhistory
 
 # 1. Скинути попередні правила, поставити default policy на IPv4 і IPv6
 iptables -F OUTPUT
@@ -65,6 +74,8 @@ ipset create  claude-allowed-6 hash:net family inet6 hashsize 1024 maxelem 65536
 
 ALLOWED_DOMAINS=(
   "api.anthropic.com"
+  "console.anthropic.com"
+  "claude.ai"
   "github.com"
   "api.github.com"
   "objects.githubusercontent.com"

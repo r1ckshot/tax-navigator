@@ -98,6 +98,8 @@
     "network": {
       "allowedDomains": [
         "api.anthropic.com",
+        "console.anthropic.com",
+        "claude.ai",
         "github.com",
         "api.github.com",
         "objects.githubusercontent.com",
