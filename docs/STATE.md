@@ -1,26 +1,22 @@
 # STATE — живий стан проєкту (веде Claude Code, оновлення = частина DoD)
 
 ## Фаза
-Курс: M3 закінчується завтра, M4 стартує. Продукт: pre-code.
+Курс: M4 стартувало. Продукт: перший робочий деплой (порожній Next.js на Vercel), функціонал ще не почато.
 
 ## Поточні задачі
 1. [x] M3 capstone (Шлях B): здано (`docs/capstones/m3.md`). Post-submission: реальне відкриття devcontainer виявило 3 нові баги (CRLF checkout, домени логіну, права на named volumes) — виправлено й закомічено окремою сесією, деталі DECISIONS.md 2026-07-17. Стан capstone-чернетки лишається як здано, без змін заднім числом.
-2. [ ] Репо: git-репо ініціалізовано з паку (див. "Зроблено" нижче). Порожній Next.js + деплой на Vercel (internal URL, без домену) — окрема майбутня сесія.
+2. [x] Репо: git-репо ініціалізовано з паку. Порожній Next.js (TS, App Router) + деплой на Vercel — готово, деталі нижче.
 3. [ ] G1-тест: рішення — без лендінгу/email, чистий Telegram-сигнал (ціль ≥5 явних "коли можна купити", OR-гілка ворот). Тексти постів готові — `docs/capstones/g1-outreach-messages.md` (поза git). Лишилось: відправити руками в 4 канали (DISTRIBUTION §1), коли зручно — не блокує решту.
+4. [ ] **P1-matrix звірка проти офіційних джерел** (наступна сесія, рекомендований наступний крок, деталі нижче).
 
 ## Зроблено (ця сесія)
-- Git-репо ініціалізовано з паку: 1 чистий коміт (`Co-Authored-By: Claude Sonnet 5`), гілка `feat/m3-capstone-config`.
-- README.md переструктуровано (публічна презентація продукту); CLAUDE.md створено (тверді правила + git-етикет, автозавантажується кожної сесії).
-- `.claude/settings.json` (Project): permissions (deny секретів + незворотних команд, allow під Next.js/Drizzle стек, `ask` на `git commit`/`git push`), sandbox-блок (denyRead, allowedDomains без statsig/sentry + vercel.com/neon.tech), env (privacy-прапорці, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75`).
-- Local tier (`.claude/settings.local.json.example`) + User tier (`~/.claude/settings.json`) — глобальний User-файл очищено від секретів (2 Notion API-токени, Supabase anon-key, DB-пароль у plaintext), `attribution` і `$schema` виправлено.
-- `package.json` + `scripts/verify.mjs` + `Makefile` — `npm run verify` працює крос-платформно (Windows-хост без make/python3).
-- `.devcontainer/` (Dockerfile, devcontainer.json, init-firewall.sh, TZ=Europe/Warsaw) + `tests/*.sh` + `docker-compose.yml`.
-- `.env.example` з полями проєкту (ANTHROPIC_API_KEY, DATABASE_URL, NEXT_PUBLIC_APP_URL, LOG_LEVEL).
-- Виправлено 2 wildcard-баги: `.env.*` у `permissions.deny` і в `.gitignore` блокував/ігнорував власний `.env.example` — замінено на точні suffix-и / негацію.
-- Реальний runtime-тест усіх 4 рівнів у Docker: знайдено й виправлено 4 баги, успадковані зі starter-шаблону курсу (`getent`+`pipefail` тихо вбиває `init-firewall.sh`, `curl -f` хибно трактує HTTP 404 як "заблоковано", `iptables -L` без root завжди SKIP-ає firewall-тест, `node:20` замість `node:22` для актуального Claude Code). Деталі — `DECISIONS.md`.
-- `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` вирівняно на 60 (було 75) — узгоджено з власним ручним правилом `SESSIONS-GUIDE.md` ("60–70% → /compact").
-- Реальний `.claude/settings.local.json` створено (копія `.example`, docker compose allow — тепер актуально, `.devcontainer/` існує).
-- `DECISIONS.md`: 3 нових записи (README/CLAUDE.md split + приватність research/notes; permissions.deny suffix-фікс; 4 runtime-баги starter-шаблону).
+- Next.js (TS, App Router) вручну заскафолджений в корені репо (`create-next-app` відмовляється в непорожній директорії) — `app/layout.tsx`, `app/page.tsx`, `tsconfig.json`, `next.config.mjs`, `next-env.d.ts`, `package.json` доповнено (`next`/`react`/`react-dom` + скрипти `dev`/`build`/`start`, старий `verify` збережено).
+- `tsconfig.json` звужено до `include: app/**`, `docs/` виключено — інакше `tsc` підхоплював чужий express-стартер курсу з `docs/course/...` і білд падав.
+- `npm install` + `npm run build` — зелені; гілка `feat/nextjs-scaffold` запушена, fast-forward змержена в `master`, запушена, гілку видалено (локально + origin).
+- Vercel-проєкт створено через Git-інтеграцію (import repo, не CLI/токен) — деплой живий: https://tax-navigator-red.vercel.app
+- Firewall: `tax-navigator-red.vercel.app` додано в allowlist (`.claude/settings.json` + `init-firewall.sh`) — apex `vercel.app` мав іншу IP, не спільний anycast з проєктним субдоменом (перевірено `getent`). `npm run verify` підтверджує синхронність.
+- Виявлено: Claude Code блокує self-modification `.claude/settings.json` (permissions/sandbox) навіть з дозволом Mike в чаті — `init-firewall.sh` правив Claude, `.claude/settings.json` довелось руками Mike.
+- `DECISIONS.md`: новий запис 2026-07-18 (4 рішення: manual-scaffold, Git-інтеграція Vercel, exact-hostname firewall, self-modification блок).
 
 ## Змінилось
 - Основний шлях верифікації — `npm run verify`, не `make` (Windows-хост без make/python3); Makefile лишається для CI/devcontainer.
@@ -30,8 +26,9 @@
 ## Спливло / блокери
 - `~/.claude/settings.json` завантажується один раз на старті сесії — правки permissions.deny не підхоплюються поточною сесією, лише наступною.
 - Bash-редирект (`> .env`) обходить `Edit`/`Write`-permission-деny — закривається лише OS-рівнем sandbox (devcontainer/WSL2), не на native Windows. Тримати в увазі, не виправлено технічно (свідомо, per розмову цієї сесії).
+- Claude Code не редагує власний `.claude/settings.json` (permissions/sandbox) — жорсткий класифікатор, не permission-промпт. Такі правки — завжди руками Mike.
+- Firewall whitelist матчить по резолвленій IP, не по SNI/hostname — apex-домен не покриває піддомени на спільних CDN/edge, якщо вони не діляться тим самим anycast IP (перевіряти `getent` перед додаванням).
 
 ## Наступне після поточних
-- Задача 2 (нова сесія, рекомендований наступний крок): порожній Next.js + деплой Vercel — pivot-safe, не залежить від сигналу G1, можна починати вже зараз.
-- G1: тексти готові, відправка руками паралельно з M4, коли зручно.
-- M6 очікування: перед SDLC — фіналізувати P1-matrix числа web-fetch'ем з офіційних джерел.
+- **P1-matrix звірка проти офіційних джерел (рекомендований наступний крок, НОВА сесія, `/model fable`):** цифри сценаріїв A–F в `EVIDENCE.md` §6 звірити з zus.pl (składka zdrowotna/społeczne пороги 2026), podatki.gov.pl (ryczałt/liniowy/skala ставки, kwota wolna), Objaśnienia MF 29.04.2021 (резидентство/тай-брейки). Блокер перед M6 (SDLC-артефакти) per `SESSIONS-GUIDE.md` мапа модулів. Model-routing: Fable 5 (найвища ціна помилки — фінансовий продукт), не Sonnet.
+- G1: тексти готові, відправка руками паралельно з M4, коли зручно — не блокує P1-matrix.
