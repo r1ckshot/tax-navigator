@@ -83,6 +83,7 @@ ALLOWED_DOMAINS=(
   "registry.npmjs.org"
   "vercel.com"
   "api.vercel.com"
+  "tax-navigator-red.vercel.app"
   "neon.tech"
   "console.neon.tech"
 )
