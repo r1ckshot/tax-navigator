@@ -86,6 +86,17 @@ ALLOWED_DOMAINS=(
   "tax-navigator-red.vercel.app"
   "neon.tech"
   "console.neon.tech"
+  "www.zus.pl"
+  "zus.pl"
+  "www.podatki.gov.pl"
+  "podatki.gov.pl"
+  "www.biznes.gov.pl"
+  "biznes.gov.pl"
+  "www.gov.pl"
+  "gov.pl"
+  "isap.sejm.gov.pl"
+  "stat.gov.pl"
+  "eureka.mf.gov.pl"
 )
 
 for domain in "${ALLOWED_DOMAINS[@]}"; do
