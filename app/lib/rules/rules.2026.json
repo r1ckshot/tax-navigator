@@ -1,0 +1,173 @@
+{
+  "tax_year": 2026,
+  "profile": "P1",
+  "verified_at": "2026-07-24",
+  "rules": [
+    {
+      "rule_id": "residency.days_threshold",
+      "params": { "days": 183, "partialDayCountsAsFull": true },
+      "source_url": "https://www.gov.pl/web/finanse/objasnienia-podatkowe-z-29-kwietnia-2021-r-ws-rezydencji-podatkowej-oraz-zakresu-obowiazku-podatkowego-osob-fizycznych-w-polsce",
+      "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "residency.special_norm_52zr",
+      "params": { "validFrom": "2024-01-01", "validTo": "2026-12-31" },
+      "source_url": "https://orka.sejm.gov.pl/proc10.nsf/ustawy/2172_u.htm",
+      "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "residency.treaty_tiebreakers",
+      "params": { "order": ["permanentHome", "centerOfInterests", "habitualAbode", "citizenship"] },
+      "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19940630269",
+      "verified_at": "2026-07-18"
+    },
+
+    {
+      "rule_id": "common.minimum_wage",
+      "params": { "monthly": 4806 },
+      "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
+      "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "common.projected_average_wage",
+      "params": { "monthly": 9420 },
+      "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
+      "verified_at": "2026-07-24"
+    },
+
+    {
+      "rule_id": "jdg.ryczalt.rate",
+      "params": { "rateProgramming": 0.12, "rateNarrowSupport": 0.085, "annualLimit": 8517200 },
+      "source_url": "https://sip.lex.pl/akty-prawne/dzu-dziennik-ustaw/zryczaltowany-podatek-dochodowy-od-niektorych-przychodow-16832090/art-8",
+      "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "jdg.zdrowotna.ryczalt",
+      "params": {
+        "base": 9228.64,
+        "tiers": [
+          { "annualRevenueUpTo": 60000, "monthly": 498.35 },
+          { "annualRevenueUpTo": 300000, "monthly": 830.58 },
+          { "annualRevenueUpTo": null, "monthly": 1495.04 }
+        ],
+        "deductibleShareOfRevenue": 0.5
+      },
+      "source_url": "https://stat.gov.pl/",
+      "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "jdg.liniowy",
+      "params": { "rate": 0.19, "zdrowotnaRate": 0.049, "zdrowotnaMinMonthly": 432.54, "zdrowotnaAnnualDeductionCap": 14100 },
+      "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
+      "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "jdg.skala",
+      "params": {
+        "lowerRate": 0.12,
+        "upperRate": 0.32,
+        "bracketThreshold": 120000,
+        "taxFreeAmount": 30000,
+        "kwotaZmniejszajacaAnnual": 3600,
+        "zdrowotnaRate": 0.09,
+        "zdrowotnaMinMonthly": 432.54
+      },
+      "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
+      "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "jdg.zus.stages",
+      "params": {
+        "ulgaNaStartMonths": 6,
+        "preferencyjnyMonths": 24,
+        "preferencyjnyBase": 1441.8,
+        "preferencyjnyWithSickness": 456.18,
+        "preferencyjnyWithoutSickness": 420.86,
+        "duzyBase": 5652,
+        "duzyMonthly": 1926.76,
+        "priorBusinessLookbackMonths": 60
+      },
+      "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
+      "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "jdg.byly_pracodawca",
+      "params": {
+        "ryczaltRequiresIdenticalServices": true,
+        "zusReliefLostOnPartialOverlap": true
+      },
+      "source_url": "https://sip.lex.pl/akty-prawne/dzu-dziennik-ustaw/zryczaltowany-podatek-dochodowy-od-niektorych-przychodow-16832090/art-8",
+      "verified_at": "2026-07-18"
+    },
+
+    {
+      "rule_id": "incubator.kup",
+      "params": {
+        "kupStandard": 0.2,
+        "kupCopyright": 0.5,
+        "copyrightAnnualCap": 120000,
+        "effectivePitStandardEstimate": 0.136,
+        "effectivePitCopyrightEstimate": 0.06,
+        "subscriptionMonthlyMin": 300,
+        "subscriptionMonthlyMax": 349,
+        "hasZus": false,
+        "isEstimate": true
+      },
+      "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19910800350",
+      "verified_at": "2026-07-18"
+    },
+
+    {
+      "rule_id": "uop.employer_contributions",
+      "params": {
+        "emerytalne": 0.0976,
+        "rentowe": 0.065,
+        "wypadkowe": 0.0167,
+        "fpFs": 0.0245,
+        "fgsp": 0.001
+      },
+      "source_url": "https://www.biznes.gov.pl/pl/portal/00274",
+      "verified_at": "2026-07-24"
+    },
+    {
+      "rule_id": "uop.employee_contributions",
+      "params": {
+        "emerytalne": 0.0976,
+        "rentowe": 0.015,
+        "chorobowe": 0.0245,
+        "zdrowotnaRate": 0.09,
+        "zdrowotnaDeductibleFromTax": false
+      },
+      "source_url": "https://www.biznes.gov.pl/pl/portal/00274",
+      "verified_at": "2026-07-24"
+    },
+    {
+      "rule_id": "uop.pit",
+      "params": {
+        "kupMonthly": 250,
+        "kwotaZmniejszajacaMonthly": 300
+      },
+      "source_url": "https://www.podatki.gov.pl/twoj-e-pit/pytania-i-odpowiedzi/koszty-uzyskania-przychodow",
+      "verified_at": "2026-07-24"
+    },
+    {
+      "rule_id": "uop.annual_contribution_cap",
+      "params": { "annualBaseCap": 282600, "appliesTo": ["emerytalne", "rentowe"] },
+      "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
+      "verified_at": "2026-07-24"
+    },
+
+    {
+      "rule_id": "fop.zaklad_in_pl",
+      "params": {
+        "ukrainianSingleTaxRate": 0.05,
+        "creditedInPl": false,
+        "ryczaltAvailable": false,
+        "numericRangeAvailable": false,
+        "unverifiedComponents": ["ЄСВ", "ВЗ"]
+      },
+      "source_url": "https://eureka.mf.gov.pl",
+      "verified_at": "2026-07-18"
+    }
+  ]
+}
