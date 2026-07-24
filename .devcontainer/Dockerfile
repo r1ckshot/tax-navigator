@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     less \
     python3 \
     ca-certificates \
+    jq \
+    iproute2 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall \
