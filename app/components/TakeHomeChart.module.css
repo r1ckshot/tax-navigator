@@ -1,0 +1,135 @@
+.figure {
+  margin: 0 0 1.5rem;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+.caption {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
+  /* 2px проміжок між сусідніми смугами робиться відступом, не рамкою. */
+  padding-bottom: 0.85rem;
+}
+
+.label {
+  font-size: 0.9rem;
+}
+
+.track {
+  position: relative;
+  display: block;
+  height: 10px;
+  background: var(--plane);
+  border-radius: 999px;
+}
+
+.bar {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  /* Заокруглені кінці даних. Мінімальна ширина — щоб вузький діапазон не зник. */
+  min-width: 8px;
+  border-radius: var(--radius);
+}
+
+.bar[data-risk='green'] {
+  background: var(--risk-green);
+}
+.bar[data-risk='yellow'] {
+  background: var(--risk-yellow);
+}
+.bar[data-risk='red'] {
+  background: var(--risk-red);
+}
+
+.value {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-secondary);
+}
+
+.value[data-empty='true'] {
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0 1rem;
+  font-size: 0.8rem;
+  color: var(--ink-secondary);
+}
+
+.legendTitle {
+  color: var(--ink-muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.swatch[data-risk='green'] {
+  background: var(--risk-green);
+}
+.swatch[data-risk='yellow'] {
+  background: var(--risk-yellow);
+}
+.swatch[data-risk='red'] {
+  background: var(--risk-red);
+}
+
+.table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.table td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* На вужчих екранах підпис і значення лишаються в одному рядку над смугою. */
+@media (min-width: 32rem) {
+  .row {
+    grid-template-columns: 11rem 1fr 9rem;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .value {
+    text-align: right;
+  }
+}

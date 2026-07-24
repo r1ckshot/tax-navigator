@@ -1,0 +1,90 @@
+:root {
+  /* Поверхні й чорнило — з довідника dataviz. */
+  --surface: #fcfcfb;
+  --plane: #f9f9f7;
+  --ink: #0b0b0b;
+  --ink-secondary: #52514e;
+  --ink-muted: #898781;
+  --hairline: #e4e3df;
+
+  /* Status-палітра: фіксована, ніколи не використовується як «серія». */
+  --risk-green: #0ca30c;
+  --risk-yellow: #fab219;
+  --risk-red: #d03b3b;
+
+  --radius: 4px;
+  --gap: 1rem;
+}
+
+/* Темна тема — власні кроки, а не автоматична інверсія. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #1a1a19;
+    --plane: #0d0d0d;
+    --ink: #ffffff;
+    --ink-secondary: #c3c2b7;
+    --ink-muted: #898781;
+    --hairline: #33322f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--plane);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.55;
+  font-size: 16px;
+}
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin-bottom: 0.5rem;
+}
+
+a {
+  color: inherit;
+}
+
+/* Видимий фокус — обовʼязковий, бо анкету треба проходити з клавіатури. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: var(--radius);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.6rem 1.1rem;
+  min-height: 44px;
+}
+
+button[data-variant='primary'] {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

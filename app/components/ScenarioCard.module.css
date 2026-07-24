@@ -1,0 +1,67 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.range {
+  margin: 0.4rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.range[data-empty='true'] {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.unit {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+
+.subforms {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.88rem;
+}
+
+.subforms li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0;
+}
+
+.subformName {
+  color: var(--ink-secondary);
+}
+
+.subformValue {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.notes {
+  margin: 0.9rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.83rem;
+  color: var(--ink-secondary);
+}
+
+.notes li + li {
+  margin-top: 0.3rem;
+}

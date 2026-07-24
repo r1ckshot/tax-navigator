@@ -1,0 +1,9 @@
+.disclaimer {
+  margin: 1.5rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font-size: 0.85rem;
+}

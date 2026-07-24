@@ -1,0 +1,27 @@
+.cta {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border: 1px dashed var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.cta h2 {
+  margin-top: 0;
+}
+
+.cta p {
+  margin: 0.5rem 0 0;
+  color: var(--ink-secondary);
+  font-size: 0.9rem;
+}
+
+.soon {
+  display: inline-block;
+  margin-top: 0.85rem !important;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--plane);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}

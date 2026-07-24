@@ -1,0 +1,50 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.verdict {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.basis {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-secondary);
+  font-size: 0.9rem;
+}
+
+.basis li + li {
+  margin-top: 0.25rem;
+}
+
+.tiebreak {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.9rem;
+}
+
+.tiebreak p {
+  margin: 0 0 0.4rem;
+}
+
+.note {
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+.sunset {
+  margin-top: 1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius);
+  background: var(--plane);
+  border-left: 3px solid var(--risk-yellow);
+  font-size: 0.87rem;
+  color: var(--ink-secondary);
+}
