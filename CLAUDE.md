@@ -3,11 +3,19 @@
 Tax Navigator — інформаційний податковий навігатор UA↔PL. Соло-проєкт, курс Agentic Engineering (Module 3, фініш ~09.2026). Деталі продукту: [README.md](README.md).
 
 ## Порядок читання нової сесії
-`docs/SESSIONS-GUIDE.md` (як працюємо) → `docs/PROJECT.md` (що і навіщо) → `docs/STATE.md` (де зараз) → релевантне з `docs/EVIDENCE.md` / `docs/OPEN-RISKS.md` / `docs/DISTRIBUTION.md`.
+`docs/SESSIONS-GUIDE.md` (як працюємо) → `docs/PROJECT.md` (що і навіщо) → `docs/STATE.md` (де зараз) → `docs/BACKLOG.md` (що далі) → релевантне з `docs/EVIDENCE.md` / `docs/OPEN-RISKS.md` / `docs/DISTRIBUTION.md`.
 
 ## Тверді правила продукту
 ### Product / UI / calculations → .claude/rules/product-safety.md
+### Цифри та джерела → .claude/rules/evidence-numbers.md
 - `research/tg-mining`: read-only до Telegram; дані і сесії — ніколи в git.
+- Автовідправка ботом у чужі спільноти — окреме рішення на кожен канал, не наслідок цього правила (див. `docs/BACKLOG.md`).
+
+## Як працюємо
+- **Перед стартом задачі** → `.claude/rules/preflight.md` (тести, домени, команди верифікації — перевірити ДО роботи).
+- **Тести** → `.claude/rules/testing.md` (пишуться з кодом; еталон не підганяється під код).
+- **Візуальні зміни** → `.claude/rules/visual-review.md` (не «готово», поки Mike не подивився очима).
+- **Межі середовища** → `.claude/rules/environment-limits.md` (журнал відомих блокерів; читати перед плануванням).
 
 ## Git
 - Гілка на фічу (`feat/*`, `fix/*`); у `master` напряму не пушимо, тільки merge після підтвердження Mike.
