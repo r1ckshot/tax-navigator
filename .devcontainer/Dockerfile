@@ -39,5 +39,11 @@ RUN echo "${CLAUDE_CODE_VERSION}" | grep -qE '^(latest|[0-9a-zA-Z._-]+)$' || \
     (echo "ERROR: невалідний CLAUDE_CODE_VERSION='${CLAUDE_CODE_VERSION}'" && exit 1) \
     && npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
 
+# node_modules живе в Docker-томі (див. devcontainer.json): нативний overlay
+# замість повільного bind через 9p/drvfs — саме резолвлення node_modules з'їдало
+# десятки секунд на білді й тестах. Готуємо теку від root, щоб свіжий (порожній)
+# том успадкував власника node, а не root, і postCreateCommand зміг у неї писати.
+RUN mkdir -p /workspace/node_modules && chown node:node /workspace/node_modules
+
 USER node
 WORKDIR /workspace
