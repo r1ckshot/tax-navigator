@@ -64,6 +64,27 @@ description: Log of known environment blockers in this devcontainer — check he
 кеш vite теж на томі); `next dev` **Ready 6.4 с**, сторінки → 200. Перший прогін
 будь-чого повільний через холодний кеш — це разово, не баг.
 
+**Доповнення 2026-07-28: справжня причина краху `Cannot find module './NNN.js'`.**
+Спершу списали на 9p і винесли `.next` у named-volume `tax-navigator-next` — том
+корисний (ext4 замість 9p пришвидшує dev-кеш), але **краху він не лікував**.
+Реальна причина: `next build` і `next dev` ділили одну теку `.next`. Клод багато
+разів ганяв `npm run build` для перевірки в тому ж контейнері, де Mike потім
+відкривав `npm run dev` — dev спотикався об артефакти продакшн-збірки
+(`server/pages/_document.js`, `webpack-runtime.js` з посиланнями на неіснуючі в dev
+чанки). Діагностика: `ls .next/BUILD_ID` — якщо є, у теці лежить білд, і dev
+зламається.
+
+Виправлення:
+- **`next.config.mjs`: `distDir: process.env.NEXT_DIST_DIR || '.next'`** — щоб білд
+  можна було спрямувати в окрему теку. Vercel без цього env → дефолт `.next`.
+- **Політика: Клод не запускає `next build` у контейнері Mike.** Перевірка —
+  `tsc --noEmit` + `npm test` + `npm run test:ui` (жоден не чіпає `.next`). Виявилось,
+  що навіть `NEXT_DIST_DIR=.next-verify` частково протікає в `.next`, тож надійніше
+  просто не білдити тут; продакшн-збірку валідує Vercel на деплої.
+- Якщо `.next` уже засмічений білдом — `find .next -mindepth 1 -delete`, тоді `dev`.
+  Перевірено 2026-07-28: після чистки `next dev` Ready 2.7 с, `/` і `/questionnaire`
+  → 200 без module-error.
+
 Розглянутий і відкинутий варіант — перенести весь репо на ext4 WSL2: чистіше в
 теорії, але щоразу впиралось у reattach контейнера до старої `C:\`-копії, і
 коштувало б втрати редагування з Windows. Том дає те саме прискорення без цього.

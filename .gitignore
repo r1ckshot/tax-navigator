@@ -6,6 +6,7 @@
 # Build / deps
 node_modules/
 .next/
+.next-verify/
 dist/
 *.tsbuildinfo
 

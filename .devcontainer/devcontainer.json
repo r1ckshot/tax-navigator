@@ -26,7 +26,8 @@
   "mounts": [
     "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
     "source=claude-code-config-${devcontainerId},target=/home/node/.claude,type=volume",
-    "source=tax-navigator-node-modules,target=/workspace/node_modules,type=volume"
+    "source=tax-navigator-node-modules,target=/workspace/node_modules,type=volume",
+    "source=tax-navigator-next,target=/workspace/.next,type=volume"
   ],
   "postCreateCommand": "npm ci",
   "containerEnv": {
