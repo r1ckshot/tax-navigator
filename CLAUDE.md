@@ -32,6 +32,7 @@ app/components/, app/**/page.tsx, i18n/    presentation; без арифмети
 - **Тести** → `.claude/rules/testing.md` (пишуться з кодом; еталон не підганяється під код).
 - **Візуальні зміни** → `.claude/rules/visual-review.md` (не «готово», поки Mike не подивився очима).
 - **Межі середовища** → `.claude/rules/environment-limits.md` (журнал відомих блокерів; читати перед плануванням).
+- **Нова ідея фічі** → скіл `.claude/skills/interview/` (14 фаз, результат — `docs/features/<slug>/idea-brief.md`). Для фіч M+ або коли ще не ясно, що саме будувати; для дрібних правок не потрібен.
 
 ## Git
 - Гілка на фічу (`feat/*`, `fix/*`); у `master` напряму не пушимо, тільки merge після підтвердження Mike.
