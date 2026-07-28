@@ -25,7 +25,8 @@ export interface Answers {
   economicCenter: Place;
   specialLaw52zr: SpecialLaw;
   incomeSource: IncomeSource;
-  permanentHomeInUa: boolean;
+  /** Умовне: питається лише коли резидентство неоднозначне (див. homeInUaMatters). */
+  permanentHomeInUa?: boolean;
   hasActiveUaFop: boolean;
   /** Нетто без VAT. Живе лише в памʼяті — не зберігається і не йде в URL. */
   monthlyRevenue: number;

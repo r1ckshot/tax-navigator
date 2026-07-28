@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SCREENS, visibleScreens, visibleFields, isScreenComplete, validateRevenue } from '@/lib/questions/schema';
+import { SCREENS, visibleScreens, visibleFields, isScreenComplete } from '@/lib/questions/schema';
 import { baseAnswers, withAnswers } from './fixtures';
 
 describe('анкета — умовні екрани', () => {
@@ -8,15 +8,26 @@ describe('анкета — умовні екрани', () => {
     expect(visibleScreens(baseAnswers).length).toBe(10);
   });
 
-  it('найскладніший кейс = 12 екранів', () => {
-    const complex = withAnswers({ daysInPl: 'unsure', daysInPlApprox: 200, jdgStatus: 'lt6' });
-    expect(visibleScreens(complex).length).toBe(12);
+  it('найскладніший кейс = 13 екранів', () => {
+    // Уточнення днів + історія JDG + умовний екран житла (центр в UA).
+    const complex = withAnswers({ daysInPl: 'unsure', daysInPlApprox: 200, jdgStatus: 'lt6', personalCenter: 'UA' });
+    expect(visibleScreens(complex).length).toBe(13);
   });
 
   it('уточнення про дні зʼявляється лише при «не впевнений»', () => {
     const ids = (a: typeof baseAnswers) => visibleScreens(a).map((s) => s.id);
     expect(ids(baseAnswers)).not.toContain('daysApprox');
     expect(ids(withAnswers({ daysInPl: 'unsure' }))).toContain('daysApprox');
+  });
+
+  it('питання про житло в UA зʼявляється лише коли резидентство неоднозначне', () => {
+    const ids = (a: typeof baseAnswers) => visibleScreens(a).map((s) => s.id);
+    // Обидва центри в PL — резидент однозначно, тай-брейкер зайвий.
+    expect(ids(baseAnswers)).not.toContain('homeInUa');
+    // Особистий центр в UA + резидент PL за днями — тай-брейкер вирішує вердикт.
+    expect(ids(withAnswers({ personalCenter: 'UA' }))).toContain('homeInUa');
+    // Не резидент PL — Конвенція не запускається, питання нічого не змінює.
+    expect(ids(withAnswers({ daysInPl: 'lt183', personalCenter: 'UA', economicCenter: 'UA' }))).not.toContain('homeInUa');
   });
 });
 
@@ -45,24 +56,12 @@ describe('анкета — питання не ставиться, коли не
   });
 });
 
-describe('анкета — повнота і валідація', () => {
+describe('анкета — повнота', () => {
   it('екран вважається завершеним лише коли заповнені всі ВИДИМІ поля', () => {
     const jdgScreen = SCREENS.find((s) => s.id === 'jdg')!;
     // voluntarySickness прихована на gt30 — її відсутність не блокує.
     expect(isScreenComplete(jdgScreen, { jdgStatus: 'gt30' })).toBe(true);
     expect(isScreenComplete(jdgScreen, { jdgStatus: 'from6to30', formerEmployer: 'no' })).toBe(false);
-  });
-
-  it('виручка: нуль, відʼємне і нечислове не проходять', () => {
-    expect(validateRevenue(15000)).toBe('ok');
-    expect(validateRevenue(0)).toBe('tooLow');
-    expect(validateRevenue(-5)).toBe('tooLow');
-    expect(validateRevenue('15000')).toBe('notANumber');
-    expect(validateRevenue(NaN)).toBe('notANumber');
-  });
-
-  it('виручка понад місячний еквівалент ліміту ричалту позначається окремо', () => {
-    expect(validateRevenue(800000)).toBe('overRyczaltLimit');
   });
 });
 

@@ -1,14 +1,7 @@
-import type { Answers } from '@/lib/calc/types';
 import type { Draft } from '@/lib/questions/schema';
+import { quantizeRevenue } from '@/lib/share';
 
 const KEY = 'tax-navigator:draft';
-
-/**
- * Прогрес переживає F5, але точна виручка — ні. Правило «сирі доходи не
- * зберігаємо» діє і для sessionStorage, тому поле навмисне випадає при
- * відновленні, і користувач вводить його знову.
- */
-const NEVER_PERSIST: (keyof Answers)[] = ['monthlyRevenue'];
 
 export interface Restored {
   answers: Draft;
@@ -25,7 +18,9 @@ const EMPTY: Restored = { answers: {}, step: 0 };
 export function saveDraft(draft: Draft, step: number): void {
   if (typeof window === 'undefined') return;
   const safe: Draft = { ...draft };
-  for (const key of NEVER_PERSIST) delete safe[key];
+  // Виручка живе на сітці 2 500 zł, тож її можна зберігати (прогрес переживає F5),
+  // не порушуючи «сирі доходи не зберігаємо»: точнішого числа тут ніколи й немає.
+  if (safe.monthlyRevenue !== undefined) safe.monthlyRevenue = quantizeRevenue(safe.monthlyRevenue);
   try {
     window.sessionStorage.setItem(KEY, JSON.stringify({ answers: safe, step } satisfies Stored));
   } catch {
@@ -40,7 +35,6 @@ export function loadDraft(): Restored {
     if (!raw) return EMPTY;
     const parsed = JSON.parse(raw) as Partial<Stored>;
     const answers: Draft = { ...(parsed.answers ?? {}) };
-    for (const key of NEVER_PERSIST) delete answers[key];
     const step = typeof parsed.step === 'number' && Number.isFinite(parsed.step) ? parsed.step : 0;
     return { answers, step: Math.max(0, Math.trunc(step)) };
   } catch {

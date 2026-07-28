@@ -1,12 +1,8 @@
 .wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .track {
-  flex: 1;
   height: 6px;
   border-radius: 999px;
   background: var(--hairline);
@@ -15,17 +11,9 @@
 
 .fill {
   height: 100%;
-  background: var(--ink);
+  background: var(--accent);
   border-radius: 999px;
-  transition: width 160ms ease-out;
-}
-
-.value {
-  font-size: 0.8rem;
-  color: var(--ink-muted);
-  font-variant-numeric: tabular-nums;
-  min-width: 2.5rem;
-  text-align: right;
+  transition: width 240ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

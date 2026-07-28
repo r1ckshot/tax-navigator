@@ -2,66 +2,156 @@
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--radius);
-  padding: 1.1rem 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.card[open] {
+  box-shadow: var(--shadow-md);
+}
+
+/* Заголовок-клікабельний рядок акордеона. */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  cursor: pointer;
+  list-style: none;
+  min-height: 44px;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* Ліва група заголовка: назва + чип ризику, з переносом на вузькому. */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  flex: 1;
+  min-width: 0;
 }
 
 .title {
-  margin: 0;
-  font-size: 1.05rem;
+  font-size: var(--text-md);
+  font-weight: 600;
 }
 
 .range {
-  margin: 0.4rem 0 0;
-  font-size: 1.35rem;
+  font-size: var(--text-md);
   font-weight: 600;
-  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  line-height: var(--leading-tight);
 }
 
 .range[data-empty='true'] {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 400;
   font-style: italic;
+  color: var(--ink-muted);
 }
 
 .unit {
   display: block;
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   font-weight: 400;
   color: var(--ink-muted);
 }
 
-.subforms {
-  list-style: none;
-  margin: 1rem 0 0;
-  padding: 0.75rem 0 0;
-  border-top: 1px solid var(--hairline);
-  font-size: 0.88rem;
+/* Шеврон розкриття — обертається у відкритому стані. */
+.chevron {
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-right: 2px solid var(--ink-muted);
+  border-bottom: 2px solid var(--ink-muted);
+  transform: rotate(45deg);
+  transition: transform 150ms ease;
 }
 
-.subforms li {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.25rem 0;
+.card[open] .chevron {
+  transform: rotate(-135deg);
+}
+
+.body {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  border-top: 1px solid var(--hairline);
+}
+
+/* Компактна таблиця підформ: назва й сума поруч, по центру картки. */
+.subforms {
+  border-collapse: collapse;
+  margin: var(--space-4) auto 0;
+  font-size: var(--text-base);
+}
+
+.subforms th,
+.subforms td {
+  text-align: left;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: baseline;
+}
+
+/* Проміжок між колонками — назва / сума. */
+.subforms th {
+  padding-right: var(--space-6);
+}
+
+.subforms tr:last-child th,
+.subforms tr:last-child td {
+  border-bottom: 0;
 }
 
 .subformName {
-  color: var(--ink-secondary);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
 .subformValue {
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  font-weight: 600;
+  padding-right: 0;
+}
+
+.subformValue[data-empty='true'] {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ink-muted);
 }
 
 .notes {
-  margin: 0.9rem 0 0;
+  margin: var(--space-4) 0 0;
   padding-left: 1.1rem;
-  font-size: 0.83rem;
+  font-size: var(--text-base);
   color: var(--ink-secondary);
 }
 
+/* Коли пункти — перший блок картки (немає таблиці підформ), зайвий верхній відступ. */
+.notes:first-child {
+  margin-top: 0;
+}
+
+.notes li {
+  text-wrap: pretty;
+}
+
 .notes li + li {
-  margin-top: 0.3rem;
+  margin-top: var(--space-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
 }

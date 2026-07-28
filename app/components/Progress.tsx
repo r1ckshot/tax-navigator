@@ -2,11 +2,11 @@ import { t } from '@/lib/i18n/uk';
 import styles from './Progress.module.css';
 
 /**
- * Відсоток, а не «крок N з 10»: хвіст анкети умовний, тож фіксована
- * кількість кроків була б неправдою.
+ * Плавна смуга прогресу. Число не показуємо: хвіст анкети умовний, тож точний
+ * відсоток «стрибав» би від відповідей. Смугу стабілізуємо в самій сторінці
+ * (не відкочується назад від зміни кількості екранів).
  */
-export function Progress({ current, total }: { current: number; total: number }) {
-  const percent = Math.round((current / total) * 100);
+export function Progress({ percent }: { percent: number }) {
   return (
     <div className={styles.wrap}>
       <div
@@ -19,7 +19,6 @@ export function Progress({ current, total }: { current: number; total: number })
       >
         <div className={styles.fill} style={{ width: `${percent}%` }} />
       </div>
-      <span className={styles.value}>{percent}%</span>
     </div>
   );
 }

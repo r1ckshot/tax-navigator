@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect, type CSSProperties } from 'react';
 import { t } from '@/lib/i18n/uk';
 import type { Answers } from '@/lib/calc/types';
-import type { Draft, Field, Screen } from '@/lib/questions/schema';
-import { visibleFields, validateRevenue } from '@/lib/questions/schema';
+import type { Draft, Field, Screen, SliderConfig } from '@/lib/questions/schema';
+import { visibleFields } from '@/lib/questions/schema';
+import { formatMoney } from '@/lib/format';
 import styles from './Question.module.css';
 
 interface Props {
@@ -15,7 +17,9 @@ interface Props {
 export function Question({ screen, answers, onChange }: Props) {
   return (
     <section className={styles.screen}>
-      <h1>{t(screen.titleKey)}</h1>
+      {/* Категорія кроку лишається h1 (семантика заголовка), але візуально — дрібний
+          акцентний надрядок; головний візуальний акцент на самому питанні нижче. */}
+      <h1 className={styles.eyebrow}>{t(screen.titleKey)}</h1>
       {visibleFields(screen, answers).map((field) => (
         <FieldControl key={field.name} field={field} answers={answers} onChange={onChange} />
       ))}
@@ -26,15 +30,14 @@ export function Question({ screen, answers, onChange }: Props) {
 function FieldControl({ field, answers, onChange }: { field: Field } & Omit<Props, 'screen'>) {
   const current = answers[field.name];
 
-  if (field.kind === 'number') {
-    return <NumberField field={field} value={current as number | undefined} onChange={onChange} />;
+  if (field.kind === 'slider') {
+    return <SliderField field={field} value={current as number | undefined} onChange={onChange} />;
   }
 
   // fieldset/legend — щоб зчитувач озвучив питання разом із варіантами.
   return (
     <fieldset className={styles.fieldset}>
       <legend className={styles.legend}>{t(field.labelKey)}</legend>
-      {field.hintKey && <p className={styles.hint}>{t(field.hintKey)}</p>}
       <div className={styles.options}>
         {field.options!.map((option) => {
           const id = `${field.name}-${String(option.value)}`;
@@ -56,7 +59,19 @@ function FieldControl({ field, answers, onChange }: { field: Field } & Omit<Prop
   );
 }
 
-function NumberField({
+/** Будь-яке число → найближчий крок у межах слайдера. */
+function snap(value: number, cfg: SliderConfig): number {
+  if (!Number.isFinite(value)) return cfg.default;
+  const stepped = Math.round(value / cfg.step) * cfg.step;
+  return Math.min(cfg.max, Math.max(cfg.min, stepped));
+}
+
+/**
+ * Універсальний слайдер (виручка, кількість днів…): жодного ручного вводу.
+ * Позиція має стартове значення, тож екран одразу «повний» — користувач приймає
+ * або коригує. Точного «сирого» числа немає за конструкцією.
+ */
+function SliderField({
   field,
   value,
   onChange,
@@ -65,35 +80,49 @@ function NumberField({
   value: number | undefined;
   onChange: Props['onChange'];
 }) {
-  const isRevenue = field.name === 'monthlyRevenue';
-  const status = isRevenue && value !== undefined ? validateRevenue(value) : 'ok';
-  // Перевищення ліміту ричалту — попередження, а не блокування: інші підформи
-  // лишаються придатними, і мовчки прораховувати їх було б гірше.
-  const isError = status === 'notANumber' || status === 'tooLow';
-  const errorId = `${field.name}-error`;
+  const cfg = field.slider!;
+
+  useEffect(() => {
+    if (value === undefined) onChange(field.name, cfg.default);
+  }, [value, field.name, cfg.default, onChange]);
+
+  const shown = value ?? cfg.default;
+  const atMax = Boolean(cfg.openEnded) && shown >= cfg.max;
+  const unit = t(cfg.unitKey);
+  // Частка заливки треку — щоб пройдена частина фарбувалась акцентом (webkit).
+  const fill = ((shown - cfg.min) / (cfg.max - cfg.min)) * 100;
 
   return (
-    <div className={styles.numberField}>
-      <label htmlFor={field.name}>{t(field.labelKey)}</label>
-      {field.hintKey && <p className={styles.hint}>{t(field.hintKey)}</p>}
+    <div className={styles.sliderField}>
+      <label htmlFor={field.name} className={styles.sliderLabel}>
+        {t(field.labelKey)}
+      </label>
+
+      <output className={styles.sliderValue} htmlFor={field.name}>
+        {formatMoney(shown)}
+        {atMax ? '+' : ''} <span className={styles.sliderUnit}>{unit}</span>
+      </output>
+
       <input
         id={field.name}
-        type="number"
-        inputMode="numeric"
-        min={0}
-        value={value ?? ''}
-        aria-invalid={isError || undefined}
-        aria-describedby={status !== 'ok' ? errorId : undefined}
-        onChange={(e) => {
-          const raw = e.target.value;
-          onChange(field.name, raw === '' ? undefined : Number(raw));
-        }}
+        type="range"
+        className={styles.slider}
+        style={{ '--fill': `${fill}%` } as CSSProperties}
+        min={cfg.min}
+        max={cfg.max}
+        step={cfg.step}
+        value={shown}
+        aria-valuetext={`${formatMoney(shown)}${atMax ? '+' : ''} ${unit}`}
+        onChange={(e) => onChange(field.name, snap(Number(e.target.value), cfg))}
       />
-      {status !== 'ok' && (
-        <p id={errorId} className={styles.error} data-severity={isError ? 'error' : 'warning'} role="alert">
-          {t(`error.${status}`)}
-        </p>
-      )}
+
+      <div className={styles.sliderScale} aria-hidden="true">
+        <span>{formatMoney(cfg.min)}</span>
+        <span>
+          {formatMoney(cfg.max)}
+          {cfg.openEnded ? '+' : ''}
+        </span>
+      </div>
     </div>
   );
 }

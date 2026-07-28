@@ -2,49 +2,58 @@
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--radius);
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
 }
 
+/* Вердикт — це висновок, тож виділяємо акцентною плашкою. Однаково для обох
+   результатів: колір маркує «ось відповідь», а не оцінює її як добру чи погану. */
 .verdict {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0.25rem 0 0.75rem;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: var(--leading-snug);
+  margin: var(--space-2) 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--accent-soft);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-sm);
 }
 
 .basis {
   margin: 0;
   padding-left: 1.1rem;
   color: var(--ink-secondary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .basis li + li {
-  margin-top: 0.25rem;
+  margin-top: var(--space-2);
 }
 
 .tiebreak {
-  margin-top: 1rem;
-  padding-top: 0.75rem;
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--hairline);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .tiebreak p {
-  margin: 0 0 0.4rem;
+  margin: 0 0 var(--space-2);
 }
 
 .note {
   color: var(--ink-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .sunset {
-  margin-top: 1rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: var(--radius);
-  background: var(--plane);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--sunken);
   border-left: 3px solid var(--risk-yellow);
-  font-size: 0.87rem;
+  font-size: var(--text-sm);
   color: var(--ink-secondary);
+  /* \n у тексті → кожне речення з нового рядка. */
+  white-space: pre-line;
 }

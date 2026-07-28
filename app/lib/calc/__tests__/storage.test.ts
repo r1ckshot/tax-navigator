@@ -29,9 +29,11 @@ describe('чернетка переживає F5', () => {
     expect(restored.step).toBe(4);
   });
 
-  it('точна виручка не зберігається навіть при відновленні кроку', () => {
-    saveDraft(baseAnswers, 7);
-    expect(loadDraft().answers.monthlyRevenue).toBeUndefined();
+  it('виручка зберігається квантизованою до 2500, точна сума — ні', () => {
+    saveDraft({ ...baseAnswers, monthlyRevenue: 17342 }, 7);
+    const restored = loadDraft().answers.monthlyRevenue;
+    expect(restored).toBe(17500);
+    expect(restored! % 2500).toBe(0);
   });
 
   it('порожнє сховище дає нульовий крок, а не NaN', () => {
@@ -47,13 +49,13 @@ describe('чернетка переживає F5', () => {
 
 describe('resumeIndex — куди саме висаджуємо після F5', () => {
   it('не пускає далі першого незаповненого екрана', () => {
-    // Виручка навмисне не пережила перезавантаження, тож збережений крок 9
-    // не має права перестрибнути екран виручки.
-    const { monthlyRevenue: _dropped, ...withoutRevenue } = baseAnswers;
-    const screens = visibleScreens(withoutRevenue);
-    const revenueScreen = screens.findIndex((s) => s.id === 'revenue');
+    // Якщо ранній екран лишився неповним (зіпсована чи часткова чернетка),
+    // збережений крок 9 не має права його перестрибнути.
+    const { personalCenter: _dropped, ...partial } = baseAnswers;
+    const screens = visibleScreens(partial);
+    const centersScreen = screens.findIndex((s) => s.id === 'centers');
 
-    expect(resumeIndex(withoutRevenue, 9)).toBe(revenueScreen);
+    expect(resumeIndex(partial, 9)).toBe(centersScreen);
   });
 
   it('повертає саме збережений крок, коли попередні екрани заповнені', () => {

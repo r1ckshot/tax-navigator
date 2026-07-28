@@ -28,7 +28,7 @@ export function assessResidency(answers: Answers): ResidencyResult {
 
   const personalInUa = answers.personalCenter === 'UA';
   const economicInUa = answers.economicCenter === 'UA';
-  const hasUaTies = personalInUa || economicInUa || answers.permanentHomeInUa;
+  const hasUaTies = personalInUa || economicInUa || answers.permanentHomeInUa === true;
   const dualRisk = plResident && hasUaTies;
 
   return {
@@ -46,10 +46,27 @@ export function assessResidency(answers: Answers): ResidencyResult {
   };
 }
 
-function isOverDaysThreshold(answers: Answers, threshold: number): boolean {
+function isOverDaysThreshold(answers: Partial<Answers>, threshold: number): boolean {
   if (answers.daysInPl === 'gte183') return true;
   if (answers.daysInPl === 'lt183') return false;
   return (answers.daysInPlApprox ?? 0) > threshold;
+}
+
+/**
+ * Чи впливає «стале житло в UA» на вердикт — отже, чи варто про нього питати.
+ * Виведено з логіки вище, а не вгадано: permanentHomeInUa вмикає тай-брейкер
+ * Конвенції лише коли (а) особа провізорно резидент PL і (б) центри інтересів не
+ * стоять обидва чітко в PL. Якщо резидентства PL немає — Конвенція не запускається
+ * взагалі; якщо обидва центри в PL — резидентство однозначне й тай-брейкер зайвий.
+ * Питати про житло поза цими межами означало б зайвий екран без впливу на результат.
+ */
+export function homeInUaMatters(a: Partial<Answers>): boolean {
+  const { days } = getParams<DaysParams>('residency.days_threshold');
+  const plResident =
+    isOverDaysThreshold(a, days) || a.personalCenter === 'PL' || a.economicCenter === 'PL' || a.specialLaw52zr === 'yes';
+  if (!plResident) return false;
+  const bothCentersPl = a.personalCenter === 'PL' && a.economicCenter === 'PL';
+  return !bothCentersPl;
 }
 
 /**

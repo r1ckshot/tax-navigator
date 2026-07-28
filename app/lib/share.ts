@@ -1,25 +1,22 @@
 import type { Answers } from '@/lib/calc/types';
 
 /**
- * Шеринг результату. Правило product-safety «сирі доходи не зберігаємо» діє і тут:
- * точна виручка НІКОЛИ не потрапляє в URL — лише смуга, з якої відтворюється
- * репрезентативне значення. Лінк дає той самий вердикт і ті самі порядки цифр,
- * але не розкриває, скільки людина заробляє.
+ * Виручка живе на одній дискретній шкалі по 2 500 zł — для слайдера, сховища,
+ * лінка й розрахунку. Крок навмисне грубий: правило product-safety «сирі доходи
+ * не зберігаємо» так виконується за конструкцією — застосунок ніколи не отримує
+ * точнішого за 2 500 zł числа, тож і розкривати в лінку нема чого. Пороги
+ * zdrowotnej (60 000 і 300 000 zł на рік → 5 000 і 25 000 на місяць) лягають
+ * рівно на межі кроків, тож жоден варіант не «зависає» між ступенями.
  */
-export const REVENUE_BANDS = [
-  { id: 'a', max: 5000, representative: 4000 },
-  { id: 'b', max: 10000, representative: 7500 },
-  { id: 'c', max: 15000, representative: 12500 },
-  { id: 'd', max: 25000, representative: 20000 },
-  { id: 'e', max: Infinity, representative: 32000 },
-] as const;
+export const REVENUE_STEP = 2500;
+export const REVENUE_MIN = 2500;
+export const REVENUE_MAX = 50000;
 
-export function bandOf(monthlyRevenue: number): string {
-  return (REVENUE_BANDS.find((b) => monthlyRevenue <= b.max) ?? REVENUE_BANDS[REVENUE_BANDS.length - 1]).id;
-}
-
-export function revenueFromBand(bandId: string): number {
-  return (REVENUE_BANDS.find((b) => b.id === bandId) ?? REVENUE_BANDS[2]).representative;
+/** Будь-яке число → найближчий крок 2 500 у межах слайдера. */
+export function quantizeRevenue(value: number): number {
+  if (!Number.isFinite(value)) return REVENUE_MIN;
+  const stepped = Math.round(value / REVENUE_STEP) * REVENUE_STEP;
+  return Math.min(REVENUE_MAX, Math.max(REVENUE_MIN, stepped));
 }
 
 const KEYS: Record<string, keyof Answers> = {
@@ -46,8 +43,8 @@ export function encodeAnswers(answers: Answers): string {
     if (value === undefined) continue;
     params.set(short, typeof value === 'boolean' ? (value ? '1' : '0') : String(value));
   }
-  // Замість monthlyRevenue — лише смуга.
-  params.set('r', bandOf(answers.monthlyRevenue));
+  // Замість точної суми — квантизоване до 2 500 значення (те саме, що бачить слайдер).
+  params.set('r', String(quantizeRevenue(answers.monthlyRevenue)));
   return params.toString();
 }
 
@@ -61,8 +58,8 @@ export function decodeAnswers(query: string): Partial<Answers> {
     out[key] = BOOLEAN_KEYS.has(key) ? raw === '1' : raw;
   }
 
-  const band = params.get('r');
-  if (band) out.monthlyRevenue = revenueFromBand(band);
+  const r = params.get('r');
+  if (r !== null && r !== '') out.monthlyRevenue = quantizeRevenue(Number(r));
 
   return out as Partial<Answers>;
 }

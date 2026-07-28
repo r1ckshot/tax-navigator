@@ -1,0 +1,39 @@
+.hero {
+  margin-top: var(--space-6);
+  padding: var(--space-7) var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-4);
+}
+
+.intro {
+  color: var(--ink-secondary);
+  font-size: var(--text-md);
+  margin: 0 auto;
+  max-width: 34rem;
+}
+
+.cta {
+  margin: var(--space-5) auto 0;
+  max-width: none;
+}
+
+.cta button {
+  width: 100%;
+  font-size: var(--text-md);
+  padding: 0.8rem 1.5rem;
+}
+
+/* На ширших екранах кнопка не тягнеться на всю ширину — стає компактною. */
+@media (min-width: 30rem) {
+  .cta button {
+    width: auto;
+  }
+}

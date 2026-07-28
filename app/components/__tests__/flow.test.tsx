@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-import { render, screen, within, cleanup } from '@testing-library/react';
+import { render, screen, within, cleanup, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import QuestionnairePage from '@/questionnaire/page';
 import { t } from '@/lib/i18n/uk';
@@ -34,15 +34,13 @@ async function walkMedianPath(revenue = '15000') {
 
   await answerAndAdvance(user, [t('q.special.no')]);
 
-  await user.click(within(screen.getByRole('group', { name: t('q.income.source') })).getByLabelText(t('q.income.plClients')));
-  await user.click(
-    within(screen.getByRole('group', { name: t('q.income.permanentHomeInUa') })).getByLabelText(t('q.income.home.no'))
-  );
-  await user.click(screen.getByRole('button', { name: t('nav.next') }));
+  // Джерело доходу — окремий екран; житло в UA не питається (обидва центри в PL).
+  await answerAndAdvance(user, [t('q.income.plClients')]);
 
   await answerAndAdvance(user, [t('q.uaFop.no')]);
 
-  await user.type(screen.getByLabelText(t('q.revenue.label')), revenue);
+  // Виручка — слайдер: задаємо значення напряму (квантизується до кроку 2500).
+  fireEvent.change(screen.getByLabelText(t('q.revenue.label')), { target: { value: revenue } });
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
   await user.click(within(screen.getByRole('group', { name: t('q.work.kind') })).getByLabelText(t('q.work.programming')));
@@ -75,7 +73,8 @@ describe('анкета — наскрізний прохід', () => {
 
   it('дисклеймер присутній на екрані результату', async () => {
     await walkMedianPath();
-    expect(screen.getByText(t('app.disclaimer'))).toBeDefined();
+    // Текст містить \n (кожне речення з нового рядка), тож матчимо за фрагментом.
+    expect(screen.getByText(/Це інформаційний калькулятор орієнтовного характеру/)).toBeDefined();
   });
 
   it('ФОП показано без числа і з поясненням чому', async () => {
@@ -97,19 +96,16 @@ describe('анкета — наскрізний прохід', () => {
   });
 });
 
-describe('графік', () => {
-  it('має таблицю як доступну альтернативу', async () => {
-    const user = await walkMedianPath();
-    await user.click(screen.getByRole('button', { name: t('chart.tableView') }));
-
-    const table = screen.getByRole('table');
-    expect(within(table).getByText(t('chart.col.range'))).toBeDefined();
-    expect(within(table).getAllByRole('row').length).toBe(5); // шапка + 4 варіанти
-  });
-
-  it('легенда пояснює, що означає колір', async () => {
+describe('порівняльна таблиця', () => {
+  it('показує всі чотири варіанти в одній таблиці з колонкою «на руки»', async () => {
     await walkMedianPath();
-    expect(screen.getByText(`${t('chart.legend')}:`)).toBeDefined();
+
+    // Секція порівняння (окремо від таблиць-підформ усередині акордеонів).
+    const region = screen.getByRole('region', { name: t('scenarios.title') });
+    const table = within(region).getByRole('table');
+    expect(within(table).getByText(t('chart.col.range'))).toBeDefined();
+    expect(within(table).getByText(t('chart.col.risk'))).toBeDefined();
+    expect(within(table).getAllByRole('row').length).toBe(5); // шапка + 4 варіанти
   });
 });
 
@@ -119,7 +115,7 @@ describe('приватність і прогрес', () => {
     expect(window.sessionStorage.getItem('tax-navigator:draft') ?? '').not.toContain('17342');
   });
 
-  it('прогрес зберігається між кроками, але без суми', async () => {
+  it('прогрес зберігається між кроками; точна сума в сховище не потрапляє', async () => {
     const user = userEvent.setup();
     render(<QuestionnairePage />);
     await user.click(screen.getByLabelText(t('q.days.gte183')));
@@ -127,30 +123,7 @@ describe('приватність і прогрес', () => {
 
     const saved = window.sessionStorage.getItem('tax-navigator:draft') ?? '';
     expect(saved).toContain('gte183');
-    expect(saved).not.toContain('monthlyRevenue');
-  });
-});
-
-describe('валідація вводу', () => {
-  it('нуль не пускає далі й показує помилку', async () => {
-    const user = userEvent.setup();
-    render(<QuestionnairePage />);
-    await user.click(screen.getByLabelText(t('q.days.gte183')));
-    await user.click(screen.getByRole('button', { name: t('nav.next') }));
-    await user.click(within(screen.getByRole('group', { name: t('q.centers.personal') })).getByLabelText(t('q.centers.pl')));
-    await user.click(within(screen.getByRole('group', { name: t('q.centers.economic') })).getByLabelText(t('q.centers.pl')));
-    await user.click(screen.getByRole('button', { name: t('nav.next') }));
-    await user.click(screen.getByLabelText(t('q.special.no')));
-    await user.click(screen.getByRole('button', { name: t('nav.next') }));
-    await user.click(within(screen.getByRole('group', { name: t('q.income.source') })).getByLabelText(t('q.income.plClients')));
-    await user.click(
-      within(screen.getByRole('group', { name: t('q.income.permanentHomeInUa') })).getByLabelText(t('q.income.home.no'))
-    );
-    await user.click(screen.getByRole('button', { name: t('nav.next') }));
-    await user.click(screen.getByLabelText(t('q.uaFop.no')));
-    await user.click(screen.getByRole('button', { name: t('nav.next') }));
-
-    await user.type(screen.getByLabelText(t('q.revenue.label')), '0');
-    expect(screen.getByRole('alert').textContent).toBe(t('error.tooLow'));
+    // Виручка ще не обрана; коли буде — тільки крок 2500, ніколи точна сума.
+    expect(saved).not.toContain('17342');
   });
 });

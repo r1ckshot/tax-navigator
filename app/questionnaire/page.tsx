@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { t } from '@/lib/i18n/uk';
 import type { Answers } from '@/lib/calc/types';
 import { assessResidency } from '@/lib/calc/residency';
@@ -12,7 +12,7 @@ import { Question } from '@/components/Question';
 import { Progress } from '@/components/Progress';
 import { ResidencyVerdict } from '@/components/ResidencyVerdict';
 import { ScenarioCard } from '@/components/ScenarioCard';
-import { TakeHomeChart } from '@/components/TakeHomeChart';
+import { ComparisonTable } from '@/components/ComparisonTable';
 import { Disclaimer } from '@/components/Disclaimer';
 import { EmailCta } from '@/components/EmailCta';
 import styles from './page.module.css';
@@ -23,6 +23,9 @@ export default function QuestionnairePage() {
   const [done, setDone] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [shareNote, setShareNote] = useState(false);
+  // Прогрес не має відкочуватись назад, коли змінилась лише кількість екранів
+  // (зʼявився/зник умовний крок), а не позиція користувача.
+  const progressRef = useRef({ index: 0, percent: 0 });
 
   // Відновлення: спершу лінк (шеринг), інакше — прогрес сесії.
   useEffect(() => {
@@ -87,9 +90,14 @@ export default function QuestionnairePage() {
     return <Result answers={answers as Answers} onRestart={restart} onShare={share} shareNote={shareNote} />;
   }
 
+  const rawPercent = screens.length > 0 ? Math.round(((index + 1) / screens.length) * 100) : 0;
+  // Та сама позиція + більше екранів = не відкочуємось; зміна кроку рухає нормально.
+  const percent = index === progressRef.current.index ? Math.max(rawPercent, progressRef.current.percent) : rawPercent;
+  progressRef.current = { index, percent };
+
   return (
     <main>
-      <Progress current={index + 1} total={screens.length} />
+      <Progress percent={percent} />
 
       {/* Зміна кроку озвучується, бо заголовок міняється без переходу сторінки. */}
       <div aria-live="polite">
@@ -123,14 +131,13 @@ function Result({
   const scenarios = compareScenarios(answers);
 
   return (
-    <main aria-live="polite">
-      <ResidencyVerdict result={residency} />
+    <main aria-live="polite" className={styles.result}>
+      <div className={styles.stack}>
+        <ResidencyVerdict result={residency} />
+        <ComparisonTable scenarios={scenarios} />
+      </div>
 
-      <h2>{t('scenarios.title')}</h2>
-      <p className={styles.subtitle}>{t('scenarios.subtitle')}</p>
-
-      <TakeHomeChart scenarios={scenarios} />
-
+      <h3 className={styles.detailsHeading}>{t('scenarios.detailsTitle')}</h3>
       <div className={styles.cards}>
         {scenarios.map((s) => (
           <ScenarioCard key={s.id} scenario={s} />

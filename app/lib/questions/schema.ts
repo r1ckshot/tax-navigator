@@ -1,4 +1,6 @@
 import type { Answers } from '@/lib/calc/types';
+import { homeInUaMatters } from '@/lib/calc/residency';
+import { REVENUE_MAX, REVENUE_MIN, REVENUE_STEP } from '@/lib/share';
 
 export type Draft = Partial<Answers>;
 
@@ -7,12 +9,22 @@ export interface FieldOption {
   labelKey: string;
 }
 
+export interface SliderConfig {
+  min: number;
+  max: number;
+  step: number;
+  default: number;
+  unitKey: string;
+  /** Показувати «+» на максимумі (значення «і більше»). */
+  openEnded?: boolean;
+}
+
 export interface Field {
   name: keyof Answers;
-  kind: 'choice' | 'number';
+  kind: 'choice' | 'slider';
   labelKey: string;
-  hintKey?: string;
   options?: FieldOption[];
+  slider?: SliderConfig;
   showIf?: (a: Draft) => boolean;
 }
 
@@ -42,7 +54,6 @@ export const SCREENS: Screen[] = [
         name: 'daysInPl',
         kind: 'choice',
         labelKey: 'q.days.label',
-        hintKey: 'q.days.hint',
         options: [
           { value: 'lt183', labelKey: 'q.days.lt183' },
           { value: 'gte183', labelKey: 'q.days.gte183' },
@@ -55,7 +66,14 @@ export const SCREENS: Screen[] = [
     id: 'daysApprox',
     titleKey: 'q.daysApprox.title',
     showIf: (a) => a.daysInPl === 'unsure',
-    fields: [{ name: 'daysInPlApprox', kind: 'number', labelKey: 'q.daysApprox.label' }],
+    fields: [
+      {
+        name: 'daysInPlApprox',
+        kind: 'slider',
+        labelKey: 'q.daysApprox.label',
+        slider: { min: 0, max: 366, step: 1, default: 183, unitKey: 'q.daysApprox.unit' },
+      },
+    ],
   },
   {
     id: 'centers',
@@ -65,14 +83,12 @@ export const SCREENS: Screen[] = [
         name: 'personalCenter',
         kind: 'choice',
         labelKey: 'q.centers.personal',
-        hintKey: 'q.centers.personalHint',
         options: placeOptions('q.centers'),
       },
       {
         name: 'economicCenter',
         kind: 'choice',
         labelKey: 'q.centers.economic',
-        hintKey: 'q.centers.economicHint',
         options: placeOptions('q.centers'),
       },
     ],
@@ -85,7 +101,6 @@ export const SCREENS: Screen[] = [
         name: 'specialLaw52zr',
         kind: 'choice',
         labelKey: 'q.special.label',
-        hintKey: 'q.special.hint',
         options: [
           { value: 'yes', labelKey: 'q.special.yes' },
           { value: 'no', labelKey: 'q.special.no' },
@@ -109,11 +124,19 @@ export const SCREENS: Screen[] = [
           { value: 'none', labelKey: 'q.income.none' },
         ],
       },
+    ],
+  },
+  {
+    id: 'homeInUa',
+    titleKey: 'q.home.title',
+    // Житло в UA — перший тай-брейкер Конвенції. Питаємо лише коли резидентство
+    // неоднозначне, тобто коли ця відповідь реально розвертає вердикт.
+    showIf: (a) => homeInUaMatters(a),
+    fields: [
       {
         name: 'permanentHomeInUa',
         kind: 'choice',
         labelKey: 'q.income.permanentHomeInUa',
-        hintKey: 'q.income.permanentHomeInUaHint',
         options: yesNo('q.income.home'),
       },
     ],
@@ -129,7 +152,19 @@ export const SCREENS: Screen[] = [
     id: 'revenue',
     titleKey: 'q.revenue.title',
     fields: [
-      { name: 'monthlyRevenue', kind: 'number', labelKey: 'q.revenue.label', hintKey: 'q.revenue.hint' },
+      {
+        name: 'monthlyRevenue',
+        kind: 'slider',
+        labelKey: 'q.revenue.label',
+        slider: {
+          min: REVENUE_MIN,
+          max: REVENUE_MAX,
+          step: REVENUE_STEP,
+          default: 15000,
+          unitKey: 'q.revenue.unit',
+          openEnded: true,
+        },
+      },
     ],
   },
   {
@@ -140,7 +175,6 @@ export const SCREENS: Screen[] = [
         name: 'workKind',
         kind: 'choice',
         labelKey: 'q.work.kind',
-        hintKey: 'q.work.kindHint',
         options: [
           { value: 'programming', labelKey: 'q.work.programming' },
           { value: 'otherIt', labelKey: 'q.work.otherIt' },
@@ -167,7 +201,6 @@ export const SCREENS: Screen[] = [
         name: 'hasParallelUop',
         kind: 'choice',
         labelKey: 'q.parallelUop.label',
-        hintKey: 'q.parallelUop.hint',
         options: yesNo('q.parallelUop'),
       },
     ],
@@ -180,7 +213,6 @@ export const SCREENS: Screen[] = [
         name: 'formerEmployer',
         kind: 'choice',
         labelKey: 'q.formerEmployer.label',
-        hintKey: 'q.formerEmployer.hint',
         options: [
           { value: 'no', labelKey: 'q.formerEmployer.no' },
           { value: 'identical', labelKey: 'q.formerEmployer.identical' },
@@ -226,7 +258,6 @@ export const SCREENS: Screen[] = [
         name: 'hadJdgInLast60Months',
         kind: 'choice',
         labelKey: 'q.jdgHistory.label',
-        hintKey: 'q.jdgHistory.hint',
         options: yesNo('q.jdgHistory'),
       },
     ],
@@ -265,14 +296,4 @@ export function resumeIndex(answers: Draft, savedStep: number): number {
   const firstIncomplete = screens.findIndex((s) => !isScreenComplete(s, answers));
   const ceiling = firstIncomplete === -1 ? screens.length - 1 : firstIncomplete;
   return Math.max(0, Math.min(savedStep, ceiling));
-}
-
-/** Виручка: тільки додатне число; поза межами — крок не пускає далі. */
-export const REVENUE_LIMITS = { min: 1, max: 8517200 / 12 } as const;
-
-export function validateRevenue(value: unknown): 'ok' | 'notANumber' | 'tooLow' | 'overRyczaltLimit' {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return 'notANumber';
-  if (value < REVENUE_LIMITS.min) return 'tooLow';
-  if (value > REVENUE_LIMITS.max) return 'overRyczaltLimit';
-  return 'ok';
 }

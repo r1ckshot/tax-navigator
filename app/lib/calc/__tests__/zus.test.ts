@@ -52,3 +52,13 @@ describe('były pracodawca — два РІЗНІ тести', () => {
     expect(assessZus(withAnswers({ formerEmployer: 'no', jdgStatus: 'from6to30' })).stage).toBe('preferencyjny');
   });
 });
+
+describe('ричалт — річний ліміт', () => {
+  // Слайдер виручки не сягає ліміту (стеля 50 000 zł/міс), але guard у розрахунку
+  // лишається: якщо річна виручка перевищить 8 517 200 zł, ричалт недоступний.
+  it('виручка понад річний ліміт робить ричалт недоступним', () => {
+    const overLimit = calcJdg(withAnswers({ monthlyRevenue: 800000 })).subforms?.find((s) => s.id === 'ryczalt');
+    expect(overLimit?.available).toBe(false);
+    expect(overLimit?.unavailableReasonKey).toBe('ryczalt.overLimit');
+  });
+});

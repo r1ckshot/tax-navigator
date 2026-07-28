@@ -2,83 +2,198 @@
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--radius);
-  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4) var(--space-5);
+  /* Крок перемонтовується (key=screen.id), тож анімація грає на кожному переході. */
+  animation: stepIn 220ms ease-out;
+}
+
+@keyframes stepIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Категорія кроку — дрібний акцентний надрядок; питання нижче несе головний акцент. */
+.eyebrow {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .fieldset {
   border: 0;
   padding: 0;
-  margin: 1.25rem 0 0;
+  margin: var(--space-4) 0 0;
 }
 
+.fieldset:first-of-type {
+  margin-top: var(--space-3);
+}
+
+/* Саме питання — головний заголовок кроку. */
 .legend {
   padding: 0;
-  font-weight: 600;
-}
-
-.hint {
-  margin: 0.35rem 0 0;
-  font-size: 0.85rem;
-  color: var(--ink-muted);
+  font-weight: 700;
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
 }
 
 .options {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: 0.4rem;
+  margin-top: var(--space-3);
 }
 
 .option {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
+  padding: 0.5rem 0.85rem;
+  /* Легкий фон, щоб варіанти не зливались із білою карткою. */
+  background: var(--sunken);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  /* Зона кліку лишається ≥44px (важливо для пальця), стискаємо лише проміжки. */
   min-height: 44px;
+  transition: border-color 120ms ease, background 120ms ease;
 }
 
+.option:hover {
+  border-color: var(--ink-muted);
+}
+
+/* Активний вибір — акцентом: рамка + мʼякий теплий фон, не лише радіо-крапка. */
 .option:has(input:checked) {
-  border-color: var(--ink);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .option:has(input:focus-visible) {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.numberField {
-  margin-top: 1.25rem;
+.option input {
+  accent-color: var(--accent);
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
+}
+
+/* --- Слайдер (виручка, дні…) --- */
+.sliderField {
+  margin-top: var(--space-4);
   display: flex;
   flex-direction: column;
 }
 
-.numberField label {
-  font-weight: 600;
+.sliderLabel {
+  font-weight: 700;
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
 }
 
-.numberField input {
-  margin-top: 0.75rem;
-  font: inherit;
-  padding: 0.7rem 0.85rem;
-  min-height: 44px;
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  background: var(--plane);
+.sliderValue {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-tight);
   color: var(--ink);
 }
 
-.error {
-  margin: 0.5rem 0 0;
-  font-size: 0.85rem;
+.sliderUnit {
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--ink-muted);
 }
 
-.error[data-severity='error'] {
-  color: var(--risk-red);
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2.25rem; /* велика зона захоплення для миші й пальця */
+  margin: var(--space-2) 0 0;
+  background: transparent;
+  cursor: pointer;
 }
 
-.error[data-severity='warning'] {
-  color: var(--ink-secondary);
+/* --- Трек: залита частина акцентом, решта — притоплений жолоб --- */
+.slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(var(--accent), var(--accent)) left / var(--fill, 50%) 100% no-repeat, var(--sunken);
+}
+
+.slider::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sunken);
+}
+
+.slider::-moz-range-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+/* --- Повзунок: велика teal-кулька з білим обідком --- */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -9px; /* центрування 26px-кульки на 8px-треку */
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.slider::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--surface);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.slider:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sliderScale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+  }
+
+  .screen {
+    animation: none;
+  }
 }

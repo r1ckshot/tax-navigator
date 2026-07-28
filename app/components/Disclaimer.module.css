@@ -1,9 +1,11 @@
 .disclaimer {
-  margin: 1.5rem 0;
-  padding: 0.9rem 1rem;
+  margin: var(--space-5) 0;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--hairline);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink-secondary);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
+  /* \n у тексті → кожне речення з нового рядка. */
+  white-space: pre-line;
 }

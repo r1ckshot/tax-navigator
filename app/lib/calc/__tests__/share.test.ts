@@ -1,32 +1,34 @@
 import { describe, expect, it } from 'vitest';
-import { encodeAnswers, decodeAnswers, bandOf } from '@/lib/share';
+import { encodeAnswers, decodeAnswers, quantizeRevenue } from '@/lib/share';
 import { assessResidency } from '../residency';
 import { baseAnswers, withAnswers } from './fixtures';
 
 describe('шеринг — точний дохід не витікає', () => {
-  it('URL не містить точної виручки', () => {
+  it('URL несе лише квантизоване значення, не точну суму', () => {
     const query = encodeAnswers(withAnswers({ monthlyRevenue: 17342 }));
     expect(query).not.toContain('17342');
-    expect(new URLSearchParams(query).get('r')).toBe('d');
+    expect(new URLSearchParams(query).get('r')).toBe('17500'); // 17342 → крок 2500
   });
 
-  it('декодування дає репрезентативне значення смуги, а не оригінал', () => {
+  it('декодування дає квантизоване значення, а не оригінал', () => {
     const decoded = decodeAnswers(encodeAnswers(withAnswers({ monthlyRevenue: 17342 })));
-    expect(decoded.monthlyRevenue).toBe(20000);
+    expect(decoded.monthlyRevenue).toBe(17500);
     expect(decoded.monthlyRevenue).not.toBe(17342);
   });
 
-  it('різні доходи в одній смузі дають однаковий лінк — за ним не відновити суму', () => {
-    expect(encodeAnswers(withAnswers({ monthlyRevenue: 11000 }))).toBe(
-      encodeAnswers(withAnswers({ monthlyRevenue: 14900 }))
+  it('різні суми в одному кроці 2500 дають однаковий лінк — за ним не відновити точну', () => {
+    // 14 000 і 15 100 обидва округляються до 15 000.
+    expect(encodeAnswers(withAnswers({ monthlyRevenue: 14000 }))).toBe(
+      encodeAnswers(withAnswers({ monthlyRevenue: 15100 }))
     );
   });
 
-  it('смуги покривають усю шкалу', () => {
-    expect(bandOf(1)).toBe('a');
-    expect(bandOf(5000)).toBe('a');
-    expect(bandOf(5001)).toBe('b');
-    expect(bandOf(999999)).toBe('e');
+  it('квантизація тримається меж слайдера і кроку 2500', () => {
+    expect(quantizeRevenue(1)).toBe(2500); // нижче мінімуму → мінімум
+    expect(quantizeRevenue(5000)).toBe(5000); // поріг zdrowotnej лягає на крок
+    expect(quantizeRevenue(6000)).toBe(5000);
+    expect(quantizeRevenue(25000)).toBe(25000); // другий поріг zdrowotnej
+    expect(quantizeRevenue(999999)).toBe(50000); // вище максимуму → максимум
   });
 });
 
