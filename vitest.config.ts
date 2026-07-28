@@ -3,12 +3,12 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
 
 /**
- * `npm test` ганяє логіку двигуна в node.
+ * `npm test` ганяє логіку двигуна в node — швидко і без DOM.
  *
- * UI-тести (`*.test.tsx`, потребують jsdom) виключені з дефолтного прогону:
- * у девконтейнері jsdom-воркер не стартує — та сама межа середовища, через яку
- * тут не піднімаються `next build` і `next dev`. Запускати їх треба там, де
- * середовище це дозволяє: `npm run test:ui`.
+ * UI-тести (`*.test.tsx`) потребують jsdom, тож живуть в окремому конфізі
+ * (`npm run test:ui`), щоб кожен прогін двигуна не платив за підняття DOM.
+ * Стара примітка «jsdom-воркер у девконтейнері не стартує» знята 2026-07-24:
+ * причиною була 9p-ФС, `node_modules` переїхали на ext4-том.
  */
 export default defineConfig({
   plugins: [react()],
