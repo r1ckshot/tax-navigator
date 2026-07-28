@@ -6,8 +6,17 @@
 ## Поточні задачі
 1. [x] M3 capstone (Шлях B): здано (`docs/capstones/m3.md`). Post-submission баги виправлено (DECISIONS.md 2026-07-17).
 2. [x] Репо: Next.js (TS, App Router) + деплой на Vercel — https://tax-navigator-red.vercel.app
-3. [ ] G1-тест: тексти готові (`docs/capstones/g1-outreach-messages.md`, поза git). Лишилось: відправити руками в 4 канали (DISTRIBUTION §1), коли зручно — не блокує решту.
+3. [x] G1-тест: тексти відправлені в дозволені зони (`docs/capstones/g1-outreach-messages.md`, поза git). **Результат — нуль відповідей.** DOU не приймає власні пости за форматом каналу. Експеримент завершений, не «недороблений».
 4. [x] **P1-matrix звірка проти офіційних джерел** — виконано цієї сесії, деталі нижче. Блокер перед M6 знято.
+5. [x] **SDLC ideation для фічі `tg-assistant`** — `docs/features/tg-assistant/idea-brief.md`, status Confirmed. Деталі нижче.
+
+## Зроблено (2026-07-28) — SDLC ideation, фіча `tg-assistant`
+- **Пройдено скіл `interview` з `docs/course/.../sdlc`** (14 фаз): Socratic-інтервʼю, конкурентний аналіз пошуком, три стратегічні підходи й три перспективи рев'ю паралельними sub-agent-ами, devil's advocate із чистим контекстом, RICE і Feasibility з підтвердженням Mike. Плагін `sdlc` не встановлений — протокол виконано за `SKILL.md` вручну.
+- **Артефакт:** `docs/features/tg-assistant/idea-brief.md` (15 секцій, RICE 3.25, Feasibility Tech ☑ Skills ☑ Time ☐) + глосарій фічі `CONTEXT.md`. Заглушки на дві інші ідеї — `docs/features/paid-action-plan/`, `docs/features/rules-change-monitor/` (status Draft, лише §1; повного інтервʼю не було).
+- **Скоуп фічі звужено до вимірювання:** щотижневий збір чужих органічних питань + розмітка «покрито / біла пляма». Без відповідей, чернеток і трекера власних повідомлень. Критерій зупинки записаний наперед (6 циклів, <5 питань → півот). Рішення — у DECISIONS.md.
+- **`docs/features/` повернено в git** (`.gitignore`); `docs/notes/`, `docs/capstones/`, `research/` лишаються поза ним.
+- **Скіл адаптовано в проєкт:** `.claude/skills/interview/` (SKILL.md + український шаблон брифу), підключений у CLAUDE.md. Плагін `sdlc` цілком не ставили — деталі в DECISIONS.md.
+- **Головний висновок рев'ю:** жоден із трьох підходів не має двох плюсів у матриці, а Executive і devil's advocate незалежно вказали на те саме — вузьке місце не в даних, а в тому, що питання «купиш?» ще не поставлене достатній кількості людей.
 
 ## Зроблено (ця сесія, 2026-07-24) — анкета-навігатор
 - **Крок 0, звірка бракуючих цифр.** P1-matrix давала числа лише для JDG. Довірено з офіційних джерел і дописано в EVIDENCE (сценарій F): внески роботодавця (9.76 + 6.50 + 1.67 + 2.45 + 0.10 ≈ 20.48%), працівника (13.71% + zdrowotna 9%), KUP 250/міс, kwota zmniejszająca 300/міс, 30-krotność 282,600 (= 30 × 9,420, сходиться з базою duży ZUS). Джерела: biznes.gov.pl, zus.pl, podatki.gov.pl.

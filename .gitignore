@@ -23,8 +23,7 @@ docs/course/
 # Local tier (персональні override, не для команди)
 .claude/settings.local.json
 
-# Приватне: нотатки, чернетки здачі, чернетки фіч, tg-mining pipeline (дані + протокол)
+# Приватне: нотатки, чернетки здачі, tg-mining pipeline (дані + протокол)
 docs/notes/
 docs/capstones/
-docs/features/
 research/
