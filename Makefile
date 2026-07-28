@@ -1,4 +1,4 @@
-.PHONY: help verify verify-syntax verify-devcontainer verify-whitelist verify-sandbox verify-firewall test build rebuild clean clean-artifacts
+.PHONY: help dev verify verify-syntax verify-devcontainer verify-whitelist verify-sandbox verify-firewall test test-arch build rebuild clean clean-artifacts
 
 STARTER_NAME := tax-navigator
 TEST_CMD := npm test
@@ -6,13 +6,15 @@ CLEAN_PATHS := node_modules dist .next
 
 help:
 	@echo "Targets:"
+	@echo "  dev                 Підняти Next.js dev-сервер на :3000"
 	@echo "  verify              Запустити всі security перевірки"
 	@echo "  verify-syntax       JSON валідність + deny/sandbox мінімум + консистентність доменів (Node, без python3)"
 	@echo "  verify-devcontainer Перевірити devcontainer.json runArgs і postStartCommand (з'явиться на Кроці 6)"
 	@echo "  verify-whitelist    Перевірити консистентність sandbox і init-firewall whitelists (з'явиться на Кроці 6)"
 	@echo "  verify-sandbox      Перевірити що sandbox блокує cat .env (потребує Docker)"
 	@echo "  verify-firewall     Перевірити firewall у devcontainer (тільки всередині контейнера)"
-	@echo "  test                Запустити unit тести"
+	@echo "  test                Запустити unit тести (+ архітектурні межі)"
+	@echo "  test-arch           Тільки перевірка dependency rule (ARCHITECTURE.md)"
 	@echo "  build               Зібрати Docker image"
 	@echo "  rebuild             Перезібрати без cache"
 	@echo "  clean               Прибрати containers і volumes (build artifacts: 'make clean-artifacts')"
@@ -53,8 +55,14 @@ verify-firewall:
 	@echo "=== Firewall test ==="
 	@bash tests/firewall.test.sh
 
+dev:
+	@npm run dev
+
 test:
 	@$(TEST_CMD)
+
+test-arch:
+	@npm run test:arch
 
 build:
 	@docker compose build

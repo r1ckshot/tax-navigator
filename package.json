@@ -6,8 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run",
+    "test": "vitest run && npm run test:arch",
     "test:watch": "vitest",
+    "test:arch": "depcruise app",
     "test:ui": "vitest run --config vitest.ui.config.ts",
     "verify": "node scripts/verify.mjs"
   },
@@ -24,6 +25,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.4",
+    "dependency-cruiser": "^18.1.0",
     "jsdom": "^29.1.1",
     "typescript": "^5.7.0",
     "vitest": "^4.1.10"
