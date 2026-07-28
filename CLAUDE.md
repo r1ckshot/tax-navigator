@@ -3,7 +3,23 @@
 Tax Navigator — інформаційний податковий навігатор UA↔PL. Соло-проєкт, курс Agentic Engineering (Module 3, фініш ~09.2026). Деталі продукту: [README.md](README.md).
 
 ## Порядок читання нової сесії
-`docs/SESSIONS-GUIDE.md` (як працюємо) → `docs/PROJECT.md` (що і навіщо) → `docs/STATE.md` (де зараз) → `docs/BACKLOG.md` (що далі) → релевантне з `docs/EVIDENCE.md` / `docs/OPEN-RISKS.md` / `docs/DISTRIBUTION.md`.
+`docs/SESSIONS-GUIDE.md` (як працюємо) → `docs/PROJECT.md` (що і навіщо) → `docs/STATE.md` (де зараз) → `docs/BACKLOG.md` (що далі) → перед кодом ще `ARCHITECTURE.md` + `SPEC.md` → релевантне з `docs/EVIDENCE.md` / `docs/OPEN-RISKS.md` / `docs/DISTRIBUTION.md`.
+
+## Правило залежностей (карта шарів — ARCHITECTURE.md)
+TypeScript таких меж не енфорсить, тож вони описані тут явно і перевіряються `npm test`.
+
+```
+presentation → adapters → calc → rules      (стрілки тільки в один бік)
+
+app/lib/rules/       дані + типи; не імпортує нічого, крім себе
+app/lib/calc/        чисті розрахунки; ЛИШЕ rules/ і себе.
+                     Нуль npm-залежностей: ні react, ні next, ні будь-чого ще
+app/lib/{questions,storage,share,format}   адаптери; браузерні API — тільки в storage.ts
+app/components/, app/**/page.tsx, i18n/    presentation; без арифметики
+```
+- Жоден файл `app/lib/**` не імпортує компоненти чи сторінки.
+- UI не читає `rules.2026.json` напряму — будь-яка цифра йде через `calc/`.
+- Перевірка: `npm run test:arch` (граф імпортів) + `app/lib/__tests__/architecture.test.ts` (браузерні глобали, яких у графі не видно).
 
 ## Тверді правила продукту
 ### Product / UI / calculations → .claude/rules/product-safety.md
