@@ -16,11 +16,11 @@ reflects_commit: "a19d58c"
 
 ## Стек
 
-- Мова: TypeScript `^5.7.0` (`package.json:22`), `strict: true` (`tsconfig.json:6`), аліас `@/* → ./app/*` (`tsconfig.json:22`)
-- Фреймворк: Next.js `^15.1.0` App Router (`package.json:12`), React `^19.0.0` (`package.json:13`)
-- **Рантайм-залежностей рівно три** — `next`, `react`, `react-dom` (`package.json:11-15`). Нуль UI-бібліотек, нуль CSS-in-JS, нуль стор-менеджерів
-- Тести: vitest `^4.1.10` (`package.json:31`), `@testing-library/react` (`package.json:18`), jsdom (`package.json:24`), dependency-cruiser `^18.1.0` (`package.json:23`)
-- Команди (`package.json:5-11`): `npm test` → `vitest run && npm run test:arch` (node, лише `*.test.ts`); `npm run test:ui` → окремий jsdom-конфіг (лише `*.test.tsx`); `npm run test:arch` → `depcruise app`; `npm run verify` → `node scripts/verify.mjs`
+- Мова: TypeScript `^5.7.0` (`package.json:30`), `strict: true` (`tsconfig.json:7`), таргет ES2017 (`tsconfig.json:3`), аліас `@/* → ./app/*` (`tsconfig.json:22`)
+- Фреймворк: Next.js `^15.1.0` App Router (`package.json:16`), React `^19.0.0` (`package.json:17`)
+- **Рантайм-залежностей рівно три** — `next`, `react`, `react-dom` (`package.json:15-19`). Нуль UI-бібліотек, нуль CSS-in-JS, нуль стор-менеджерів
+- Тести: vitest `^4.1.10` (`package.json:31`), `@testing-library/react` (`package.json:22`), jsdom (`package.json:29`), dependency-cruiser `^18.1.0` (`package.json:28`)
+- Команди (`package.json:5-13`): `npm test` → `vitest run && npm run test:arch` (node, лише `*.test.ts`); `npm run test:ui` → окремий jsdom-конфіг (лише `*.test.tsx`); `npm run test:arch` → `depcruise app`; `npm run verify` → `node scripts/verify.mjs`
 - `distDir` перемикається через `NEXT_DIST_DIR`, щоб dev і build не ділили `.next` (`next.config.mjs:7`)
 - **Лінтера немає** — ні скрипта, ні конфіга. Найближче до нього — `test:arch` + `app/lib/__tests__/architecture.test.ts`
 
@@ -56,15 +56,15 @@ C4Container
 | Дані-правила | `app/lib/rules/rules.2026.json` | rules | — | 17 правил; шапка `tax_year/profile/verified_at` (`:2-4`) |
 | Доступ до правил | `app/lib/rules/types.ts` | rules | — | `getRule`/`getParams`/`sourcesOf` (`:26,32,48`); кидає на невідомий `rule_id` (`:28`) |
 | Політика діапазонів | `app/lib/calc/range.ts` | calc | — | `UNCERTAINTY.ARITHMETIC=0.04`/`ESTIMATE=0.1` (`:13-16`), `toRange` (`:18`) |
-| Резидентство | `app/lib/calc/residency.ts` | calc | `page.tsx:130` | `assessResidency` (`:13`), `homeInUaMatters` (`:63`), тай-брейки (`:77`) |
+| Резидентство | `app/lib/calc/residency.ts` | calc | `app/questionnaire/page.tsx:130` | `assessResidency` (`:13`), `homeInUaMatters` (`:63`), тай-брейки (`:77`) |
 | ZUS | `app/lib/calc/zus.ts` | calc | `jdg.ts:39` | 4 етапи у фіксованому пріоритеті (`:28-67`) |
-| Сценарії | `app/lib/calc/scenarios/` | calc | `page.tsx:131` | Фасад `compareScenarios`, порядок `[fop, jdg, incubator, uop]` (`index.ts:11-13`) |
-| Схема анкети | `app/lib/questions/schema.ts` | adapters | `page.tsx:48` | **13 екранів** (`:48-265`), `visibleScreens` (`:275`), `resumeIndex` (`:294`) |
-| Чернетка | `app/lib/storage.ts` | adapters | `page.tsx:44-46` | Ключ `tax-navigator:draft` (`:4`); SSR-guard + try/catch (`:19,24`) |
-| Share-лінк | `app/lib/share.ts` | adapters | `page.tsx:32` | `quantizeRevenue` (`:16`), мапа коротких ключів (`:22-37`) |
+| Сценарії | `app/lib/calc/scenarios/` | calc | `app/questionnaire/page.tsx:131` | Фасад `compareScenarios`, порядок `[fop, jdg, incubator, uop]` (`index.ts:11-13`) |
+| Схема анкети | `app/lib/questions/schema.ts` | adapters | `app/questionnaire/page.tsx:48` | **13 екранів** (`:48-265`), `visibleScreens` (`:275`), `resumeIndex` (`:294`) |
+| Чернетка | `app/lib/storage.ts` | adapters | `app/questionnaire/page.tsx:44-46` | Ключ `tax-navigator:draft` (`:4`); SSR-guard + try/catch (`:19,24`) |
+| Share-лінк | `app/lib/share.ts` | adapters | `app/questionnaire/page.tsx:32` | `quantizeRevenue` (`:16`), мапа коротких ключів (`:22-37`) |
 | Форматування | `app/lib/format.ts` | adapters | 3 компоненти | `Intl.NumberFormat('uk-UA')` (`:3-5`); нуль імпортів |
 | Тексти | `app/lib/i18n/uk.ts` | див. §Звірка п.1 | 12 імпортерів | 152 ключі (`:2-192`), `t()` з fallback на ключ (`:194-196`) |
-| Компоненти | `app/components/` | presentation | `page.tsx:104,136-144` | 10 штук, кожен зі своїм `.module.css` |
+| Компоненти | `app/components/` | presentation | `app/questionnaire/page.tsx:104,136-144` | 10 штук, кожен зі своїм `.module.css` |
 | Сторінки | `app/page.tsx`, `app/questionnaire/page.tsx` | presentation | `app/layout.tsx` | Лендинг (server) і анкета (client, `:20`) |
 
 ## Конвенції (цитовані — правила, яким має відповідати нова фіча)
@@ -73,7 +73,7 @@ C4Container
 - **Типізація `params` — на місці споживання, не в `rules/`:** локальні `interface *Params` у файлі сценарію (`app/lib/calc/scenarios/uop.ts:6-31`)
 - **Крайні випадки — три різні шаблони:** недоступність замість числа (`rangeMonthly: null` + `unavailableReasonKey`, `jdg.ts:60-62`); кламп арифметики (`Math.max(0, …)`, `shared.ts:26`, `jdg.ts:97`); порожній набір → `null`, не `Infinity` (`shared.ts:32`)
 - **Ідентифікатори:** `ScenarioId` (`calc/types.ts:52`) → файл `scenarios/<id>.ts` → експорт `calc<Pascal>` → i18n-ключ `scenario.<id>` (`i18n/uk.ts:124-127`). Екрани анкети — camelCase `id`, а `name` поля збігається з ключем `Answers` (`schema.ts:23`)
-- **Пізнє зв'язування через рядки:** calc повертає **ключі** i18n, не тексти (`fop.ts:19-24`, `zus.ts:37`), UI резолвить через `t()` (`ScenarioCard.tsx:57-60`). Частина ключів будується динамічно — `` t(`zus.stage.${zus.stage}`) `` (`jdg.ts:39`). **Типами це не перевіряється** — головне джерело тихих поломок при перейменуванні
+- **Пізнє зв'язування через рядки:** calc повертає **ключі** i18n, не тексти (`fop.ts:19-24`, `zus.ts:34,47`), UI резолвить через `t()` (`ScenarioCard.tsx:57-60`). Частина ключів будується динамічно — `` t(`zus.stage.${zus.stage}`) `` (`jdg.ts:39`). **Типами це не перевіряється** — головне джерело тихих поломок при перейменуванні
 - **Тести:** `describe` описує правило, `it` містить очікуване число просто в заголовку (`benchmark.test.ts:22-25`). Еталон звіряється через **`rangeContains`, не `toBe`** (`:24,28,32`), бо продукт показує діапазони. Спільні дані — `baseAnswers` + `withAnswers(patch)` (`__tests__/fixtures.ts:4,22`). Ручні еталони виведені в шапці (`benchmark.test.ts:10-17`) з посиланням на `docs/EVIDENCE.md §6`
 - **Стилі — варіанти через `data-*`, не класи-модифікатори:** `data-variant="primary"` (`app/page.tsx:13`) → `button[data-variant='primary']` (`globals.css:174`); те саме `data-risk` (`RiskBadge.tsx:15`), `data-empty` (`ComparisonTable.tsx:34`)
 - **Локалізація:** всі повноцінні фрази через `t()`; дисципліна витримана приблизно на 95% — виняток названо в §Звірка п.3
@@ -83,7 +83,7 @@ C4Container
 | Сховище | Рушій | Доступ через | Нотатки |
 |---|---|---|---|
 | Чернетка анкети | `window.sessionStorage` | `app/lib/storage.ts:25` | Єдиний ключ `tax-navigator:draft`; **не** localStorage |
-| Share-лінк | URL query | `app/lib/share.ts:39,51` | Вхідний канал теж: має пріоритет над чернеткою (`page.tsx:32-36`) |
+| Share-лінк | URL query | `app/lib/share.ts:39,51` | Вхідний канал теж: має пріоритет над чернеткою (`app/questionnaire/page.tsx:32-36`) |
 | БД | — | — | Немає. `.env.example:8` містить `DATABASE_URL` із позначкою «у FREE-зрізі не використовується» (`:6-7`) |
 
 **Що свідомо не зберігається:** точна виручка. Квантизується до кроку 2 500 перед
@@ -98,18 +98,18 @@ C4Container
 - **Спільні примітиви — чесна картина:**
   - `RiskBadge` (`RiskBadge.tsx:13`) і `SourceCitation` (`SourceCitation.tsx:7`) — **єдині два реально перевикористовувані** компоненти
   - Кнопка — глобальний елементний стиль (`globals.css:158-189`), React-компонента `Button` **немає**: сторінки пишуть голий `<button data-variant>`
-  - **Примітиву картки немає.** Однаковий набір `--surface` + `--hairline` + радіус + `--shadow-sm` продубльовано в п'яти місцях: `ComparisonTable.module.css:1-8`, `ResidencyVerdict.module.css:1`, `ScenarioCard.module.css:1-6`, `Question.module.css:1-6`, `page.module.css:1-9`
+  - **Примітиву картки немає.** Однаковий набір `--surface` + `--hairline` + радіус + `--shadow-sm` продубльовано в п'яти місцях: `ComparisonTable.module.css:1-8`, `ResidencyVerdict.module.css:1`, `ScenarioCard.module.css:1-6`, `Question.module.css:1-6`, `app/page.module.css:1-9`
   - Слайдер — узагальнений, керується `SliderConfig` (`schema.ts:12-20`), обслуговує дві осі (виручка `:159-166`, дні `:74`), має `openEnded` для «+» (`Question.tsx:90`)
   - Акордеон — на нативному `<details>` (`ScenarioCard.tsx:15`), в окремий примітив не витягнутий
   - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:19-49`) і таблиця підформ (`ScenarioCard.tsx:38-53`)
-- **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:153-156`), мінімум 44px на клікабельних (`globals.css:166`), `prefers-reduced-motion` у 4 файлах, `aria-live="polite"` на результаті (`page.tsx:134`)
+- **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:153-156`), мінімум 44px на клікабельних (`globals.css:166`), `prefers-reduced-motion` у 4 файлах, `aria-live="polite"` на результаті (`app/questionnaire/page.tsx:134`)
 - **Найближчий прецедент екрана:** результатний — `Result` (`app/questionnaire/page.tsx:119-163`); простий статичний — `app/page.tsx:5-21`; інтерактивний кроковий — `Question` (`Question.tsx:17-27`)
 
 ## Де що лежить / найближчі прецеденти
 
 - **Новий сценарій розрахунку** → `app/lib/calc/scenarios/<id>.ts`, за зразком `uop.ts` (найповніший: локальні `*Params` `:6-31`, читання правил на початку `:41-45`, річна арифметика ÷12 `:60-63`, повернення з `toRange` + `risk` + `noteKeys` + `sourcesOf` `:67-76`). Реєстрація у фасаді — `scenarios/index.ts:5,12,15`. Пара-тест з еталоном у назві — `benchmark.test.ts:46-66`. Сценарій із підформами → `jdg.ts:31-51`; сценарій свідомо без числа → `fop.ts:13-26`
 - **Нове питання анкети** → `schema.ts`, за зразком екрана `jdgHistory` (`:249-264`). Чекліст із нього: поле в `Answers` (`calc/types.ts:39`) → екран у `SCREENS` → `showIf` → ключі в `uk.ts` (`:94-97`) → якщо їде в лінк, коротка літера в `KEYS` (`share.ts:35`) і для булевого — `BOOLEAN_KEYS` (`:71`) → тест на умовність (`questions.test.ts:35-48`) + оновити лічильники екранів (`:6-15`). Складніший прецедент, де `showIf` виведено з логіки калькуляції, — `homeInUa` (`schema.ts:130-143`) + `homeInUaMatters` (`residency.ts:63-70`)
-- **Новий екран** → складається з наявних примітивів (§Фронтенд), за зразком `Result` (`page.tsx:119-163`)
+- **Новий екран** → складається з наявних примітивів (§Фронтенд), за зразком `Result` (`app/questionnaire/page.tsx:119-163`)
 - **Нова картка-компонент** → `app/components/`, за зразком `ResidencyVerdict.tsx:6-38` + однойменний `.module.css`
 
 ## Обмеження й відомий технічний борг
@@ -119,7 +119,7 @@ C4Container
 - **Ключі i18n не типізовані** — динамічні шаблони (`` t(`risk.jdg.formerEmployer.${…}`) ``, `jdg.ts:46`) не ловляться ні `tsc`, ні depcruise. Перейменування ключа падає мовчки в рантаймі, `t()` віддає сам ключ (`uk.ts:194-196`)
 - **Квантизація виручки живе у двох реалізаціях** — `quantizeRevenue` (`share.ts:16`) і `snap` у компоненті (`Question.tsx:63-67`), з різними джерелами меж. Розійдуться при зміні кроку — див. §Звірка п.2
 - **Ворота G2 не пройдені** — закріплено 1 калібрувальний профіль, потрібно 10 проти держкалькуляторів (`SPEC.md:46`). Движок не вважається готовим
-- **Сценарій ФОП свідомо без числового діапазону** (`fop.ts:15`) — до звірки ЄСВ/ВЗ із першоджерелом. `zakon.rada.gov.ua` відкрито 2026-07-28, тож обмеження стало знімним
+- **Сценарій ФОП свідомо без числового діапазону** (`fop.ts:16`) — до звірки ЄСВ/ВЗ із першоджерелом. `zakon.rada.gov.ua` відкрито 2026-07-28, тож обмеження стало знімним
 - **Лінтера і CI немає** — CI заплановано з Module 9 (`CLAUDE.md:74`)
 - **`next build` у контейнері заборонено** (`.claude/rules/environment-limits.md`) — перевірка через `tsc --noEmit` + `npm test` + `npm run test:ui`
 
@@ -129,10 +129,10 @@ C4Container
 залежностей, машинна перевірка меж, обидва «відомі зміщення» підтверджені в коді.
 Знайдені розходження — нижче; вони **не виправлені мовчки**, а названі.
 
-1. **`i18n/` класифікується по-різному в документі й у конфізі.** `ARCHITECTURE.md:14` відносить `app/lib/i18n/` до presentation; `.dependency-cruiser.cjs:16` включає його в регексп `ADAPTERS`, а `PRESENTATION` (`:18`) його не покриває. Практичного розходження немає — `core-no-adapters` (`:33-39`) однаково забороняє ядру імпортувати i18n — але «відоме зміщення» в `ARCHITECTURE.md:65-66` цього не згадує.
-2. **Квантизація дубльована, а не лише «не в тому шарі».** `ARCHITECTURE.md:67-69` називає двох споживачів `share.ts`; фактично їх чотири, і четвертий — `snap()` у `app/components/Question.tsx:63-67` — це **незалежна друга реалізація** тієї самої логіки з іншим джерелом меж (`cfg.min/max/step`). Тобто продуктове рішення «крок 2 500» тримається у двох місцях.
-3. **«У компонентах немає рядків-літералів» (`ARCHITECTURE.md:42`) не виконується.** `app/layout.tsx:5-6` містить захардкоджені `title: "Tax Navigator"` і український `description` повз `t()` — при цьому `uk.ts:4` має **інший** заголовок `'Податковий навігатор UA↔PL'`. Два різні заголовки продукту. Дрібніше: гліфи ризику продубльовані (`ComparisonTable.tsx:11` і `RiskBadge.tsx:11`), `'+'` у `Question.tsx:103,115,123`, роздільник `–` у `format.ts:8`. **Головне: це єдине правило таблиці, яке не перевіряється нічим** — тоді як секція «Чим це тримається» (`ARCHITECTURE.md:44-61`) створює враження, що всі правила машинні.
-4. **Кількість тестів застаріла у двох файлах.** `ARCHITECTURE.md:51` і `docs/adr/0001-layered-with-isolated-core.md:46` кажуть 71; фактично 74 в node-наборі.
+1. **`i18n/` класифікується по-різному в документі й у конфізі.** `ARCHITECTURE.md:20` відносить `app/lib/i18n/` до presentation; `.dependency-cruiser.cjs:16` включає його в регексп `ADAPTERS`, а `PRESENTATION` (`:18`) його не покриває. Практичного розходження немає — `core-no-adapters` (`:33-39`) однаково забороняє ядру імпортувати i18n — але «відоме зміщення» в `ARCHITECTURE.md:71-72` цього не згадує.
+2. **Квантизація дубльована, а не лише «не в тому шарі».** `ARCHITECTURE.md:73-75` називає двох споживачів `share.ts`; фактично їх чотири, і четвертий — `snap()` у `app/components/Question.tsx:63-67` — це **незалежна друга реалізація** тієї самої логіки з іншим джерелом меж (`cfg.min/max/step`). Тобто продуктове рішення «крок 2 500» тримається у двох місцях.
+3. **«У компонентах немає рядків-літералів» (`ARCHITECTURE.md:48`) не виконується.** `app/layout.tsx:5-6` містить захардкоджені `title: "Tax Navigator"` і український `description` повз `t()` — при цьому `uk.ts:4` має **інший** заголовок `'Податковий навігатор UA↔PL'`. Два різні заголовки продукту. Дрібніше: гліфи ризику продубльовані (`ComparisonTable.tsx:11` і `RiskBadge.tsx:11`), `'+'` у `Question.tsx:103,115,123`, роздільник `–` у `format.ts:8`. **Головне: це єдине правило таблиці, яке не перевіряється нічим** — тоді як секція «Чим це тримається» (`ARCHITECTURE.md:50-67`) створює враження, що всі правила машинні.
+4. **Кількість тестів застаріла у двох файлах.** `ARCHITECTURE.md:57` і `docs/adr/0001-layered-with-isolated-core.md:46` кажуть 71; фактично 74 в node-наборі.
 5. **Тести адаптерів лежать у теці ядра.** `share.test.ts`, `storage.test.ts`, `questions.test.ts` тестують adapters, але лежать під `app/lib/calc/__tests__/`. Формально не порушення (правила мають `pathNot: '__tests__'`), проте розкладка суперечить карті шарів.
 6. **«Браузерні API лише в `storage.ts`» ширше за реальне правило.** Presentation вільно користується браузером: `window.location`, `window.history`, `navigator.clipboard` (`app/questionnaire/page.tsx:32,73,79`). Це узгоджено з енфорсментом (скан обмежений `app/lib`), але формулювання документа цього не звужує.
 7. **Дрібне:** стале посилання в коментарі `calc/types.ts:38` (`'from6to24'` проти реального `'from6to30'`, `:16`); назва тесту `residency.test.ts:79` не збігається з асертом (`:84`); токен `--measure: 66ch` (`globals.css:45`) не використовується ніде.

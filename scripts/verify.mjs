@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Крос-платформна заміна python3/bash-перевірок starter-Makefile (Windows-хост без make/python3).
 import { existsSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 
 let failed = false;
 const ok = (msg) => console.log(`OK: ${msg}`);
@@ -91,6 +92,23 @@ if (!existsSync(devcontainerPath)) {
       : fail("devcontainer.json runArgs не містить NET_ADMIN/NET_RAW — iptables не запуститься");
   } catch (e) {
     fail(`devcontainer.json невалідний JSON: ${e.message}`);
+  }
+}
+
+// 6. Якорі карти архітектури — окремий скрипт, бо він потрібен і сам по собі
+//    (скіл map-architecture ганяє його перед комітом карти).
+{
+  const r = spawnSync(process.execPath, ["scripts/check-anchors.mjs"], { encoding: "utf8" });
+  // FAIL друкується у stderr, OK — у stdout. Читати лише stdout означало б
+  // проґавити всі провали й лишити гейт зеленим без предмета перевірки.
+  const out = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
+  const fails = out.split("\n").filter((l) => l.startsWith("FAIL:"));
+  if (r.status === 0 && fails.length === 0) {
+    ok((r.stdout || "").trim().split("\n").pop().replace(/^OK: /, ""));
+  } else if (fails.length) {
+    for (const l of fails) fail(l.replace(/^FAIL: /, ""));
+  } else {
+    fail(`check-anchors.mjs впав із кодом ${r.status}: ${out.trim().split("\n").pop()}`);
   }
 }
 
