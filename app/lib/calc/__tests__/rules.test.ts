@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { RULES, getParams } from '@/lib/rules/types';
 
+const STALE_AFTER_DAYS = 180;
+
+const daysSince = (isoDate: string) =>
+  (Date.now() - Date.parse(`${isoDate}T00:00:00Z`)) / 86_400_000;
+
 describe('rules-as-data — дисципліна джерел', () => {
   it('кожне правило має source_url і verified_at', () => {
     for (const rule of RULES.rules) {
@@ -16,6 +21,18 @@ describe('rules-as-data — дисципліна джерел', () => {
 
   it('податковий рік зафіксований на 2026', () => {
     expect(RULES.tax_year).toBe(2026);
+  });
+
+  // Тригер для /scaffold-rule: репо саме каже, що перезвіряти, бо ззовні змін
+  // ніхто не моніторить. Тест свідомо падає від самого плину часу, без зміни
+  // коду — для продукту, який показує verified_at користувачу, протерміноване
+  // число і є дефект. Календар польських цифр: обвіщення GUS і ліміти PIT —
+  // грудень, бази ZUS — з 1 січня; 180 днів від липневої звірки влучають туди.
+  it(`жодне правило не старше ${STALE_AFTER_DAYS} днів`, () => {
+    const stale = RULES.rules
+      .filter((r) => daysSince(r.verified_at) > STALE_AFTER_DAYS)
+      .map((r) => `${r.rule_id} (${r.verified_at})`);
+    expect(stale, 'перезвірити командою /scaffold-rule <rule_id>').toEqual([]);
   });
 });
 
