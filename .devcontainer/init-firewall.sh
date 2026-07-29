@@ -97,6 +97,13 @@ ALLOWED_DOMAINS=(
   "isap.sejm.gov.pl"
   "stat.gov.pl"
   "eureka.mf.gov.pl"
+  # Українські першоджерела. zakon.rada.gov.ua - один статичний IP, тримається надійно.
+  # tax.gov.ua сидить на Akamai anycast (10 IP, і www - взагалі інший edge), а ipset
+  # наповнюється лише при старті контейнера: після ротації IP домен відвалиться,
+  # і лікується це Rebuild Container, а не дебагом. Прийнято свідомо (DECISIONS.md).
+  "zakon.rada.gov.ua"
+  "tax.gov.ua"
+  "www.tax.gov.ua"
 )
 
 for domain in "${ALLOWED_DOMAINS[@]}"; do
