@@ -13,11 +13,59 @@
   margin-bottom: var(--space-4);
 }
 
+/* Стрілка UA↔PL — єдиний акцент у заголовку: вона й несе сенс «між двома
+   системами», тож саме її варто підсвітити, а не фарбувати весь рядок. */
+.arrow {
+  color: var(--accent);
+}
+
+/* Головна теза — більша за пояснення й темніша: саме її читають, якщо читають
+   один рядок. Ширина вужча за .intro, щоб рядок ламався в передбачуваному місці. */
+.lead {
+  color: var(--ink);
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+  margin: 0 auto;
+  max-width: 30rem;
+}
+
 .intro {
   color: var(--ink-secondary);
   font-size: var(--text-md);
-  margin: 0 auto;
+  margin: var(--space-4) auto 0;
   max-width: 34rem;
+}
+
+/* Чотири сценарії — один рядок, а не вертикальний список: їх мало, вони короткі,
+   і стовпчик із чотирьох пунктів роздував блок сильніше, ніж додавав ясності.
+   Семантично лишається <ul>, візуально — рядок; роздільник живе в CSS, тож не
+   потрапляє в розмітку й не читається скрінрідером. */
+.scenarios {
+  color: var(--ink);
+  font-size: var(--text-md);
+  font-weight: 500;
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+}
+
+.scenarios li {
+  display: inline;
+}
+
+/* Роздільник — окремий inline-block фіксованої ширини з круглою крапкою по
+   центру рядка. Через ::content з символом «·» він сідав на базову лінію: у
+   шрифті цей гліф намальований низько, і ні vertical-align, ні line-height його
+   не піднімали передбачувано. Намальована крапка стоїть рівно там, де треба. */
+.scenarios li + li::before {
+  background: var(--accent);
+  border-radius: 50%;
+  content: '';
+  display: inline-block;
+  height: 0.3em;
+  margin: 0 var(--space-2);
+  vertical-align: 0.25em;
+  width: 0.3em;
 }
 
 .cta {
