@@ -35,6 +35,7 @@ app/components/, app/**/page.tsx, i18n/    presentation; без арифмети
 - **Візуальні зміни** → `.claude/rules/visual-review.md` (не «готово», поки Mike не подивився очима).
 - **Межі середовища** → `.claude/rules/environment-limits.md` (журнал відомих блокерів; читати перед плануванням).
 - **Нова ідея фічі** → скіл `.claude/skills/interview/` (14 фаз, результат — `docs/features/<slug>/idea-brief.md`). Коли ще не ясно, що саме будувати; для дрібних правок не потрібен.
+- **Карта архітектури** → скіл `.claude/skills/map-architecture/` (стадія 00, результат — `docs/architecture-map.md`). Один скан на все репо; наступні стадії читають карту, а не код. Скан делегується sub-agent-у `.claude/agents/explorer.md` (read-only). Карта **не** заміняє `ARCHITECTURE.md` — різні читачі, межа описана в самому скілі.
 
 ### Глибина артефактів = розмір фічі
 Рубрика взята з курсу (`sdlc/00-overview/mvp-vs-full.md`), не вигадана. Класифікувати ДО того, як почав писати артефакти.
