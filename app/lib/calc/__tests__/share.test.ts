@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { encodeAnswers, decodeAnswers, quantizeRevenue } from '@/lib/share';
+import { encodeAnswers, decodeAnswers } from '@/lib/share';
+import { quantizeRevenue } from '@/lib/calc/quantize';
 import { assessResidency } from '../residency';
 import { baseAnswers, withAnswers } from './fixtures';
 

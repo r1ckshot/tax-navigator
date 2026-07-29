@@ -1,23 +1,5 @@
 import type { Answers } from '@/lib/calc/types';
-
-/**
- * Виручка живе на одній дискретній шкалі по 2 500 zł — для слайдера, сховища,
- * лінка й розрахунку. Крок навмисне грубий: правило product-safety «сирі доходи
- * не зберігаємо» так виконується за конструкцією — застосунок ніколи не отримує
- * точнішого за 2 500 zł числа, тож і розкривати в лінку нема чого. Пороги
- * zdrowotnej (60 000 і 300 000 zł на рік → 5 000 і 25 000 на місяць) лягають
- * рівно на межі кроків, тож жоден варіант не «зависає» між ступенями.
- */
-export const REVENUE_STEP = 2500;
-export const REVENUE_MIN = 2500;
-export const REVENUE_MAX = 50000;
-
-/** Будь-яке число → найближчий крок 2 500 у межах слайдера. */
-export function quantizeRevenue(value: number): number {
-  if (!Number.isFinite(value)) return REVENUE_MIN;
-  const stepped = Math.round(value / REVENUE_STEP) * REVENUE_STEP;
-  return Math.min(REVENUE_MAX, Math.max(REVENUE_MIN, stepped));
-}
+import { quantizeRevenue } from '@/lib/calc/quantize';
 
 const KEYS: Record<string, keyof Answers> = {
   d: 'daysInPl',

@@ -3,6 +3,7 @@
 import { useEffect, type CSSProperties } from 'react';
 import { t } from '@/lib/i18n/uk';
 import type { Answers } from '@/lib/calc/types';
+import { snapToStep } from '@/lib/calc/quantize';
 import type { Draft, Field, Screen, SliderConfig } from '@/lib/questions/schema';
 import { visibleFields } from '@/lib/questions/schema';
 import { formatMoney } from '@/lib/format';
@@ -61,9 +62,7 @@ function FieldControl({ field, answers, onChange }: { field: Field } & Omit<Prop
 
 /** Будь-яке число → найближчий крок у межах слайдера. */
 function snap(value: number, cfg: SliderConfig): number {
-  if (!Number.isFinite(value)) return cfg.default;
-  const stepped = Math.round(value / cfg.step) * cfg.step;
-  return Math.min(cfg.max, Math.max(cfg.min, stepped));
+  return snapToStep(value, { min: cfg.min, max: cfg.max, step: cfg.step, fallback: cfg.default });
 }
 
 /**

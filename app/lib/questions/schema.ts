@@ -1,6 +1,6 @@
 import type { Answers } from '@/lib/calc/types';
 import { homeInUaMatters } from '@/lib/calc/residency';
-import { REVENUE_MAX, REVENUE_MIN, REVENUE_STEP } from '@/lib/share';
+import { REVENUE_MAX, REVENUE_MIN, REVENUE_STEP } from '@/lib/calc/quantize';
 
 export type Draft = Partial<Answers>;
 

@@ -1,5 +1,5 @@
 import type { Draft } from '@/lib/questions/schema';
-import { quantizeRevenue } from '@/lib/share';
+import { quantizeRevenue } from '@/lib/calc/quantize';
 
 const KEY = 'tax-navigator:draft';
 
