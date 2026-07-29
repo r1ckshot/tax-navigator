@@ -168,6 +168,18 @@
       },
       "source_url": "https://eureka.mf.gov.pl",
       "verified_at": "2026-07-18"
+    },
+    {
+      "rule_id": "fop.esv_vz",
+      "params": {
+        "esvRate": 0.22,
+        "minimumWageMonthlyUah": 8647,
+        "esvMinMonthlyUah": 1902.34,
+        "vzRateGroup3": 0.01,
+        "vzTiedToMartialLaw": true
+      },
+      "source_url": "https://zakon.rada.gov.ua/laws/show/2464-17",
+      "verified_at": "2026-07-29"
     }
   ]
 }

@@ -70,6 +70,26 @@ describe('verify-first числа не дрейфнули', () => {
     expect(duzyBase).toBeCloseTo(avg * 0.6, 0);
   });
 
+  it('ЄСВ укр ФОП 2026: мінімум 1902.34 грн/міс = 22% × мінімалка 8647 грн (ст. 8 Держбюджету-2026)', () => {
+    const p = getParams<{
+      esvRate: number;
+      minimumWageMonthlyUah: number;
+      esvMinMonthlyUah: number;
+    }>('fop.esv_vz');
+    expect(p.esvRate).toBe(0.22);
+    expect(p.minimumWageMonthlyUah).toBe(8647);
+    expect(p.esvMinMonthlyUah).toBe(1902.34);
+    // крос-звірка похідної: мін. внесок мусить сходитись із мінімалкою × ставкою
+    expect(p.esvMinMonthlyUah).toBeCloseTo(p.minimumWageMonthlyUah * p.esvRate, 2);
+  });
+
+  // У ВЗ три ставки поруч: 5% зарплатна, 10% мінімалки для 1/2/4 груп,
+  // 1% доходу для 3-ї (п. 16-1 підрозд. 10 розд. XX ПКУ). P1 = 3 група.
+  it('АНТИ-РЕГРЕС: ВЗ для 3 групи — 1% доходу, не зарплатні 5% і не 10% мінімалки', () => {
+    const p = getParams<{ vzRateGroup3: number }>('fop.esv_vz');
+    expect(p.vzRateGroup3).toBe(0.01);
+  });
+
   it('наріст роботодавця при UoP ≈ 20.48%', () => {
     const er = getParams<Record<string, number>>('uop.employer_contributions');
     const total = er.emerytalne + er.rentowe + er.wypadkowe + er.fpFs + er.fgsp;
