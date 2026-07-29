@@ -6,7 +6,9 @@
 - `research/tg-mining/` ← твій Telegram-майнінг пайплайн. Локально, поза git (read-only до Telegram; дані і приватні цитати ніколи не публікуються).
 
 ## Що генерує Claude Code
-- `docs/capstones/` ← чернетки здачі capstone по модулю (`m3.md`, пізніше `m6.md` тощо) — окремо від `docs/notes/`, бо це не навчальні нотатки, а текст на здачу. Локально, поза git.
+- `docs/capstones/` ← чернетки здачі capstone по модулю (`m3.md`, `m4.md`, далі `m6.md`) — окремо від `docs/notes/`, бо це не навчальні нотатки, а текст на здачу. Локально, поза git.
+- `docs/features/<slug>/` ← SDLC-артефакти фічі (idea-brief, CONTEXT, далі PRD і tasks). **У git**, на відміну від решти вище: тут немає сирих даних людей, і DoD скіла вимагає закоміченого артефакту. Писати так, ніби це читає стороння людина з тих самих чатів.
+- `docs/JOURNAL.md` ← хроніка й післямортеми. Поза обов'язковим читанням — відкривається, коли треба «як ми до цього дійшли».
 
 ## Принцип
 Один інструмент, дві РОЛІ через два ТИПИ сесій. Стан живе у файлах (STATE, DECISIONS), не в чатах — тому сесії безболісно народжуються і вмирають.
@@ -34,8 +36,8 @@
 - Всередині однієї довгої задачі на ~60–70% контексту → `/compact` з фокусом на задачу ("preserve modified files list and test commands").
 - Застряг двічі на тому самому → нова сесія + гостріший BRIEF.
 
-## Definition of Done (кожна задача)
-1) Критерії "Готово коли" виконані; 2) тести проходять (для движка — обов'язково еталонні); 3) коміти атомарні; 4) STATE.md оновлено; 5) якщо ухвалено рішення — рядок у DECISIONS.md.
+## Definition of Done
+Канон — у [CLAUDE.md](../CLAUDE.md), розділ "Definition of Done". Тут свідомо не дублюється: дві копії розійдуться.
 
 ## Git-мінімум (до Module 9, потім поглиблюємо курсом)
 - Conventional commits: `feat|fix|test|docs|refactor|chore(scope): що`. Один логічний крок = один коміт. "Чому" — у тілі коміта, коли неочевидно.
@@ -53,9 +55,11 @@
 ## Мапа модулів → продукт (дві швидкості)
 | Модуль | Техніка курсу | У продукт | Ворота |
 |---|---|---|---|
-| M3 (зараз) | setup, settings, permissions, sandbox, devcontainer | адаптований nodejs-typescript starter конфіг; репо+деплой Vercel; capstone M3 | 🟢 |
-| паралельно | — | лендінг+waitlist (G1: 100 email АБО 5 "коли купити" за 3–4 тиж) | 🔴 G1 |
-| M6 | SDLC-артефакти | PRD, arc42+ADR, C4, data model (rules-as-data, профілі), OpenAPI, tasks; GDPR-рішення "де живе PDF" | стоп без вивіреної matrix |
+| M3 | setup, settings, permissions, sandbox, devcontainer | адаптований nodejs-typescript starter конфіг; репо+деплой Vercel; capstone M3 | 🟢 здано |
+| M4 | промпти, контекст, `.claude/rules`, bounded contexts, scaffold | `.claude/rules/`, ARCHITECTURE + SPEC + ADR, арх-тести (dependency-cruiser); capstone M4 | 🟢 здано |
+| M5 | commands, skills, hooks, plugins, marketplace, SDK | 🟡 **частково випереджено**: `.claude/skills/interview/` і хуки вже зроблені на реальній потребі. Лишається наздогнати plugins / marketplace / SDK | 🟡 |
+| M6 (зараз) | SDLC-артефакти | ideation ✅ (`docs/features/tg-assistant/`) → далі PRD, arc42+ADR, C4, data model, OpenAPI, tasks; GDPR-рішення "де живе PDF" | 🟠 у роботі |
+| паралельно | — | попит (G1): перша спроба через пости дала нуль — провалився канал, не попит. Новий канал вимірювання — `tg-assistant` T1+T2 | 🔴 G1 |
 | M7 | execution, Ralph loop, TDD | движок (діапазони) + анкета + порівняння; 10 еталонних профілів | 🔴 G2: 10/10 з держкалькуляторами |
 | M8 | MCP | MCP-сервер офіційних джерел + Q&A-асистент (відповіді ТІЛЬКИ з джерел, temperature=0) | 🟡 після движка |
 | M9 | git/collaboration | авто-рев'ю PR, secret-guard, release pipeline; Rule of Two в CI (агент ніколи не мержить сам) | 🟡 |
