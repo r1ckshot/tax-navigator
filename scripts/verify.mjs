@@ -56,7 +56,10 @@ if (!existsSync(firewallPath)) {
   skip("devcontainer/init-firewall.sh ще не існує — перевірку доменів пропущено");
 } else {
   const fw = readFileSync(firewallPath, "utf8");
-  const match = fw.match(/ALLOWED_DOMAINS=\(([\s\S]*?)\)/);
+  // Закриваюча дужка МУСИТЬ матчитись на початку рядка: non-greedy `\)` обривався
+  // на першій дужці всередині коментаря, і перевірка мовчки переставала бачити
+  // домени, дописані нижче. Зелений гейт без предмета перевірки — гірше за червоний.
+  const match = fw.match(/ALLOWED_DOMAINS=\(([\s\S]*?)^\)/m);
   if (!match) {
     fail("не знайдено ALLOWED_DOMAINS у init-firewall.sh");
   } else {
