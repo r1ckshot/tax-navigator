@@ -86,12 +86,34 @@ describe('benchmark — інкубатор', () => {
   });
 });
 
-describe('ФОП — свідомо без числа', () => {
-  it('діапазону немає, бо ЄСВ/ВЗ не звірені', () => {
-    const fop = calcFop(baseAnswers);
+describe('ФОП — український бік у гривні, польський без числа', () => {
+  const fop = calcFop(baseAnswers);
+
+  // Курс тут не потрібен за побудовою: ЄП і ВЗ — частка доходу, а частка від
+  // валюти не залежить. 15,000 × (0.05 + 0.01) = 900.
+  it('ЄП 5% + ВЗ 1% = 6% від 15,000 zł → 900 zł/міс', () => {
+    expect(fop.foreignBurden!.proportionalRate).toBe(0.06);
+    expect(rangeContains(fop.foreignBurden!.proportionalMonthly, 900)).toBe(true);
+  });
+
+  it('ЄСВ лишається в гривні: 1,902.34 грн/міс, без конвертації (DECISIONS 2026-07-29)', () => {
+    expect(fop.foreignBurden!.fixedMonthlyUah).toBe(1902.34);
+  });
+
+  it('«на руки» в злотих далі без числа — складки ZUS для zakładu не звірені', () => {
     expect(fop.rangeMonthly).toBeNull();
     expect(fop.risk).toBe('red');
-    expect(fop.noteKeys).toContain('fop.noNumericRange');
+    expect(fop.noteKeys).toContain('fop.plSideNotVerified');
+  });
+
+  // Дві величини стоять поруч і НЕ складаються — скласти zł і грн можна лише
+  // через курс. Природа в них теж різна, і це видно на зміні виручки.
+  it('ЄСВ — фіксована підлога (виручка не впливає), ЄП+ВЗ — пропорційні', () => {
+    const richer = calcFop(withAnswers({ monthlyRevenue: 30000 }));
+    expect(richer.foreignBurden!.fixedMonthlyUah).toBe(fop.foreignBurden!.fixedMonthlyUah);
+    expect(richer.foreignBurden!.proportionalMonthly.min).toBeGreaterThan(
+      fop.foreignBurden!.proportionalMonthly.min,
+    );
   });
 });
 

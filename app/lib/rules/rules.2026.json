@@ -164,7 +164,7 @@
         "creditedInPl": false,
         "ryczaltAvailable": false,
         "numericRangeAvailable": false,
-        "unverifiedComponents": ["ЄСВ", "ВЗ"]
+        "unverifiedComponents": ["ZUS/zdrowotna для zakładu"]
       },
       "source_url": "https://eureka.mf.gov.pl",
       "verified_at": "2026-07-18"

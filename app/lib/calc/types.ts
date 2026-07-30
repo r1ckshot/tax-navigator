@@ -61,10 +61,33 @@ export interface SubformResult {
   sources: Source[];
 }
 
+/**
+ * Витрата поза польською системою, яку не можна згорнути в «на руки».
+ * Пропорційна частина рахується у валюті виручки — частка доходу від валюти не
+ * залежить; фіксований мінімум лишається у гривні, бо курс UAH→PLN свідомо не
+ * застосовуємо (DECISIONS 2026-07-29). Через це дві величини стоять поруч, а не
+ * складаються в одне число.
+ */
+export interface ForeignBurden {
+  /** ЄП + ВЗ: сумарна частка доходу, з якої виведена пропорційна частина. */
+  proportionalRate: number;
+  /** Пропорційна частина у валюті виручки (zł/міс). */
+  proportionalMonthly: Range;
+  /** Фіксований мінімум у гривні — не конвертується. */
+  fixedMonthlyUah: number;
+}
+
 export interface ScenarioResult {
   id: ScenarioId;
-  /** null = свідомо без числа (напр. ФОП: ЄСВ/ВЗ не звірені). */
+  /** null = свідомо без числа (напр. ФОП: складки для zakładu не звірені). */
   rangeMonthly: Range | null;
+  /**
+   * Чим підписати порожнє «на руки». Без нього — загальне `scenario.noRange`;
+   * ФОП уточнює, бо в його картці числа Є, просто в іншій юрисдикції.
+   */
+  noRangeReasonKey?: string;
+  /** Є лише там, де сценарій тягне витрату в іншій юрисдикції (укр ФОП). */
+  foreignBurden?: ForeignBurden;
   risk: Risk;
   riskReasonKey: string;
   noteKeys: string[];
