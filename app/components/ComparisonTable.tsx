@@ -32,7 +32,9 @@ export function ComparisonTable({ scenarios }: { scenarios: ScenarioResult[] }) 
               </th>
 
               <td className={styles.value} data-empty={s.rangeMonthly ? undefined : 'true'}>
-                {s.rangeMonthly ? formatRange(s.rangeMonthly) : t('scenario.noRange')}
+                {s.rangeMonthly
+                  ? formatRange(s.rangeMonthly)
+                  : t(s.noRangeReasonKey ?? 'scenario.noRange')}
               </td>
 
               <td>

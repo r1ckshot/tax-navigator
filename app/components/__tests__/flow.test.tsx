@@ -77,10 +77,21 @@ describe('анкета — наскрізний прохід', () => {
     expect(screen.getByText(/Це інформаційний калькулятор орієнтовного характеру/)).toBeDefined();
   });
 
-  it('ФОП показано без числа і з поясненням чому', async () => {
+  it('ФОП: злотова колонка без числа з поясненням чому', async () => {
     await walkMedianPath();
-    expect(screen.getAllByText(t('scenario.noRange')).length).toBeGreaterThan(0);
-    expect(screen.getByText(t('fop.noNumericRange'))).toBeDefined();
+    // Саме уточнений напис, а не загальне «Без числового діапазону»: у картці
+    // числа Є, тож порожня має читатись як «польське на руки», а не «взагалі».
+    expect(screen.getAllByText(t('fop.noPlTakeHome')).length).toBeGreaterThan(0);
+    expect(screen.getByText(t('fop.plSideNotVerified'))).toBeDefined();
+  });
+
+  // Валюта мусить бути підписана: та сама картка показує обидві, і сплутати їх
+  // означало б показати гривню під злотовим заголовком.
+  it('ФОП: український тягар видно двома підписаними валютами', async () => {
+    await walkMedianPath();
+    expect(screen.getByText(t('fop.burden.label'))).toBeDefined();
+    expect(screen.getByText(t('fop.burden.esv'))).toBeDefined();
+    expect(screen.getAllByText(t('unit.uahMonth')).length).toBeGreaterThan(0);
   });
 
   it('на картці JDG видно підформи і примітку про IP Box', async () => {

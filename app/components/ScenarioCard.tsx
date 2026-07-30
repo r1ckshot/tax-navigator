@@ -1,6 +1,6 @@
 import { t } from '@/lib/i18n/uk';
 import type { ScenarioResult } from '@/lib/calc/types';
-import { formatRange } from '@/lib/format';
+import { formatMoney, formatRange } from '@/lib/format';
 import { RiskBadge } from './RiskBadge';
 import { SourceCitation } from './SourceCitation';
 import styles from './ScenarioCard.module.css';
@@ -26,7 +26,7 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
               <span className={styles.unit}>{t('scenario.takeHome')}</span>
             </>
           ) : (
-            t('scenario.noRange')
+            t(scenario.noRangeReasonKey ?? 'scenario.noRange')
           )}
         </span>
 
@@ -51,6 +51,39 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
               ))}
             </tbody>
           </table>
+        )}
+
+        {scenario.foreignBurden && (
+          <>
+            <p id="fop-burden-label" className={styles.burdenCaption}>
+              {t('fop.burden.label')}
+            </p>
+            <table
+              className={`${styles.subforms} ${styles.burdenTable}`}
+              aria-labelledby="fop-burden-label"
+            >
+              <tbody>
+                <tr>
+                  <th scope="row" className={styles.subformName}>
+                    {t('fop.burden.proportional')}
+                  </th>
+                  <td className={styles.subformValue}>
+                    {formatRange(scenario.foreignBurden.proportionalMonthly)}{' '}
+                    <span className={styles.burdenUnit}>{t('unit.zlMonth')}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row" className={styles.subformName}>
+                    {t('fop.burden.esv')}
+                  </th>
+                  <td className={styles.subformValue}>
+                    {formatMoney(scenario.foreignBurden.fixedMonthlyUah)}{' '}
+                    <span className={styles.burdenUnit}>{t('unit.uahMonth')}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </>
         )}
 
         <ul className={styles.notes}>
