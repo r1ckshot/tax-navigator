@@ -14,7 +14,9 @@
 
 ## NOW
 
-Порожньо — наступна задача обирається плануванням із NEXT нижче.
+| Задача | Чому зараз | Хто |
+|---|---|---|
+| Вставити блок у `.claude/settings.json` — підключити `pre-commit-gate.mjs` | Скрипт готовий і протестований (3 кейси), лишається одна правка, яку Claude Code не може зробити сам | Mike |
 
 ## NEXT
 
@@ -38,6 +40,7 @@
 | 5.4 Hooks | `.claude/hooks/block-env-writes.mjs` + ізольований тест | ✅ 21 кейс зелені (додано `$IFS` та inline-інтерпретатор), спрацювання підтверджене вживу |
 | 5.4 Hooks (другий) | Хук проти `git push --force` у `master` | ⬜ правило в CLAUDE.md є, енфорсменту немає — `if` на `Bash(git push --force*)` |
 | 5.4 Hooks (третій) | SessionStart зі списком протермінованих `verified_at` | ⬜ після `check-docs.mjs`: спільний скрипт, інакше два джерела правди |
+| 5.4 Hooks (четвертий) | `.claude/hooks/pre-commit-gate.mjs` — блокує коміт з кирилицею в message, замінив інлайн `npm test` на `npm test` + `npm run verify` | ✅ 3 кейси перевірені локально (allow / кирилиця / провалений test); підключення в `settings.json` — застосовує Mike |
 | 5.5 Plugins | `tax-navigator-toolkit/` — конвертація реального `.claude/` (scaffold-rule + add-source-domain + hooks) | ✅ `claude plugin validate` зелений; живий `--plugin-dir` тест зависав у цьому контейнері (environment-limits.md) — структурна перевірка замінює |
 | 5.6 Marketplace | [team-marketplace](https://github.com/r1ckshot/team-marketplace) — v1 = `block-env-writes@1.0.0` | ✅ CI зелений, тег `block-env-writes@1.0.0`, install-флоу підтверджений наскрізно (marketplace add → install → живий блок у терміналі Mike) |
 | 5.6 Marketplace (v1.1 ідея) | `bootstrap-agentic-workflow` skill — скаффолдить STATE/BACKLOG/DECISIONS-конвенцію в новий репо, будь-який стек | ⬜ ідея, не спроєктовано — окремо від v1, щоб не блокувати реліз |
