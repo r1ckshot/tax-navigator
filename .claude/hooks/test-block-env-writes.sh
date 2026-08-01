@@ -22,6 +22,8 @@ check() {
 }
 
 cmd_payload() { printf '{"tool_name":"Bash","tool_input":{"command":%s}}' "$1"; }
+# Для команд зі складним цитуванням (вкладені " і ') — jq сам вважає екранування.
+cmd_payload_raw() { jq -nc --arg c "$1" '{"tool_name":"Bash","tool_input":{"command":$c}}'; }
 
 echo "Позитивні (мусить заблокувати, exit 2):"
 check "редирект у .env"          2 "$(cmd_payload '"echo SECRET=1 > .env"')"
@@ -31,6 +33,9 @@ check "tee"                      2 "$(cmd_payload '"echo K=V | tee .env.test"')"
 check "копіювання поверх"        2 "$(cmd_payload '"cp /tmp/leak .env"')"
 check "sed -i по .env"           2 "$(cmd_payload '"sed -i s/A/B/ .env.development"')"
 check "у складеній команді"      2 "$(cmd_payload '"npm run build && echo TOKEN=1 > .env"')"
+check "\$IFS замість пробілу"    2 "$(cmd_payload_raw 'echo${IFS}X=1${IFS}>${IFS}.env')"
+check "node -e writeFileSync"    2 "$(cmd_payload_raw "node -e \"require('fs').writeFileSync('.env','X=1')\"")"
+check "python3 -c open(...,'w')" 2 "$(cmd_payload_raw "python3 -c \"open('.env','w').write('X')\"")"
 
 echo "Негативні (мусить пропустити, exit 0):"
 check "читання .env"             0 "$(cmd_payload '"cat .env"')"
@@ -38,6 +43,8 @@ check "grep по .env"             0 "$(cmd_payload '"grep -n KEY .env.productio
 check "запис у .env.example"     0 "$(cmd_payload '"echo KEY= > .env.example"')"
 check "звичайна команда"         0 "$(cmd_payload '"npm test"')"
 check "інший файл із env у назві" 0 "$(cmd_payload '"echo x > environment.md"')"
+check "node -e читає .env"       0 "$(cmd_payload_raw "node -e \"console.log(require('fs').readFileSync('.env','utf8'))\"")"
+check "звичайний node -e без .env" 0 "$(cmd_payload_raw 'node -e "console.log(1)"')"
 
 echo "Межові (не має падати, exit 0):"
 check "порожній payload"         0 '{}'

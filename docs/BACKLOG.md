@@ -39,7 +39,8 @@
 | 5.4 Hooks (другий) | Хук проти `git push --force` у `master` | ⬜ правило в CLAUDE.md є, енфорсменту немає — `if` на `Bash(git push --force*)` |
 | 5.4 Hooks (третій) | SessionStart зі списком протермінованих `verified_at` | ⬜ після `check-docs.mjs`: спільний скрипт, інакше два джерела правди |
 | 5.5 Plugins | `tax-navigator-toolkit/` — конвертація реального `.claude/` (scaffold-rule + add-source-domain + hooks) | ✅ `claude plugin validate` зелений; живий `--plugin-dir` тест зависав у цьому контейнері (environment-limits.md) — структурна перевірка замінює |
-| 5.6 Marketplace | — | ⬜ не почато |
+| 5.6 Marketplace | `team-marketplace` (GitHub, публічний) — v1 = `block-env-writes` | ⏳ у роботі |
+| 5.6 Marketplace (v1.1 ідея) | `bootstrap-agentic-workflow` skill — скаффолдить STATE/BACKLOG/DECISIONS-конвенцію в новий репо, будь-який стек | ⬜ ідея, не спроєктовано — окремо від v1, щоб не блокувати реліз |
 | 5.7 SDK | — | ⬜ не почато |
 | M6 SDLC | PRD → arc42+ADR → `tasks/` для `tg-assistant` | ⏳ ideation пройдено, далі PRD |
 

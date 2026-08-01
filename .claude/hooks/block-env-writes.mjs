@@ -27,6 +27,16 @@ const WRITE_PATTERNS = [
   { what: 'truncate/dd', re: new RegExp(String.raw`\b(?:truncate|dd)\b[^;&|]*?(${TARGET})(?![\w.-])`) },
 ];
 
+/**
+ * Інлайн-код інтерпретатора (`node -e`, `python3 -c`, ...) пише файл через
+ * власне API, не через shell-редирект — жоден з WRITE_PATTERNS вище цього не
+ * бачить. Блокуємо лише коли в тій самій команді є І виклик інтерпретатора з
+ * інлайн-кодом, І write-подібний метод — інакше легітимне читання
+ * (`node -e "console.log(fs.readFileSync('.env'))"`) теж заблокувалось би.
+ */
+const INLINE_INTERPRETER = /\b(?:node|python3?|perl|ruby)\b[^;&|]*\s(?:-e|-c)\b/;
+const WRITE_HINT = /writeFile(?:Sync)?|appendFile(?:Sync)?|open\([^)]*['"][wa]['"]|\.write\(|fs\.write|\bdump\(|\bsave\(/;
+
 const IS_TEMPLATE = /\.(example|sample|template|dist)$/;
 
 let raw = '';
@@ -42,18 +52,30 @@ process.stdin.on('end', () => {
   }
   if (!command) process.exit(0);
 
-  for (const { what, re } of WRITE_PATTERNS) {
-    const m = command.match(re);
-    if (!m) continue;
-    const target = m[1];
-    if (IS_TEMPLATE.test(target)) continue;
+  // `${IFS}`/`$IFS` замість пробілу обходить `\s*` у патернах нижче — звести
+  // до звичайного пробілу ДО матчингу.
+  command = command.replace(/\$\{?IFS\}?/g, ' ');
 
+  const block = (target, what) => {
     process.stderr.write(
       `ЗАБЛОКОВАНО: запис у ${target} через шелл (${what}).\n` +
         `.env-файли не редагуються ні агентом, ні шеллом — тільки людиною вручну.\n` +
         `Якщо треба показати змінну — додай її в .env.example без значення.\n`,
     );
     process.exit(2);
+  };
+
+  for (const { what, re } of WRITE_PATTERNS) {
+    const m = command.match(re);
+    if (!m) continue;
+    const target = m[1];
+    if (IS_TEMPLATE.test(target)) continue;
+    block(target, what);
+  }
+
+  if (INLINE_INTERPRETER.test(command) && WRITE_HINT.test(command)) {
+    const m = command.match(new RegExp(TARGET));
+    if (m && !IS_TEMPLATE.test(m[0])) block(m[0], 'інлайн-код інтерпретатора');
   }
 
   process.exit(0);
