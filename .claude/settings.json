@@ -142,7 +142,7 @@
             "if": "Bash(git commit*)",
             "statusMessage": "Ганяю тести перед комітом…",
             "timeout": 180,
-            "command": "npm test --silent >/tmp/tn-test.log 2>&1 || node -e 'console.log(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"npm test впав — коміт заблоковано. Лог: /tmp/tn-test.log\"}}))'"
+            "command": "node .claude/hooks/pre-commit-gate.mjs"
           },
           {
             "type": "command",
