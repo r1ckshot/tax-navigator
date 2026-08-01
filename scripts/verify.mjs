@@ -112,6 +112,22 @@ if (!existsSync(devcontainerPath)) {
   }
 }
 
+// 7. Звірка документів: кількість тестів у STATE.md, NOW у BACKLOG.md проти
+//    закритого в STATE.md, живі перехресні markdown-посилання — окремий
+//    скрипт, бо ганяє vitest сам і корисний і поза verify.
+{
+  const r = spawnSync(process.execPath, ["scripts/check-docs.mjs"], { encoding: "utf8" });
+  const out = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
+  const fails = out.split("\n").filter((l) => l.startsWith("FAIL:"));
+  if (r.status === 0 && fails.length === 0) {
+    for (const l of out.split("\n").filter((l) => l.startsWith("OK:"))) ok(l.replace(/^OK: /, ""));
+  } else if (fails.length) {
+    for (const l of fails) fail(l.replace(/^FAIL: /, ""));
+  } else {
+    fail(`check-docs.mjs впав із кодом ${r.status}: ${out.trim().split("\n").pop()}`);
+  }
+}
+
 console.log("");
 if (failed) {
   console.error("=== Verify: ПРОВАЛЕНО ===");
