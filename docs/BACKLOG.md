@@ -35,11 +35,11 @@
 |---|---|---|
 | 5.1 Commands | `.claude/commands/scaffold-rule.md` | ✅ прогнано на `fop.esv_vz` |
 | 5.2–5.3 Skills | `.claude/skills/add-source-domain/` + `evals/` | ✅ бенчмарк 100% проти 85% на baseline |
-| 5.4 Hooks | `.claude/hooks/block-env-writes.mjs` + ізольований тест | ✅ 16 кейсів зелені, спрацювання підтверджене вживу |
+| 5.4 Hooks | `.claude/hooks/block-env-writes.mjs` + ізольований тест | ✅ 21 кейс зелені (додано `$IFS` та inline-інтерпретатор), спрацювання підтверджене вживу |
 | 5.4 Hooks (другий) | Хук проти `git push --force` у `master` | ⬜ правило в CLAUDE.md є, енфорсменту немає — `if` на `Bash(git push --force*)` |
 | 5.4 Hooks (третій) | SessionStart зі списком протермінованих `verified_at` | ⬜ після `check-docs.mjs`: спільний скрипт, інакше два джерела правди |
 | 5.5 Plugins | `tax-navigator-toolkit/` — конвертація реального `.claude/` (scaffold-rule + add-source-domain + hooks) | ✅ `claude plugin validate` зелений; живий `--plugin-dir` тест зависав у цьому контейнері (environment-limits.md) — структурна перевірка замінює |
-| 5.6 Marketplace | `team-marketplace` (GitHub, публічний) — v1 = `block-env-writes` | ⏳ у роботі |
+| 5.6 Marketplace | [team-marketplace](https://github.com/r1ckshot/team-marketplace) — v1 = `block-env-writes@1.0.0` | ✅ CI зелений, тег `block-env-writes@1.0.0`, install-флоу підтверджений наскрізно (marketplace add → install → живий блок у терміналі Mike) |
 | 5.6 Marketplace (v1.1 ідея) | `bootstrap-agentic-workflow` skill — скаффолдить STATE/BACKLOG/DECISIONS-конвенцію в новий репо, будь-який стек | ⬜ ідея, не спроєктовано — окремо від v1, щоб не блокувати реліз |
 | 5.7 SDK | — | ⬜ не почато |
 | M6 SDLC | PRD → arc42+ADR → `tasks/` для `tg-assistant` | ⏳ ideation пройдено, далі PRD |

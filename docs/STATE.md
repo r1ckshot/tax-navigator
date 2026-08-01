@@ -7,8 +7,8 @@
 
 **Курс:** M4 здано (`docs/capstones/m4.md`), M6 у роботі — пройдено ideation по
 фічі `tg-assistant`, далі PRD і tasks. M5 частково випереджено (скіл `interview`,
-хуки зроблені на реальній потребі, 5.5 Plugins зроблено на реальному наборі),
-лишається наздогнати marketplace / SDK.
+хуки зроблені на реальній потребі, 5.5 Plugins і 5.6 Marketplace зроблено на
+реальному наборі), лишається наздогнати SDK.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 4 сценаріїв рахуються детерміновано на клієнті. 92 node-тести + 9 UI зелені.
@@ -17,6 +17,22 @@
 G2 (10/10 профілів проти держкалькуляторів) не пройдені — закріплено 1 калібрувальний.
 
 ## Зараз у роботі
+
+Закрито 2026-07-31 (M5.6 Marketplace — публічний [team-marketplace](https://github.com/r1ckshot/team-marketplace)):
+- [x] v1 = `block-env-writes@1.0.0`, єдиний реальний плагін — курсові приклади
+  (deploy-checklist/pr-review-rules/security-scan) свідомо не копіювались,
+  у нас немає їхніх реальних відповідників
+- [x] Хук закалений перед публікацією: `$IFS`-нормалізація і детекція запису
+  через `node -e`/`python3 -c` (веб-дослідження bypass-технік) — 21 кейс
+  зелені, синхронізовано і в `.claude/hooks/`, і в `tax-navigator-toolkit/`
+- [x] CI (`validate-plugins.yml`: static-validate + plugin-validate + ізольований
+  тест хука) зелений на `main`; version-invariant між `marketplace.json` і
+  `plugin.json` — власна перевірка, курсовий шаблон її не мав
+- [x] Тег `block-env-writes@1.0.0`; install-флоу підтверджений наскрізно
+  (`marketplace add` → `install` → живий блок у терміналі Mike), тестова
+  інсталяція прибрана після перевірки
+- [x] `auto-flow`-ідея (bootstrap-agentic-workflow) занесена в BACKLOG як v1.1,
+  не блокує v1
 
 Закрито 2026-07-31 (M5.5 Plugins — конвертація реального `.claude/` у плагін, `tax-navigator-toolkit/`):
 - [x] `.claude-plugin/plugin.json`, копія команди `scaffold-rule` і скіла
