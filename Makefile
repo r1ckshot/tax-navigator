@@ -1,4 +1,4 @@
-.PHONY: help dev verify verify-syntax verify-devcontainer verify-whitelist verify-sandbox verify-firewall test test-arch build rebuild clean clean-artifacts
+.PHONY: help dev verify verify-syntax verify-devcontainer verify-whitelist verify-sandbox verify-firewall test test-arch build rebuild clean clean-artifacts state-checkpoint
 
 STARTER_NAME := tax-navigator
 TEST_CMD := npm test
@@ -19,6 +19,7 @@ help:
 	@echo "  rebuild             Перезібрати без cache"
 	@echo "  clean               Прибрати containers і volumes (build artifacts: 'make clean-artifacts')"
 	@echo "  clean-artifacts     Видалити локальні build/dependency артефакти ($(CLEAN_PATHS))"
+	@echo "  state-checkpoint    Claude SDK чернетка запису 'Закрито' у docs/STATE.md (scripts/state-checkpoint/)"
 
 verify: verify-syntax
 	@echo ""
@@ -80,3 +81,6 @@ clean-artifacts:
 			rm -r -- "$$path"; \
 		fi; \
 	done
+
+state-checkpoint:
+	@bash scripts/state-checkpoint/draft.sh
