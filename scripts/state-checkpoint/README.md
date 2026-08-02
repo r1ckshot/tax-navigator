@@ -49,8 +49,10 @@ scripts/state-checkpoint/draft.sh --dry-run  # тільки pre-check, без в
 
 ## Guardrails
 
-- `--max-turns 6` — бюджет на: Read STATE.md → git log (межа) → git log
-  (діапазон) → Read BACKLOG.md → Edit STATE.md → опційний re-Read.
+- `--max-turns 15` — бюджет на: Read STATE.md → git log (межа) → git log
+  (діапазон, `--name-status`) → Read BACKLOG.md → Edit STATE.md → опційний
+  re-Read (6, 8 і 10 послідовно падали на живих прогонах — `is_error: true` /
+  `error_max_turns`; модель регулярно робить кілька зайвих read/re-read).
 - `--model claude-haiku-4-5` — read→transform→write по схемі, не reasoning-задача.
 - `is_error` перевіряється перед використанням `result`; при помилці —
   `exit 1`, сирий response виводиться на stderr для діагностики.

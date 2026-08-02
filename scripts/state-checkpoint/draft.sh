@@ -149,15 +149,51 @@ SCHEMA='{
 #   Read → docs/**          — контекст формату STATE.md + назви задач з BACKLOG.md
 #   Edit → docs/STATE.md    — рівно один файл, не вся директорія docs/
 #
-# --max-turns 6: Read STATE.md → git log (межа) → git log (діапазон) →
-# Read BACKLOG.md → Edit STATE.md → опційний re-Read, плюс один хід запасу.
-
-RESPONSE="$(claude -p "$PROMPT" \
+# --max-turns 15: Read STATE.md → git log (межа) → git log (діапазон,
+# --name-status) → Read BACKLOG.md → Edit STATE.md → опційний re-Read.
+# Живі прогони показали, що 6, 8 і 10 послідовно замало (is_error: true /
+# error_max_turns) — модель регулярно робить кілька додаткових read/re-read
+# понад мінімальний happy path; 15 — емпірично підібраний запас, не здогад.
+#
+# env -u ...: коли цей скрипт запускається з-під ІНТЕРАКТИВНОЇ сесії Claude
+# Code (а не з голого терміналу), змінні CLAUDECODE / CLAUDE_CODE_* / AI_AGENT
+# протікають у це дочірнє середовище — зокрема CLAUDE_CODE_SESSION_ID
+# ІДЕНТИЧНИЙ батьківській сесії. Вкладений `claude -p`, побачивши це,
+# намагається торкнутись того самого session-стану (checkpointing/lock), що й
+# батьківська сесія — а та в цей момент сама заблокована, чекаючи на
+# завершення ЦЬОГО-таки Bash-виклику: дедлок на файловому лоці.
+# Підтверджено емпірично на реальному Bash(git log)-виклику: з цими
+# змінними процес висів у D-стані (uninterruptible I/O wait) — timeout 60
+# послав SIGTERM вчасно, але сигнал не міг доставитись, поки D-стан не
+# розвʼязався сам за ~5 хв; без змінних той самий виклик стабільно
+# завершується за ~9с. CLAUDE_CONFIG_DIR свідомо НЕ знімається — без нього
+# Claude Code не бачить довіру до /workspace і ігнорує permissions.allow
+# з .claude/settings.json. При запуску з голого терміналу (реальний
+# сценарій використання цього скрипта) жодної з цих змінних нема, і env -u
+# просто нічого не робить — безпечно завжди.
+# `if RESPONSE=$(...)` навмисно, а не голе присвоєння: під `set -e` голе
+# `RESPONSE="$(claude -p ...)"` обриває скрипт МОВЧКИ в момент, коли claude
+# повертає ненульовий exit (а він так робить і на is_error: true), — тоді
+# ніхто не побачить ні summary, ні git diff, навіть якщо Edit уже реально
+# застосувався у working tree (підтверджено живим прогоном: на
+# error_max_turns Edit іноді встигає відпрацювати ДО вичерпання ходів).
+if RESPONSE="$(env \
+  -u CLAUDECODE -u CLAUDE_CODE_CHILD_SESSION -u CLAUDE_PID \
+  -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING \
+  -u CLAUDE_CODE_SUBPROCESS_ENV_SCRUB -u CLAUDE_CODE_ENABLE_TASKS \
+  -u CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY -u CLAUDE_CODE_ENTRYPOINT \
+  -u CLAUDE_CODE_EXECPATH -u CLAUDE_AGENT_SDK_VERSION \
+  -u CLAUDE_AUTOCOMPACT_PCT_OVERRIDE -u CLAUDE_EFFORT -u AI_AGENT \
+  claude -p "$PROMPT" \
   --allowed-tools "Bash(git log *)" "Read(docs/**)" "Edit(docs/STATE.md)" \
   --model claude-haiku-4-5 \
   --output-format json \
   --json-schema "$SCHEMA" \
-  --max-turns 6)"
+  --max-turns 15)"; then
+  CLAUDE_EXIT=0
+else
+  CLAUDE_EXIT=$?
+fi
 
 # Нормалізуємо форму відповіді між версіями claude CLI (масив повідомлень
 # у 2.x+, один обʼєкт з .result у старіших CLI) — той самий трюк, що й demo.
@@ -166,32 +202,35 @@ RESULT_OBJ=$(echo "$RESPONSE" | jq -c '
   then (map(select(.type == "result")) | last // {})
   else .
   end
-')
+' 2>/dev/null || echo '{}')
 
 COST=$(echo "$RESULT_OBJ" | jq -r '.total_cost_usd // "n/a"')
 DURATION=$(echo "$RESULT_OBJ" | jq -r '.duration_ms // "n/a"')
 TURNS=$(echo "$RESULT_OBJ" | jq -r '.num_turns // "n/a"')
 IS_ERROR=$(echo "$RESULT_OBJ" | jq -r '.is_error // false')
 
-echo "[claude] cost=\$${COST} duration=${DURATION}ms turns=${TURNS} is_error=${IS_ERROR}" >&2
+echo "[claude] exit=${CLAUDE_EXIT} cost=\$${COST} duration=${DURATION}ms turns=${TURNS} is_error=${IS_ERROR}" >&2
 
-if [[ "$IS_ERROR" == "true" ]]; then
+if [[ "$IS_ERROR" == "true" || "$CLAUDE_EXIT" -ne 0 ]]; then
   echo "[claude] агент повернув помилку — сира відповідь нижче" >&2
   echo "$RESPONSE" >&2
-  exit 1
+  ERRORED=1
+else
+  ERRORED=0
+  # Валідований проти схеми JSON → stdout (structured_output у 2.x+, інакше
+  # fallback на парсинг .result).
+  echo "$RESULT_OBJ" | jq '
+    if (.structured_output // null) != null
+    then .structured_output
+    else (.result as $r | try ($r | fromjson) catch $r)
+    end
+  '
 fi
 
-# Валідований проти схеми JSON → stdout (structured_output у 2.x+, інакше
-# fallback на парсинг .result).
-echo "$RESULT_OBJ" | jq '
-  if (.structured_output // null) != null
-  then .structured_output
-  else (.result as $r | try ($r | fromjson) catch $r)
-  end
-'
-
-# Trust-but-verify: показуємо реальний diff, щоб рев'юер бачив точно, що
-# агент змінив, окремо від JSON, який він повернув.
+# Trust-but-verify: показуємо реальний diff НЕЗАЛЕЖНО від is_error — Edit
+# міг застосуватись до того, як агент вичерпав ходи чи впав на схемі.
+# Порожній diff тут при is_error означає, що Edit справді не відбувся;
+# непорожній diff при is_error — сигнал: чернетка часткова, дивись уважно.
 echo >&2
 echo "--- реальний git diff (що агент відредагував у working tree) ---" >&2
 git diff -- docs/STATE.md >&2 || true
@@ -199,3 +238,7 @@ echo "--- кінець git diff ---" >&2
 echo >&2
 echo "[hint] переглянь diff вище. Прийняти: відредагуй за потреби, тоді комітни." >&2
 echo "[hint] Відхилити:  git restore docs/STATE.md" >&2
+
+if [[ "$ERRORED" -eq 1 ]]; then
+  exit 1
+fi
