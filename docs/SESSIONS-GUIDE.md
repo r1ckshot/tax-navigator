@@ -57,7 +57,7 @@
 |---|---|---|---|
 | M3 | setup, settings, permissions, sandbox, devcontainer | адаптований nodejs-typescript starter конфіг; репо+деплой Vercel; capstone M3 | 🟢 здано |
 | M4 | промпти, контекст, `.claude/rules`, bounded contexts, scaffold | `.claude/rules/`, ARCHITECTURE + SPEC + ADR, арх-тести (dependency-cruiser); capstone M4 | 🟢 здано |
-| M5 | commands, skills, hooks, plugins, marketplace, SDK | 🟡 **частково випереджено**: `.claude/skills/interview/` і хуки вже зроблені на реальній потребі. Лишається наздогнати plugins / marketplace / SDK | 🟡 |
+| M5 | commands, skills, hooks, plugins, marketplace, SDK | 🟢 **здано**: усі 7 лекцій застосовані на реальному продукті (`interview`, хуки, `tax-navigator-toolkit`, `team-marketplace`, `scripts/state-checkpoint/`) | 🟢 |
 | M6 (зараз) | SDLC-артефакти | ideation ✅ (`docs/features/tg-assistant/`) → далі PRD, arc42+ADR, C4, data model, OpenAPI, tasks; GDPR-рішення "де живе PDF" | 🟠 у роботі |
 | паралельно | — | попит (G1): перша спроба через пости дала нуль — провалився канал, не попит. Новий канал вимірювання — `tg-assistant` T1+T2 | 🔴 G1 |
 | M7 | execution, Ralph loop, TDD | движок (діапазони) + анкета + порівняння; 10 еталонних профілів | 🔴 G2: 10/10 з держкалькуляторами |
