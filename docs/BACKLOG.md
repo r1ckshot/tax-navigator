@@ -16,7 +16,7 @@
 
 | Задача | Чому | Хто |
 |---|---|---|
-| M5 capstone, Етапи 2–5 | F1 (`zlecenie`, руками) зроблена. Далі: витягнути повторюване в `tax-navigator-toolkit`, зробити F2 (`działalność nierejestrowana`) через плагін, звірити SDK-скрипт із рубрикою, опублікувати в team-marketplace. Вимір — [CAPSTONE_LOG.md](../CAPSTONE_LOG.md) | Claude + Mike |
+| M5 capstone, Етапи 3–5 | F1 (`zlecenie`, руками) і плагін (Етап 2) зроблені. Далі: **F2 `działalność nierejestrowana` через плагін** — покроково в [STATE.md](STATE.md), потім звірка SDK-скрипта з рубрикою і публікація в team-marketplace. Вимір — [CAPSTONE_LOG.md](../CAPSTONE_LOG.md) | Claude + Mike |
 
 ## NEXT
 
@@ -46,6 +46,7 @@
 | 5.5 Plugins | `tax-navigator-toolkit/` — конвертація реального `.claude/` (scaffold-rule + add-source-domain + hooks) | ✅ `claude plugin validate` зелений; живий `--plugin-dir` тест зависав у цьому контейнері (environment-limits.md) — структурна перевірка замінює |
 | 5.6 Marketplace | [team-marketplace](https://github.com/r1ckshot/team-marketplace) — v1 = `block-env-writes@1.0.0` | ✅ CI зелений, тег `block-env-writes@1.0.0`, install-флоу підтверджений наскрізно (marketplace add → install → живий блок у терміналі Mike) |
 | 5.6 Marketplace (v1.1 ідея) | `bootstrap-agentic-workflow` skill — скаффолдить STATE/BACKLOG/DECISIONS-конвенцію в новий репо, будь-який стек | ⬜ ідея, не спроєктовано — окремо від v1, щоб не блокувати реліз |
+| M5 capstone | `CAPSTONE_LOG.md` + `tax-navigator-toolkit` v1.0.0 + дві фічі того самого зрізу (F1 `zlecenie` руками, F2 `nierejestrowana` через плагін) | ⏳ Етапи 0–2 закриті, F2 наступна |
 | 5.7 SDK | `scripts/state-checkpoint/` — Claude Agent SDK чернетка запису `Закрито` у STATE.md з git log | ✅ форк `sdk-cli`; 3 виміри `--allowed-tools` (Edit звужено до одного файлу); `is_error`-гейт і invalid-prompt тест підтверджені; живий прогін на реальному репо знайшов і виправив дедлок вкладеного `claude -p` (`environment-limits.md`) |
 | M6 SDLC | PRD → arc42+ADR → `tasks/` для `tg-assistant` | ⏳ ideation пройдено, далі PRD |
 
