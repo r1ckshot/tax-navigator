@@ -62,11 +62,11 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('анкета — наскрізний прохід', () => {
-  it('десять кроків доводять до результату з вердиктом і чотирма варіантами', async () => {
+  it('десять кроків доводять до результату з вердиктом і п’ятьма варіантами', async () => {
     await walkMedianPath();
 
     expect(screen.getByText(t('residency.plResident'))).toBeDefined();
-    for (const id of ['fop', 'jdg', 'incubator', 'uop']) {
+    for (const id of ['fop', 'jdg', 'incubator', 'zlecenie', 'uop']) {
       expect(screen.getAllByText(t(`scenario.${id}`)).length).toBeGreaterThan(0);
     }
   });
@@ -101,14 +101,27 @@ describe('анкета — наскрізний прохід', () => {
     expect(screen.getByText(t('jdg.ipBoxNotIncluded'))).toBeDefined();
   });
 
-  it('UoP пояснює базу порівняння, інакше воно лестило б B2B', async () => {
+  // Пояснення бази стоїть на обох картках найму (UoP і zlecenie) — там воно і
+  // потрібне, бо саме там виручка ділиться на нарахування роботодавця.
+  it('картки найму пояснюють базу порівняння, інакше воно лестило б B2B', async () => {
     await walkMedianPath();
-    expect(screen.getByText(t('uop.employerCostBasis'))).toBeDefined();
+    expect(screen.getAllByText(t('uop.employerCostBasis')).length).toBe(2);
+  });
+
+  // Питання про хворобову анкета ставить лише в контексті пільгового ZUS для JDG
+  // (`showIf` у schema.ts), тож на медіанному шляху воно не звучить і в zleceniu
+  // складка не врахована. Примітка мусить це сказати, НЕ приписуючи людині вибору,
+  // якого вона не робила.
+  it('zlecenie: підформи KUP і чесна примітка про невраховану хворобову', async () => {
+    await walkMedianPath();
+    expect(screen.getAllByText(t('subform.kup20')).length).toBeGreaterThan(0);
+    expect(screen.getByText(t('zlecenie.choroboweSkipped'))).toBeDefined();
+    expect(screen.getByText(t('zlecenie.studentUnder26'))).toBeDefined();
   });
 });
 
 describe('порівняльна таблиця', () => {
-  it('показує всі чотири варіанти в одній таблиці з колонкою «на руки»', async () => {
+  it('показує всі п’ять варіантів в одній таблиці з колонкою «на руки»', async () => {
     await walkMedianPath();
 
     // Секція порівняння (окремо від таблиць-підформ усередині акордеонів).
@@ -116,7 +129,7 @@ describe('порівняльна таблиця', () => {
     const table = within(region).getByRole('table');
     expect(within(table).getByText(t('chart.col.range'))).toBeDefined();
     expect(within(table).getByText(t('chart.col.risk'))).toBeDefined();
-    expect(within(table).getAllByRole('row').length).toBe(5); // шапка + 4 варіанти
+    expect(within(table).getAllByRole('row').length).toBe(6); // шапка + 5 варіантів
   });
 });
 

@@ -180,6 +180,58 @@
       },
       "source_url": "https://zakon.rada.gov.ua/laws/show/2464-17",
       "verified_at": "2026-07-29"
+    },
+    {
+      "rule_id": "zlecenie.contributions",
+      "params": {
+        "employer": {
+          "emerytalne": 0.0976,
+          "rentowe": 0.065,
+          "wypadkowe": 0.0167,
+          "fpFs": 0.0245,
+          "fgsp": 0.001
+        },
+        "employee": {
+          "emerytalne": 0.0976,
+          "rentowe": 0.015,
+          "chorobowe": 0.0245,
+          "zdrowotnaRate": 0.09,
+          "zdrowotnaDeductibleFromTax": false
+        },
+        "choroboweVoluntary": true
+      },
+      "source_url": "https://www.biznes.gov.pl/pl/portal/0098",
+      "verified_at": "2026-08-03"
+    },
+    {
+      "rule_id": "zlecenie.kup",
+      "params": {
+        "kupStandard": 0.2,
+        "kupCopyright": 0.5,
+        "copyrightAnnualCap": 120000,
+        "appliedAfterSocialContributions": true
+      },
+      "source_url": "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-umowy-zlecenia-lub-o-dzielo",
+      "verified_at": "2026-08-03"
+    },
+    {
+      "rule_id": "zlecenie.zbieg_z_etatem",
+      "params": {
+        "socialWaivedWhenUopAtLeastMinimumWage": true,
+        "minimumWageMonthly": 4806,
+        "zdrowotnaAlwaysDue": true
+      },
+      "source_url": "https://www.biznes.gov.pl/pl/portal/001785",
+      "verified_at": "2026-08-03"
+    },
+    {
+      "rule_id": "zlecenie.przekwalifikowanie",
+      "params": {
+        "pipDecisionPowerFrom": "2026-07-08",
+        "testIsFactsNotContractName": true
+      },
+      "source_url": "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
+      "verified_at": "2026-08-03"
     }
   ]
 }
