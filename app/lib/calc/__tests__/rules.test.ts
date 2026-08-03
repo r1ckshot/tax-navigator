@@ -100,4 +100,47 @@ describe('verify-first числа не дрейфнули', () => {
     const ee = getParams<Record<string, number>>('uop.employee_contributions');
     expect(ee.emerytalne + ee.rentowe + ee.chorobowe).toBeCloseTo(0.1371, 4);
   });
+
+  it('ліміт nierejestrowanej 2026: 10,813.50 zł/квартал = 225% × мінімалка 4,806', () => {
+    const limit = getParams<{ quarterlyLimit: number; shareOfMinimumWage: number }>(
+      'nierejestrowana.limit'
+    );
+    const minimumWage = getParams<{ monthly: number }>('common.minimum_wage').monthly;
+    expect(limit.quarterlyLimit).toBe(10813.5);
+    expect(limit.shareOfMinimumWage).toBe(2.25);
+    // Крос-звірка похідної: ліміт прив'язаний до мінімалки й рухається разом із
+    // нею щороку. Якщо колись оновлять одне з двох — падає саме цей рядок.
+    expect(limit.quarterlyLimit).toBeCloseTo(minimumWage * limit.shareOfMinimumWage, 2);
+  });
+
+  // Ліміт став КВАРТАЛЬНИМ з 01.01.2026; довідники в мережі досі дають місячний
+  // (75% мінімалки). Місячне значення в даних = мовчазне вчетверо м'якше правило.
+  it('АНТИ-РЕГРЕС: ліміт nierejestrowanej квартальний, не місячний', () => {
+    const limit = getParams<{ quarterlyLimit: number; settledQuarterlyFrom: string }>(
+      'nierejestrowana.limit'
+    );
+    expect(limit.settledQuarterlyFrom).toBe('2026-01-01');
+    const minimumWage = getParams<{ monthly: number }>('common.minimum_wage').monthly;
+    expect(limit.quarterlyLimit).not.toBeCloseTo(minimumWage * 0.75, 2);
+  });
+
+  // Найдорожча пастка сценарію H (EVIDENCE §Нестабільності п. 3): «без ZUS»
+  // вірне лише для продажу товарів. Послуги = umowa o świadczenie usług = zlecenie.
+  it('АНТИ-РЕГРЕС: послуги в nierejestrowanej — титул до ZUS, а не звільнення', () => {
+    const zus = getParams<{ servicesAreZlecenieTitle: boolean; goodsSaleIsNoTitle: boolean }>(
+      'nierejestrowana.zus'
+    );
+    expect(zus.servicesAreZlecenieTitle).toBe(true);
+    expect(zus.goodsSaleIsNoTitle).toBe(true);
+  });
+
+  // KUP тут — фактичні задокументовані витрати (art. 20 ust. 1ba, «inne źródła»),
+  // а не ричалтові 20%/50% зі zlecenia. Прапорець тримає цю межу явною.
+  it('nierejestrowana не має ричалтових KUP — лише фактичні витрати', () => {
+    const pit = getParams<{ lumpSumKupAvailable: boolean; actualDocumentedCostsOnly: boolean }>(
+      'nierejestrowana.pit'
+    );
+    expect(pit.lumpSumKupAvailable).toBe(false);
+    expect(pit.actualDocumentedCostsOnly).toBe(true);
+  });
 });

@@ -4,6 +4,7 @@ import { calcUop } from '../scenarios/uop';
 import { calcIncubator } from '../scenarios/incubator';
 import { calcFop } from '../scenarios/fop';
 import { calcZlecenie } from '../scenarios/zlecenie';
+import { calcNierejestrowana } from '../scenarios/nierejestrowana';
 import { compareScenarios } from '../scenarios';
 import { rangeContains } from '../range';
 import { baseAnswers, withAnswers } from './fixtures';
@@ -147,6 +148,59 @@ describe('benchmark — umowa zlecenie при 15,000 zł/міс', () => {
   });
 });
 
+/**
+ * Еталон виведений вручну з EVIDENCE §Сценарій H, у порядку норми: прихід →
+ * społeczne (титул той самий, що при zleceniu — послуги) → фактичні витрати →
+ * skala. Рахунок зроблено окремим скриптом, не викликом `calcNierejestrowana`.
+ *
+ * Профіль інший, ніж у решти сценаріїв, і це вимушено: ліміт 10,813.50 zł/квартал
+ * = 3,604.50 zł/міс, тож базові 15,000 у цю форму не влазять за побудовою.
+ * Спільна база — 3,000 zł ПОВНОГО кошту замовника → прихід 2,490.04 zł/міс
+ * (÷1.2048), річний 29,880.48.
+ */
+describe('benchmark — działalność nierejestrowana при 3,000 zł/міс', () => {
+  const eligible = withAnswers({ monthlyRevenue: 3000, jdgStatus: 'none' });
+  const exact = (r: { min: number; max: number }) => (r.min + r.max) / 2;
+
+  it('витрати 1,494.02 → społeczne 4,096.61 → zdrowotna 2,320.55 → PIT 0 → на руки 1,830.77', () => {
+    expect(exact(calcNierejestrowana(eligible).rangeMonthly!)).toBeCloseTo(1830.77, 2);
+  });
+
+  // Не побічний ефект, а факт продукту: 12% від бази 24,289.84 = 2,914.78, що
+  // менше за kwotę zmniejszającą 3,600 → податку немає взагалі. Гілка скалі на
+  // цьому профілі не працює, тому нижче два профілі з ДОДАТНИМ податком.
+  it('kwota zmniejszająca 3,600 з’їдає весь податок при такому доході', () => {
+    const annualTaxable = 29880.48 - 1494.02 - 4096.61;
+    expect(annualTaxable * 0.12).toBeLessThan(3600);
+  });
+
+  it('без добровільної хворобової: społeczne 3,364.54 → на руки 1,886.29', () => {
+    const noSickness = calcNierejestrowana(withAnswers({ ...eligible, voluntarySickness: false }));
+    expect(exact(noSickness.rangeMonthly!)).toBeCloseTo(1886.29, 2);
+  });
+
+  // Головна відмінність від zlecenia: витрати тут ФАКТИЧНІ, тож відповідь анкети
+  // рухає і базу податку, і «на руки». При ричалтових KUP цього не сталося б.
+  it('витрати 40% замість 5%: витрати 11,952.19 → на руки 959.26', () => {
+    const highExpense = calcNierejestrowana(withAnswers({ ...eligible, expenseShare: 'gt30' }));
+    expect(exact(highExpense.rangeMonthly!)).toBeCloseTo(959.26, 2);
+  });
+
+  // Zbieg: społeczne нема ні в людини, ні в замовника → прихід = всі 3,000.
+  // 36,000 річних, витрати 1,800, база 34,200 → PIT 504 (тут він уже додатний).
+  it('збіг із етатом: тільки zdrowotna 3,240 → PIT 504 → на руки 2,538.00', () => {
+    const zbieg = calcNierejestrowana(withAnswers({ ...eligible, hasParallelUop: true }));
+    expect(exact(zbieg.rangeMonthly!)).toBeCloseTo(2538, 2);
+  });
+
+  // Верхня межа ліміту — рівно 10,813.50 за квартал. Профіль узятий від брутто,
+  // щоб межа була точною, а не наслідком ділення на 1.2048.
+  it('рівно на ліміті (3,604.50 брутто/міс): społeczne 5,930.12 → PIT 619.34 → на руки 2,598.56', () => {
+    const atLimit = calcNierejestrowana(withAnswers({ ...eligible, monthlyRevenue: 3604.5 }), 'gross');
+    expect(exact(atLimit.rangeMonthly!)).toBeCloseTo(2598.56, 2);
+  });
+});
+
 describe('ФОП — український бік у гривні, польський без числа', () => {
   const fop = calcFop(baseAnswers);
 
@@ -179,11 +233,12 @@ describe('ФОП — український бік у гривні, польсь
 });
 
 describe('порівняння як ціле', () => {
-  it('п’ять сценаріїв у фіксованому порядку, без сортування «за вигодою»', () => {
+  it('шість сценаріїв у фіксованому порядку, без сортування «за вигодою»', () => {
     expect(compareScenarios(baseAnswers).map((s) => s.id)).toEqual([
       'fop',
       'jdg',
       'incubator',
+      'nierejestrowana',
       'zlecenie',
       'uop',
     ]);

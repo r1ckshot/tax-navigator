@@ -62,11 +62,11 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('анкета — наскрізний прохід', () => {
-  it('десять кроків доводять до результату з вердиктом і п’ятьма варіантами', async () => {
+  it('десять кроків доводять до результату з вердиктом і шістьма варіантами', async () => {
     await walkMedianPath();
 
     expect(screen.getByText(t('residency.plResident'))).toBeDefined();
-    for (const id of ['fop', 'jdg', 'incubator', 'zlecenie', 'uop']) {
+    for (const id of ['fop', 'jdg', 'incubator', 'nierejestrowana', 'zlecenie', 'uop']) {
       expect(screen.getAllByText(t(`scenario.${id}`)).length).toBeGreaterThan(0);
     }
   });
@@ -118,10 +118,20 @@ describe('анкета — наскрізний прохід', () => {
     expect(screen.getByText(t('zlecenie.choroboweSkipped'))).toBeDefined();
     expect(screen.getByText(t('zlecenie.studentUnder26'))).toBeDefined();
   });
+
+  // Медіанний шлях відповідає «JDG понад 30 місяців», тож умова 60 місяців не
+  // виконана — і сценарій показує ПРИЧИНУ замість числа. Це його штатний вигляд
+  // для більшості людей, а не крайній випадок, тому й перевіряється тут.
+  it('nierejestrowana: замість числа названо причину, і пастка про ZUS видна', async () => {
+    await walkMedianPath();
+    expect(screen.getAllByText(t('nierejestrowana.priorBusiness')).length).toBeGreaterThan(0);
+    expect(screen.getByText(t('nierejestrowana.zusOnServices'))).toBeDefined();
+    expect(screen.getByText(t('nierejestrowana.lookback60'))).toBeDefined();
+  });
 });
 
 describe('порівняльна таблиця', () => {
-  it('показує всі п’ять варіантів в одній таблиці з колонкою «на руки»', async () => {
+  it('показує всі шість варіантів в одній таблиці з колонкою «на руки»', async () => {
     await walkMedianPath();
 
     // Секція порівняння (окремо від таблиць-підформ усередині акордеонів).
@@ -129,7 +139,7 @@ describe('порівняльна таблиця', () => {
     const table = within(region).getByRole('table');
     expect(within(table).getByText(t('chart.col.range'))).toBeDefined();
     expect(within(table).getByText(t('chart.col.risk'))).toBeDefined();
-    expect(within(table).getAllByRole('row').length).toBe(6); // шапка + 5 варіантів
+    expect(within(table).getAllByRole('row').length).toBe(7); // шапка + 6 варіантів
   });
 });
 
