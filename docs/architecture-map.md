@@ -33,7 +33,7 @@ C4Container
     Container(pages, "Сторінки", "Next.js App Router", "Лендинг і анкета; тримає весь стан у useState")
     Container(components, "Компоненти", "React + CSS Modules", "10 компонентів, нуль арифметики")
     Container(adapters, "Адаптери", "TypeScript", "Схема анкети, чернетка, share-лінк, форматування")
-    Container(calc, "Ядро розрахунку", "TypeScript, нуль npm", "Резидентство, ZUS, 4 сценарії, діапазони")
+    Container(calc, "Ядро розрахунку", "TypeScript, нуль npm", "Резидентство, ZUS, 5 сценаріїв, діапазони")
     Container(rules, "Дані-правила", "JSON", "17 правил, кожне з source_url і verified_at")
     Container(browser, "sessionStorage", "Browser API", "Чернетка: відповіді + крок, виручка квантизована")
     Rel(user, pages, "Проходить 13 екранів")
