@@ -1,11 +1,10 @@
-import { Fragment } from 'react';
 import Link from 'next/link';
 import { t } from '@/lib/i18n/uk';
 import type { ScenarioId } from '@/lib/calc/types';
 import styles from './page.module.css';
 
-/** Ті самі пʼять сценаріїв і в тому ж порядку, що й у таблиці результату. */
-const SCENARIOS: ScenarioId[] = ['fop', 'jdg', 'incubator', 'zlecenie', 'uop'];
+/** Ті самі шість сценаріїв і в тому ж порядку, що й у таблиці результату. */
+const SCENARIOS: ScenarioId[] = ['fop', 'jdg', 'incubator', 'nierejestrowana', 'zlecenie', 'uop'];
 
 const ARROW = '↔';
 
@@ -36,13 +35,8 @@ export default function Home() {
         <p className={styles.lead}>{t('app.lead')}</p>
         <p className={styles.intro}>{t('app.intro')}</p>
         <ul className={styles.scenarios}>
-          {SCENARIOS.map((id, i) => (
-            <Fragment key={id}>
-              <li>{t(`scenario.${id}`)}</li>
-              {/* Розрив рядка на вузькому екрані: 3 + 2. Порожній елемент, а не
-                  стиль на самому пункті — flex ламає рядок лише окремим item-ом. */}
-              {i === 2 && <li className={styles.scenariosBreak} aria-hidden="true" />}
-            </Fragment>
+          {SCENARIOS.map((id) => (
+            <li key={id}>{t(`scenario.${id}`)}</li>
           ))}
         </ul>
         <p className={styles.cta}>

@@ -232,6 +232,54 @@
       },
       "source_url": "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
       "verified_at": "2026-08-03"
+    },
+
+    {
+      "rule_id": "nierejestrowana.limit",
+      "params": {
+        "quarterlyLimit": 10813.5,
+        "shareOfMinimumWage": 2.25,
+        "settledQuarterlyFrom": "2026-01-01",
+        "priorBusinessLookbackMonths": 60,
+        "daysToRegisterAfterExceeding": 7,
+        "countsAccruedNotReceived": true
+      },
+      "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
+      "verified_at": "2026-08-03"
+    },
+    {
+      "rule_id": "nierejestrowana.zus",
+      "params": {
+        "servicesAreZlecenieTitle": true,
+        "goodsSaleIsNoTitle": true,
+        "payerIsClient": true,
+        "socialWaivedWhenUopAtLeastMinimumWage": true,
+        "zdrowotnaAlwaysDue": true
+      },
+      "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
+      "verified_at": "2026-08-03"
+    },
+    {
+      "rule_id": "nierejestrowana.pit",
+      "params": {
+        "taxedBySkala": true,
+        "lumpSumKupAvailable": false,
+        "actualDocumentedCostsOnly": true,
+        "monthlyAdvancesRequired": false,
+        "cashBasis": true
+      },
+      "source_url": "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-dzialalnosci-nierejestrowanej",
+      "verified_at": "2026-08-03"
+    },
+    {
+      "rule_id": "nierejestrowana.cudzoziemcy",
+      "params": {
+        "restrictedFrom": "2025-06-01",
+        "residencePermitRequired": true,
+        "ukrPeselEligible": true
+      },
+      "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
+      "verified_at": "2026-08-03"
     }
   ]
 }

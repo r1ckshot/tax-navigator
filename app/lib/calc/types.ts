@@ -49,7 +49,7 @@ export interface Range {
   max: number;
 }
 
-export type ScenarioId = 'fop' | 'jdg' | 'incubator' | 'zlecenie' | 'uop';
+export type ScenarioId = 'fop' | 'jdg' | 'incubator' | 'nierejestrowana' | 'zlecenie' | 'uop';
 export type SubformId = 'ryczalt' | 'liniowy' | 'skala' | 'kup20' | 'kup50';
 
 export interface SubformResult {
