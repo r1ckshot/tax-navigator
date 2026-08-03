@@ -149,7 +149,15 @@
             "statusMessage": "Перевіряю, чи команда не пише в .env…",
             "timeout": 10,
             "command": "node .claude/hooks/block-env-writes.mjs"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git push *)",
+            "statusMessage": "Перевіряю force-push на захищені гілки…",
+            "timeout": 10,
+            "command": "node .claude/hooks/block-force-push-master.mjs"
           }
+
         ]
       }
     ],
@@ -170,7 +178,12 @@
           {
             "type": "command",
             "command": "node -e 'const fs=require(\"fs\");try{console.log(JSON.stringify({hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:fs.readFileSync(\".claude/rules/environment-limits.md\",\"utf8\")}}))}catch(e){}'"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-stale-rules.mjs"
           }
+
         ]
       }
     ]
