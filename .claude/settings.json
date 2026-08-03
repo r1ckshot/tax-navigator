@@ -186,6 +186,16 @@
 
         ]
       }
+    ],
+     "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/remind-state-update.mjs"
+          }
+        ]
+      }
     ]
   },
   "env": {

@@ -36,8 +36,9 @@
 | 5.1 Commands | `.claude/commands/scaffold-rule.md` | ✅ прогнано на `fop.esv_vz` |
 | 5.2–5.3 Skills | `.claude/skills/add-source-domain/` + `evals/` | ✅ бенчмарк 100% проти 85% на baseline |
 | 5.4 Hooks | `.claude/hooks/block-env-writes.mjs` + ізольований тест | ✅ 21 кейс зелені (додано `$IFS` та inline-інтерпретатор), спрацювання підтверджене вживу |
-| 5.4 Hooks (другий) | Хук проти `git push --force` у `master` | ⬜ правило в CLAUDE.md є, енфорсменту немає — `if` на `Bash(git push --force*)` |
-| 5.4 Hooks (третій) | SessionStart зі списком протермінованих `verified_at` | ⬜ після `check-docs.mjs`: спільний скрипт, інакше два джерела правди |
+| 5.4 Hooks (другий) | `.claude/hooks/block-force-push-master.mjs` — блокує force-push у `master` | ✅ адаптація курсового `recipe-5-git-policy.sh`; 16 ізольованих кейсів, зокрема "гілка не названа явно" через fixture-репо |
+| 5.4 Hooks (третій) | `.claude/hooks/session-stale-rules.mjs` — SessionStart зі списком протермінованих `verified_at` (>90 днів) | ✅ спільна логіка з `scripts/check-stale-rules.mjs` (nudge, не verify-гейт); 5 кейсів, зокрема межа порогу |
+| 5.4 Hooks (п'ятий) | `.claude/hooks/remind-state-update.mjs` — UserPromptSubmit нагадує про коміти, яких `docs/STATE.md` ще не бачив | ✅ ненав'язливо (не Stop — курсовий `stop-quality-gate.sh` сам застерігає, що жорсткий Stop-гейт anti-pattern); 6 кейсів, зокрема укр. плюралізація "1 коміт/3 коміти/5 комітів" |
 | 5.4 Hooks (четвертий) | `.claude/hooks/pre-commit-gate.mjs` — блокує коміт з кирилицею в message, замінив інлайн `npm test` на `npm test` + `npm run verify` | ✅ підключено в `settings.json`; спрацювання підтвердиться в новій сесії (правки `settings.json` читаються раз на старті) |
 | 5.5 Plugins | `tax-navigator-toolkit/` — конвертація реального `.claude/` (scaffold-rule + add-source-domain + hooks) | ✅ `claude plugin validate` зелений; живий `--plugin-dir` тест зависав у цьому контейнері (environment-limits.md) — структурна перевірка замінює |
 | 5.6 Marketplace | [team-marketplace](https://github.com/r1ckshot/team-marketplace) — v1 = `block-env-writes@1.0.0` | ✅ CI зелений, тег `block-env-writes@1.0.0`, install-флоу підтверджений наскрізно (marketplace add → install → живий блок у терміналі Mike) |
