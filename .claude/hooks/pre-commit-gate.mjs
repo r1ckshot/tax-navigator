@@ -21,6 +21,12 @@ process.stdin.on('end', () => {
   }
   if (!command) process.exit(0);
 
+  // Власний гейт замість покладання на `if: Bash(git commit*)` у settings.json:
+  // поле `if` фактично не фільтрує — хук отримував КОЖНУ Bash-команду і ганяв на
+  // ній повний `npm test` + `verify`, а кирилиця в будь-якому echo читалась як
+  // кирилиця в commit message. Перевірено 2026-08-03 живими викликами.
+  if (!isGitCommit(command)) process.exit(0);
+
   const CYRILLIC = /[Ѐ-ӿ]/;
   if (CYRILLIC.test(command)) {
     deny('Кирилиця в git commit — коміти строго англійською (CLAUDE.md, розділ Git).');
@@ -41,6 +47,30 @@ process.stdin.on('end', () => {
 
   process.exit(0);
 });
+
+/**
+ * Чи є в команді справжній `git commit`. Регексом це не робиться надійно: між
+ * `git` і підкомандою стоять глобальні опції, і частина з них має ОКРЕМИМ токеном
+ * значення (`git -c user.name=x commit`). Тому — розбір токенів: пропускаємо
+ * прапорці, перший непрапорцевий токен і є підкоманда. Так `git commit-tree` і
+ * `grep commit` лишаються поза гейтом, а `npm test && git commit -m …` — усередині.
+ */
+function isGitCommit(command) {
+  const OPTIONS_WITH_VALUE = new Set(['-c', '-C', '--git-dir', '--work-tree', '--namespace', '--exec-path']);
+
+  for (const segment of command.split(/&&|\|\||;|\||\n/)) {
+    const tokens = segment.trim().split(/\s+/).filter(Boolean);
+    const gitAt = tokens.findIndex((t) => t === 'git' || t.endsWith('/git'));
+    if (gitAt === -1) continue;
+
+    for (let i = gitAt + 1; i < tokens.length; i++) {
+      const token = tokens[i];
+      if (!token.startsWith('-')) return token === 'commit';
+      if (OPTIONS_WITH_VALUE.has(token)) i++;
+    }
+  }
+  return false;
+}
 
 function tail(s, n = 20) {
   return s.trim().split('\n').slice(-n).join('\n');
