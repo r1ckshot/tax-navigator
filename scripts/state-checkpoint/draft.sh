@@ -149,11 +149,14 @@ SCHEMA='{
 #   Read → docs/**          — контекст формату STATE.md + назви задач з BACKLOG.md
 #   Edit → docs/STATE.md    — рівно один файл, не вся директорія docs/
 #
-# --max-turns 15: Read STATE.md → git log (межа) → git log (діапазон,
+# --max-turns 12: Read STATE.md → git log (межа) → git log (діапазон,
 # --name-status) → Read BACKLOG.md → Edit STATE.md → опційний re-Read.
 # Живі прогони показали, що 6, 8 і 10 послідовно замало (is_error: true /
 # error_max_turns) — модель регулярно робить кілька додаткових read/re-read
-# понад мінімальний happy path; 15 — емпірично підібраний запас, не здогад.
+# понад мінімальний happy path. Спершу стояло 15; замір 2026-08-03 на реальному
+# однокомітному діапазоні дав num_turns=10 при exit=0, тобто 12 лишає два ходи
+# запасу над фактичним ужитком і водночас тримається в межах, які називає
+# рубрика capstone (6–12). Цифра емпірична в обидва боки: 10 падає, 12 ні.
 #
 # env -u ...: коли цей скрипт запускається з-під ІНТЕРАКТИВНОЇ сесії Claude
 # Code (а не з голого терміналу), змінні CLAUDECODE / CLAUDE_CODE_* / AI_AGENT
@@ -189,7 +192,7 @@ if RESPONSE="$(env \
   --model claude-haiku-4-5 \
   --output-format json \
   --json-schema "$SCHEMA" \
-  --max-turns 15)"; then
+  --max-turns 12)"; then
   CLAUDE_EXIT=0
 else
   CLAUDE_EXIT=$?
