@@ -40,7 +40,7 @@ F1 і F2 навмисно мають однакову форму — інакш�
 |---|---|---|
 | `feat/f1-umowa-zlecenie` | F1 руками: 5 комітів | PR #1, змерджено в `master` через rebase |
 | `feat/m5-capstone-plugin` | Етап 2 — хук, скіли, toolkit 1.0.0: 4 коміти | PR #2, змерджено в `master` через rebase |
-| `feat/f2-dzialalnosc-nierejestrowana` | F2 через плагін: 5 комітів | PR #3, база — `master` |
+| `feat/f2-dzialalnosc-nierejestrowana` | F2 через плагін: джерела → код+тести → документи | [PR #3](https://github.com/r1ckshot/tax-navigator/pull/3), база — `master` |
 
 Усі три PR — англійською, як і коміти.
 
