@@ -18,8 +18,11 @@ G2 (10/10 профілів проти держкалькуляторів) не �
 
 ## Зараз у роботі
 
-**M5 capstone, Етап 3 з 5** — гілка `feat/m5-capstone-plugin`, вимір у
-[CAPSTONE_LOG.md](../CAPSTONE_LOG.md).
+**M5 capstone, Етап 3 з 5** — вимір у [CAPSTONE_LOG.md](../CAPSTONE_LOG.md).
+
+Три гілки, форма F2 дзеркальна до F1 (деталі — §Гілки і PR у логу):
+`feat/f1-umowa-zlecenie` (змерджена) · `feat/m5-capstone-plugin` (Етап 2) ·
+`feat/f2-dzialalnosc-nierejestrowana` (F2, база — гілка плагіна).
 
 ### F2 через плагін — код зелений, лишився рев'ю Mike і коміти
 
