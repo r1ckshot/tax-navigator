@@ -3,6 +3,7 @@ import { calcJdg } from '../scenarios/jdg';
 import { calcUop } from '../scenarios/uop';
 import { calcIncubator } from '../scenarios/incubator';
 import { calcFop } from '../scenarios/fop';
+import { calcZlecenie } from '../scenarios/zlecenie';
 import { compareScenarios } from '../scenarios';
 import { rangeContains } from '../range';
 import { baseAnswers, withAnswers } from './fixtures';
@@ -86,6 +87,66 @@ describe('benchmark — інкубатор', () => {
   });
 });
 
+/**
+ * Еталон виведений вручну з EVIDENCE §Сценарій G, у тому ж порядку дій, що й у
+ * законі: прихід → społeczne → KUP від залишку → skala. Проміжні числа лишені в
+ * назвах тестів, щоб наступний рефактор не зсунув їх тихо.
+ *
+ * Спільна база: 15,000 zł = ПОВНИЙ кошт замовника → прихід 12,450.20 zł/міс
+ * (÷1.2048), річний 149,402.39; społeczne 13.71% = 20,483.07; база KUP
+ * 128,919.32; zdrowotna 9% від неї = 11,602.74.
+ */
+describe('benchmark — umowa zlecenie при 15,000 zł/міс', () => {
+  const z = calcZlecenie(baseAnswers);
+  const sub = (id: string) => z.subforms?.find((s) => s.id === id);
+
+  /**
+   * Порівнюємо з ЦЕНТРОМ смуги, а не через `rangeContains`. Причина знайдена
+   * мутаційною перевіркою цього ж набору: смуга ±4% ковтає похибку у пів-тисячі
+   * злотих на рік — тест із `rangeContains` пройшов і тоді, коли KUP навмисне
+   * рахувались від повного приходу замість приходу після społecznych. Смуга —
+   * продуктове рішення (діапазони, не точні суми), а не допуск для арифметики.
+   */
+  const exact = (r: { min: number; max: number }) => (r.min + r.max) / 2;
+
+  it('KUP 20%: витрати 25,783.86 → дохід 103,135.46 → PIT 8,776.25 → на руки 9,045.03', () => {
+    expect(exact(sub('kup20')!.rangeMonthly!)).toBeCloseTo(9045.03, 2);
+  });
+
+  it('KUP 50%: витрати 64,459.66 → дохід 64,459.66 → PIT 4,135.16 → на руки 9,431.79', () => {
+    expect(exact(sub('kup50')!.rangeMonthly!)).toBeCloseTo(9431.79, 2);
+  });
+
+  it('без добровільної хворобової: społeczne 11.26% → на руки 9,293.32', () => {
+    const noSickness = calcZlecenie(withAnswers({ voluntarySickness: false }));
+    expect(exact(noSickness.subforms!.find((s) => s.id === 'kup20')!.rangeMonthly!)).toBeCloseTo(9293.32, 2);
+  });
+
+  // Збіг титулів: społeczne нема ні в працівника, ні в замовника, тому прихід
+  // дорівнює всім 15,000 — 15,000 × 12 = 180,000; zdrowotna 16,200; KUP 20% від
+  // 180,000 → дохід 144,000, з якого 24,000 за ставкою 32%.
+  it('збіг із етатом: тільки zdrowotna → на руки 12,110.00', () => {
+    const zbieg = calcZlecenie(withAnswers({ hasParallelUop: true }));
+    expect(exact(zbieg.subforms!.find((s) => s.id === 'kup20')!.rangeMonthly!)).toBeCloseTo(12110, 2);
+  });
+
+  // 30-krotność обмежує базу emerytalne+rentowe і при zleceniu теж. Профіль той
+  // самий, що в UoP-тесті вище (60,000 брутто), тому społeczne мусять зійтись до
+  // копійки — 49,460.76 на рік. Без ліміту на руки вийшло б 36,160.20, тобто
+  // майже на 2,700 zł/міс менше: розрив свідомо великий, щоб мутація «ліміт
+  // знято» не могла лишитись непоміченою.
+  it('30-krotność ріже і тут: 60,000 брутто → społeczne 49,460.76 → на руки 38,844.39', () => {
+    const rich = calcZlecenie(withAnswers({ monthlyRevenue: 60000 }), 'gross');
+    expect(exact(rich.subforms!.find((s) => s.id === 'kup20')!.rangeMonthly!)).toBeCloseTo(38844.39, 2);
+  });
+
+  // Порівняння з UoP на ТІЙ САМІЙ базі — це і є сенс сценарію в продукті:
+  // складки однакові, різницю дає KUP 20% від приходу проти фіксованих 250 zł/міс.
+  it('на руки більше, ніж на UoP при тому самому кошті замовника (KUP 20% проти 250 zł/міс)', () => {
+    expect(z.rangeMonthly!.min).toBeGreaterThan(calcUop(baseAnswers).rangeMonthly!.min);
+  });
+});
+
 describe('ФОП — український бік у гривні, польський без числа', () => {
   const fop = calcFop(baseAnswers);
 
@@ -118,8 +179,14 @@ describe('ФОП — український бік у гривні, польсь
 });
 
 describe('порівняння як ціле', () => {
-  it('чотири сценарії у фіксованому порядку, без сортування «за вигодою»', () => {
-    expect(compareScenarios(baseAnswers).map((s) => s.id)).toEqual(['fop', 'jdg', 'incubator', 'uop']);
+  it('п’ять сценаріїв у фіксованому порядку, без сортування «за вигодою»', () => {
+    expect(compareScenarios(baseAnswers).map((s) => s.id)).toEqual([
+      'fop',
+      'jdg',
+      'incubator',
+      'zlecenie',
+      'uop',
+    ]);
   });
 
   it('кожен сценарій несе джерела для цитати', () => {
