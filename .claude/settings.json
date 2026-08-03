@@ -139,9 +139,8 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(git commit*)",
-            "statusMessage": "Ганяю тести перед комітом…",
-            "timeout": 180,
+            "statusMessage": "Гейт перед комітом: мова message, тести, verify…",
+            "timeout": 300,
             "command": "node .claude/hooks/pre-commit-gate.mjs"
           },
           {
@@ -158,6 +157,17 @@
             "command": "node .claude/hooks/block-force-push-master.mjs"
           }
 
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Перевіряю межу шарів…",
+            "timeout": 10,
+            "command": "node .claude/hooks/layer-boundary.mjs"
+          }
         ]
       }
     ],
