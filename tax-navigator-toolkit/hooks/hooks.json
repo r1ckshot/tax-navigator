@@ -6,16 +6,26 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(git commit*)",
-            "statusMessage": "Ганяю тести перед комітом…",
-            "timeout": 180,
-            "command": "npm test --silent >/tmp/tn-test.log 2>&1 || node -e 'console.log(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"npm test впав — коміт заблоковано. Лог: /tmp/tn-test.log\"}}))'"
+            "statusMessage": "Гейт перед комітом: мова message, тести, verify…",
+            "timeout": 300,
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/pre-commit-gate.mjs"
           },
           {
             "type": "command",
             "statusMessage": "Перевіряю, чи команда не пише в .env…",
             "timeout": 10,
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/block-env-writes.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Перевіряю межу шарів…",
+            "timeout": 10,
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/layer-boundary.mjs"
           }
         ]
       }

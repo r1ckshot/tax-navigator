@@ -1,7 +1,7 @@
 {
   "name": "tax-navigator-toolkit",
-  "version": "0.1.0",
-  "description": "Tax Navigator toolkit: scaffold-rule (evidence-numbers chain), add-source-domain skill, hook проти запису в .env через шелл.",
+  "version": "1.0.0",
+  "description": "Tax Navigator toolkit: verified-number chain (scaffold-rule), whole vertical slice (scaffold-scenario), mutation-checked benchmarks, DoD gate before commit, and layer-boundary enforcement at write time.",
   "author": {
     "name": "r1ckshot",
     "email": "kapusticnyk.com@gmail.com"

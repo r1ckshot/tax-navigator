@@ -128,6 +128,40 @@ if (!existsSync(devcontainerPath)) {
   }
 }
 
+// 8. Плагін — не форк, а копія: `.claude/` і `tax-navigator-toolkit/` мусять
+//    нести той самий код хуків і той самий текст команд та скілів. Копії вже
+//    існували й нічим не трималися; розходження помічається лише тоді, коли
+//    встановлений плагін поводиться інакше за репо — тобто пізно й дорого.
+{
+  const twins = [
+    [".claude/hooks/block-env-writes.mjs", "tax-navigator-toolkit/hooks/block-env-writes.mjs"],
+    [".claude/hooks/pre-commit-gate.mjs", "tax-navigator-toolkit/hooks/pre-commit-gate.mjs"],
+    [".claude/hooks/layer-boundary.mjs", "tax-navigator-toolkit/hooks/layer-boundary.mjs"],
+    [".claude/hooks/test-block-env-writes.sh", "tax-navigator-toolkit/hooks/test-block-env-writes.sh"],
+    [".claude/hooks/test-pre-commit-gate.sh", "tax-navigator-toolkit/hooks/test-pre-commit-gate.sh"],
+    [".claude/hooks/test-layer-boundary.sh", "tax-navigator-toolkit/hooks/test-layer-boundary.sh"],
+    [".claude/commands/scaffold-rule.md", "tax-navigator-toolkit/commands/scaffold-rule.md"],
+    [".claude/commands/scaffold-scenario.md", "tax-navigator-toolkit/commands/scaffold-scenario.md"],
+    [".claude/skills/add-source-domain/SKILL.md", "tax-navigator-toolkit/skills/add-source-domain/SKILL.md"],
+    [".claude/skills/scenario-tests/SKILL.md", "tax-navigator-toolkit/skills/scenario-tests/SKILL.md"],
+    [".claude/skills/feature-ship/SKILL.md", "tax-navigator-toolkit/skills/feature-ship/SKILL.md"],
+  ];
+
+  let drifted = 0;
+  for (const [source, copy] of twins) {
+    if (!existsSync(source) || !existsSync(copy)) {
+      fail(`плагін: немає пари ${source} ↔ ${copy}`);
+      drifted++;
+      continue;
+    }
+    if (readFileSync(source, "utf8") !== readFileSync(copy, "utf8")) {
+      fail(`плагін: ${copy} розійшовся з ${source}`);
+      drifted++;
+    }
+  }
+  if (drifted === 0) ok(`плагін синхронний із .claude/: ${twins.length} пар звірено`);
+}
+
 console.log("");
 if (failed) {
   console.error("=== Verify: ПРОВАЛЕНО ===");
