@@ -33,7 +33,7 @@ C4Container
     Container(pages, "Сторінки", "Next.js App Router", "Лендинг і анкета; тримає весь стан у useState")
     Container(components, "Компоненти", "React + CSS Modules", "10 компонентів, нуль арифметики")
     Container(adapters, "Адаптери", "TypeScript", "Схема анкети, чернетка, share-лінк, форматування")
-    Container(calc, "Ядро розрахунку", "TypeScript, нуль npm", "Резидентство, ZUS, 5 сценаріїв, діапазони")
+    Container(calc, "Ядро розрахунку", "TypeScript, нуль npm", "Резидентство, ZUS, 6 сценаріїв, діапазони")
     Container(rules, "Дані-правила", "JSON", "17 правил, кожне з source_url і verified_at")
     Container(browser, "sessionStorage", "Browser API", "Чернетка: відповіді + крок, виручка квантизована")
     Rel(user, pages, "Проходить 13 екранів")
@@ -59,7 +59,7 @@ C4Container
 | Квантизація доходу | `app/lib/calc/quantize.ts` | calc | `storage.ts:2`, `schema.ts:3`, `Question.tsx:4` | `snapToStep` (`:27`), `quantizeRevenue` (`:34`), константи кроку 2 500 (`:14-16`) — єдине джерело |
 | Резидентство | `app/lib/calc/residency.ts` | calc | `app/questionnaire/page.tsx:130` | `assessResidency` (`:13`), `homeInUaMatters` (`:63`), тай-брейки (`:77`) |
 | ZUS | `app/lib/calc/zus.ts` | calc | `jdg.ts:39` | 4 етапи у фіксованому пріоритеті (`:28-67`) |
-| Сценарії | `app/lib/calc/scenarios/` | calc | `app/questionnaire/page.tsx:131` | Фасад `compareScenarios`, порядок `[fop, jdg, incubator, uop]` (`index.ts:11-13`) |
+| Сценарії | `app/lib/calc/scenarios/` | calc | `app/questionnaire/page.tsx:131` | Фасад `compareScenarios`, порядок `[fop, jdg, incubator, nierejestrowana, zlecenie, uop]` (`index.ts:16-23`) |
 | Схема анкети | `app/lib/questions/schema.ts` | adapters | `app/questionnaire/page.tsx:48` | **13 екранів** (`:48-265`), `visibleScreens` (`:275`), `resumeIndex` (`:294`) |
 | Чернетка | `app/lib/storage.ts` | adapters | `app/questionnaire/page.tsx:44-46` | Ключ `tax-navigator:draft` (`:4`); SSR-guard + try/catch (`:19,24`) |
 | Share-лінк | `app/lib/share.ts` | adapters | `app/questionnaire/page.tsx:32` | `encodeAnswers` (`:21`), `decodeAnswers` (`:33`), мапа коротких ключів (`:4-19`) |
