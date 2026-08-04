@@ -1,12 +1,20 @@
+/*
+ * Картка більше не окрема коробка: рамку, радіус і тінь тримає спільний блок
+ * `.cards` на сторінці, тут лишається тільки лінійка між сусідами. Розкрита
+ * підсвічується фоном — тінь усередині суцільного списку виглядала б як
+ * відрив рядка від решти.
+ */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+  min-width: 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.card:last-child {
+  border-bottom: 0;
 }
 
 .card[open] {
-  box-shadow: var(--shadow-md);
+  background: var(--sunken);
 }
 
 /* Заголовок-клікабельний рядок акордеона. */
@@ -30,12 +38,14 @@
   border-radius: var(--radius);
 }
 
-/* Ліва група заголовка: назва + чип ризику, з переносом на вузькому. */
+/*
+ * Ліва група заголовка: назва + іконка ризику (без підпису, він у таблиці).
+ * Звичайний рядковий потік, а НЕ flex: іконка мусить поводитись як частина
+ * тексту й переноситись разом із останнім словом. Як окремий flex-елемент вона
+ * при нестачі ширини лишалась сама на новому рядку.
+ */
 .head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-1) var(--space-3);
+  display: block;
   flex: 1;
   min-width: 0;
 }
@@ -44,6 +54,13 @@
   font-size: var(--text-md);
   font-weight: 600;
 }
+
+/* Останнє слово назви + іконка ризику: рветься лише перед цим сегментом. */
+.titleTail {
+  white-space: nowrap;
+}
+
+
 
 .range {
   font-size: var(--text-md);
@@ -87,24 +104,51 @@
   border-top: 1px solid var(--hairline);
 }
 
-/* Компактна таблиця підформ: назва й сума поруч, по центру картки. */
+/*
+ * Обведений блок навколо будь-якої таблиці чисел у картці — підформи й
+ * український тягар виглядають однаково (Mike, 2026-08-04).
+ */
+.panel {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  /* Світліше за фон розкритої картки (`--sunken`), інакше блок зливався б із нею. */
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  /* Остання лінія оборони, якщо зміст ширший за екран: скрол блоку, не сторінки. */
+  overflow-x: auto;
+}
+
+/*
+ * Таблиця по центру блоку і ЗАВШИРШКИ РІВНО ПО ЗМІСТУ (`max-content`): лінійки
+ * рядків закінчуються там, де закінчуються числа, а не тягнуться порожнім
+ * місцем до краю блоку (Mike, 2026-08-04 — видно було на картці JDG, де назви
+ * підформ коротші за решту). `max-width: 100%` тримає її в межах на вузькому.
+ */
 .subforms {
+  width: max-content;
+  max-width: 100%;
   border-collapse: collapse;
-  margin: var(--space-4) auto 0;
+  margin: 0 auto;
   font-size: var(--text-base);
 }
 
+/*
+ * `middle`, а не `baseline`: коли довга назва підформи переноситься на два
+ * рядки, сума при базовій лінії ставала врівень із ПЕРШИМ рядком і виглядала
+ * приліпленою вгору. Тепер вона по центру між обома рядками назви.
+ */
 .subforms th,
 .subforms td {
   text-align: left;
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--hairline);
-  vertical-align: baseline;
+  vertical-align: middle;
 }
 
-/* Проміжок між колонками — назва / сума. */
+/* Мінімальний проміжок між колонками; решту розводить сама ширина. */
 .subforms th {
-  padding-right: var(--space-6);
+  padding-right: var(--space-4);
 }
 
 .subforms tr:last-child th,
@@ -115,13 +159,26 @@
 .subformName {
   font-weight: 600;
   color: var(--ink);
+  text-wrap: pretty;
+}
+
+/*
+ * Права колонка вирівнюється праворуч — і селектор мусить бути не слабшим за
+ * `.subforms td` вище, інакше загальне `text-align: left` перемагає за
+ * специфічністю (клас+тег проти самого класу). Саме це й ловило око: числа
+ * стояли ліворуч у своїй колонці.
+ */
+.subforms .subformValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+  padding-right: 0;
   white-space: nowrap;
 }
 
-.subformValue {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  padding-right: 0;
+/* Причина замість суми — це проза, їй перенос потрібен. */
+.subforms .subformValue[data-empty='true'] {
+  white-space: normal;
 }
 
 .subformValue[data-empty='true'] {
@@ -131,21 +188,47 @@
 }
 
 /*
- * Підпис українського тягаря: ці дві суми — витрата в іншій юрисдикції, а не
- * «на руки». Стоїть окремим блоком НАД таблицею, а не <caption> всередині:
- * caption розтягує таблицю на свою ширину, і рядки з сумами переставали
- * центруватись. Звʼязок із таблицею лишається через aria-labelledby.
+ * Український тягар — обведений блок із власним фоном і акцентною лівою смугою.
+ * Видима межа тут несе зміст: усе всередині рахується в ЧУЖІЙ юрисдикції і є
+ * витратою. Без неї суми стояли впритул до польських чисел картки й читались як
+ * «на руки» — помилка в комунікації числа, яку ловить лише рев'ю очима
+ * (DECISIONS 2026-08-03).
  */
-.burdenCaption {
-  margin: var(--space-4) 0 0;
-  text-align: center;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--ink-muted);
+/*
+ * Блок тягаря має ту саму рамку, що й блоки підформ: акцентна ліва смуга
+ * робила його схожим на цитату й вибивалась із решти карток (Mike,
+ * 2026-08-04). Те, що це чужа юрисдикція, каже підпис, а не декор.
+ */
+.burden {
+  margin-top: var(--space-5);
 }
 
+/*
+ * Підпис стоїть окремим блоком НАД таблицею, а не <caption> всередині: caption
+ * розтягує таблицю на свою ширину. Звʼязок лишається через aria-labelledby.
+ */
+.burdenCaption {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-secondary);
+  text-align: center;
+  text-wrap: pretty;
+}
+
+/*
+ * Менший відступ, ніж проміжок між рядками таблиці: підпис і перший рядок — це
+ * одна група. З `space-2` блок тягаря виглядав розсунутішим за блоки підформ,
+ * де підпису немає взагалі.
+ */
 .burdenTable {
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+/* Рамка блоку темніша за звичайну лінійку, тож і лінійки всередині — теж. */
+.panel .subforms th,
+.panel .subforms td {
+  border-bottom-color: var(--hairline-strong);
 }
 
 /*
@@ -177,6 +260,28 @@
 
 .notes li + li {
   margin-top: var(--space-2);
+}
+
+/*
+ * Телефон: у згорнутій картці лишається САМА НАЗВА. Сума й ризик у шапці
+ * дублювали таблицю порівняння за екран вище — на вузькому це подвоювало
+ * висоту секції без нової інформації (Mike, 2026-08-04). На широкому сума
+ * лишається: там вона безкоштовна по місцю і працює якорем при читанні деталей.
+ */
+@media (max-width: 40rem) {
+  /*
+   * Відступи ті самі, що в рядку таблиці порівняння (`space-3` по вертикалі,
+   * `space-5` по горизонталі): дві секції екрана мусять мати однаковий ритм,
+   * інакше та сама інформація виглядає розсунутою в одній і щільною в другій.
+   */
+  .summary {
+    padding: var(--space-3) var(--space-5);
+  }
+
+  /* Сума з підписом — тільки на широкому; тут її вже дала таблиця вище. */
+  .range {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

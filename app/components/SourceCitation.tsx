@@ -20,9 +20,11 @@ export function SourceCitation({ sources }: { sources: Source[] }) {
             <a href={s.url} target="_blank" rel="noopener noreferrer">
               {s.ruleId}
             </a>
+            {/* Тире живе в окремому span: на телефоні дата йде своїм рядком, і
+                тоді розділовий знак посеред рядка не потрібен. */}
             <span className={styles.meta}>
-              {' '}
-              — {t('app.verifiedAt')} {s.verifiedAt}
+              <span className={styles.dash}> — </span>
+              {t('app.verifiedAt')} {s.verifiedAt}
             </span>
           </li>
         ))}

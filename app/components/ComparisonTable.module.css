@@ -64,6 +64,11 @@
   white-space: nowrap;
 }
 
+/*
+ * Рядок без числа: та сама позиція в тому самому порядку, інша типографіка.
+ * Приглушений курсив меншого кегля читається як «тут причина, а не сума» — і не
+ * створює враження, що варіант кудись відсунули (DECISIONS 2026-08-04).
+ */
 .value[data-empty='true'] {
   font-size: var(--text-sm);
   font-weight: 400;
@@ -72,9 +77,124 @@
   white-space: normal;
 }
 
+/* Підпис колонки всередині рядка — потрібен лише в стековому режимі. */
+.stackedLabel {
+  display: none;
+}
+
+
+/*
+ * Верхній відступ нульовий навмисно: останній рядок таблиці вже несе свій
+ * `padding-bottom: space-3`, тож лінійка примітки лягає рівно там само, де
+ * лягають лінійки між рядками. З `margin-top` вона відсувалась удвічі далі, і
+ * останній варіант (UoP) виглядав відірваним від решти.
+ */
+.riskNote {
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--hairline);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  /* Друге речення — з нового рядка: воно знімає інше непорозуміння, ніж перше. */
+  white-space: pre-line;
+  text-wrap: pretty;
+}
+
+/*
+ * Нижче 40rem три колонки не вміщаються: `nowrap` на сумі розпихав решту, і на
+ * 375px назва варіанта стискалась у стовпчик по літері.
+ *
+ * Рядок стає карткою в ОДНУ колонку по лівому краю: назва, під нею сума з
+ * підписом у рядок, під нею ризик. Двоколонковий варіант (ризик ліворуч, сума
+ * праворуч) відкинуто після перегляду вживу — на реальних довжинах назв і
+ * причин обидва краї «їхали» врізнобіч і рядок читався рвано (Mike, 2026-08-04).
+ *
+ * Ролі проставлені в розмітці явно, тому зміна `display` не забирає семантику.
+ */
+@media (max-width: 40rem) {
+  .table,
+  .table tbody,
+  .table tbody tr,
+  .table tbody th,
+  .table tbody td {
+    display: block;
+    width: 100%;
+  }
+
+  .name {
+    margin-bottom: var(--space-1);
+  }
+
+  .value {
+    margin-bottom: var(--space-2);
+  }
+
+  /* Шапка лишається для читалок, з екрана йде: у картці підпис дає .stackedLabel. */
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .row {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  /* Лінійки нема, а нижній відступ лишається: далі йде лінійка примітки, і
+     ритм має збігатися з проміжками між рядками. */
+  .table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+
+  .table tbody th,
+  .table tbody td {
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  /*
+   * Сума — головний елемент рядка, тому більший кегль; ціла, не рветься по
+   * тире. Разом із підписом і ризиком в одному рядку нижче це дає три сходинки
+   * замість чотирьох і закриває порожнє місце змістом (Mike, 2026-08-04).
+   */
+  .value {
+    font-size: var(--text-xl);
+    white-space: nowrap;
+  }
+
+  /* Причина — проза, їй перенос потрібен. */
+  .value[data-empty='true'] {
+    white-space: normal;
+  }
+
+  /*
+   * Підпис одразу за числом і навмисно дрібніший (`--text-xs`): у парі з
+   * `--text-xl` на сумі обидва вміщаються в один рядок на 375px, а рвався він
+   * саме тоді, коли кегль був однаковий із рештою.
+   */
+  .stackedLabel {
+    display: inline;
+    margin-left: var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 400;
+    color: var(--ink-muted);
+    white-space: nowrap;
+  }
+
+  /* Кожне речення підзаголовка — з нового рядка: на телефоні вони злипались. */
+  .subtitle {
+    white-space: pre-line;
+  }
+}
+
 .risk {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
   font-size: var(--text-base);
   color: var(--ink-secondary);
@@ -82,6 +202,17 @@
 
 .riskIcon {
   flex: none;
+  line-height: 1;
+}
+
+/* Ті самі оптичні поправки, що і в RiskBadge: `●` малюється дрібнішим за
+   `▲`/`■`, а трикутник при геометричному центруванні читається завищеним. */
+.risk[data-risk='green'] .riskIcon {
+  font-size: 1.2em;
+}
+
+.risk[data-risk='yellow'] .riskIcon {
+  transform: translateY(0.06em);
 }
 
 .risk[data-risk='green'] .riskIcon {

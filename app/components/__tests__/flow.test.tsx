@@ -131,15 +131,94 @@ describe('анкета — наскрізний прохід', () => {
 });
 
 describe('порівняльна таблиця', () => {
+  // Підпис колонки продубльований у кожному рядку (у стековому режимі шапки не
+  // видно), тому шапка шукається саме за роллю, а не за текстом: дублі —
+  // `aria-hidden`, у дерево доступності не потрапляють.
   it('показує всі шість варіантів в одній таблиці з колонкою «на руки»', async () => {
     await walkMedianPath();
 
     // Секція порівняння (окремо від таблиць-підформ усередині акордеонів).
     const region = screen.getByRole('region', { name: t('scenarios.title') });
     const table = within(region).getByRole('table');
-    expect(within(table).getByText(t('chart.col.range'))).toBeDefined();
-    expect(within(table).getByText(t('chart.col.risk'))).toBeDefined();
+    expect(within(table).getByRole('columnheader', { name: t('chart.col.range') })).toBeDefined();
+    expect(within(table).getByRole('columnheader', { name: t('chart.col.risk') })).toBeDefined();
     expect(within(table).getAllByRole('row').length).toBe(7); // шапка + 6 варіантів
+  });
+
+  // Рішення 2026-08-04: усі шість рівноважні, порядок фіксований для будь-якого
+  // профілю. Тест ловить саме те, що не переживе мовчазного рефактора — спробу
+  // винести варіанти без числа вниз або в окремий блок «не для тебе».
+  it('порядок рядків фіксований і не залежить від того, у кого є число', async () => {
+    await walkMedianPath();
+
+    const region = screen.getByRole('region', { name: t('scenarios.title') });
+    const rows = within(region).getAllByRole('row').slice(1); // без шапки
+    const names = rows.map((row) => within(row).getByRole('rowheader').textContent);
+
+    expect(names).toEqual(
+      ['fop', 'jdg', 'incubator', 'nierejestrowana', 'zlecenie', 'uop'].map((id) =>
+        t(`scenario.${id}`)
+      )
+    );
+  });
+
+  // Для медіанного профілю ФОП і nierejestrowana числа не дають. Клітинка мусить
+  // нести причину І бути позначеною `data-empty` — на цій позначці тримається вся
+  // відмінність у типографіці, і без неї причина виглядала б як сума.
+  it('рядок без числа несе причину і позначку, за якою його відрізняє верстка', async () => {
+    await walkMedianPath();
+
+    const region = screen.getByRole('region', { name: t('scenarios.title') });
+    const rows = within(region).getAllByRole('row').slice(1);
+    // Перша клітинка рядка — сума або причина; друга — ризик.
+    const valueCell = (row: HTMLElement) => within(row).getAllByRole('cell')[0];
+    const empty = rows.filter((row) => valueCell(row).dataset.empty === 'true');
+
+    expect(empty.length).toBe(2);
+    for (const row of empty) {
+      expect(valueCell(row).textContent).not.toBe('');
+    }
+  });
+});
+
+describe('іконка ризику без видимого підпису', () => {
+  /*
+   * Правило `product-safety.md` §Статус-іконки: у картках «Деталей» іконка
+   * стоїть без видимого підпису, але сам підпис МУСИТЬ лишатись у розмітці —
+   * інакше рівень ризику зникає для читалки й для пошуку по сторінці. Тест
+   * падає рівно тоді, коли хтось «оптимізує» приховування на `display: none`
+   * або викине текст із компонента.
+   */
+  it('підпис рівня лишається в розмітці, хоч його й не видно', async () => {
+    await walkMedianPath();
+
+    const cards = Array.from(document.querySelectorAll('details'));
+    expect(cards.length).toBe(6);
+
+    const levels = ['green', 'yellow', 'red'].map((l) => t(`risk.${l}`));
+    for (const card of cards) {
+      const summary = card.querySelector('summary');
+      // Саме textContent, а не пошук за роллю чи `title`: атрибут пережив би
+      // видалення тексту, і перевірка стала б беззубою (спіймано мутацією).
+      expect(levels.some((label) => summary?.textContent?.includes(label))).toBe(true);
+    }
+  });
+});
+
+describe('український тягар ФОП', () => {
+  // Підпис звʼязаний із таблицею через aria-labelledby: він і є доступною назвою.
+  // Якщо звʼязок розірветься при рефакторі, читалка перестане казати, що ці суми
+  // з ЧУЖОЇ юрисдикції — рівно та помилка комунікації, через яку 2 850 zł
+  // прочитались як «на руки» (DECISIONS 2026-08-03).
+  it('таблиця тягаря має доступну назву, яка називає це витратами', async () => {
+    await walkMedianPath();
+
+    const burden = screen.getByRole('table', { name: t('fop.burden.label') });
+    expect(within(burden).getByText(t('fop.burden.esv'))).toBeDefined();
+    // Підпис мусить називати дію («платиш») і бік («український»): саме цих двох
+    // слів бракувало, коли 2 850 zł прочитались як дохід.
+    expect(t('fop.burden.label')).toMatch(/платиш/);
+    expect(t('fop.burden.label')).toMatch(/[Уу]країнськ/);
   });
 });
 

@@ -35,10 +35,37 @@
   margin: var(--space-6) 0 var(--space-3);
 }
 
+/*
+ * Деталі — один суцільний блок, як секція порівняння вище: картки йдуть рядок
+ * за рядком, розділені лінійкою, а не шістьма окремими коробками з проміжками.
+ *
+ * `minmax(0, 1fr)`, а не `1fr`: дефолтний `min-width: auto` у грід-елемента дає
+ * розкритій картці розсунути колонку ширше за екран (усередині є таблиця на
+ * `max-content`) — саме через це відкриття картки «вилазило» за в'юпорт.
+ */
 .cards {
   display: grid;
-  gap: var(--space-3);
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/*
+ * Кути крайніх карток заокруглені вручну, а НЕ через `overflow: hidden` на
+ * контейнері: overflow обрізав би фокусну рамку `summary` (вона з
+ * `outline-offset`, тобто виходить за межі картки) — прохід із клавіатури по
+ * першій і останній картці лишався б без видимого фокуса. Заокруглення потрібне
+ * лише тому, що розкрита картка має власний фон і без нього зрізала б кут.
+ */
+.cards > :first-child {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.cards > :last-child {
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .shareNote {

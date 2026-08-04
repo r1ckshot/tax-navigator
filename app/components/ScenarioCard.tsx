@@ -6,17 +6,45 @@ import { SourceCitation } from './SourceCitation';
 import styles from './ScenarioCard.module.css';
 
 /**
- * Акордеон-варіант: у згорнутому стані видно назву, рівень ризику й діапазон
- * «на руки». У розкритому — таблиця підформ (де є) і пояснення пунктами
- * (перший пункт — «чому» саме такий ризик), джерела списком.
+ * Ділить назву на «все, крім останнього слова» і саме останнє слово. Іконка
+ * ризику їде разом із останнім словом у нерозривному сегменті — інакше при
+ * певних ширинах вона лишалась сама на новому рядку. Нерозривного пробілу для
+ * цього мало: перед інлайн-блоком браузери трактують його по-різному.
+ */
+function splitTail(name: string): [string, string] {
+  const lastSpace = name.lastIndexOf(' ');
+  return lastSpace === -1 ? ['', name] : [name.slice(0, lastSpace + 1), name.slice(lastSpace + 1)];
+}
+
+/**
+ * Акордеон-варіант: у згорнутому стані видно назву й рівень ризику (на широкому
+ * ще й діапазон «чистими»). У розкритому — таблиця підформ (де є) і пояснення
+ * пунктами (перший пункт — «чому» саме такий ризик), джерела списком.
  */
 export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
+  const [nameHead, nameTail] = splitTail(t(`scenario.${scenario.id}`));
+
   return (
     <details className={styles.card}>
       <summary className={styles.summary}>
         <span className={styles.head}>
-          <span className={styles.title}>{t(`scenario.${scenario.id}`)}</span>
-          <RiskBadge risk={scenario.risk} />
+          {/*
+           * Останнє слово назви разом з іконкою — в одному нерозривному
+           * сегменті. Тому в довгих назвах на кшталт «Без реєстрації
+           * (nierejestrowana)» іконка переноситься РАЗОМ із дужковою частиною
+           * і за жодної ширини не лишається сама на новому рядку.
+           *
+           * Тільки іконка: повний підпис поруч із назвою не вміщається на
+           * вузькому, а словами ту саму шкалу підписано в таблиці порівняння.
+           */}
+          <span className={styles.title}>
+            {nameHead}
+            <span className={styles.titleTail}>
+              {nameTail}
+              {'\u00A0'}
+              <RiskBadge risk={scenario.risk} compact />
+            </span>
+          </span>
         </span>
 
         <span className={styles.range} data-empty={scenario.rangeMonthly ? undefined : 'true'}>
@@ -35,26 +63,39 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
 
       <div className={styles.body}>
         {scenario.subforms && (
-          <table className={styles.subforms}>
-            <tbody>
-              {scenario.subforms.map((sub) => (
-                <tr key={sub.id}>
-                  <th scope="row" className={styles.subformName}>
-                    {t(`subform.${sub.id}`)}
-                  </th>
-                  <td className={styles.subformValue} data-empty={sub.available && sub.rangeMonthly ? undefined : 'true'}>
-                    {sub.available && sub.rangeMonthly
-                      ? formatRange(sub.rangeMonthly)
-                      : t(sub.unavailableReasonKey ?? 'scenario.unavailable')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          /* Той самий обведений блок, що й у тягаря: будь-яка таблиця чисел у
+             картці читається як окремий предмет, а не як продовження прози. */
+          <div className={styles.panel}>
+            <table className={styles.subforms}>
+              <tbody>
+                {scenario.subforms.map((sub) => (
+                  <tr key={sub.id}>
+                    <th scope="row" className={styles.subformName}>
+                      {t(`subform.${sub.id}`)}
+                    </th>
+                    <td
+                      className={styles.subformValue}
+                      data-empty={sub.available && sub.rangeMonthly ? undefined : 'true'}
+                    >
+                      {sub.available && sub.rangeMonthly
+                        ? formatRange(sub.rangeMonthly)
+                        : t(sub.unavailableReasonKey ?? 'scenario.unavailable')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {scenario.foreignBurden && (
-          <>
+          /*
+           * Обведений блок, а не просто підпис над таблицею: ці дві суми —
+           * витрата в ЧУЖІЙ юрисдикції, і без видимої межі вони читались як
+           * продовження польських чисел картки, тобто як «на руки» (2026-08-03,
+           * рев'ю Mike). Межа + фон + явний підпис лікуються разом.
+           */
+          <div className={`${styles.panel} ${styles.burden}`}>
             <p id="fop-burden-label" className={styles.burdenCaption}>
               {t('fop.burden.label')}
             </p>
@@ -83,7 +124,7 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
                 </tr>
               </tbody>
             </table>
-          </>
+          </div>
         )}
 
         <ul className={styles.notes}>
