@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Tax Navigator — інформаційний податковий навігатор UA↔PL. Соло-проєкт, курс Agentic Engineering (M4 здано, M6 у роботі; фініш ~09.2026). Деталі продукту: [README.md](README.md).
+Tax Navigator — інформаційний податковий навігатор UA↔PL. Соло-проєкт, курс Agentic Engineering (M5 здано, M6 у роботі; фініш ~09.2026). Деталі продукту: [README.md](README.md).
 
 ## Порядок читання нової сесії
 `docs/SESSIONS-GUIDE.md` (як працюємо) → `docs/PROJECT.md` (що і навіщо) → `docs/STATE.md` (де зараз) → `docs/BACKLOG.md` (що далі) → перед кодом ще `ARCHITECTURE.md` + `SPEC.md` → релевантне з `docs/EVIDENCE.md` / `docs/OPEN-RISKS.md` / `docs/DISTRIBUTION.md`.
@@ -39,7 +39,6 @@ app/components/, app/**/page.tsx, i18n/    presentation; без арифмети
 - **Межі середовища** → `.claude/rules/environment-limits.md` (журнал відомих блокерів; читати перед плануванням).
 - **Нова ідея фічі** → скіл `.claude/skills/interview/` (14 фаз, результат — `docs/features/<slug>/idea-brief.md`). Коли ще не ясно, що саме будувати; для дрібних правок не потрібен.
 - **Карта архітектури** → скіл `.claude/skills/map-architecture/` (стадія 00, результат — `docs/architecture-map.md`). Один скан на все репо; наступні стадії читають карту, а не код. Скан делегується sub-agent-у `.claude/agents/explorer.md` (read-only). Карта **не** заміняє `ARCHITECTURE.md` — різні читачі, межа описана в самому скілі.
-- **Робота в `feat/f1-*` / `feat/f2-*`** (вимірювання M5 capstone) → після **кожного** коміту дописати рядок у [CAPSTONE_LOG.md](CAPSTONE_LOG.md): timestamp, крок, метрика. Промпти в F1 записуються **дослівно і до виконання** — лог і є результатом етапу, відновити його заднім числом неможливо. Правило чинне, поки capstone не зданий.
 
 ### Глибина артефактів = розмір фічі
 Рубрика взята з курсу (`sdlc/00-overview/mvp-vs-full.md`), не вигадана. Класифікувати ДО того, як почав писати артефакти.

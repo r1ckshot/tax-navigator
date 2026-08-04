@@ -16,7 +16,7 @@
 
 | Задача | Чому | Хто |
 |---|---|---|
-| **Екран результату: адаптивність + ясність карток** | M5 capstone закрито (лишився пост у TG — за Mike), і це перша задача після нього: борг свідомо не чіпався ні в F1, ні в F2, щоб не роздути замір. Один корінь — верстка результату не тримає вузький екран. (а) `ComparisonTable` — тритиколонкова `<table>` з `white-space: nowrap` на сумі: на 375px рядок розпихає решту. (б) Підтаблиці в картках центровані з фіксованим `space-6` між колонками. (в) Український тягар ФОП (ЄП+ВЗ у zł, ЄСВ у грн) читається як «на руки»: підпис над таблицею замалий, щоб відділити ЧУЖУ юрисдикцію — Mike прочитав 2 850 zł як дохід, хоча це витрата. Лікується разом: картковий лейаут замість таблиць + видима межа блоку тягаря. **Всередині є продуктове рішення:** чи всі шість сценаріїв рівноважні, чи `fop` і `nierejestrowana` (обидва без числа для профілю P1) згортаються під основну таблицю — ухвалити явно, рядком у DECISIONS | Claude + візуальний рев'ю Mike |
+| **Екран результату: адаптивність + ясність карток** | Перша задача після capstone: борг свідомо не чіпався ні в F1, ні в F2, щоб не роздути замір. Один корінь — верстка результату не тримає вузький екран. (а) `ComparisonTable` — тритиколонкова `<table>` з `white-space: nowrap` на сумі: на 375px рядок розпихає решту. (б) Підтаблиці в картках центровані з фіксованим `space-6` між колонками. (в) Український тягар ФОП (ЄП+ВЗ у zł, ЄСВ у грн) читається як «на руки»: підпис над таблицею замалий, щоб відділити ЧУЖУ юрисдикцію — Mike прочитав 2 850 zł як дохід, хоча це витрата. Лікується разом: картковий лейаут замість таблиць + видима межа блоку тягаря. **Всередині є продуктове рішення:** чи всі шість сценаріїв рівноважні, чи `fop` і `nierejestrowana` (обидва без числа для профілю P1) згортаються під основну таблицю — ухвалити явно, рядком у DECISIONS | Claude + візуальний рев'ю Mike |
 
 ## NEXT
 
@@ -34,20 +34,11 @@
 стані. Артефакт вважається зданим, коли він **працює в цьому проєкті**, а не коли
 написаний.
 
-| Урок | Артефакт у репо | Стан |
+| Модуль | Артефакт у репо | Стан |
 |---|---|---|
-| 5.1 Commands | `.claude/commands/scaffold-rule.md` | ✅ прогнано на `fop.esv_vz` |
-| 5.2–5.3 Skills | `.claude/skills/add-source-domain/` + `evals/` | ✅ бенчмарк 100% проти 85% на baseline |
-| 5.4 Hooks | `.claude/hooks/block-env-writes.mjs` + ізольований тест | ✅ 21 кейс зелені (додано `$IFS` та inline-інтерпретатор), спрацювання підтверджене вживу |
-| 5.4 Hooks (другий) | `.claude/hooks/block-force-push-master.mjs` — блокує force-push у `master` | ✅ адаптація курсового `recipe-5-git-policy.sh`; 16 ізольованих кейсів, зокрема "гілка не названа явно" через fixture-репо |
-| 5.4 Hooks (третій) | `.claude/hooks/session-stale-rules.mjs` — SessionStart зі списком протермінованих `verified_at` (>90 днів) | ✅ спільна логіка з `scripts/check-stale-rules.mjs` (nudge, не verify-гейт); 5 кейсів, зокрема межа порогу |
-| 5.4 Hooks (п'ятий) | `.claude/hooks/remind-state-update.mjs` — UserPromptSubmit нагадує про коміти, яких `docs/STATE.md` ще не бачив | ✅ ненав'язливо (не Stop — курсовий `stop-quality-gate.sh` сам застерігає, що жорсткий Stop-гейт anti-pattern); 6 кейсів, зокрема укр. плюралізація "1 коміт/3 коміти/5 комітів" |
-| 5.4 Hooks (четвертий) | `.claude/hooks/pre-commit-gate.mjs` — блокує коміт з кирилицею в message, замінив інлайн `npm test` на `npm test` + `npm run verify` | ✅ підключено в `settings.json`; спрацювання підтвердиться в новій сесії (правки `settings.json` читаються раз на старті) |
-| 5.5 Plugins | `tax-navigator-toolkit/` — конвертація реального `.claude/` (scaffold-rule + add-source-domain + hooks) | ✅ `claude plugin validate` зелений; живий `--plugin-dir` тест зависав у цьому контейнері (environment-limits.md) — структурна перевірка замінює |
-| 5.6 Marketplace | [team-marketplace](https://github.com/r1ckshot/team-marketplace) — v1 = `block-env-writes@1.0.0` | ✅ CI зелений, тег `block-env-writes@1.0.0`, install-флоу підтверджений наскрізно (marketplace add → install → живий блок у терміналі Mike) |
-| 5.6 Marketplace (v1.1 ідея) | `bootstrap-agentic-workflow` skill — скаффолдить STATE/BACKLOG/DECISIONS-конвенцію в новий репо, будь-який стек | ⬜ ідея, не спроєктовано — окремо від v1, щоб не блокувати реліз |
-| M5 capstone | `CAPSTONE_LOG.md` + `tax-navigator-toolkit@1.0.0` у публічному marketplace + дві фічі того самого зрізу (F1 `zlecenie` руками, F2 `nierejestrowana` через плагін) | ✅ усі 5 етапів; 44 хв → 18 хв (2.4×), мутації 2/5 → 7/7, хук спрацював. Лишився пост у TG — за Mike |
-| 5.7 SDK | `scripts/state-checkpoint/` — Claude Agent SDK чернетка запису `Закрито` у STATE.md з git log | ✅ форк `sdk-cli`; 3 виміри `--allowed-tools` (Edit звужено до одного файлу); `is_error`-гейт і invalid-prompt тест підтверджені; живий прогін на реальному репо знайшов і виправив дедлок вкладеного `claude -p` (`environment-limits.md`) |
+| M5, уроки 5.1–5.7 | `.claude/commands/scaffold-rule.md`; скіли `add-source-domain` (+`evals/`), `scenario-tests`, `feature-ship`; команда `/scaffold-scenario`; хуки `block-env-writes`, `block-force-push-master`, `session-stale-rules`, `remind-state-update`, `pre-commit-gate`, `layer-boundary`; плагін `tax-navigator-toolkit/`; [team-marketplace](https://github.com/r1ckshot/team-marketplace); `scripts/state-checkpoint/` | ✅ здано. Кожен артефакт із ізольованим тестом і регресійною перевіркою мутацією; що з цього не видно з коду — [JOURNAL.md](JOURNAL.md), записи 2026-07-30 → 2026-08-02 |
+| M5 capstone | [CAPSTONE_LOG.md](../CAPSTONE_LOG.md) + `tax-navigator-toolkit@1.0.0` у публічному marketplace + дві фічі того самого зрізу (F1 руками, F2 через плагін) | ✅ здано 2026-08-04: 44 хв → 18 хв (2.4×), мутації 2/5 → 7/7, хуки спрацювали |
+| M5.6 (ідея v1.1) | `bootstrap-agentic-workflow` skill — скаффолдить STATE/BACKLOG/DECISIONS-конвенцію в новий репо, будь-який стек | ⬜ ідея, не спроєктовано; не блокувала реліз v1 |
 | M6 SDLC | PRD → arc42+ADR → `tasks/` для `tg-assistant` | ⏳ ideation пройдено, далі PRD |
 
 **Відкинуто свідомо, щоб не плодити інструменти:** скіл `module-context` (знання

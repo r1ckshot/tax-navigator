@@ -6,7 +6,7 @@
 - `research/tg-mining/` ← твій Telegram-майнінг пайплайн. Локально, поза git (read-only до Telegram; дані і приватні цитати ніколи не публікуються).
 
 ## Що генерує Claude Code
-- `docs/capstones/` ← чернетки здачі capstone по модулю (`m3.md`, `m4.md`, далі `m6.md`) — окремо від `docs/notes/`, бо це не навчальні нотатки, а текст на здачу. Локально, поза git.
+- `docs/capstones/` ← чернетки здачі capstone по модулю (`m3.md`, `m4.md`, далі `m6.md`) — окремо від `docs/notes/`, бо це не навчальні нотатки, а текст на здачу. Локально, поза git. Виняток — [CAPSTONE_LOG.md](../CAPSTONE_LOG.md) (M5): він у git свідомо, бо це не чернетка тексту, а вимір на самому продукті.
 - `docs/features/<slug>/` ← SDLC-артефакти фічі (idea-brief, CONTEXT, далі PRD і tasks). **У git**, на відміну від решти вище: тут немає сирих даних людей, і DoD скіла вимагає закоміченого артефакту. Писати так, ніби це читає стороння людина з тих самих чатів.
 - `docs/JOURNAL.md` ← хроніка й післямортеми. Поза обов'язковим читанням — відкривається, коли треба «як ми до цього дійшли».
 
@@ -57,7 +57,7 @@
 |---|---|---|---|
 | M3 | setup, settings, permissions, sandbox, devcontainer | адаптований nodejs-typescript starter конфіг; репо+деплой Vercel; capstone M3 | 🟢 здано |
 | M4 | промпти, контекст, `.claude/rules`, bounded contexts, scaffold | `.claude/rules/`, ARCHITECTURE + SPEC + ADR, арх-тести (dependency-cruiser); capstone M4 | 🟢 здано |
-| M5 | commands, skills, hooks, plugins, marketplace, SDK | 🟢 **здано**: усі 7 лекцій застосовані на реальному продукті (`interview`, хуки, `tax-navigator-toolkit`, `team-marketplace`, `scripts/state-checkpoint/`) | 🟢 |
+| M5 | commands, skills, hooks, plugins, marketplace, SDK | 🟢 **здано** (capstone — 2026-08-04): усі 7 лекцій застосовані на реальному продукті (`interview`, хуки, `tax-navigator-toolkit`, `team-marketplace`, `scripts/state-checkpoint/`) | 🟢 |
 | M6 (зараз) | SDLC-артефакти | ideation ✅ (`docs/features/tg-assistant/`) → далі PRD, arc42+ADR, C4, data model, OpenAPI, tasks; GDPR-рішення "де живе PDF" | 🟠 у роботі |
 | паралельно | — | попит (G1): перша спроба через пости дала нуль — провалився канал, не попит. Новий канал вимірювання — `tg-assistant` T1+T2 | 🔴 G1 |
 | M7 | execution, Ralph loop, TDD | движок (діапазони) + анкета + порівняння; 10 еталонних профілів | 🔴 G2: 10/10 з держкалькуляторами |
