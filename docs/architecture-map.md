@@ -59,7 +59,7 @@ C4Container
 | Квантизація доходу | `app/lib/calc/quantize.ts` | calc | `storage.ts:2`, `schema.ts:3`, `Question.tsx:4` | `snapToStep` (`:27`), `quantizeRevenue` (`:34`), константи кроку 2 500 (`:14-16`) — єдине джерело |
 | Резидентство | `app/lib/calc/residency.ts` | calc | `app/questionnaire/page.tsx:130` | `assessResidency` (`:13`), `homeInUaMatters` (`:63`), тай-брейки (`:77`) |
 | ZUS | `app/lib/calc/zus.ts` | calc | `jdg.ts:39` | 4 етапи у фіксованому пріоритеті (`:28-67`) |
-| Сценарії | `app/lib/calc/scenarios/` | calc | `app/questionnaire/page.tsx:131` | Фасад `compareScenarios`, порядок `[fop, jdg, incubator, nierejestrowana, zlecenie, uop]` (`index.ts:16-23`) |
+| Сценарії | `app/lib/calc/scenarios/` | calc | `app/questionnaire/page.tsx:131` | Фасад `compareScenarios`, порядок `[fop, jdg, incubator, nierejestrowana, zlecenie, uop]` (`index.ts:17-26`) |
 | Схема анкети | `app/lib/questions/schema.ts` | adapters | `app/questionnaire/page.tsx:48` | **13 екранів** (`:48-265`), `visibleScreens` (`:275`), `resumeIndex` (`:294`) |
 | Чернетка | `app/lib/storage.ts` | adapters | `app/questionnaire/page.tsx:44-46` | Ключ `tax-navigator:draft` (`:4`); SSR-guard + try/catch (`:19,24`) |
 | Share-лінк | `app/lib/share.ts` | adapters | `app/questionnaire/page.tsx:32` | `encodeAnswers` (`:21`), `decodeAnswers` (`:33`), мапа коротких ключів (`:4-19`) |
@@ -76,7 +76,7 @@ C4Container
 - **Ідентифікатори:** `ScenarioId` (`calc/types.ts:52`) → файл `scenarios/<id>.ts` → експорт `calc<Pascal>` → i18n-ключ `scenario.<id>` (`i18n/uk.ts:142-147`). Екрани анкети — camelCase `id`, а `name` поля збігається з ключем `Answers` (`schema.ts:23`)
 - **Пізнє зв'язування через рядки:** calc повертає **ключі** i18n, не тексти (`fop.ts:19-24`, `zus.ts:34,47`), UI резолвить через `t()` (`ScenarioCard.tsx:25,80-82`). Частина ключів будується динамічно — `` t(`zus.stage.${zus.stage}`) `` (`jdg.ts:39`). **Типами це не перевіряється** — головне джерело тихих поломок при перейменуванні
 - **Тести:** `describe` описує правило, `it` містить очікуване число просто в заголовку (`benchmark.test.ts:22-25`). Еталон звіряється через **`rangeContains`, не `toBe`** (`:24,28,32`), бо продукт показує діапазони. Спільні дані — `baseAnswers` + `withAnswers(patch)` (`__tests__/fixtures.ts:4,22`). Ручні еталони виведені в шапці (`benchmark.test.ts:10-17`) з посиланням на `docs/EVIDENCE.md §6`
-- **Стилі — варіанти через `data-*`, не класи-модифікатори:** `data-variant="primary"` (`app/page.tsx:13`) → `button[data-variant='primary']` (`globals.css:174`); те саме `data-risk` (`RiskBadge.tsx:24`), `data-empty` (`ComparisonTable.tsx:54`)
+- **Стилі — варіанти через `data-*`, не класи-модифікатори:** `data-variant="primary"` (`app/page.tsx:44`) → `button[data-variant='primary']` (`globals.css:174`); те саме `data-risk` (`RiskBadge.tsx:24`), `data-empty` (`ComparisonTable.tsx:54`)
 - **Локалізація:** усі тексти для людини — через `t()`, у `.tsx` немає кириличних літералів. З 2026-07-29 це **машинна** межа, не дисципліна: скан у `app/lib/__tests__/architecture.test.ts`
 
 ## Сховища даних
@@ -104,11 +104,11 @@ C4Container
   - Акордеон — на нативному `<details>` (`ScenarioCard.tsx:28`), в окремий примітив не витягнутий
   - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:30-82`) і таблиця підформ (`ScenarioCard.tsx:69-87`)
 - **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:153-156`), мінімум 44px на клікабельних (`globals.css:166`), `prefers-reduced-motion` у 4 файлах, `aria-live="polite"` на результаті (`app/questionnaire/page.tsx:134`)
-- **Найближчий прецедент екрана:** результатний — `Result` (`app/questionnaire/page.tsx:119-163`); простий статичний — `app/page.tsx:5-21`; інтерактивний кроковий — `Question` (`Question.tsx:17-27`)
+- **Найближчий прецедент екрана:** результатний — `Result` (`app/questionnaire/page.tsx:119-163`); простий статичний — `app/page.tsx:30-52`; інтерактивний кроковий — `Question` (`Question.tsx:18-29`)
 
 ## Де що лежить / найближчі прецеденти
 
-- **Новий сценарій розрахунку** → `app/lib/calc/scenarios/<id>.ts`, за зразком `uop.ts` (найповніший: локальні `*Params` `:6-31`, читання правил на початку `:41-45`, річна арифметика ÷12 `:60-63`, повернення з `toRange` + `risk` + `noteKeys` + `sourcesOf` `:67-76`). Реєстрація у фасаді — `scenarios/index.ts:5,12,15`. Пара-тест з еталоном у назві — `benchmark.test.ts:46-66`. Сценарій із підформами → `jdg.ts:31-51`; сценарій свідомо без числа → `fop.ts:13-26`
+- **Новий сценарій розрахунку** → `app/lib/calc/scenarios/<id>.ts`, за зразком `uop.ts` (найповніший: локальні `*Params` `:6-12`, читання правил на початку `:41-45`, річна арифметика ÷12 `:60-63`, повернення з `toRange` + `risk` + `noteKeys` + `sourcesOf` `:67-76`). Реєстрація у фасаді — `scenarios/index.ts:5,12,15`. Пара-тест з еталоном у назві — `benchmark.test.ts:59-66`. Сценарій із підформами → `jdg.ts:31-51`; сценарій свідомо без числа → `fop.ts:18-49`
 - **Нове питання анкети** → `schema.ts`, за зразком екрана `jdgHistory` (`:249-264`). Чекліст із нього: поле в `Answers` (`calc/types.ts:39`) → екран у `SCREENS` → `showIf` → ключі в `uk.ts` (`:94-97`) → якщо їде в лінк, коротка літера в `KEYS` (`share.ts:17`) і для булевого — `BOOLEAN_KEYS` (`:49`) → тест на умовність (`questions.test.ts:35-48`) + оновити лічильники екранів (`:6-15`). Складніший прецедент, де `showIf` виведено з логіки калькуляції, — `homeInUa` (`schema.ts:130-143`) + `homeInUaMatters` (`residency.ts:63-70`)
 - **Новий екран** → складається з наявних примітивів (§Фронтенд), за зразком `Result` (`app/questionnaire/page.tsx:119-163`)
 - **Нова картка-компонент** → `app/components/`, за зразком `ResidencyVerdict.tsx:6-38` + однойменний `.module.css`
