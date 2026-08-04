@@ -1,8 +1,8 @@
 ---
 status: current
 mode: current
-updated_at: "2026-07-29"
-reflects_commit: "a19d58c"
+updated_at: "2026-08-04"
+reflects_commit: "be3e254"
 ---
 
 # Карта архітектури — Tax Navigator
@@ -73,10 +73,10 @@ C4Container
 - **Формат даних-правил:** `rule_id` (крапкова ієрархія `домен.підтема.аспект`) + `params` + `source_url` + `verified_at` — `app/lib/rules/rules.2026.json:44-57`. Метаполя snake_case, усередині `params` camelCase (`:8,40,84`). Відкритий верхній tier = `null` (`:51`), читається як «остання смуга» (`app/lib/calc/scenarios/jdg.ts:83`). Інваріант «кожне правило має джерело» перевіряється `app/lib/calc/__tests__/rules.test.ts:5-10`
 - **Типізація `params` — на місці споживання, не в `rules/`:** локальні `interface *Params` у файлі сценарію (`app/lib/calc/scenarios/uop.ts:6-31`)
 - **Крайні випадки — три різні шаблони:** недоступність замість числа (`rangeMonthly: null` + `unavailableReasonKey`, `jdg.ts:60-62`); кламп арифметики (`Math.max(0, …)`, `shared.ts:26`, `jdg.ts:97`); порожній набір → `null`, не `Infinity` (`shared.ts:32`)
-- **Ідентифікатори:** `ScenarioId` (`calc/types.ts:52`) → файл `scenarios/<id>.ts` → експорт `calc<Pascal>` → i18n-ключ `scenario.<id>` (`i18n/uk.ts:126-129`). Екрани анкети — camelCase `id`, а `name` поля збігається з ключем `Answers` (`schema.ts:23`)
-- **Пізнє зв'язування через рядки:** calc повертає **ключі** i18n, не тексти (`fop.ts:19-24`, `zus.ts:34,47`), UI резолвить через `t()` (`ScenarioCard.tsx:57-60`). Частина ключів будується динамічно — `` t(`zus.stage.${zus.stage}`) `` (`jdg.ts:39`). **Типами це не перевіряється** — головне джерело тихих поломок при перейменуванні
+- **Ідентифікатори:** `ScenarioId` (`calc/types.ts:52`) → файл `scenarios/<id>.ts` → експорт `calc<Pascal>` → i18n-ключ `scenario.<id>` (`i18n/uk.ts:142-147`). Екрани анкети — camelCase `id`, а `name` поля збігається з ключем `Answers` (`schema.ts:23`)
+- **Пізнє зв'язування через рядки:** calc повертає **ключі** i18n, не тексти (`fop.ts:19-24`, `zus.ts:34,47`), UI резолвить через `t()` (`ScenarioCard.tsx:25,80-82`). Частина ключів будується динамічно — `` t(`zus.stage.${zus.stage}`) `` (`jdg.ts:39`). **Типами це не перевіряється** — головне джерело тихих поломок при перейменуванні
 - **Тести:** `describe` описує правило, `it` містить очікуване число просто в заголовку (`benchmark.test.ts:22-25`). Еталон звіряється через **`rangeContains`, не `toBe`** (`:24,28,32`), бо продукт показує діапазони. Спільні дані — `baseAnswers` + `withAnswers(patch)` (`__tests__/fixtures.ts:4,22`). Ручні еталони виведені в шапці (`benchmark.test.ts:10-17`) з посиланням на `docs/EVIDENCE.md §6`
-- **Стилі — варіанти через `data-*`, не класи-модифікатори:** `data-variant="primary"` (`app/page.tsx:13`) → `button[data-variant='primary']` (`globals.css:174`); те саме `data-risk` (`RiskBadge.tsx:15`), `data-empty` (`ComparisonTable.tsx:34`)
+- **Стилі — варіанти через `data-*`, не класи-модифікатори:** `data-variant="primary"` (`app/page.tsx:13`) → `button[data-variant='primary']` (`globals.css:174`); те саме `data-risk` (`RiskBadge.tsx:24`), `data-empty` (`ComparisonTable.tsx:54`)
 - **Локалізація:** усі тексти для людини — через `t()`, у `.tsx` немає кириличних літералів. З 2026-07-29 це **машинна** межа, не дисципліна: скан у `app/lib/__tests__/architecture.test.ts`
 
 ## Сховища даних
@@ -90,19 +90,19 @@ C4Container
 **Що свідомо не зберігається:** точна виручка. Квантизується до кроку 2 500 перед
 записом (`storage.ts:23`) і перед потраплянням у лінк (`share.ts:29`). Тести
 приватності: `storage.test.ts:32-37` (17342 → 17500), `share.test.ts:7-11,19-24`
-(два різні доходи в одному кроці дають однаковий лінк), `flow.test.tsx:113-116`.
+(два різні доходи в одному кроці дають однаковий лінк), `flow.test.tsx:226-228`.
 
 ## Фронтенд / UI-фундамент
 
 - **Дизайн-токени:** `app/globals.css`, імпортується рівно один раз (`app/layout.tsx:2`). Групи: поверхні й чорнило (`:12-19`), teal-акцент `#0f766e` (`:22-26`), статуси ризику (`:29-31`), типографіка `--text-xs…2xl` (`:34-45`), відступи `--space-1…7` (`:48-54`), радіуси (`:57-59`), тіні (`:62-63`). Темна тема — окремий набір, не інверсія (`:69-91`). Плаваючий rem: `clamp(16px, 15px + 0.35vw, 18px)` (`:99`)
 - **Підхід до стилів:** CSS Modules, один файл на компонент — 11 файлів, разом 725 рядків. Імпорт незмінно `import styles from './X.module.css'`
 - **Спільні примітиви — чесна картина:**
-  - `RiskBadge` (`RiskBadge.tsx:13`) і `SourceCitation` (`SourceCitation.tsx:7`) — **єдині два реально перевикористовувані** компоненти
+  - `RiskBadge` (`RiskBadge.tsx:18`) і `SourceCitation` (`SourceCitation.tsx:7`) — **єдині два реально перевикористовувані** компоненти
   - Кнопка — глобальний елементний стиль (`globals.css:158-189`), React-компонента `Button` **немає**: сторінки пишуть голий `<button data-variant>`
-  - **Примітиву картки немає.** Однаковий набір `--surface` + `--hairline` + радіус + `--shadow-sm` продубльовано в п'яти місцях: `ComparisonTable.module.css:1-8`, `ResidencyVerdict.module.css:1`, `ScenarioCard.module.css:1-6`, `Question.module.css:1-6`, `app/page.module.css:1-9`
+  - **Примітиву картки немає.** Однаковий набір `--surface` + `--hairline` + радіус + `--shadow-sm` продубльовано в п'яти місцях: `ComparisonTable.module.css:1-8`, `ResidencyVerdict.module.css:1-2`, `Question.module.css:1-6`, `app/page.module.css:1-9`, `questionnaire/page.module.css:46-54`. З 2026-08-04 картка сценарію свого фону вже НЕ має — рамку й радіус тримає спільний контейнер `.cards`, а `ScenarioCard.module.css:7-10` лишає тільки лінійку між сусідами
   - Слайдер — узагальнений, керується `SliderConfig` (`schema.ts:12-20`), обслуговує дві осі (виручка `:159-166`, дні `:74`), має `openEnded` для «+» (`Question.tsx:88`)
-  - Акордеон — на нативному `<details>` (`ScenarioCard.tsx:15`), в окремий примітив не витягнутий
-  - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:19-49`) і таблиця підформ (`ScenarioCard.tsx:38-53`)
+  - Акордеон — на нативному `<details>` (`ScenarioCard.tsx:28`), в окремий примітив не витягнутий
+  - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:30-82`) і таблиця підформ (`ScenarioCard.tsx:69-87`)
 - **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:153-156`), мінімум 44px на клікабельних (`globals.css:166`), `prefers-reduced-motion` у 4 файлах, `aria-live="polite"` на результаті (`app/questionnaire/page.tsx:134`)
 - **Найближчий прецедент екрана:** результатний — `Result` (`app/questionnaire/page.tsx:119-163`); простий статичний — `app/page.tsx:5-21`; інтерактивний кроковий — `Question` (`Question.tsx:17-27`)
 
@@ -117,7 +117,7 @@ C4Container
 
 - **Ядро без npm-залежностей** — `calc/` мусить рахуватись у голому Node. Енфорситься `core-no-external` (`.dependency-cruiser.cjs:21-31`); правило свого часу було привидом через `exclude: node_modules`, фікс — `doNotFollow`
 - **Браузерні API лише в `storage.ts`** — у межах `app/lib/**`. Скан обмежений цим шляхом (`architecture.test.ts:15`) з allowlist на один файл (`:18`) і антипротуханням allowlist (`:46-55`)
-- **Ключі i18n не типізовані** — динамічні шаблони (`` t(`risk.jdg.formerEmployer.${…}`) ``, `jdg.ts:46`) не ловляться ні `tsc`, ні depcruise. Перейменування ключа падає мовчки в рантаймі, `t()` віддає сам ключ (`uk.ts:196-198`)
+- **Ключі i18n не типізовані** — динамічні шаблони (`` t(`risk.jdg.formerEmployer.${…}`) ``, `jdg.ts:46`) не ловляться ні `tsc`, ні depcruise. Перейменування ключа падає мовчки в рантаймі, `t()` віддає сам ключ (`uk.ts:166-169`)
 - **Квантизація виручки — одне джерело** (`app/lib/calc/quantize.ts`), слайдер і сховище звертаються до нього. Анти-регрес `calc/__tests__/quantize.test.ts` падає, щойно межі слайдера розійдуться з константами
 - **Ворота G2 не пройдені** — закріплено 1 калібрувальний профіль, потрібно 10 проти держкалькуляторів (`SPEC.md:46`). Движок не вважається готовим
 - **Сценарій ФОП: український тягар є, польське «на руки» — ні** (`fop.ts:31-32`). ЄСВ/ВЗ звірені 2026-07-29, тож `foreignBurden` віддає дві величини в різних валютах і **не** складає їх — курс UAH→PLN не застосовуємо (DECISIONS 2026-07-29). `rangeMonthly` лишається `null`, поки не звірені складки ZUS саме для `zakład`
