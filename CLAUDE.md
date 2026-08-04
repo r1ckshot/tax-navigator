@@ -73,7 +73,7 @@ app/components/, app/**/page.tsx, i18n/    presentation; без арифмети
 - Стейджити файли за іменем, не `git add -A` наосліп — перевіряти `git status` перед комітом.
 - `.env` ніколи в git, тільки `.env.example`.
 - **Перед кожним комітом — явне підтвердження Mike.** Показати diff/список файлів, дочекатись "так", тільки тоді комітити.
-- Атрибуція Claude в комітах/PR — керується `attribution.commit` / `attribution.pr` у settings.json (User tier), не хардкодиться в промпті.
+- Атрибуція Claude в комітах/PR — керується `attribution.commit` / `attribution.pr` у `.claude/settings.json` (ключ верхнього рівня, поряд з `env` і `hooks`), не хардкодиться в промпті. Ввімкнена 2026-08-04; коміти до того трейлера не мають, і заднім числом його не дописуємо — крім п'яти комітів того ж дня, переписаних одразу.
 - PR-флоу (draft PR, авто-рев'ю, Rule of Two) додається з Module 9, коли з'явиться CI.
 
 ## Definition of Done
