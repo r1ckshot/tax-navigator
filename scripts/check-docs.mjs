@@ -72,12 +72,15 @@ function extractBacktickTokens(text) {
 {
   const stateSrc = readFileSync(STATE, "utf8");
   // Блок закритих задач: рядок "Зроблено ..." або "Закрито ..." (без "- "),
-  // далі підряд рядки "- [x] ..." до першого порожнього рядка.
+  // далі пункти "- [x] ..." до першого порожнього рядка. Перенесені (відбиті
+  // пробілами) продовження пункту читаються теж: інакше скан зупинявся на першому
+  // ж переносі рядка і збирав нуль токенів, лишаючись зеленим.
   const lines = stateSrc.split("\n");
   const closedTokens = new Set();
   for (let i = 0; i < lines.length; i++) {
     if (/^(Зроблено|Закрито)\s/.test(lines[i])) {
-      for (let j = i + 1; j < lines.length && /^- \[x\]/.test(lines[j]); j++) {
+      for (let j = i + 1; j < lines.length && lines[j].trim() !== ""; j++) {
+        if (!/^- \[x\]/.test(lines[j]) && !/^\s+\S/.test(lines[j])) break;
         for (const t of extractBacktickTokens(lines[j])) closedTokens.add(t);
       }
     }
