@@ -54,7 +54,7 @@ app/components/, app/**/page.tsx, i18n/    presentation; без арифмети
 Потрібен наступний скіл (`write-prd`, `break-tasks`) — вендоримо один скіл у `.claude/skills/`, плагін `sdlc` цілком не ставимо (DECISIONS 2026-07-28).
 
 ## Git
-- Гілка на фічу (`feat/*`, `fix/*`); у `master` напряму не пушимо, тільки merge після підтвердження Mike.
+- Гілка на фічу (`feat/*`, `fix/*`); у `master` напряму не пушимо і не комітимо, тільки merge після підтвердження Mike. Перевіряє `pre-commit-gate` — прозою це правило вже протікало.
 - Conventional Commits: `type(scope): description`, **англійською** (subject і тіло, включно з "чому"). Один логічний крок = один коміт.
 - Subject короткий (imperative); тіло коміта — тільки "чому", коли неочевидно з diff (не переказ what).
 - Docs-only коміти (STATE.md/DECISIONS.md/README) — тіло практично ніколи не потрібне: сам diff вже проза.
