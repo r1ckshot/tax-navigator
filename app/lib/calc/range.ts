@@ -23,8 +23,16 @@ export function toRange(exact: number, uncertainty: number = UNCERTAINTY.ARITHME
   };
 }
 
+/**
+ * Округлення до копійки. Наївний `Math.round(value * 100) / 100` тут помиляється
+ * на грош: рівно-половинні значення після ланцюжка ділень лежать у памʼяті трохи
+ * НИЖЧЕ половини (120,199.98 / 12 = 10,016.665 у двійковому float — це
+ * 10016.664999999999), і половинка губиться вниз замість вгору. Знайдено при
+ * переїзді еталонів UoP на центр смуги: рахунок вручну давав 10,016.67, движок —
+ * 10,016.66. Гасимо шум на шостому знаку, аж тоді округлюємо.
+ */
 export function round2(value: number): number {
-  return Math.round(value * 100) / 100;
+  return Math.round(Number((value * 100).toFixed(6))) / 100;
 }
 
 export function rangeContains(range: Range, value: number): boolean {

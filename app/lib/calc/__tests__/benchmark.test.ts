@@ -6,8 +6,16 @@ import { calcFop } from '../scenarios/fop';
 import { calcZlecenie } from '../scenarios/zlecenie';
 import { calcNierejestrowana } from '../scenarios/nierejestrowana';
 import { compareScenarios } from '../scenarios';
-import { rangeContains } from '../range';
 import { baseAnswers, withAnswers } from './fixtures';
+
+/**
+ * Еталон звіряється з ЦЕНТРОМ смуги, а не через `rangeContains`. Смуга ±4% —
+ * продуктове рішення («діапазони, не точні суми»), а не допуск для арифметики:
+ * при 15,000 zł вона ковтає похибку в чотири сотні злотих на місяць. Знайдено
+ * мутаційною перевіркою на `zlecenie` (2026-08-03), де тест із `rangeContains`
+ * лишався зеленим при KUP, порахованих від неправильної бази.
+ */
+const exact = (r: { min: number; max: number }) => (r.min + r.max) / 2;
 
 /**
  * Еталони виведені вручну зі ставок, звірених у docs/EVIDENCE.md §6.
@@ -23,15 +31,15 @@ describe('benchmark — JDG при 15,000 zł/міс', () => {
 
   it('ричалт 12%: 15000 − 1750.17 податку − 830.58 zdrowotnej − 1926.76 ZUS = 10492.49', () => {
     expect(sub('ryczalt')!.rangeMonthly!).toBeDefined();
-    expect(rangeContains(sub('ryczalt')!.rangeMonthly!, 10492.49)).toBe(true);
+    expect(exact(sub('ryczalt')!.rangeMonthly!)).toBeCloseTo(10492.49, 2);
   });
 
   it('лінійний 19%: дохід 12323.24 після витрат і ZUS → на руки 9492.72', () => {
-    expect(rangeContains(sub('liniowy')!.rangeMonthly!, 9492.72)).toBe(true);
+    expect(exact(sub('liniowy')!.rangeMonthly!)).toBeCloseTo(9492.72, 2);
   });
 
   it('скаля: 32% вмикається, бо річний дохід 147.9k > 120k → на руки 9570.71', () => {
-    expect(rangeContains(sub('skala')!.rangeMonthly!, 9570.71)).toBe(true);
+    expect(exact(sub('skala')!.rangeMonthly!)).toBeCloseTo(9570.71, 2);
   });
 
   it('ричалт вигідніший за лінійний при витратах <10% (як каже EVIDENCE)', () => {
@@ -48,12 +56,12 @@ describe('benchmark — JDG при 15,000 zł/міс', () => {
 describe('benchmark — UoP', () => {
   it('база «повний кошт роботодавця»: брутто 12450.20 → на руки 8718.53', () => {
     const r = calcUop(baseAnswers, 'employerCost').rangeMonthly!;
-    expect(rangeContains(r, 8718.53)).toBe(true);
+    expect(exact(r)).toBeCloseTo(8718.53, 2);
   });
 
   it('база «брутто» (лише для звірки з EVIDENCE): 15000 брутто → на руки 10016.67', () => {
     const r = calcUop(baseAnswers, 'gross').rangeMonthly!;
-    expect(rangeContains(r, 10016.67)).toBe(true);
+    expect(exact(r)).toBeCloseTo(10016.67, 2);
   });
 
   it('30-krotność обмежує базу emerytalne+rentowe при високій зарплаті', () => {
@@ -63,7 +71,7 @@ describe('benchmark — UoP', () => {
     // Без ліміту społeczne були б ~98,712 і цифра вийшла б суттєво нижчою,
     // тому точний збіг і є доказом, що ліміт застосовано.
     const r = calcUop(withAnswers({ monthlyRevenue: 60000 }), 'gross').rangeMonthly!;
-    expect(rangeContains(r, 35348.18)).toBe(true);
+    expect(exact(r)).toBeCloseTo(35348.18, 2);
   });
 });
 
@@ -72,7 +80,7 @@ describe('benchmark — інкубатор', () => {
 
   it('KUP 20%: 15000 × (1 − 13.6%) − 324.5 абонемент = 12635.50', () => {
     const kup20 = inc.subforms!.find((s) => s.id === 'kup20')!;
-    expect(rangeContains(kup20.rangeMonthly!, 12635.5)).toBe(true);
+    expect(exact(kup20.rangeMonthly!)).toBeCloseTo(12635.5, 2);
   });
 
   it('маркується як оцінка і як «без ZUS»', () => {
@@ -100,15 +108,6 @@ describe('benchmark — інкубатор', () => {
 describe('benchmark — umowa zlecenie при 15,000 zł/міс', () => {
   const z = calcZlecenie(baseAnswers);
   const sub = (id: string) => z.subforms?.find((s) => s.id === id);
-
-  /**
-   * Порівнюємо з ЦЕНТРОМ смуги, а не через `rangeContains`. Причина знайдена
-   * мутаційною перевіркою цього ж набору: смуга ±4% ковтає похибку у пів-тисячі
-   * злотих на рік — тест із `rangeContains` пройшов і тоді, коли KUP навмисне
-   * рахувались від повного приходу замість приходу після społecznych. Смуга —
-   * продуктове рішення (діапазони, не точні суми), а не допуск для арифметики.
-   */
-  const exact = (r: { min: number; max: number }) => (r.min + r.max) / 2;
 
   it('KUP 20%: витрати 25,783.86 → дохід 103,135.46 → PIT 8,776.25 → на руки 9,045.03', () => {
     expect(exact(sub('kup20')!.rangeMonthly!)).toBeCloseTo(9045.03, 2);
@@ -160,7 +159,6 @@ describe('benchmark — umowa zlecenie при 15,000 zł/міс', () => {
  */
 describe('benchmark — działalność nierejestrowana при 3,000 zł/міс', () => {
   const eligible = withAnswers({ monthlyRevenue: 3000, jdgStatus: 'none' });
-  const exact = (r: { min: number; max: number }) => (r.min + r.max) / 2;
 
   it('витрати 1,494.02 → społeczne 4,096.61 → zdrowotna 2,320.55 → PIT 0 → на руки 1,830.77', () => {
     expect(exact(calcNierejestrowana(eligible).rangeMonthly!)).toBeCloseTo(1830.77, 2);
@@ -208,7 +206,7 @@ describe('ФОП — український бік у гривні, польсь
   // валюти не залежить. 15,000 × (0.05 + 0.01) = 900.
   it('ЄП 5% + ВЗ 1% = 6% від 15,000 zł → 900 zł/міс', () => {
     expect(fop.foreignBurden!.proportionalRate).toBe(0.06);
-    expect(rangeContains(fop.foreignBurden!.proportionalMonthly, 900)).toBe(true);
+    expect(exact(fop.foreignBurden!.proportionalMonthly)).toBeCloseTo(900, 2);
   });
 
   it('ЄСВ лишається в гривні: 1,902.34 грн/міс, без конвертації (DECISIONS 2026-07-29)', () => {
