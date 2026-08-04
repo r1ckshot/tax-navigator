@@ -1,0 +1,332 @@
+{
+  "package.json:30": [
+    "\"typescript\": \"^5.7.0\","
+  ],
+  "tsconfig.json:7": [
+    "\"strict\": true,"
+  ],
+  "tsconfig.json:3": [
+    "\"target\": \"ES2017\","
+  ],
+  "tsconfig.json:22": [
+    "\"@/*\": [\"./app/*\"]"
+  ],
+  "package.json:16": [
+    "\"next\": \"^15.1.0\","
+  ],
+  "package.json:17": [
+    "\"react\": \"^19.0.0\","
+  ],
+  "package.json:15-19": [
+    "\"dependencies\": {",
+    "},"
+  ],
+  "package.json:31": [
+    "\"vitest\": \"^4.1.10\""
+  ],
+  "package.json:22": [
+    "\"@testing-library/react\": \"^16.3.2\","
+  ],
+  "package.json:29": [
+    "\"jsdom\": \"^29.1.1\","
+  ],
+  "package.json:28": [
+    "\"dependency-cruiser\": \"^18.1.0\","
+  ],
+  "package.json:5-13": [
+    "\"scripts\": {",
+    "\"verify\": \"node scripts/verify.mjs\""
+  ],
+  "next.config.mjs:7": [
+    "distDir: process.env.NEXT_DIST_DIR || '.next',"
+  ],
+  "SPEC.md:21-22": [
+    "3. **Не бекенд.** Розрахунок детермінований і клієнтський; сервера, БД і",
+    "авторизації в цьому зрізі немає."
+  ],
+  "storage.ts:2": [
+    "import { quantizeRevenue } from '@/lib/calc/quantize';"
+  ],
+  "schema.ts:3": [
+    "import { REVENUE_MAX, REVENUE_MIN, REVENUE_STEP } from '@/lib/calc/quantize';"
+  ],
+  "Question.tsx:4": [
+    "import { t } from '@/lib/i18n/uk';"
+  ],
+  "app/questionnaire/page.tsx:130": [
+    "const residency = assessResidency(answers);"
+  ],
+  "jdg.ts:39": [
+    "const noteKeys: string[] = ['jdg.ipBoxNotIncluded', `zus.stage.${zus.stage}`, ...zus.reasonKeys];"
+  ],
+  "app/questionnaire/page.tsx:131": [
+    "const scenarios = compareScenarios(answers);"
+  ],
+  "index.ts:17-26": [
+    "export function compareScenarios(answers: Answers): ScenarioResult[] {",
+    "}"
+  ],
+  "app/questionnaire/page.tsx:48": [
+    "const screens = useMemo(() => visibleScreens(answers), [answers]);"
+  ],
+  "app/questionnaire/page.tsx:44-46": [
+    "useEffect(() => {",
+    "}, [answers, index, hydrated, done]);"
+  ],
+  "app/questionnaire/page.tsx:32": [
+    "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));"
+  ],
+  "app/lib/rules/rules.2026.json:44-57": [
+    "{",
+    "},"
+  ],
+  "app/lib/calc/scenarios/jdg.ts:83": [
+    "if (tier.annualRevenueUpTo === null || annualRevenue <= tier.annualRevenueUpTo) return tier.monthly;"
+  ],
+  "app/lib/calc/__tests__/rules.test.ts:5-10": [
+    "",
+    "it('кожне правило має source_url і verified_at', () => {"
+  ],
+  "app/lib/calc/scenarios/uop.ts:6-31": [
+    "interface EmployerParams {",
+    "}"
+  ],
+  "jdg.ts:60-62": [
+    "if (annualRevenue > p.annualLimit) {",
+    "}"
+  ],
+  "shared.ts:26": [
+    "return Math.max(0, tax);"
+  ],
+  "jdg.ts:97": [
+    "const tax = Math.max(0, p.rate * (income - deductibleZdrowotna));"
+  ],
+  "shared.ts:32": [
+    "if (ranges.length === 0) return null;"
+  ],
+  "calc/types.ts:52": [
+    "export type ScenarioId = 'fop' | 'jdg' | 'incubator' | 'nierejestrowana' | 'zlecenie' | 'uop';"
+  ],
+  "i18n/uk.ts:142-147": [
+    "'scenario.fop': 'Український ФОП',",
+    "'scenario.uop': 'Трудовий договір (UoP)',"
+  ],
+  "schema.ts:23": [
+    "name: keyof Answers;"
+  ],
+  "fop.ts:19-24": [
+    "const { ukrainianSingleTaxRate } = getParams<{ ukrainianSingleTaxRate: number }>(",
+    "esvMinMonthlyUah: number;"
+  ],
+  "zus.ts:34-47": [
+    "stage: 'zbiegOnlyHealth',",
+    "stage: 'duzy',"
+  ],
+  "benchmark.test.ts:22-25": [
+    "const sub = (id: string) => jdg.subforms?.find((s) => s.id === id);",
+    "expect(sub('ryczalt')!.rangeMonthly!).toBeDefined();"
+  ],
+  "__tests__/fixtures.ts:4-22": [
+    "export const baseAnswers: Answers = {",
+    "export function withAnswers(patch: Partial<Answers>): Answers {"
+  ],
+  "benchmark.test.ts:10-17": [
+    "import { baseAnswers, withAnswers } from './fixtures';",
+    "* Це старт шляху до ворота G2 (10/10 профілів проти державних калькуляторів) —"
+  ],
+  "app/page.tsx:44": [
+    "<button type=\"button\" data-variant=\"primary\">"
+  ],
+  "globals.css:174": [
+    "button[data-variant='primary'] {"
+  ],
+  "RiskBadge.tsx:24": [
+    "data-risk={risk}"
+  ],
+  "ComparisonTable.tsx:54": [
+    "data-empty={s.rangeMonthly ? undefined : 'true'}"
+  ],
+  "app/lib/storage.ts:25": [
+    "window.sessionStorage.setItem(KEY, JSON.stringify({ answers: safe, step } satisfies Stored));"
+  ],
+  "app/lib/share.ts:21-33": [
+    "export function encodeAnswers(answers: Answers): string {",
+    "export function decodeAnswers(query: string): Partial<Answers> {"
+  ],
+  "app/questionnaire/page.tsx:32-36": [
+    "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));",
+    "} else {"
+  ],
+  "storage.ts:23": [
+    "if (safe.monthlyRevenue !== undefined) safe.monthlyRevenue = quantizeRevenue(safe.monthlyRevenue);"
+  ],
+  "share.ts:29": [
+    "params.set('r', String(quantizeRevenue(answers.monthlyRevenue)));"
+  ],
+  "storage.test.ts:32-37": [
+    "it('виручка зберігається квантизованою до 2500, точна сума — ні', () => {",
+    "});"
+  ],
+  "flow.test.tsx:226-228": [
+    "it('точна виручка не потрапляє в sessionStorage', async () => {",
+    "expect(window.sessionStorage.getItem('tax-navigator:draft') ?? '').not.toContain('17342');"
+  ],
+  "app/layout.tsx:2": [
+    "import \"./globals.css\";"
+  ],
+  "RiskBadge.tsx:18": [
+    "export function RiskBadge({ risk, compact = false }: { risk: Risk; compact?: boolean }) {"
+  ],
+  "SourceCitation.tsx:7": [
+    "export function SourceCitation({ sources }: { sources: Source[] }) {"
+  ],
+  "globals.css:158-189": [
+    "button {",
+    "}"
+  ],
+  "ComparisonTable.module.css:1-8": [
+    ".card {",
+    "}"
+  ],
+  "ResidencyVerdict.module.css:1-2": [
+    ".card {",
+    "background: var(--surface);"
+  ],
+  "Question.module.css:1-6": [
+    ".screen {",
+    "padding: var(--space-4) var(--space-5);"
+  ],
+  "app/page.module.css:1-9": [
+    ".hero {",
+    "}"
+  ],
+  "questionnaire/page.module.css:46-54": [
+    ".cards {",
+    "}"
+  ],
+  "ScenarioCard.module.css:7-10": [
+    ".card {",
+    "}"
+  ],
+  "schema.ts:12-20": [
+    "export interface SliderConfig {",
+    "}"
+  ],
+  "Question.tsx:88": [
+    "const shown = value ?? cfg.default;"
+  ],
+  "ScenarioCard.tsx:28": [
+    "<details className={styles.card}>"
+  ],
+  "ComparisonTable.tsx:30-82": [
+    "<table className={styles.table} role=\"table\">",
+    "</table>"
+  ],
+  "ScenarioCard.tsx:69-87": [
+    "<table className={styles.subforms}>",
+    "</table>"
+  ],
+  "globals.css:153-156": [
+    ":focus-visible {",
+    "}"
+  ],
+  "globals.css:166": [
+    "min-height: 44px;"
+  ],
+  "app/questionnaire/page.tsx:134": [
+    "<main aria-live=\"polite\" className={styles.result}>"
+  ],
+  "app/questionnaire/page.tsx:119-163": [
+    "function Result({",
+    ");"
+  ],
+  "app/page.tsx:30-52": [
+    "export default function Home() {",
+    "}"
+  ],
+  "Question.tsx:18-29": [
+    "export function Question({ screen, answers, onChange }: Props) {",
+    "}"
+  ],
+  "benchmark.test.ts:59-66": [
+    "it('30-krotność обмежує базу emerytalne+rentowe при високій зарплаті', () => {",
+    "expect(rangeContains(r, 35348.18)).toBe(true);"
+  ],
+  "jdg.ts:31-51": [
+    "export function calcJdg(answers: Answers): ScenarioResult {",
+    "}"
+  ],
+  "fop.ts:18-49": [
+    "export function calcFop(answers: Answers): ScenarioResult {",
+    "}"
+  ],
+  "calc/types.ts:39": [
+    "hadJdgInLast60Months?: boolean;"
+  ],
+  "share.ts:17": [
+    "o: 'hadJdgInLast60Months',"
+  ],
+  "questions.test.ts:35-48": [
+    "it('історія JDG не питається при паралельному етаті (społeczne і так 0)', () => {",
+    "});"
+  ],
+  "schema.ts:130-143": [
+    "id: 'homeInUa',",
+    "},"
+  ],
+  "residency.ts:63-70": [
+    "export function homeInUaMatters(a: Partial<Answers>): boolean {",
+    "}"
+  ],
+  "ResidencyVerdict.tsx:6-38": [
+    "export function ResidencyVerdict({ result }: { result: ResidencyResult }) {",
+    "}"
+  ],
+  ".dependency-cruiser.cjs:21-31": [
+    "forbidden: [",
+    "{"
+  ],
+  "architecture.test.ts:15": [
+    "const LIB = join(process.cwd(), 'app', 'lib');"
+  ],
+  "jdg.ts:46": [
+    "riskReasonKey: answers.formerEmployer === 'no' ? 'risk.jdg.standard' : `risk.jdg.formerEmployer.${answers.formerEmployer}`,"
+  ],
+  "uk.ts:166-169": [
+    "'risk.jdg.formerEmployer.identical':",
+    "'Частковий збіг із колишніми обовʼязками: ричалт лишається, але пільговий ZUS втрачається.',"
+  ],
+  "SPEC.md:46": [
+    "| 5 | **G2:** 10/10 тестових профілів збігаються з державними калькуляторами (zus.pl, podatki.gov.pl) | ⏳ не пройдено, ворота перед M7 |"
+  ],
+  "fop.ts:31-32": [
+    "rangeMonthly: null,",
+    "noRangeReasonKey: 'fop.noPlTakeHome',"
+  ],
+  "CLAUDE.md:74": [
+    "- `.env` ніколи в git, тільки `.env.example`."
+  ],
+  "ARCHITECTURE.md:20": [
+    "| **presentation** | `app/components/`, `app/**/page.tsx`, `app/layout.tsx`, `app/lib/i18n/` | React, CSS Modules, українські тексти | усе нижче |"
+  ],
+  ".dependency-cruiser.cjs:16": [
+    "const ADAPTERS = '^app/lib/(storage|share|format)\\\\.ts$|^app/lib/(questions|i18n)/';"
+  ],
+  "ARCHITECTURE.md:72-76": [
+    "- `app/lib/i18n/uk.ts` лежить у `lib/`, але за роллю це presentation. Ядром не",
+    "трактуваннях), але класифікація розходиться."
+  ],
+  "app/layout.tsx:9-12": [
+    "title: t(\"app.title\"),",
+    ""
+  ],
+  "calc/types.ts:38": [
+    "/** Умовне: лише коли jdgStatus === 'none' | 'lt6' | 'from6to24'. */"
+  ],
+  "residency.test.ts:79": [
+    "it('житло в обох країнах → вирішує центр інтересів', () => {"
+  ],
+  "globals.css:45": [
+    "--measure: 66ch;"
+  ]
+}
