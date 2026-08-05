@@ -122,17 +122,25 @@
     "stage: 'zbiegOnlyHealth',",
     "stage: 'duzy',"
   ],
-  "benchmark.test.ts:22-25": [
-    "const sub = (id: string) => jdg.subforms?.find((s) => s.id === id);",
-    "expect(sub('ryczalt')!.rangeMonthly!).toBeDefined();"
+  "benchmark.test.ts:32-34": [
+    "it('ричалт 12%: 15000 − 1750.17 податку − 830.58 zdrowotnej − 1926.76 ZUS = 10492.49', () => {",
+    "expect(exact(sub('ryczalt')!.rangeMonthly!)).toBeCloseTo(10492.49, 2);"
+  ],
+  "benchmark.test.ts:11-18": [
+    "/**",
+    "const exact = (r: { min: number; max: number }) => (r.min + r.max) / 2;"
   ],
   "__tests__/fixtures.ts:4-22": [
     "export const baseAnswers: Answers = {",
     "export function withAnswers(patch: Partial<Answers>): Answers {"
   ],
-  "benchmark.test.ts:10-17": [
-    "import { baseAnswers, withAnswers } from './fixtures';",
-    "* Це старт шляху до ворота G2 (10/10 профілів проти державних калькуляторів) —"
+  "benchmark.test.ts:20-27": [
+    "/**",
+    "*/"
+  ],
+  "zus-state.test.ts:8-19": [
+    "*",
+    "tiers: { annualRevenueUpTo: number | null; monthly: number }[];"
   ],
   "app/page.tsx:44": [
     "<button type=\"button\" data-variant=\"primary\">"
@@ -248,9 +256,9 @@
     "export function Question({ screen, answers, onChange }: Props) {",
     "}"
   ],
-  "benchmark.test.ts:59-66": [
+  "benchmark.test.ts:67-75": [
     "it('30-krotność обмежує базу emerytalne+rentowe при високій зарплаті', () => {",
-    "expect(rangeContains(r, 35348.18)).toBe(true);"
+    "});"
   ],
   "jdg.ts:31-51": [
     "export function calcJdg(answers: Answers): ScenarioResult {",

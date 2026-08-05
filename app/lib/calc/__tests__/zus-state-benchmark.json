@@ -1,0 +1,88 @@
+{
+  "_comment": "Відповіді ДЕРЖАВНОГО калькулятора ZUS. Не редагувати руками: перезбирається `node scripts/fetch-zus-benchmark.mjs`. Розбіжність із движком — привід знайти причину, а не правити цей файл.",
+  "source_url": "https://www.zus.pl/firmy/przedsiebiorco-przeczytaj-wazne/kalkulator-skladki-zdrowotnej",
+  "fetched_at": "2026-08-04",
+  "period": {
+    "month": "7",
+    "year": "2026"
+  },
+  "cases": [
+    {
+      "id": "ryczalt.tier1.mid",
+      "form": "lump",
+      "annualRevenue": 50000,
+      "note": "нижній ярус: прихід ≤ 60k",
+      "monthlyContribution": 498.35
+    },
+    {
+      "id": "ryczalt.tier1.edge",
+      "form": "lump",
+      "annualRevenue": 60000,
+      "note": "рівно на порозі 60k",
+      "monthlyContribution": 498.35
+    },
+    {
+      "id": "ryczalt.tier2.low",
+      "form": "lump",
+      "annualRevenue": 60000.01,
+      "note": "на грош за порогом 60k",
+      "monthlyContribution": 830.58
+    },
+    {
+      "id": "ryczalt.tier2.mid",
+      "form": "lump",
+      "annualRevenue": 180000,
+      "note": "середній ярус: 60k–300k",
+      "monthlyContribution": 830.58
+    },
+    {
+      "id": "ryczalt.tier2.edge",
+      "form": "lump",
+      "annualRevenue": 300000,
+      "note": "рівно на порозі 300k",
+      "monthlyContribution": 830.58
+    },
+    {
+      "id": "ryczalt.tier3.low",
+      "form": "lump",
+      "annualRevenue": 300000.01,
+      "note": "на грош за порогом 300k",
+      "monthlyContribution": 1495.04
+    },
+    {
+      "id": "ryczalt.tier3.mid",
+      "form": "lump",
+      "annualRevenue": 400000,
+      "note": "верхній ярус: > 300k",
+      "monthlyContribution": 1495.04
+    },
+    {
+      "id": "liniowy.rate",
+      "form": "flat",
+      "monthlyIncome": 15000,
+      "note": "4.9% від доходу",
+      "monthlyContribution": 735
+    },
+    {
+      "id": "liniowy.min",
+      "form": "flat",
+      "monthlyIncome": 5000,
+      "note": "4.9% нижче мінімуму → мінімум",
+      "monthlyContribution": 432.54
+    },
+    {
+      "id": "skala.rate",
+      "form": "scale",
+      "monthlyIncome": 10000,
+      "note": "9% від доходу",
+      "monthlyContribution": 900
+    },
+    {
+      "id": "skala.min",
+      "form": "scale",
+      "monthlyIncome": 1000,
+      "note": "9% нижче мінімуму → мінімум",
+      "monthlyContribution": 432.54
+    }
+  ]
+}
