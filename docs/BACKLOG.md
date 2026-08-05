@@ -40,6 +40,7 @@
 | M5 capstone | [CAPSTONE_LOG.md](../CAPSTONE_LOG.md) + `tax-navigator-toolkit@1.0.0` у публічному marketplace + дві фічі того самого зрізу (F1 руками, F2 через плагін) | ✅ здано 2026-08-04: 44 хв → 18 хв (2.4×), мутації 2/5 → 7/7, хуки спрацювали |
 | M5.6 (ідея v1.1) | `bootstrap-agentic-workflow` skill — скаффолдить STATE/BACKLOG/DECISIONS-конвенцію в новий репо, будь-який стек | ⬜ ідея, не спроєктовано; не блокувала реліз v1 |
 | M6 SDLC | PRD → arc42+ADR → `tasks/` для `tg-assistant` | ⏳ ideation пройдено, далі PRD |
+| M6, урок 6.1 | Скіл `.claude/skills/sdlc-audit/` (інспекційний, read-only) + ручна інвентаризація [features/nierejestrowana/artifact-inventory.md](features/nierejestrowana/artifact-inventory.md) + прогін і порівняння [sdlc-audit-run.md](features/nierejestrowana/sdlc-audit-run.md) | ✅ здано 2026-08-05: прогін на реальній фічі дав 7 правок у SKILL.md, з них 3 — з помилок самого скіла |
 
 **Відкинуто свідомо, щоб не плодити інструменти:** скіл `module-context` (знання
 вже в `docs/notes/`, скіл лише дублював би — той самий висновок, що дав бенчмарк
