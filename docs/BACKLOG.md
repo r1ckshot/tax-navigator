@@ -69,7 +69,7 @@
 |---|---|---|
 | Білд движка з живим fetch ставок | M7 | Домени в allowlist; пильнувати пастку цифр ветованої реформи zdrowotnej |
 | CI + draft PR + Rule of Two | M9 | CLAUDE.md уже описує PR-флоу як «з M9» |
-| Агент-моніторинг змін правил | M10 | Замінює ручну щорічну звірку |
+| Агент-моніторинг змін правил | M10 | Ideation пройдено 2026-08-05 ([idea-brief](features/rules-change-monitor/idea-brief.md), Approach C, RICE=12.5). Effort=4pw в брифі — ймовірно завищено: fetch+staleness (`scripts/fetch-zus-benchmark.mjs`, `check-stale-rules.mjs`) вже готові, лишається лише звірка-diff |
 | Платний tier: PDF-план, Stripe | після G3 | Ціна 79 zł, działalność nierejestrowana |
 
 ---
