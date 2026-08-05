@@ -47,6 +47,19 @@ process.stdin.on('end', () => {
     return;
   }
 
+  // Трейлер атрибуції. Ключ `attribution` у settings.json цього НЕ гарантує: він
+  // лише кладе інструкцію в контекст, а інструкцію можна проґавити — 2026-08-05
+  // два коміти пішли без трейлера саме так. Перевіряється сам ФАКТ трейлера, не
+  // імʼя моделі: Mike перемикає Opus/Sonnet/Fable під задачу, і дефолтний текст
+  // щоразу інший.
+  if (messageIsInCommand(command) && !/Co-Authored-By:\s*\S+.*@anthropic\.com/i.test(command)) {
+    deny(
+      'Коміт без трейлера Co-Authored-By — CLAUDE.md, розділ Git.\n' +
+        'Дописати останнім рядком тіла: Co-Authored-By: Claude <модель> <noreply@anthropic.com>'
+    );
+    return;
+  }
+
   const test = spawnSync('npm', ['test', '--silent'], { encoding: 'utf8' });
   if (test.status !== 0) {
     deny(`npm test впав — коміт заблоковано.\n${tail(test.stdout + test.stderr)}`);
@@ -84,6 +97,16 @@ function isGitCommit(command) {
     }
   }
   return false;
+}
+
+/**
+ * Чи видно текст повідомлення прямо в команді. `git commit` без прапорця відкриває
+ * редактор, `--amend --no-edit` і `-C HEAD` переносять старе повідомлення — у всіх
+ * трьох трейлера в команді нема ЗА ПОБУДОВОЮ, і блокувати їх означало б ловити не
+ * те. Гейт спрацьовує лише там, де повідомлення справді складається зараз.
+ */
+function messageIsInCommand(command) {
+  return /(^|\s)(-m\b|--message\b|-F\s*-|--file[= ]-)/.test(command);
 }
 
 /**
