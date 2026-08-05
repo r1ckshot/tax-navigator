@@ -41,6 +41,7 @@
 | M5.6 (ідея v1.1) | `bootstrap-agentic-workflow` skill — скаффолдить STATE/BACKLOG/DECISIONS-конвенцію в новий репо, будь-який стек | ⬜ ідея, не спроєктовано; не блокувала реліз v1 |
 | M6 SDLC | PRD → arc42+ADR → `tasks/` для `tg-assistant` | ⏳ ideation пройдено, далі PRD |
 | M6, урок 6.1 | Скіл `.claude/skills/sdlc-audit/` (інспекційний, read-only) + ручна інвентаризація [features/nierejestrowana/artifact-inventory.md](features/nierejestrowana/artifact-inventory.md) + прогін і порівняння [sdlc-audit-run.md](features/nierejestrowana/sdlc-audit-run.md) | ✅ здано 2026-08-05: прогін на реальній фічі дав 7 правок у SKILL.md, з них 3 — з помилок самого скіла |
+| M6, урок 6.2 | Готовий (невендорений) `interview`+`fix-term` вручну на новій фічі [rules-change-monitor](features/rules-change-monitor/idea-brief.md) (CONTEXT.md + 15-секційний бриф, Approach C, RICE=12.5) + toy-вправа на іграшковій ідеї (скріншоти, не закомічено) + порівняння з власним `.claude/skills/interview/` | ✅ здано 2026-08-05: порівняння й побічна знахідка (`check-stale-rules.mjs` вже існує) — [JOURNAL.md](JOURNAL.md) |
 
 **Відкинуто свідомо, щоб не плодити інструменти:** скіл `module-context` (знання
 вже в `docs/notes/`, скіл лише дублював би — той самий висновок, що дав бенчмарк
