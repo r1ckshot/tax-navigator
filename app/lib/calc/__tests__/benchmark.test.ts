@@ -29,9 +29,9 @@ describe('benchmark — JDG при 15,000 zł/міс', () => {
   const jdg = calcJdg(baseAnswers);
   const sub = (id: string) => jdg.subforms?.find((s) => s.id === id);
 
-  it('ричалт 12%: 15000 − 1750.17 податку − 830.58 zdrowotnej − 1926.76 ZUS = 10492.49', () => {
+  it('ричалт 12%: 15000 − 750 витрат − 1750.17 податку − 830.58 zdrowotnej − 1926.76 ZUS = 9742.49', () => {
     expect(sub('ryczalt')!.rangeMonthly!).toBeDefined();
-    expect(exact(sub('ryczalt')!.rangeMonthly!)).toBeCloseTo(10492.49, 2);
+    expect(exact(sub('ryczalt')!.rangeMonthly!)).toBeCloseTo(9742.49, 2);
   });
 
   it('лінійний 19%: дохід 12323.24 після витрат і ZUS → на руки 9492.72', () => {
@@ -46,10 +46,14 @@ describe('benchmark — JDG при 15,000 zł/міс', () => {
     expect(sub('ryczalt')!.rangeMonthly!.min).toBeGreaterThan(sub('liniowy')!.rangeMonthly!.min);
   });
 
-  it('смуга ричалту перетинається з калібрувальною 10.5–11.2k з EVIDENCE', () => {
+  // Смуга з калібрувального прикладу EVIDENCE §6. Приклад помічений там як
+  // «перераховано движком» — це не зовнішній еталон, а вихід цього ж коду, тож
+  // тест ловить лише РОЗХОДЖЕННЯ документа з движком, а не правильність числа.
+  // Правильність тримають ручний вивід вище і калькулятор ZUS у `zus-state`.
+  it('смуга ричалту збігається з калібрувальною 9,352.79–10,132.19 з EVIDENCE', () => {
     const r = sub('ryczalt')!.rangeMonthly!;
-    expect(r.max).toBeGreaterThanOrEqual(10500);
-    expect(r.min).toBeLessThanOrEqual(11200);
+    expect(r.min).toBeCloseTo(9352.79, 2);
+    expect(r.max).toBeCloseTo(10132.19, 2);
   });
 });
 

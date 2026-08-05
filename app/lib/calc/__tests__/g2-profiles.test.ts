@@ -41,8 +41,8 @@ function sub(answers: Answers, id: SubformId): number {
 describe('P1 — 15,000 zł, duży ZUS 1,926.76, programming, витрати <10%', () => {
   const p1 = withAnswers({});
 
-  it('ричалт: zdrowotna 830.58 (ярус 60k–300k), податок 12% × (15000 − 415.29) = 1750.17 → 10,492.49', () => {
-    expect(sub(p1, 'ryczalt')).toBeCloseTo(10492.49, 2);
+  it('ричалт: zdrowotna 830.58 (ярус 60k–300k), витрати 750, податок 1,750.17 → 9,742.49', () => {
+    expect(sub(p1, 'ryczalt')).toBeCloseTo(9742.49, 2);
   });
 
   it('лінійний: дохід 12,323.24, zdrowotna 603.84, податок 19% × 11,148.24 = 2,226.68 → 9,492.72', () => {
@@ -62,8 +62,8 @@ describe('P1 — 15,000 zł, duży ZUS 1,926.76, programming, витрати <10
 describe('P2 — 15,000 zł, ulga na start: społeczne = 0', () => {
   const p2 = withAnswers({ jdgStatus: 'lt6', hadJdgInLast60Months: false });
 
-  it('ричалт: та сама zdrowotna 830.58, але без 1,926.76 ZUS → 12,419.25', () => {
-    expect(sub(p2, 'ryczalt')).toBeCloseTo(12419.25, 2);
+  it('ричалт: та сама zdrowotna 830.58, але без 1,926.76 ZUS → 11,669.25', () => {
+    expect(sub(p2, 'ryczalt')).toBeCloseTo(11669.25, 2);
   });
 
   it('лінійний: дохід 14,250 (ZUS не віднімається), zdrowotna 698.25 → 10,976.92', () => {
@@ -86,8 +86,8 @@ describe('P2 — 15,000 zł, ulga na start: społeczne = 0', () => {
 describe('P3 — 12,000 zł, preferencyjny ZUS', () => {
   const p3 = withAnswers({ monthlyRevenue: 12000, jdgStatus: 'from6to30', hadJdgInLast60Months: false });
 
-  it('ричалт із хворобовою (456.18): прихід 144k → ярус 830.58 → 9,323.07', () => {
-    expect(sub(p3, 'ryczalt')).toBeCloseTo(9323.07, 2);
+  it('ричалт із хворобовою (456.18): прихід 144k → ярус 830.58, витрати 600 → 8,723.07', () => {
+    expect(sub(p3, 'ryczalt')).toBeCloseTo(8723.07, 2);
   });
 
   it('без хворобової складка 420.86, тобто на 35.32 менше — рівно на цю суму більше на руки', () => {
@@ -112,8 +112,8 @@ describe('P3 — 12,000 zł, preferencyjny ZUS', () => {
 describe('P4 — 15,000 zł, паралельний етат (zbieg)', () => {
   const p4 = withAnswers({ hasParallelUop: true });
 
-  it('ричалт: społeczne = 0 → 12,419.25', () => {
-    expect(sub(p4, 'ryczalt')).toBeCloseTo(12419.25, 2);
+  it('ричалт: społeczne = 0 → 11,669.25', () => {
+    expect(sub(p4, 'ryczalt')).toBeCloseTo(11669.25, 2);
   });
 
   it('усі три підформи збігаються з ulga na start — підстава інша, нуль той самий', () => {
@@ -132,8 +132,8 @@ describe('P4 — 15,000 zł, паралельний етат (zbieg)', () => {
 describe('P5 — 6,000 zł, duży ZUS: пороги низького доходу', () => {
   const p5 = withAnswers({ monthlyRevenue: 6000 });
 
-  it('ричалт: прихід 72k → ярус 830.58 (ще не найнижчий) → 2,572.49', () => {
-    expect(sub(p5, 'ryczalt')).toBeCloseTo(2572.49, 2);
+  it('ричалт: прихід 72k → ярус 830.58 (ще не найнижчий), витрати 300 → 2,272.49', () => {
+    expect(sub(p5, 'ryczalt')).toBeCloseTo(2272.49, 2);
   });
 
   it('лінійний: 4.9% від доходу 3,773.24 = 184.89 < мінімуму, тож zdrowotna 432.54 → 2,705.97', () => {
@@ -151,12 +151,17 @@ describe('P5 — 6,000 zł, duży ZUS: пороги низького доход�
 });
 
 /**
- * P6 — витрати >30% (анкета читає як 40%). Ричалт свідомо не перевіряється тут:
- * він не віднімає фактичних витрат від «на руки» взагалі, і це відкрите
- * продуктове питання, а не еталон — див. docs/STATE.md, розділ «Живі блокери».
+ * P6 — витрати >30% (анкета читає як 40%). Профіль, заради якого і виявився
+ * дефект: до 2026-08-05 ричалт не віднімав фактичних витрат від «на руки», тож
+ * показував 10,492.49 замість 4,492.49 і виглядав переможцем саме там, де за
+ * нормою програє. Тепер тут закріплений РОЗВОРОТ, який обіцяє EVIDENCE §Сценарій C.
  */
-describe('P6 — 15,000 zł, витрати >30%: форми з відрахуванням витрат', () => {
+describe('P6 — 15,000 zł, витрати >30%: розворот на користь форм із витратами', () => {
   const p6 = withAnswers({ expenseShare: 'gt30' });
+
+  it('ричалт: витрати 6,000 базу податку не зменшують, але з кишені виходять → 4,492.49', () => {
+    expect(sub(p6, 'ryczalt')).toBeCloseTo(4492.49, 2);
+  });
 
   it('лінійний: витрати 6,000, дохід 7,073.24, zdrowotna 432.54 (мінімум) → 5,378.97', () => {
     expect(sub(p6, 'liniowy')).toBeCloseTo(5378.97, 2);
@@ -166,8 +171,14 @@ describe('P6 — 15,000 zł, витрати >30%: форми з відрахув
     expect(sub(p6, 'skala')).toBeCloseTo(5887.86, 2);
   });
 
-  it('при витратах 40% скаля обганяє лінійний — 32% не вмикається, а kwota zmniejszająca діє', () => {
-    expect(sub(p6, 'skala')).toBeGreaterThan(sub(p6, 'liniowy'));
+  it('при витратах 40% ричалт програє обом — це і є break-even з EVIDENCE ≳15–30%', () => {
+    expect(sub(p6, 'ryczalt')).toBeLessThan(sub(p6, 'liniowy'));
+    expect(sub(p6, 'ryczalt')).toBeLessThan(sub(p6, 'skala'));
+  });
+
+  it('а при витратах <10% ричалт далі виграє — напрям залежності відновлений', () => {
+    const lowExpense = withAnswers({});
+    expect(sub(lowExpense, 'ryczalt')).toBeGreaterThan(sub(lowExpense, 'liniowy'));
   });
 });
 
@@ -179,8 +190,8 @@ describe('P6 — 15,000 zł, витрати >30%: форми з відрахув
 describe('P7 — 30,000 zł: третій ярус zdrowotnej', () => {
   const p7 = withAnswers({ monthlyRevenue: 30000 });
 
-  it('ричалт: прихід 360k > 300k → zdrowotna 1,495.04, податок 3,437.06 → 23,067.90', () => {
-    expect(sub(p7, 'ryczalt')).toBeCloseTo(23067.9, 2);
+  it('ричалт: прихід 360k > 300k → zdrowotna 1,495.04, податок 3,437.06, витрати 1,500 → 21,567.90', () => {
+    expect(sub(p7, 'ryczalt')).toBeCloseTo(21567.9, 2);
   });
 
   it('лінійний: дохід 26,573.24, zdrowotna 1,302.09; відрахування вперлось у стелю 1,175/міс → 20,445.49', () => {
@@ -227,8 +238,8 @@ describe('P8 — 60,000 zł: 30-krotność на найманих формах', 
     expect(capped).toBeLessThan(720000 * 0.1371);
   });
 
-  it('JDG на тій самій виручці: ричалт 49,467.90 — складки фіксовані, ліміт ні до чого', () => {
-    expect(sub(p8, 'ryczalt')).toBeCloseTo(49467.9, 2);
+  it('JDG на тій самій виручці: ричалт 46,467.90 — складки фіксовані, ліміт ні до чого', () => {
+    expect(sub(p8, 'ryczalt')).toBeCloseTo(46467.9, 2);
   });
 });
 
@@ -241,8 +252,8 @@ describe('P8 — 60,000 zł: 30-krotność на найманих формах', 
 describe('P10 — 15,000 zł, workKind = otherIt: ричалт 8.5%', () => {
   const p10 = withAnswers({ workKind: 'otherIt' });
 
-  it('ричалт 8.5%: податок 1,239.70 замість 1,750.17 → 11,002.96', () => {
-    expect(sub(p10, 'ryczalt')).toBeCloseTo(11002.96, 2);
+  it('ричалт 8.5%: податок 1,239.70 замість 1,750.17 → 10,252.96', () => {
+    expect(sub(p10, 'ryczalt')).toBeCloseTo(10252.96, 2);
   });
 
   it('лінійний і скаля не залежать від виду роботи — збігаються з P1', () => {

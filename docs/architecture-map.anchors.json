@@ -80,7 +80,7 @@
     "{",
     "},"
   ],
-  "app/lib/calc/scenarios/jdg.ts:83": [
+  "app/lib/calc/scenarios/jdg.ts:91": [
     "if (tier.annualRevenueUpTo === null || annualRevenue <= tier.annualRevenueUpTo) return tier.monthly;"
   ],
   "app/lib/calc/__tests__/rules.test.ts:5-10": [
@@ -91,14 +91,14 @@
     "interface EmployerParams {",
     "}"
   ],
-  "jdg.ts:60-62": [
+  "jdg.ts:66-68": [
     "if (annualRevenue > p.annualLimit) {",
     "}"
   ],
   "shared.ts:26": [
     "return Math.max(0, tax);"
   ],
-  "jdg.ts:97": [
+  "jdg.ts:105": [
     "const tax = Math.max(0, p.rate * (income - deductibleZdrowotna));"
   ],
   "shared.ts:32": [
@@ -123,8 +123,8 @@
     "stage: 'duzy',"
   ],
   "benchmark.test.ts:32-34": [
-    "it('ричалт 12%: 15000 − 1750.17 податку − 830.58 zdrowotnej − 1926.76 ZUS = 10492.49', () => {",
-    "expect(exact(sub('ryczalt')!.rangeMonthly!)).toBeCloseTo(10492.49, 2);"
+    "it('ричалт 12%: 15000 − 750 витрат − 1750.17 податку − 830.58 zdrowotnej − 1926.76 ZUS = 9742.49', () => {",
+    "expect(exact(sub('ryczalt')!.rangeMonthly!)).toBeCloseTo(9742.49, 2);"
   ],
   "benchmark.test.ts:11-18": [
     "/**",
@@ -256,7 +256,7 @@
     "export function Question({ screen, answers, onChange }: Props) {",
     "}"
   ],
-  "benchmark.test.ts:67-75": [
+  "benchmark.test.ts:71-79": [
     "it('30-krotność обмежує базу emerytalne+rentowe при високій зарплаті', () => {",
     "});"
   ],

@@ -50,7 +50,13 @@ export function calcJdg(answers: Answers): ScenarioResult {
   };
 }
 
-/** Ричалт: 12% від ПРИХОДУ, витрати не віднімаються; 50% zdrowotnej зменшує базу. */
+/**
+ * Ричалт: 12% від ПРИХОДУ — витрати не зменшують базу податку. Але «на руки»
+ * вони зменшують: гроші виходять із кишені незалежно від того, чи їх дозволено
+ * відняти. До 2026-08-05 цього віднімання не було, і залежність виходила
+ * перевернутою — що більші витрати, то привабливішим виглядав ричалт (знайдено
+ * профілем P6 воріт G2: розрив 6,000 zł/міс при витратах 40%).
+ */
 function calcRyczalt(answers: Answers, socialMonthly: number): SubformResult {
   const p = getParams<RyczaltParams>('jdg.ryczalt.rate');
   const z = getParams<ZdrowotnaRyczaltParams>('jdg.zdrowotna.ryczalt');
@@ -71,9 +77,11 @@ function calcRyczalt(answers: Answers, socialMonthly: number): SubformResult {
 
   const rate = answers.workKind === 'programming' ? p.rateProgramming : p.rateNarrowSupport;
   const zdrowotna = zdrowotnaForRevenue(z, annualRevenue);
+  // База — прихід, витрати в ній не беруть участі. Це і є суть ричалту.
   const taxBase = answers.monthlyRevenue - zdrowotna * z.deductibleShareOfRevenue;
   const tax = rate * taxBase;
-  const takeHome = answers.monthlyRevenue - tax - zdrowotna - socialMonthly;
+  const expenses = answers.monthlyRevenue * expenseRate(answers.expenseShare);
+  const takeHome = answers.monthlyRevenue - expenses - tax - zdrowotna - socialMonthly;
 
   return { id: 'ryczalt', rangeMonthly: toRange(round2(takeHome)), available: true, sources };
 }
