@@ -230,7 +230,7 @@
     "<table className={styles.table} role=\"table\">",
     "</table>"
   ],
-  "ScenarioCard.tsx:69-87": [
+  "ScenarioCard.tsx:69-93": [
     "<table className={styles.subforms}>",
     "</table>"
   ],

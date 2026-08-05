@@ -68,21 +68,27 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
           <div className={styles.panel}>
             <table className={styles.subforms}>
               <tbody>
-                {scenario.subforms.map((sub) => (
-                  <tr key={sub.id}>
-                    <th scope="row" className={styles.subformName}>
-                      {t(`subform.${sub.id}`)}
-                    </th>
-                    <td
-                      className={styles.subformValue}
-                      data-empty={sub.available && sub.rangeMonthly ? undefined : 'true'}
-                    >
-                      {sub.available && sub.rangeMonthly
-                        ? formatRange(sub.rangeMonthly)
-                        : t(sub.unavailableReasonKey ?? 'scenario.unavailable')}
-                    </td>
-                  </tr>
-                ))}
+                {/*
+                  * Таблиця лишається числовою: де суми немає — тире, і жодної прози.
+                  * Причина йде першим пунктом у нотатки під таблицею. Доти вона
+                  * стояла в комірці суми, тобто прозою в ЧИСЛОВІЙ колонці —
+                  * вирівняною праворуч, з рваним лівим краєм на переносах, і через
+                  * `width: max-content` розтягувала таблицю під найдовше речення,
+                  * відриваючи числа решти підформ від їхніх назв.
+                  */}
+                {scenario.subforms.map((sub) => {
+                  const hasNumber = sub.available && sub.rangeMonthly;
+                  return (
+                    <tr key={sub.id}>
+                      <th scope="row" className={styles.subformName}>
+                        {t(`subform.${sub.id}`)}
+                      </th>
+                      <td className={styles.subformValue} data-empty={hasNumber ? undefined : 'true'}>
+                        {hasNumber ? formatRange(sub.rangeMonthly!) : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -128,6 +134,19 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
         )}
 
         <ul className={styles.notes}>
+          {/*
+            * Причини недоступності — ПЕРШИМИ: тире в таблиці ставить питання, і
+            * відповідь на нього має бути найближчим текстом, а не десь після
+            * ризику й загальних нот. Кожен рядок сам називає підформу, бо поза
+            * своїм рядком таблиці він її вже не має.
+            */}
+          {scenario.subforms
+            ?.filter((sub) => !(sub.available && sub.rangeMonthly))
+            .map((sub) => (
+              <li key={`why-${sub.id}`} className={styles.noteUnavailable}>
+                {t(sub.unavailableReasonKey ?? 'scenario.unavailable')}
+              </li>
+            ))}
           <li>{t(scenario.riskReasonKey)}</li>
           {scenario.noteKeys.map((key) => (
             <li key={key}>{t(key)}</li>

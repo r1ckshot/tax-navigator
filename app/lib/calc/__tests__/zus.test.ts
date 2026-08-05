@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { assessZus } from '../zus';
 import { calcJdg } from '../scenarios/jdg';
 import { withAnswers } from './fixtures';
+import { REVENUE_MAX } from '../quantize';
+import { getParams } from '@/lib/rules/types';
 
 describe('ZUS — пріоритет рішень', () => {
   it('паралельний етат (zbieg tytułów) перекриває все інше', () => {
@@ -60,5 +62,15 @@ describe('ричалт — річний ліміт', () => {
     const overLimit = calcJdg(withAnswers({ monthlyRevenue: 800000 })).subforms?.find((s) => s.id === 'ryczalt');
     expect(overLimit?.available).toBe(false);
     expect(overLimit?.unavailableReasonKey).toBe('ryczalt.overLimit');
+  });
+
+  // Guard лишається, але текст до нього користувач побачити НЕ МОЖЕ: обидва входи
+  // (повзунок і share-лінк) клампляться `quantizeRevenue` до REVENUE_MAX. Тест
+  // пінить саме це співвідношення — у день, коли стелю анкети піднімуть вище за
+  // ліміт ричалту, він впаде й нагадає, що рядок причини став видимим і його
+  // формулювання треба перечитати очима.
+  it('стеля анкети нижча за ліміт ричалту — рядок причини недосяжний з UI', () => {
+    const { annualLimit } = getParams<{ annualLimit: number }>('jdg.ryczalt.rate');
+    expect(REVENUE_MAX * 12).toBeLessThan(annualLimit);
   });
 });
