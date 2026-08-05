@@ -31,6 +31,24 @@ try {
   process.exit(1);
 }
 
+// 1b. Форма значень, а не лише валідність JSON. Окремий скрипт, бо його треба
+//     ганяти на фікстурах: `.claude/settings.json` правити не можна, а без
+//     «поганих» файлів перевірка недоказова. Привід — `attribution: true`
+//     замість тексту трейлера: JSON валідний, гейт зелений, а Claude Code добу
+//     ігнорував увесь файл разом із deny, sandbox і хуками.
+{
+  const r = spawnSync(process.execPath, ["scripts/check-settings-shape.mjs"], { encoding: "utf8" });
+  const out = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
+  const fails = out.split("\n").filter((l) => l.startsWith("FAIL:"));
+  if (r.status === 0 && fails.length === 0) {
+    ok((r.stdout || "").trim().split("\n").pop().replace(/^OK: /, ""));
+  } else if (fails.length) {
+    for (const l of fails) fail(l.replace(/^FAIL: /, ""));
+  } else {
+    fail(`check-settings-shape.mjs впав із кодом ${r.status}: ${out.trim().split("\n").pop()}`);
+  }
+}
+
 // 2. Обов'язковий deny-мінімум (секрети + незворотні команди)
 const deny = settings.permissions?.deny ?? [];
 const requiredDeny = [
