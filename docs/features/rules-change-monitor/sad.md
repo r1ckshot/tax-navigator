@@ -6,7 +6,7 @@ updated_at: "2026-08-06"
 feature_size: "M"
 stage: "04-05"
 ticket: "—"
-target_surfaces: []  # заповнюється в §4 — підмножина: backend-service | web-frontend | mobile-app | desktop-app | cli | worker | library-sdk. Читає (не передеривовує) кожна наступна стадія
+target_surfaces: ["worker"]  # §4 Target-surface рішення. Читає (не передеривовує) кожна наступна стадія
 ---
 
 # Software Architecture Document — rules-change-monitor
@@ -36,8 +36,7 @@ C4 Context (L1) inline у §3. C4 Container (L2) inline у §5.
 
 | Роль | Інтерес | Sign-off? |
 |---|---|---|
-| Хранитель матриці | Єдиний споживач щомісячного звіту | Ні |
-| Tech Lead | Затвердження SAD | Так |
+| Хранитель матриці | Єдиний споживач щомісячного звіту + затверджує SAD | Так |
 
 <!-- Decision overrides (¶4) — заповнює резолюція критика на кроці 7, інакше порожньо. -->
 <!-- Формат рядка: «Decision override: <заголовок> — rationale: <причина>» -->
@@ -191,10 +190,16 @@ sequenceDiagram
     participant Report as report.mjs
 
     Cycle->>Sources: Запит значень allowlist-джерел
-    Sources->>ZUS: Читає поточне значення
-    ZUS-->>Sources: Значення джерела
-    Sources->>Podatki: Читає поточне значення (з паузою після ZUS)
-    Podatki-->>Sources: Значення джерела
+    loop Кожен запис зі source_url = zus.pl
+        Sources->>ZUS: Читає поточне значення
+        ZUS-->>Sources: Значення джерела
+        Note over Sources,ZUS: Пауза перед наступним запитом до цього ж домену (§4 стовп 2)
+    end
+    loop Кожен запис зі source_url = podatki.gov.pl
+        Sources->>Podatki: Читає поточне значення
+        Podatki-->>Sources: Значення джерела
+        Note over Sources,Podatki: Пауза перед наступним запитом до цього ж домену
+    end
     Sources-->>Cycle: Сирі значення джерел
     Cycle->>Normalize: Нормалізує й порівнює з матрицею
     Normalize-->>Cycle: Числове порівняння
@@ -284,6 +289,16 @@ ADR-файли — `docs/features/rules-change-monitor/adr/NNNN-<title>.md`.
 - **Then:** ≤15 хв на звірку (PRD §6 NFR); огляд звіту Хранителем ≤30 хв (PRD §7 KPI-1).
 - **How verify:** Timestamp старт/фініш у cycle-log (§8).
 
+**QG-4. Rate-limit throughput** *(додано на кроці 7, критик F1 — четвертий NFR §6 не мав власного QG, хоча §4 стовп 2 і §8 Rate-limiting посилаються на нього)*
+- **When:** Виконується запит до джерела в межах allowlist-скопу.
+- **Then:** 100% джерел поточного allowlist-скопу пройдено без переривання через rate limit (PRD §6 NFR).
+- **How verify:** Cycle-log — рахує успішні/перервані запити на джерело (§8).
+
+**QG-5. Allowlist anti-drift** *(додано на кроці 7, критик F6 — ADR-0003 сам пропонував цей тест, але не записав його)*
+- **When:** Запускається `npm run verify` або сам цикл звірки.
+- **Then:** Allowlist-масив у `allowlist.mjs` — підмножина firewall-allowlist з `.devcontainer/init-firewall.sh` (ADR-0003), ніколи не ширший за нього.
+- **How verify:** Скрипт-перевірка (аналог `check-settings-shape.mjs`) звіряє масив `allowlist.mjs` проти списку доменів `init-firewall.sh`.
+
 ## 11. Ризики та технічний борг
 
 <!-- Збирає ВСЕ, що може зламатись — не лише технічне. Ніколи N/A. -->
@@ -296,6 +311,7 @@ ADR-файли — `docs/features/rules-change-monitor/adr/NNNN-<title>.md`.
 | Veto-список (AC-10) підтримується вручну, без іншого джерела правди крім `docs/EVIDENCE.md` (PRD §8) | Medium | Документувати процес поповнення при кожному новому інциденті; ревʼю списку раз на цикл | Хранитель матриці |
 | Немає лінтера/CI в репо (`docs/architecture-map.md` — brownfield-геп) — баг у скрипті не зловиться автоматично до запуску проти реальних джерел | Medium | Тести `normalize.mjs`/`diff.mjs` обовʼязкові; ручний прогін проти фікстур перед першим реальним циклом | Хранитель матриці |
 | Allowlist автозвірки покриває лише 9/26 записів (34,6%) на старті — KPI-2 ціль «100% від allowlist-скоупу» не еквівалентна «100% матриці» (PRD §7 KPI-2, §8) | Medium | Розширення allowlist — окреме відкрите рішення (PRD §8), не автоматичний наслідок цього SAD | Хранитель матриці |
+| **AC-10 інертний у дефолтному allowlist-скопі** — відома ветована цифра (ставки reformy zdrowotnej) лежить у записі з `source_url: stat.gov.pl`, поза дводоменним скопом (PRD §8); veto-гілка ADR-0002 не виконається жодного разу, доки скоп не розшириться *(додано на кроці 7, критик F6)* | Medium | Явно позначити в наступному звіті цикл-нуль спрацювань AC-10 як очікуваний, не помилку; переоцінити після розширення allowlist | Хранитель матриці |
 
 **Прийнятий борг (ок для v1, план на потім):**
 - Автоматична правка `rules.2026.json` (значень чи `verified_at`) навмисно поза межами (PRD §3) — залишається ручною дією через `/scaffold-rule`
