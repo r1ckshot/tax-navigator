@@ -176,25 +176,56 @@ C4Container
 Повідомлення семантичні, БЕЗ HTTP-методів/шляхів — це територія майбутнього api-forge.
 Цей скіл сіє лише головний потік; повне покриття кожного AC — окрема майбутня стадія. -->
 
-**Критичний потік 1: <назва>**
+**Критичний потік 1: місячний цикл, happy path (AC-01, AC-03, AC-04/05, AC-06)**
 
 ```mermaid
 sequenceDiagram
-    actor User
-    participant API
-    participant Service
-    participant DB
-    User->>API: <запит>
-    API->>Service: <виклик>
-    Service->>DB: <запис>
-    DB-->>Service: ok
-    Service-->>API: результат
-    API-->>User: відповідь
+    actor Keeper as Хранитель матриці
+    participant Cycle as cycle.mjs
+    participant Sources as sources.mjs
+    participant ZUS as zus.pl
+    participant Podatki as podatki.gov.pl
+    participant Normalize as normalize.mjs
+    participant Diff as diff.mjs
+    participant State as state.mjs
+    participant Report as report.mjs
+
+    Cycle->>Sources: Запит значень allowlist-джерел
+    Sources->>ZUS: Читає поточне значення
+    ZUS-->>Sources: Значення джерела
+    Sources->>Podatki: Читає поточне значення (з паузою після ZUS)
+    Podatki-->>Sources: Значення джерела
+    Sources-->>Cycle: Сирі значення джерел
+    Cycle->>Normalize: Нормалізує й порівнює з матрицею
+    Normalize-->>Cycle: Числове порівняння
+    Cycle->>Diff: Визначає стан запису плюс veto-перевірка
+    Diff->>State: Читає історію і veto-список
+    State-->>Diff: Минулі стани, veto-записи
+    Diff-->>Cycle: Стан кожного запису
+    Cycle->>State: Записує стан цього циклу
+    Cycle->>Report: Формує місячний звіт
+    Report-->>Cycle: Готовий звіт
+    Keeper->>Report: Відкриває звіт наступного дня
 ```
 
-<!-- Для XS/S — 1 потік достатньо. Для M+ — додати 2-4 (failure-mode, async). -->
+**Критичний потік 2: джерело недоступне (AC-08, AC-09)**
 
-**Критичний потік 2: <напр. поширення події>** — <якщо застосовно, інакше N/A>.
+```mermaid
+sequenceDiagram
+    participant Cycle as cycle.mjs
+    participant Sources as sources.mjs
+    participant ZUS as zus.pl
+    participant Diff as diff.mjs
+    participant State as state.mjs
+
+    Cycle->>Sources: Запит значення джерела
+    Sources->>ZUS: Читає поточне значення
+    ZUS--xSources: Недоступність (timeout або WAF-виклик)
+    Sources-->>Cycle: Причина недоступності
+    Cycle->>Diff: Позначає стан «не вдалось перевірити» плюс причина
+    Diff->>State: Записує стан і причину
+    Note over Cycle,State: Наступний цикл повторить саме цей запис (AC-09), не пропустить назавжди
+```
 
 ## 7. Розгортання
 
