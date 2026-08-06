@@ -126,41 +126,48 @@ C4Context
 
 <!-- ВНУТРІШНЯ ДЕКОМПОЗИЦІЯ — модулі, контейнери, БД. Хто з ким може говорити. -->
 
-<1 абзац: шарова / гексагональна / clean / event-driven архітектура. Чому.>
+Простий pipeline, той самий рівень, що `scripts/state-checkpoint/` — не
+гексагональна розкладка з `app/lib`. Одна поверхня (`worker`), одна команда
+запуску за розкладом. Шість модулів-файлів, кожен відповідає за одне
+архітектурне рішення з §4 (ADR-0001/0002/0003 + паузу-стовп + report), не
+змішані в один файл, як `check-stale-rules.mjs` (там простіше — одне
+вирахування зі стану, тут — чотири окремі рішення).
 
 **Внутрішня декомпозиція:**
 
 ```
-<напр. app/lib/<модуль>/>
-├── domain/       <сутності + sentinel-помилки>
-├── app/          <use cases / сервіси>
-├── infra/        <реалізація репозиторіїв>
-├── ports/        <handlers, DTO, мапінг помилок>
-└── module.ts     <self-wiring>
+scripts/rules-change-monitor/
+├── allowlist.mjs   <власний список доменів автозвірки (ADR-0003)>
+├── sources.mjs       <фетч zus.pl/podatki.gov.pl, пауза між запитами (§4 стовп 2)>
+├── normalize.mjs       <нормалізація → порівняння чисел (ADR-0001)>
+├── diff.mjs               <присвоює один із 7 станів AC-03, звіряє з veto-списком AC-10>
+├── state.mjs                 <читає/пише cycle-history.json (ADR-0002)>
+├── report.mjs                   <збирає місячний звіт (AC-06/AC-07)>
+└── cycle.mjs                       <self-wiring — точка входу для cron>
 ```
 
-**C4 Container (L2):** один `Container` на кожну оголошену `target_surface`
-(fullstack `[backend-service, web-frontend]` — контейнер backend-API + контейнер
-web/SPA; приклад нижче для однієї поверхні, додати/замінити під §4).
+**C4 Container (L2):** одна оголошена `target_surface` → один `Container`.
 
 ```mermaid
 C4Container
-    title <система> — Containers
+    title rules-change-monitor — Containers
 
-    Person(user, "<роль>")
+    Person(keeper, "Хранитель матриці")
 
-    Container_Boundary(boundary, "<наша система>") {
-        Container(web, "<web/API контейнер>", "<технологія>", "<призначення>")
-        Container(svc, "<service контейнер>", "<технологія>", "<призначення>")
-        ContainerDb(db, "<БД>", "<технологія>", "<призначення>")
+    Container_Boundary(boundary, "rules-change-monitor") {
+        Container(monitor, "rules-change-monitor worker", "Node.js scheduled job", "щомісячний цикл: фетч → нормалізація → diff → звіт")
     }
 
-    System_Ext(ext, "<зовнішня система>", "<призначення>")
+    ContainerDb(history, "Історія циклів + veto-список", "JSON-файл", "стани по rule_id, повтор невдалого AC-09, ADR-0002")
+    System_Ext(zus, "zus.pl", "Скриптоване джерело")
+    System_Ext(podatki, "podatki.gov.pl", "Скриптоване джерело")
+    SystemDb(rulesdb, "Rules-матриця Tax Navigator", "rules.2026.json")
 
-    Rel(user, web, "<взаємодія>", "<протокол>")
-    Rel(web, svc, "<виклики сервісу>")
-    Rel(svc, db, "<читає/пише>", "<драйвер>")
-    Rel(svc, ext, "<що робить>", "<протокол>")
+    Rel(keeper, monitor, "Читає місячний diff-звіт", "файл")
+    Rel(monitor, zus, "Звіряє значення", "HTTP, read-only")
+    Rel(monitor, podatki, "Звіряє значення", "HTTP, read-only")
+    Rel(monitor, rulesdb, "Читає поточні значення", "читання файлу")
+    Rel(monitor, history, "Читає/пише стан циклу", "fs")
 ```
 
 ## 6. Виконання (runtime)
