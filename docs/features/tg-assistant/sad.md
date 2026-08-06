@@ -67,31 +67,35 @@ C4 Context (L1) inline у §3. C4 Container (L2) inline у §5.
 
 <!-- Малює МЕЖУ СИСТЕМИ — хто говорить з нею ззовні, де закінчується зона довіри. Ніколи N/A. -->
 
-<2-3 речення бізнес-контексту з PRD §1>
+tg-assistant — окремий read-only інструмент поза шаром
+presentation→adapters→calc→rules основного застосунку
+(`docs/architecture-map.md`) — окремий процес, не інтеграція у Next.js-продукт.
+Межа довіри: інструмент лише читає Telegram і `rules.2026.json`, ніколи не
+пише в жоден з них; авторизації немає — єдиний користувач один.
 
 **Зовнішні системи (in/out):**
 
 | Актор або система | Тип | Взаємодія |
 |---|---|---|
-| <роль з CONTEXT.md> | Person | <що робить> |
-| <внутрішня система> | System (internal) | <взаємодія> |
-| <зовнішня система> | System (external) | <взаємодія> |
+| Дослідник ринку | Person | Читає тижневий звіт |
+| Telegram | System (external) | MTProto, read-only читання повідомлень з чатів-учасника |
+| Rules-матриця Tax Navigator | System (external) | Читання для розмітки «покрито»/«біла пляма»; життєвий цикл веде rules-change-monitor, не tg-assistant |
 
 **C4 Context (L1):**
 
 ```mermaid
 C4Context
-    title <система> — System Context
+    title tg-assistant — System Context
 
-    Person(user, "<роль>", "<інтент>")
-    System(system, "<наша система>", "<опис одним реченням>")
-    System_Ext(ext, "<зовнішня система>", "<опис одним реченням>")
+    Person(researcher, "Дослідник ринку", "єдиний споживач тижневого звіту")
+    System(tgassistant, "tg-assistant", "Безнаглядний щотижневий збір і розмітка органічних податкових питань")
+    System_Ext(telegram, "Telegram", "MTProto API — чати, де дослідник вже учасник")
+    SystemDb(rulesdb, "Rules-матриця Tax Navigator", "rules.2026.json — 17 правил із source_url/verified_at")
 
-    Rel(user, system, "<взаємодія>", "<протокол>")
-    Rel(system, ext, "<взаємодія>", "<протокол>")
+    Rel(researcher, tgassistant, "Читає тижневий звіт", "файл")
+    Rel(tgassistant, telegram, "Читає нові повідомлення", "MTProto, read-only")
+    Rel(tgassistant, rulesdb, "Звіряє питання проти правил", "читання файлу")
 ```
-
-<!-- greenfield без коду й мапи → <!-- brownfield: N/A — greenfield repo --> замість цитувань конвенцій. -->
 
 ## 4. Стратегія рішення
 
