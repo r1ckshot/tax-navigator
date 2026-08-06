@@ -120,41 +120,44 @@ C4Context
 
 <!-- ВНУТРІШНЯ ДЕКОМПОЗИЦІЯ — модулі, контейнери, БД. Хто з ким може говорити. -->
 
-<1 абзац: шарова / гексагональна / clean / event-driven архітектура. Чому.>
+Простий pipeline, не гексагональна розкладка — одна поверхня (`worker`),
+одна команда запуску за розкладом, немає причини платити за шари
+domain/app/infra/ports заради одного cron-скрипта. Чотири модулі виконуються
+послідовно (collector → filter → labeler → reporter), спільний стан читає й
+пише кожен з них через єдиний `state.json` (ADR-0003).
 
 **Внутрішня декомпозиція:**
 
 ```
-<напр. app/lib/<модуль>/>
-├── domain/       <сутності + sentinel-помилки>
-├── app/          <use cases / сервіси>
-├── infra/        <реалізація репозиторіїв>
-├── ports/        <handlers, DTO, мапінг помилок>
-└── module.ts     <self-wiring>
+research/tg-assistant/
+├── collector.ts   <MTProto-клієнт (ADR-0001), backoff-черга по чатах (ADR-0002)>
+├── filter.ts       <відсіює органічне питання (US-02) від шуму>
+├── labeler.ts       <звіряє з rules.2026.json через app/lib/rules/types.ts (US-03)>
+├── reporter.ts       <збирає тижневий звіт (US-04)>
+├── state.ts           <читає/пише state.json — дедуп, catch-up, TTL (ADR-0003)>
+└── cycle.ts             <self-wiring — точка входу для cron>
 ```
 
-**C4 Container (L2):** один `Container` на кожну оголошену `target_surface`
-(fullstack `[backend-service, web-frontend]` — контейнер backend-API + контейнер
-web/SPA; приклад нижче для однієї поверхні, додати/замінити під §4).
+**C4 Container (L2):** одна оголошена `target_surface` → один `Container`.
 
 ```mermaid
 C4Container
-    title <система> — Containers
+    title tg-assistant — Containers
 
-    Person(user, "<роль>")
+    Person(researcher, "Дослідник ринку")
 
-    Container_Boundary(boundary, "<наша система>") {
-        Container(web, "<web/API контейнер>", "<технологія>", "<призначення>")
-        Container(svc, "<service контейнер>", "<технологія>", "<призначення>")
-        ContainerDb(db, "<БД>", "<технологія>", "<призначення>")
+    Container_Boundary(boundary, "tg-assistant") {
+        Container(worker, "tg-assistant worker", "Node.js scheduled job", "щотижневий цикл: збір → фільтр → розмітка → звіт")
     }
 
-    System_Ext(ext, "<зовнішня система>", "<призначення>")
+    ContainerDb(state, "Стан циклу", "JSON-файл", "дедуп, catch-up маркери, TTL 90 днів")
+    System_Ext(telegram, "Telegram", "MTProto API")
+    SystemDb(rulesdb, "Rules-матриця Tax Navigator", "rules.2026.json")
 
-    Rel(user, web, "<взаємодія>", "<протокол>")
-    Rel(web, svc, "<виклики сервісу>")
-    Rel(svc, db, "<читає/пише>", "<драйвер>")
-    Rel(svc, ext, "<що робить>", "<протокол>")
+    Rel(researcher, worker, "Читає тижневий звіт", "файл")
+    Rel(worker, telegram, "Читає нові повідомлення", "MTProto, read-only")
+    Rel(worker, rulesdb, "Звіряє питання проти правил", "читання файлу")
+    Rel(worker, state, "Читає/пише стан циклу", "fs")
 ```
 
 ## 6. Виконання (runtime)
