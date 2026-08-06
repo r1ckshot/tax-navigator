@@ -68,28 +68,36 @@ C4 Context (L1) inline у §3. C4 Container (L2) inline у §5.
 
 <!-- Малює МЕЖУ СИСТЕМИ — хто говорить з нею ззовні, де закінчується зона довіри. Ніколи N/A. -->
 
-<2-3 речення бізнес-контексту з PRD §1>
+rules-change-monitor — окремий Node CLI-інструмент поза шаром
+presentation→adapters→calc→rules основного застосунку. Щомісяця звіряє
+`zus.pl` і `podatki.gov.pl` проти `rules.2026.json` і видає diff-звіт;
+ніколи не пише в саму матрицю (PRD §3 — поза межами).
 
 **Зовнішні системи (in/out):**
 
 | Актор або система | Тип | Взаємодія |
 |---|---|---|
-| <роль з CONTEXT.md> | Person | <що робить> |
-| <внутрішня система> | System (internal) | <взаємодія> |
-| <зовнішня система> | System (external) | <взаємодія> |
+| Хранитель матриці | Person | Читає місячний diff-звіт |
+| `zus.pl` | System (external) | Скриптоване джерело — складки ZUS |
+| `podatki.gov.pl` | System (external) | Скриптоване джерело — податкові норми |
+| Rules-матриця Tax Navigator | System (external) | Читання для звірки; життєвий цикл веде `/scaffold-rule`, не ця фіча |
 
 **C4 Context (L1):**
 
 ```mermaid
 C4Context
-    title <система> — System Context
+    title rules-change-monitor — System Context
 
-    Person(user, "<роль>", "<інтент>")
-    System(system, "<наша система>", "<опис одним реченням>")
-    System_Ext(ext, "<зовнішня система>", "<опис одним реченням>")
+    Person(keeper, "Хранитель матриці", "єдиний споживач місячного diff-звіту")
+    System(monitor, "rules-change-monitor", "Щомісячна тиха звірка скриптованих джерел проти rules.2026.json")
+    System_Ext(zus, "zus.pl", "Складки ZUS — скриптоване джерело")
+    System_Ext(podatki, "podatki.gov.pl", "Податкові норми — скриптоване джерело")
+    SystemDb(rulesdb, "Rules-матриця Tax Navigator", "rules.2026.json — 26 записів, лише читання")
 
-    Rel(user, system, "<взаємодія>", "<протокол>")
-    Rel(system, ext, "<взаємодія>", "<протокол>")
+    Rel(keeper, monitor, "Читає місячний diff-звіт", "файл")
+    Rel(monitor, zus, "Звіряє значення", "HTTP, read-only")
+    Rel(monitor, podatki, "Звіряє значення", "HTTP, read-only")
+    Rel(monitor, rulesdb, "Читає поточні значення для порівняння", "читання файлу")
 ```
 
 <!-- greenfield без коду й мапи → <!-- brownfield: N/A — greenfield repo --> замість цитувань конвенцій. -->
