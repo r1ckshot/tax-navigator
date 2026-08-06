@@ -3,7 +3,7 @@ status: Approved
 owner: "Mike"
 reviewers: []
 updated_at: "2026-08-06"
-feature_size: "S"
+feature_size: "M"
 stage: "03"
 ticket: "—"
 ---

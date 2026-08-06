@@ -106,17 +106,17 @@ C4Context
 
 <!-- 3-4 СТРАТЕГІЧНІ СТОВПИ, з яких ростуть ADR. Найгустіша секція — gate спрацьовує майже завжди. -->
 
-**Target surface(s) (перше рішення — що саме будуємо):** `<напр. [backend-service, web-frontend]>`
-<!-- Дзеркалити у frontmatter target_surfaces. На кожну оголошену UI-поверхню (web-frontend/
-mobile-app/desktop-app) — окреме рішення UI-архітектури нижче (web → SSR/SPA/hybrid;
-mobile → native/cross-platform). Більше однієї поверхні — зазвичай ADR. UI переюзає наявну
-дизайн-систему з architecture-map.md §Фронтенд, не винаходить заново. -->
+**Target surface(s) (перше рішення — що саме будуємо):** `[worker]`
+<!-- Scheduled job без request/response і без UI — точно матчить "раз на місяць скрипт
+автоматично звіряє" з US-01. Радіус удару 1/3 (лише чесна альтернатива — cli), gate не
+спрацьовує, рішення лишається inline. -->
 
 **Стратегічні вибори (насіння для ADR):**
 
-1. **<напр. Ізоляція модулів через події>** — <2-3 речення rationale з посиланням на Топ-3 якості + Обмеження>.
-2. **<напр. Єдине сховище>** — <2-3 речення>.
-3. **<напр. UI-архітектура: SPA, що споживає backend API>** — <на кожну оголошену UI-поверхню; 2-3 речення>.
+1. **Нормалізація → порівняння чисел для diff-детектора** — парсити число з тексту джерела, потім порівнювати числове значення з матрицею; розрізняє «косметика» (AC-04) від «розбіжність» (AC-05). Радіус удару 2/3 (мультимодульно: diff-детектор + звіт + veto-перевірка; чесна альтернатива: raw string diff) → [ADR-0001](adr/0001-normalize-then-compare-numeric-values.md).
+2. **Пауза між запитами до одного джерела** — фіксована затримка, а не адаптивний backoff; закриває abuse case з PRD §6.1, якого наявний прецедент (`fetch-zus-benchmark.mjs`) не покриває (§2). Радіус удару 1/3 (лише чесна альтернатива) — межовий, свідомо лишено **inline**, не ADR: тактична деталь одного шару fetch, не архітектурна розвилка.
+3. **Локальний JSON-файл для історії циклів і veto-списку** — без нього AC-09 (повторити невдале) і AC-10 (веto відомих скасованих цифр) не працюють узагалі. Радіус удару 3/3 (незворотнє, мультимодульно, чесна альтернатива — SQLite) → [ADR-0002](adr/0002-local-json-file-for-cycle-history-and-veto-list.md).
+4. **Власний allowlist-масив у скрипті, не парсинг `init-firewall.sh`** — allowlist автозвірки (AC-02) семантично вужчий за firewall-allowlist (мережевий доступ ≠ підтверджена скриптована доступність, PRD §8). Радіус удару 2/3 (мультимодульно: firewall-конфіг + `.claude/settings.json` + цей скрипт; чесна альтернатива: parse-from-firewall) → [ADR-0003](adr/0003-own-allowlist-in-script-not-parsed-from-firewall-config.md).
 
 Кожне тактичне рішення в наступних секціях має простежуватись до одного з цих
 стовпів. Тактичне рішення, що суперечить стовпу, — червоний прапорець, виносити
@@ -226,9 +226,11 @@ N/A допустимо для XS/S, що переюзає наявне розг�
 
 | # | Назва | Статус | Секція |
 |---|---|---|---|
-| <NNNN> | <у формі рішення, напр. «Use sliding window for rate limiting»> | Accepted | §<N> |
+| 0001 | Normalize then compare numeric values for diff detection | Accepted | §4 |
+| 0002 | Local JSON file for cycle history and the veto list | Accepted | §4 |
+| 0003 | Own allowlist array in the script instead of parsing firewall config | Accepted | §4 |
 
-ADR-файли — `docs/features/<slug>/adr/NNNN-<title>.md`.
+ADR-файли — `docs/features/rules-change-monitor/adr/NNNN-<title>.md`.
 
 <!-- N/A допустимо лише якщо жодне рішення не спрацювало на gate (типово для XS): <!-- N/A: no decisions crossed blast-radius threshold --> -->
 
