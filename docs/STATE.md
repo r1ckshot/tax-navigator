@@ -6,8 +6,9 @@
 ## Фаза
 
 **Курс:** M3, M4, M5 здано. M5 разом із capstone закрито 2026-08-04 — вимір,
-рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 у роботі: ideation по
-фічі `tg-assistant` пройдено, далі PRD і tasks.
+рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 у роботі: урок 6.3
+(write-prd) здано обома рівнями 2026-08-06 — PRD для `tg-assistant` Approved,
+далі `tasks/`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 183 node-тести + 15 UI зелені.
@@ -18,8 +19,32 @@
 
 ## Зараз у роботі
 
-**Нічого — ворота G2 закриті 2026-08-05.** Далі за чергою: `tg-assistant` T1+T2,
-короткий PRD → `tasks/` ([BACKLOG.md](BACKLOG.md) → NOW).
+**Нічого — PRD `tg-assistant` Approved 2026-08-06.** Далі за чергою: `tasks/`
+для `tg-assistant` ([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-06 (курс, урок 6.3 — from idea brief to PRD, обидва рівні):
+- [x] Простий рівень: адаптовано `.claude/skills/write-prd/` (з курсового
+  `sdlc/plugin/skills/write-prd` + `docs/notes/6-sdlc.md` §6.3) + агент
+  `prd-critic` і скіл `prd-review` — прогнано на tg-assistant, 4 раунди
+  `/prd-review` до APPROVE. Критик спіймав реальний розрив: AC розмічав
+  усі непокриті питання «біла пляма», хоча власний `CONTEXT.md` уже виключав
+  із цієї мітки те, на що продукт свідомо не відповідає —
+  [tg-assistant/PRD.md](features/tg-assistant/PRD.md) (`status: Approved`)
+- [x] Складний рівень: той самий `write-prd --reference
+  scripts/check-stale-rules.mjs` на `rules-change-monitor`, повний Socratic
+  + Add edge case (AC-10, захист від ветованого значення), 7 раундів
+  `/prd-review` — критик двічі впіймав власні арифметичні помилки в KPI-цілях,
+  перерахувавши 26 записів `rules.2026.json` незалежно —
+  [rules-change-monitor/PRD.md](features/rules-change-monitor/PRD.md)
+  (`status: Approved`)
+- [x] Власний скіл `.claude/skills/spec-forge/` — паралельний, не привʼязаний
+  до фічі: §9 Evidence ledger (кожна NFR/KPI-цифра з джерелом) + self-check
+  на слова-поради + рубрика розміру з `CLAUDE.md` замість generic XS-XL.
+  Прогнано на tg-assistant для порівняння —
+  [tg-assistant/PRD-spec-forge.md](features/tg-assistant/PRD-spec-forge.md).
+  Правило іменованих станів упіймало той самий розрив на кроці чернетки, який
+  `write-prd` знайшов лише через 4 раунди критика
+- [x] Гілка `feat/m6-3-write-prd`, 5 комітів, змержено в `master`
 
 Закрито 2026-08-05 (курс, урок 6.2 — словник термінів і бриф ідеї, обидва рівні):
 - [x] Простий рівень: bootstrap `CONTEXT.md` через `fix-term` (3 терміни з NOT-межами)

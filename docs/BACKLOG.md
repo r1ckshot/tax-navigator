@@ -16,7 +16,7 @@
 
 | Задача | Чому | Хто |
 |---|---|---|
-| `tg-assistant` T1+T2: короткий PRD → `tasks/` | Це новий канал вимірювання G1, а не фіча «колись». Розмір S → без arc42 і OpenAPI. Стояло після G2 (DECISIONS 2026-08-03), бо міряти попит на незвіреному движку означало б міряти те, чого не гарантуємо — **блокер знято 2026-08-05**. Критерій зупинки вже в брифі: 6 циклів, <5 питань → півот | Claude + Mike |
+| `tg-assistant` T1+T2: `tasks/` | Це новий канал вимірювання G1, а не фіча «колись». Розмір S → без arc42 і OpenAPI. Критерій зупинки вже в [PRD](features/tg-assistant/PRD.md) §7: 6 циклів, <5 питань → півот | Claude + Mike |
 
 ## NEXT
 
@@ -42,6 +42,7 @@
 | M6 SDLC | PRD → arc42+ADR → `tasks/` для `tg-assistant` | ⏳ ideation пройдено, далі PRD |
 | M6, урок 6.1 | Скіл `.claude/skills/sdlc-audit/` (інспекційний, read-only) + ручна інвентаризація [features/nierejestrowana/artifact-inventory.md](features/nierejestrowana/artifact-inventory.md) + прогін і порівняння [sdlc-audit-run.md](features/nierejestrowana/sdlc-audit-run.md) | ✅ здано 2026-08-05: прогін на реальній фічі дав 7 правок у SKILL.md, з них 3 — з помилок самого скіла |
 | M6, урок 6.2 | Готовий (невендорений) `interview`+`fix-term` вручну на новій фічі [rules-change-monitor](features/rules-change-monitor/idea-brief.md) (CONTEXT.md + 15-секційний бриф, Approach C, RICE=12.5) + toy-вправа на іграшковій ідеї (скріншоти, не закомічено) + порівняння з власним `.claude/skills/interview/` | ✅ здано 2026-08-05: порівняння й побічна знахідка (`check-stale-rules.mjs` вже існує) — [JOURNAL.md](JOURNAL.md) |
+| M6, урок 6.3 | Адаптовано `.claude/skills/write-prd/`+`prd-review`+агент `prd-critic`; PRD для [tg-assistant](features/tg-assistant/PRD.md) (4 раунди рев'ю) і [rules-change-monitor](features/rules-change-monitor/PRD.md) (`--reference`, Add edge case, 7 раундів); власний скіл `.claude/skills/spec-forge/` + порівняльний прогін [PRD-spec-forge.md](features/tg-assistant/PRD-spec-forge.md) | ✅ здано 2026-08-06: критик двічі спіймав власні арифметичні помилки автора (перерахунок 26 записів `rules.2026.json`); named-states правило `spec-forge` упіймало на чернетці той самий розрив, що `write-prd` знайшов лише через критика |
 
 **Відкинуто свідомо, щоб не плодити інструменти:** скіл `module-context` (знання
 вже в `docs/notes/`, скіл лише дублював би — той самий висновок, що дав бенчмарк
