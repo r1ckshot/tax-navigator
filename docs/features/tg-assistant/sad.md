@@ -101,17 +101,16 @@ C4Context
 
 <!-- 3-4 СТРАТЕГІЧНІ СТОВПИ, з яких ростуть ADR. Найгустіша секція — gate спрацьовує майже завжди. -->
 
-**Target surface(s) (перше рішення — що саме будуємо):** `<напр. [backend-service, web-frontend]>`
-<!-- Дзеркалити у frontmatter target_surfaces. На кожну оголошену UI-поверхню (web-frontend/
-mobile-app/desktop-app) — окреме рішення UI-архітектури нижче (web → SSR/SPA/hybrid;
-mobile → native/cross-platform). Більше однієї поверхні — зазвичай ADR. UI переюзає наявну
-дизайн-систему з architecture-map.md §Фронтенд, не винаходить заново. -->
+**Target surface(s) (перше рішення — що саме будуємо):** `[worker]`
+<!-- Scheduled job без request/response-поверхні й без UI — точно матчить "безнаглядно
+обходить чати раз на тиждень" з US-01. Один surface, gate не спрацьовує (немає
+мультиповерхневості), рішення лишається inline. -->
 
 **Стратегічні вибори (насіння для ADR):**
 
-1. **<напр. Ізоляція модулів через події>** — <2-3 речення rationale з посиланням на Топ-3 якості + Обмеження>.
-2. **<напр. Єдине сховище>** — <2-3 речення>.
-3. **<напр. UI-архітектура: SPA, що споживає backend API>** — <на кожну оголошену UI-поверхню; 2-3 речення>.
+1. **Пряма MTProto-бібліотека замість інтерактивної Claude+MCP сесії** — цикл мусить бути безнаглядним (US-01, Топ-3 якість «Обмежена тривалість»); жива сесія з MCP-сервером (`research/tg-mining/01-SETUP.md`) не автоматизується без людини за клавіатурою, а вкладений `claude -p` за розкладом задокументовано ненадійний (`environment-limits.md`). → [ADR-0001](adr/0001-direct-mtproto-library-over-interactive-mcp.md).
+2. **Черга запитів по чатах з експоненційним відступом, що читає конкретне значення X із самої помилки `FLOOD_WAIT_X` Telegram** (§2 Обмеження, `research/tg-mining/01-SETUP.md:35` — той самий обмежувач, що вже зупиняв ручні раунди збору) і призупиняє лише той чат, що впав у ліміт, а не весь прогін. Забезпечує NFR ≥10 чатів за прогін (Топ-3 якість «Обмежена тривалість») і AC-08 (явна причина збою на чат). → [ADR-0002](adr/0002-per-chat-backoff-queue-for-flood-wait.md).
+3. **Локальний JSON-файл стану циклу** — дедуп для catch-up (AC-09), маркери вікна backfill (AC-10), TTL 90 днів для похідних даних (§6.1), без сирого тексту на диску. Не SQLite/Postgres — соло-інструмент, один читач/один писар, узгоджено з тим, що основний продукт теж без БД (`architecture-map.md`). → [ADR-0003](adr/0003-json-file-for-cycle-state.md).
 
 Кожне тактичне рішення в наступних секціях має простежуватись до одного з цих
 стовпів. Тактичне рішення, що суперечить стовпу, — червоний прапорець, виносити
@@ -221,9 +220,11 @@ N/A допустимо для XS/S, що переюзає наявне розг�
 
 | # | Назва | Статус | Секція |
 |---|---|---|---|
-| <NNNN> | <у формі рішення, напр. «Use sliding window for rate limiting»> | Accepted | §<N> |
+| 0001 | Use a direct MTProto library instead of an interactive Claude+MCP session | Accepted | §4 |
+| 0002 | Per-chat exponential-backoff queue keyed on Telegram's FLOOD_WAIT_X | Accepted | §4 |
+| 0003 | Local JSON file for weekly-cycle state instead of a database | Accepted | §4 |
 
-ADR-файли — `docs/features/<slug>/adr/NNNN-<title>.md`.
+ADR-файли — `docs/features/tg-assistant/adr/NNNN-<title>.md`.
 
 <!-- N/A допустимо лише якщо жодне рішення не спрацювало на gate (типово для XS): <!-- N/A: no decisions crossed blast-radius threshold --> -->
 
