@@ -32,7 +32,9 @@
   "postCreateCommand": "npm ci",
   "containerEnv": {
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
-    "WATCHPACK_POLLING": "true"
+    "WATCHPACK_POLLING": "true",
+    "LANG": "C.utf8",
+    "LC_ALL": "C.utf8"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",

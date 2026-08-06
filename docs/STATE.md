@@ -6,9 +6,9 @@
 ## Фаза
 
 **Курс:** M3, M4, M5 здано. M5 разом із capstone закрито 2026-08-04 — вимір,
-рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 у роботі: урок 6.3
-(write-prd) здано обома рівнями 2026-08-06 — PRD для `tg-assistant` Approved,
-далі `tasks/`.
+рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 у роботі: уроки 6.3
+(write-prd) і 6.4 (architecture-design) здані обома рівнями 2026-08-06 — PRD і
+SAD для `tg-assistant` та `rules-change-monitor` готові, далі `tasks/`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 183 node-тести + 15 UI зелені.
@@ -19,8 +19,32 @@
 
 ## Зараз у роботі
 
-**Нічого — PRD `tg-assistant` Approved 2026-08-06.** Далі за чергою: `tasks/`
-для `tg-assistant` ([BACKLOG.md](BACKLOG.md) → NOW).
+**Нічого — SAD `tg-assistant` і `rules-change-monitor` готові 2026-08-06.**
+Далі за чергою: `tasks/` для `tg-assistant` ([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-06 (курс, урок 6.4 — SAD + ADR через architecture-design, обидва рівні):
+- [x] Простий рівень: адаптовано `.claude/skills/architecture-design/` (з
+  курсового `sdlc/plugin/skills/architecture-design`) + агент `sad-critic` —
+  прогнано на `tg-assistant` §1-§5, 3 ADR, коміт на секцію (не один фінальний,
+  як у write-prd). Edit-стовп §4 з явним посиланням на §2-інцидент
+  (`FLOOD_WAIT_X`) — [tg-assistant/sad.md](features/tg-assistant/sad.md)
+- [x] Складний рівень: `rules-change-monitor` перекласифікований S→M саме
+  для цієї вправи (`.size` + PRD `feature_size`), повний прохід §1-§12 +
+  критик-раунд. Критик зловив 6 реальних розривів — дрімаючий AC-10 в
+  ADR-0002 (PRD §8 вже казав, що він не спрацює під дефолтним allowlist, ніхто
+  це не звів під час walk-у), самосуперечність в ADR-0003, вигадану роль «Tech
+  Lead» — усі виправлені —
+  [rules-change-monitor/sad.md](features/rules-change-monitor/sad.md) (3 ADR,
+  нижче курсового «типового» діапазону 5-12 для M — свідомо не роздуто)
+- [x] Власний скіл `.claude/skills/sad-forge/` — 4-й критерій радіусу удару
+  («зачіпає постійне сховище»), рекомендовані контейнери §5 під дві реальні
+  форми фічі цього репо, формалізована ADR-naming конвенція. Прогнано на
+  `tg-assistant` §1-§5 для порівняння —
+  [tg-assistant/sad-sad-forge.md](features/tg-assistant/sad-sad-forge.md).
+  Найпомітніший приріст — §1 Stakeholders уникнув вигаданої ролі «Tech Lead»
+  з самого початку, там, де оригінальний прогін зловив це лише через критика
+  (і на іншій фічі); деталі порівняння — [JOURNAL.md](JOURNAL.md)
+- [ ] Гілка `feat/m6-4-architecture-design` — злиття в `master` чекає підтвердження Mike
 
 Закрито 2026-08-06 (курс, урок 6.3 — from idea brief to PRD, обидва рівні):
 - [x] Простий рівень: адаптовано `.claude/skills/write-prd/` (з курсового
