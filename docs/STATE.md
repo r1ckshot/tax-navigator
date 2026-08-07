@@ -25,7 +25,7 @@ SAD для `tg-assistant` та `rules-change-monitor` готові, далі `ta
 Закрито 2026-08-06 (курс, урок 6.4 — SAD + ADR через architecture-design, обидва рівні):
 - [x] Простий рівень: адаптовано `.claude/skills/architecture-design/` (з
   курсового `sdlc/plugin/skills/architecture-design`) + агент `sad-critic` —
-  прогнано на `tg-assistant` §1-§5, 3 ADR, коміт на секцію (не один фінальний,
+  прогнано на tg-assistant §1-§5, 3 ADR, коміт на секцію (не один фінальний,
   як у write-prd). Edit-стовп §4 з явним посиланням на §2-інцидент
   (`FLOOD_WAIT_X`) — [tg-assistant/sad.md](features/tg-assistant/sad.md)
 - [x] Складний рівень: `rules-change-monitor` перекласифікований S→M саме
@@ -39,7 +39,7 @@ SAD для `tg-assistant` та `rules-change-monitor` готові, далі `ta
 - [x] Власний скіл `.claude/skills/sad-forge/` — 4-й критерій радіусу удару
   («зачіпає постійне сховище»), рекомендовані контейнери §5 під дві реальні
   форми фічі цього репо, формалізована ADR-naming конвенція. Прогнано на
-  `tg-assistant` §1-§5 для порівняння —
+  tg-assistant §1-§5 для порівняння —
   [tg-assistant/sad-sad-forge.md](features/tg-assistant/sad-sad-forge.md).
   Найпомітніший приріст — §1 Stakeholders уникнув вигаданої ролі «Tech Lead»
   з самого початку, там, де оригінальний прогін зловив це лише через критика
