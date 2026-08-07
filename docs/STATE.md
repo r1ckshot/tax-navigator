@@ -7,8 +7,10 @@
 
 **Курс:** M3, M4, M5 здано. M5 разом із capstone закрито 2026-08-04 — вимір,
 рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 у роботі: уроки 6.3
-(write-prd) і 6.4 (architecture-design) здані обома рівнями 2026-08-06 — PRD і
-SAD для `tg-assistant` та `rules-change-monitor` готові, далі `tasks/`.
+(write-prd), 6.4 (architecture-design) і 6.5 (complete-sequence-diagrams +
+generate-data-model) здані обома рівнями 2026-08-06/07 — PRD і SAD для
+`tg-assistant` та `rules-change-monitor` готові, тепер і §6 sequence-потоки +
+data-model + staged-міграції для обох, далі `tasks/`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 183 node-тести + 15 UI зелені.
@@ -19,8 +21,35 @@ SAD для `tg-assistant` та `rules-change-monitor` готові, далі `ta
 
 ## Зараз у роботі
 
-**Нічого — SAD `tg-assistant` і `rules-change-monitor` готові 2026-08-06.**
+**Нічого — урок 6.5 (sequence diagrams + data model) закрито 2026-08-07.**
 Далі за чергою: `tasks/` для `tg-assistant` ([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-07 (курс, урок 6.5 — sequence diagrams + data model, обидва рівні):
+- [x] Простий рівень: готові (невендорені) `complete-sequence-diagrams` +
+  `generate-data-model` прогнані вручну (плагін не встановлювався —
+  `environment-limits.md` фіксує `--plugin-dir` як ненадійний для tool-use)
+  на tg-assistant — §6 `sad.md` мав незаповнений шаблон від 6.4, домальовано
+  перший реальний потік (AC-01/02/09) + `data-model.md` і staged-міграції —
+  [tg-assistant/sad.md](features/tg-assistant/sad.md),
+  [tg-assistant/data-model.md](features/tg-assistant/data-model.md)
+- [x] Складний рівень: той самий пайплайн на `rules-change-monitor` до
+  повного закриття (усі 10 AC), плюс breaking change (`normalized_value`
+  NOT NULL) декомпозовано expand → backfill → contract і перевірено живим
+  roundtrip up→down→up на `node:sqlite` — знахідка: `ALTER COLUMN SET NOT
+  NULL` у SQLite не існує взагалі, contract-фазу довелось перекладати на
+  table-rebuild для тесту —
+  [rules-change-monitor/_audit/data-model-2026-08-07.md](features/rules-change-monitor/_audit/data-model-2026-08-07.md)
+- [x] Власний скіл `.claude/skills/migrations-forge/` — SQLite замість
+  курсового Postgres, власний `node:sqlite`-раннер замість golang-migrate/
+  Alembic/Liquibase (жодного нема в репо), contract-фаза одразу
+  table-rebuild. Прогнано на tg-assistant для порівняння — сутності й
+  індекси співпали з курсовим прогоном (той самий вхід §6), розійшлись лише
+  типи колонок і (на іншій фічі) сам патерн contract-фази —
+  [tg-assistant/data-model-migrations-forge.md](features/tg-assistant/data-model-migrations-forge.md)
+- [x] Самокорекція під час прогону: перше підтвердження потоку `sad.md`
+  порушило власний протокол скіла (`_shared/diagram-presentation.md` —
+  сирий Mermaid у питанні замість прози) — впіймано, виправлено для решти
+  потоків; деталі — [JOURNAL.md](JOURNAL.md)
 
 Закрито 2026-08-06 (курс, урок 6.4 — SAD + ADR через architecture-design, обидва рівні):
 - [x] Простий рівень: адаптовано `.claude/skills/architecture-design/` (з
