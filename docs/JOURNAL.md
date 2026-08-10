@@ -359,3 +359,43 @@ baseline) → хук `block-env-writes` → плагін `tax-navigator-toolkit/
   припускає Postgres, і кожен наступний breaking change ламався б так
   само, доки хтось не наткнеться на це руками. `migrations-forge` планує
   table-rebuild одразу, не постфактум.
+
+## 2026-08-10 — M6, урок 6.6: `api-forge` на двох фічах vs власний `contract-forge`
+
+Простий рівень (`tg-assistant`) і складний (`rules-change-monitor`,
+reconcile-демо) — той самий невендорений підхід, що 6.3-6.5. Деталі —
+[BACKLOG.md](BACKLOG.md) таблиця «Курс», рядок 6.6.
+
+- **Завдання написане під REST-фічу, обидві реальні фічі репо — не REST.**
+  `api-forge` вибирає форму контракту з `sad.md` frontmatter `target_surfaces`
+  (`_shared/surfaces.md`) — `rules-change-monitor` задекларований `["worker"]`
+  ще на 6.4, `tg-assistant` лишив поле порожнім, і PRD прямо каже «без
+  публічного API». Обидва — не `backend-service`, тож жоден прогін не дав
+  `openapi.yaml` з POST/409, як буквально описує текст лекції (той приклад —
+  з `course-lesson-mvp`, не з цього репо). Питання, чи підмінити реальні
+  фічі прикладом, вирішив явно Mike: ні — текст лекції згадує
+  `course-lesson-mvp` лише для випадку відсутніх вхідних файлів
+  (`data-model.md`/`sad.md`/`PRD.md`), а не відсутнього HTTP; у нас вони є.
+- **«Skip» — задокументована гілка протоколу, не недороблена робота.** Для
+  `tg-assistant` крок 1 каже: немає інтерфейсу → одно-рядкова нотатка в
+  звіті, одразу до `break-tasks`, без `openapi.yaml`. Перша реакція на
+  результат була «чи ми взагалі виконали завдання» — відповідь: мету
+  («відчути механіку api-forge») виконано, буквальний текст («PASS +
+  openapi.yaml») ні, і це очікувано для не-HTTP фічі, узгоджено заздалегідь.
+- **Codegen-крок хард-рівня не зі скіла, а з тексту лекції.** Курсовий
+  `api-forge/SKILL.md` не згадує `oapi-codegen`/`openapi-typescript` жодного
+  разу — очікування codegen прийшло з тексту завдання, яке мовчки припускає
+  `openapi.yaml`. Без нього (worker → `events.md`) генерувати нема з чого;
+  позначено N/A в `api-sync-report.md` з поясненням, не пропущено тихо.
+- **Порівняння `api-forge` vs власний `contract-forge`** (обидва на
+  `rules-change-monitor`,
+  [events-contract-forge.md](features/rules-change-monitor/contracts/events-contract-forge.md)):
+  на відміну від `migrations-forge` (де типи розійшлись одразу),
+  тут вихід вийшов структурно ІДЕНТИЧНИМ — курсовий `templates/events.md`
+  ніколи не мав HTTP-специфічних дефолтів (`BearerAuth`, cursor-пагінація),
+  вони живуть лише в `templates/openapi.yaml`, тож на `worker`-поверхні
+  `contract-forge`-Defaults просто нема що перевизначати. Реальна різниця
+  (auth/pagination/codegen opt-in замість мовчазного дефолту) показала б
+  себе лише на гіпотетичній `backend-service`-фічі, якої в цьому репо ще
+  немає — чесна, а не притягнута знахідка: не кожне порівняння власного
+  скіла з курсовим зобов'язане показати велику різницю.

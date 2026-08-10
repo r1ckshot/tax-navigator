@@ -7,10 +7,10 @@
 
 **Курс:** M3, M4, M5 здано. M5 разом із capstone закрито 2026-08-04 — вимір,
 рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 у роботі: уроки 6.3
-(write-prd), 6.4 (architecture-design) і 6.5 (complete-sequence-diagrams +
-generate-data-model) здані обома рівнями 2026-08-06/07 — PRD і SAD для
-`tg-assistant` та `rules-change-monitor` готові, тепер і §6 sequence-потоки +
-data-model + staged-міграції для обох, далі `tasks/`.
+(write-prd), 6.4 (architecture-design), 6.5 (complete-sequence-diagrams +
+generate-data-model) і 6.6 (api-forge) здані обома рівнями 2026-08-06/07/10 —
+PRD, SAD, §6 sequence-потоки, data-model + staged-міграції і тепер API/events-
+контракти для `tg-assistant` та `rules-change-monitor` готові, далі `tasks/`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 183 node-тести + 15 UI зелені.
@@ -21,8 +21,34 @@ data-model + staged-міграції для обох, далі `tasks/`.
 
 ## Зараз у роботі
 
-**Нічого — урок 6.5 (sequence diagrams + data model) закрито 2026-08-07.**
+**Нічого — урок 6.6 (api-forge) закрито 2026-08-10.**
 Далі за чергою: `tasks/` для `tg-assistant` ([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-10 (курс, урок 6.6 — api-forge, обидва рівні):
+- [x] Простий рівень: готовий (невендорений) `api-forge` прогнаний вручну на
+  tg-assistant — `target_surfaces` не задекларовано, PRD прямо каже «без
+  публічного API», fallback на `architecture-map.md`+PRD визначив «немає
+  зовнішнього інтерфейсу»: жодного `openapi.yaml` не згенеровано — це
+  задокументована гілка skip протоколу (крок 1), не помилка —
+  [tg-assistant/contracts/api-sync-report.md](features/tg-assistant/contracts/api-sync-report.md)
+- [x] Складний рівень: `rules-change-monitor` (`target_surfaces: ["worker"]`,
+  задекларовано `architecture-design`) → форма контракту `contracts/events.md`
+  (не `openapi.yaml`) за таблицею `_shared/surfaces.md`; inline drift-check
+  4/4, back-feed coverage AC↔events; навмисне розходження (`diff_percent` у
+  `data-model.md`) підхоплено прогоном `--reconcile` без бампу версії —
+  [rules-change-monitor/contracts/events.md](features/rules-change-monitor/contracts/events.md),
+  [rules-change-monitor/contracts/api-sync-report.md](features/rules-change-monitor/contracts/api-sync-report.md).
+  Codegen-крок хард-рівня (`oapi-codegen`/`openapi-typescript`) — N/A,
+  задокументовано в звіті: немає `openapi.yaml`, генерувати нема з чого.
+- [x] Власний скіл `.claude/skills/contract-forge/` — `events.md`/`cli.md` за
+  замовчуванням замість курсового HTTP-first (`openapi.yaml`), auth/pagination/
+  codegen — opt-in, не мовчазний дефолт; error envelope лише там, де є межа
+  процесу. Прогнано на `rules-change-monitor` (не tg-assistant — там немає
+  інтерфейсу взагалі, нема що порівнювати) для порівняння з курсовим
+  прогоном — вихід структурно ідентичний (курсовий `events.md`-шаблон і так
+  не мав HTTP-дефолтів), реальна різниця показала б себе лише на гіпотетичній
+  `backend-service`-фічі, якої в репо немає —
+  [rules-change-monitor/contracts/events-contract-forge.md](features/rules-change-monitor/contracts/events-contract-forge.md)
 
 Закрито 2026-08-07 (курс, урок 6.5 — sequence diagrams + data model, обидва рівні):
 - [x] Простий рівень: готові (невендорені) `complete-sequence-diagrams` +
