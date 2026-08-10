@@ -1,0 +1,141 @@
+# Template for contract-forge — другорядна гілка, лише для фічі з target_surfaces: ["backend-service"].
+# Копіюється в docs/features/<slug>/contracts/openapi.yaml, потім DERIVED:
+#   поля + обмеження  ← data-model.md (кожне поле трасується до колонки; копіювати maxLength/pattern/enum)
+#   error responses   ← sad.md §6 alt-гілки (одна response на гілку)
+#   список ендпоінтів ← PRD.md §4 user stories / §5 AC
+# Замінити кожен <...>. На відміну від курсового шаблону: security і pagination тут НЕ дефолтні —
+# вмикати лише коли PRD/sad.md дійсно цього вимагають (Defaults таблиця в SKILL.md).
+openapi: 3.1.0
+
+info:
+  title: <Feature> API
+  version: 0.1.0
+  description: |
+    <чому цей API існує — один абзац з PRD.md §1>
+
+servers:
+  - url: http://localhost
+    description: Local
+
+# N/A за замовчуванням — соло-локальні фічі цього репо без авторизаційної межі
+# (tg-assistant PRD Security review, rules-change-monitor sad.md §8). Розкоментувати
+# лише якщо PRD Security review для конкретної backend-service-фічі вимагає авторизації.
+# security:
+#   - BearerAuth: []
+
+paths:
+  # Один блок на ендпоінт, один (чи більше) на PRD §4 user story.
+  /api/v1/<resources>:
+    get:
+      summary: <list ...>
+      operationId: list<Resources>
+      # Cursor-пагінація — лише якщо ця фіча реально має list-ендпоінт (не типовий випадок
+      # у цьому репо, де жодна поточна фіча не backend-service). Курсовий дефолт без змін,
+      # коли таки застосовується: cursor (UUID v7), ніколи offset.
+      parameters:
+        - in: query
+          name: after
+          schema: { type: string, format: uuid }
+        - in: query
+          name: before
+          schema: { type: string, format: uuid }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/<Resource>Page" }
+
+    post:
+      summary: <create ...>
+      operationId: create<Resource>
+      # Idempotency-Key — лише якщо sad.md §6 показує retry-нотатку/async-актора на цьому
+      # потоці (той самий курсовий критерій, без відхилення).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/<Resource>Create" }
+            example:
+              title: "Test <Resource>"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/<Resource>" }
+        # Кожна наступна response = одна alt-гілка з sad.md §6.
+        "409":
+          description: <конфлікт — назвати інваріант, напр. duplicate slug>
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: "<module>.<error_name>"
+                message: "<людське пояснення>"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Error:
+      description: Error — unified envelope
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    # Уніфікований конверт помилки. Той самий курсовий формат — {code, message, details?} —
+    # застосовується без змін, коли контракт таки має response-межу. `code` МАЄ існувати в
+    # реєстрі помилок репо (drift-check пункт 2); якщо реєстру немає — писати
+    # «no error registry found», не вигадувати.
+    Error:
+      type: object
+      required: [code, message]
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          pattern: "^[a-z_]+\\.[a-z_]+$"
+          example: "<module>.<error_name>"
+        message: { type: string }
+        details:
+          type: object
+          description: опційний структурований контекст
+
+    # Одна схема на сутність data-model.md. Кожна властивість трасується до колонки.
+    <Resource>:
+      type: object
+      required: [id]
+      additionalProperties: false
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string, maxLength: 200 }
+        status: { type: string, enum: [<value_a>, <value_b>] }
+        description: { type: [string, "null"] }
+        created_at: { type: string, format: date-time }
+
+    <Resource>Create:
+      type: object
+      required: [title]
+      additionalProperties: false
+      properties:
+        title: { type: string, maxLength: 200 }
+
+    <Resource>Page:
+      type: object
+      required: [items, has_next, has_prev]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/<Resource>" }
+        has_next: { type: boolean }
+        has_prev: { type: boolean }
+        next_cursor: { type: [string, "null"], format: uuid }
