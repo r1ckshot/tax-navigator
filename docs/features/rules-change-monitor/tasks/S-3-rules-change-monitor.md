@@ -33,7 +33,7 @@ Combines US-01 (AC-02, authorization) + US-04 (AC-07, cross-context) — одн�
 
 ## Linked artifacts (read-only references — DO NOT inline)
 
-- 🌐 Sequence: [[../sad.md#Критичний потік 3: класифікація стану запису — allowlist, верифікація, veto]] — Covered (AC-02, AC-07), перші дві гілки `alt`-блоку.
+- 🌐 Sequence: [[../sad.md#Критичний потік 3: класифікація стану запису — allowlist, верифікація, veto (AC-02, AC-07, AC-10)]] — Covered (AC-02, AC-07), перші дві гілки `alt`-блоку.
 - 🗄 Data delta: див. нижче
 - 🌐 API contract: див. нижче (`rule_check.v1`)
 - 📜 Relevant ADR: [[../adr/0003-own-allowlist-in-script-not-parsed-from-firewall-config|ADR-0003]]
@@ -73,6 +73,7 @@ event: rules_change_monitor.rule_check.v1 (events.md)
 ## Definition of Done
 
 - [ ] Усі checklist steps зроблені, всі AC зелені.
+- [ ] AC-02 negative-assertion: запис із `source_url` поза allowlist ніколи не породжує HTTP-запит під час тесту (мокований fetch не викликається жодного разу для цього `rule_id`).
 - [ ] Lint + типи clean (per SAD §2 Constraints).
 - [ ] Integration test покриває всі ACs цієї story.
 - [ ] PR linked back to this story file (`tasks/S-3-rules-change-monitor.md`).

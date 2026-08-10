@@ -33,7 +33,7 @@ US-02 (AC-10, edge case, доданий через Edit при write-prd — ide
 
 ## Linked artifacts (read-only references — DO NOT inline)
 
-- 🌐 Sequence: [[../sad.md#Критичний потік 3: класифікація стану запису — allowlist, верифікація, veto]] — Covered (AC-10), третя гілка `alt`-блоку.
+- 🌐 Sequence: [[../sad.md#Критичний потік 3: класифікація стану запису — allowlist, верифікація, veto (AC-02, AC-07, AC-10)]] — Covered (AC-10), третя гілка `alt`-блоку.
 - 🗄 Data delta: див. нижче
 - 🌐 API contract: див. нижче (`rule_check.v1`)
 - 📜 Relevant reference: `veto_entries` (`data-model.md`) — калібрувальний приклад: ставки реформи zdrowotnej 2025.
@@ -71,6 +71,7 @@ event: rules_change_monitor.rule_check.v1 (events.md)
 ## Definition of Done
 
 - [ ] Усі checklist steps зроблені, всі AC зелені.
+- [ ] Anti-regression на калібрувальний приклад ставки реформи zdrowotnej (`EVIDENCE.md`): цикл повторюється 3 рази поспіль, стан лишається `needs_confirmation` щоразу, ніколи не переходить у `matches`.
 - [ ] Lint + типи clean (per SAD §2 Constraints).
 - [ ] Integration test покриває всі ACs цієї story.
 - [ ] PR linked back to this story file (`tasks/S-4-rules-change-monitor.md`).

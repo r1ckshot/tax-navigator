@@ -33,7 +33,7 @@ Combines US-01 (AC-01) + US-03 (AC-04, AC-05) + US-05 (AC-08, AC-09) — той 
 
 ## Linked artifacts (read-only references — DO NOT inline)
 
-- 🌐 Sequence: [[../sad.md#Критичний потік 1: місячний цикл, happy path]] (AC-01, AC-04/05) + [[../sad.md#Критичний потік 2: джерело недоступне]] (AC-08, AC-09) — обидва Covered за власною таблицею покриття §6.
+- 🌐 Sequence: [[../sad.md#6. Виконання (runtime)]] — Потік 1 «місячний цикл, happy path» (AC-01, AC-04/05) + Потік 2 «джерело недоступне» (AC-08, AC-09), обидва Covered за таблицею покриття §6. Обидва потоки — bold-текст у §6, не окремі заголовки, тож без власного anchor; посилання йде на весь §6.
 - 🗄 Data delta: див. нижче
 - 🌐 API contract: див. нижче (`rule_check.v1`)
 - 📜 Relevant ADR: [[../adr/0001-normalize-then-compare-numeric-values|ADR-0001]] (нормалізація→порівняння), тактична пауза-стовп §4.2 (без окремого ADR — inline)
@@ -87,6 +87,7 @@ event: rules_change_monitor.rule_check.v1 (events.md)
 ## Definition of Done
 
 - [ ] Усі checklist steps зроблені, всі AC зелені.
+- [ ] AC-08 anti-regression: challenge-сторінка WAF (HTML-сигнатура, `environment-limits.md`) ніколи не записується як `source_value` — лише як `failure_reason = 'challenge_page'`.
 - [ ] Lint + типи clean (per SAD §2 Constraints).
 - [ ] Integration test покриває всі ACs цієї story.
 - [ ] PR linked back to this story file (`tasks/S-2-rules-change-monitor.md`).

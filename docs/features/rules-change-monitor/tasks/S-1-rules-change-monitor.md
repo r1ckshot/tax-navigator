@@ -35,7 +35,7 @@ US-01..US-05 усі покладаються на `cycle_runs`/`rule_checks`/`ve
 
 ## Linked artifacts (read-only references — DO NOT inline)
 
-- 🌐 Sequence: [[../sad.md#Критичний потік 1: місячний цикл, happy path]] — precondition, не окремий крок жодного з 3 потоків (Потоки 1/2/3 усі його припускають).
+- 🌐 Sequence: [[../sad.md#6. Виконання (runtime)]] — precondition, не окремий крок жодного з 3 потоків (Потоки 1/2/3 усі його припускають). Потік 1/2 у §6 — bold-текст, не окремий заголовок, тож без власного anchor; посилання йде на весь §6.
 - 🗄 Data delta: див. нижче
 - 🌐 API contract: `_API surface: none — internal story._` (події `events.md` з'являються лише коли є перший заповнений цикл, S-2+)
 - 📜 Relevant ADR: [[../adr/0002-local-json-file-for-cycle-history-and-veto-list|ADR-0002]] (JSON-стан), [[../adr/0003-own-allowlist-in-script-not-parsed-from-firewall-config|ADR-0003]] (власний allowlist)
@@ -75,6 +75,7 @@ rules-change-monitor раніше, _audit/), другий — прямий ін�
 ## Definition of Done
 
 - [ ] Усі checklist steps зроблені, всі AC зелені.
+- [ ] Roundtrip-тест staged-міграцій `up→down→up` на `node:sqlite` (той самий формат, що `_audit/data-model-2026-08-07.md`) — не лише `up`-створення.
 - [ ] Lint + типи clean (per SAD §2 Constraints).
 - [ ] Integration test покриває всі ACs цієї story.
 - [ ] PR linked back to this story file (`tasks/S-1-rules-change-monitor.md`).

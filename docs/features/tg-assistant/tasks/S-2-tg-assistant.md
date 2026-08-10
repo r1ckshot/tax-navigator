@@ -31,7 +31,7 @@ created: 2026-08-10
 
 ## Linked artifacts (read-only references — DO NOT inline)
 
-- 🌐 Sequence: [[../sad.md#Критичний потік 1: тижневий цикл збору]] — Missing (filter-крок не намальований окремо).
+- 🌐 Sequence: [[../sad.md#Критичний потік 1: тижневий цикл збору — авторизовані чати, дедуп при надолуженні (AC-01, AC-02, AC-09)]] — Missing (filter-крок не намальований окремо).
 - 🗄 Data delta: див. нижче
 - 🌐 API contract: `_API surface: none — internal story._`
 - 📋 PRD ACs: [[../PRD.md#5-acceptance-criteria|PRD §5]]
@@ -60,6 +60,7 @@ DELTA `messages` — ADD write of `is_organic` (BOOLEAN, вже в схемі S-
 ## Definition of Done
 
 - [ ] Усі checklist steps зроблені, всі AC зелені.
+- [ ] AC-04 anti-regression: тестова партія з одним повідомленням, що підпадає під ≥2 теми одразу, дає рівно один рядок `messages` з `is_organic`, не два.
 - [ ] Lint + типи clean (per SAD §2 Constraints).
 - [ ] Integration test покриває всі ACs цієї story.
 - [ ] PR linked back to this story file (`tasks/S-2-tg-assistant.md`).

@@ -31,7 +31,7 @@ created: 2026-08-10
 
 ## Linked artifacts (read-only references — DO NOT inline)
 
-- 🌐 Sequence: [[../sad.md#Критичний потік 1: тижневий цикл збору]] — Missing (labeler-крок не намальований окремо).
+- 🌐 Sequence: [[../sad.md#Критичний потік 1: тижневий цикл збору — авторизовані чати, дедуп при надолуженні (AC-01, AC-02, AC-09)]] — Missing (labeler-крок не намальований окремо).
 - 🗄 Data delta: див. нижче
 - 🌐 API contract: `_API surface: none — internal story._`
 - 📜 Relevant reference: `app/lib/rules/types.ts` — інваріант `Rule {rule_id, params, source_url, verified_at}` і `getRule(rule_id)` (PRD «Reference-модуль»).
@@ -64,6 +64,7 @@ NO updated_at — рядок immutable від створення (закрива
 ## Definition of Done
 
 - [ ] Усі checklist steps зроблені, всі AC зелені.
+- [ ] AC-06 anti-regression: зміна `rules.2026.json` між двома прогонами циклу не переписує `question_labels` попереднього тижня — мутація (навмисна зміна `rule_id` у фікстурі) мусить завалити тест, якщо immutable-гарантія зникла.
 - [ ] Lint + типи clean (per SAD §2 Constraints).
 - [ ] Integration test покриває всі ACs цієї story.
 - [ ] PR linked back to this story file (`tasks/S-3-tg-assistant.md`).

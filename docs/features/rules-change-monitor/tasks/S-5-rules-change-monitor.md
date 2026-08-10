@@ -33,7 +33,7 @@ Combines US-04 (AC-06, happy path) + US-02 (AC-03, domain invariant — «Trivia
 
 ## Linked artifacts (read-only references — DO NOT inline)
 
-- 🌐 Sequence: [[../sad.md#Критичний потік 1: місячний цикл, happy path]] — Covered (AC-06, кінець потоку: `Cycle->>Report`); AC-03 Trivial (узагальнена властивість, не окремий крок).
+- 🌐 Sequence: [[../sad.md#6. Виконання (runtime)]] — Потік 1 «місячний цикл, happy path» (bold-текст, не заголовок), Covered (AC-06, кінець потоку: `Cycle->>Report`); AC-03 Trivial (узагальнена властивість, не окремий крок).
 - 🗄 Data delta: див. нижче
 - 🌐 API contract: див. нижче (`cycle.v1`)
 - 📋 PRD ACs: [[../PRD.md#5-acceptance-criteria|PRD §5]]
@@ -70,6 +70,7 @@ event: rules_change_monitor.cycle.v1 (events.md)
 ## Definition of Done
 
 - [ ] Усі checklist steps зроблені, всі AC зелені.
+- [ ] AC-03 invariant-тест: навмисно пропустити класифікацію одного `rule_id` (мутація) — тест мусить впасти, підтверджуючи, що перевірка «жоден запис без стану» реально щось ловить, не завжди зелена.
 - [ ] Lint + типи clean (per SAD §2 Constraints).
 - [ ] Integration test покриває всі ACs цієї story.
 - [ ] PR linked back to this story file (`tasks/S-5-rules-change-monitor.md`).

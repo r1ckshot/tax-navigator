@@ -33,7 +33,7 @@ Combines US-01 (AC-01, AC-02) + US-05 (AC-08, AC-09, AC-10) — один мод�
 
 ## Linked artifacts (read-only references — DO NOT inline)
 
-- 🌐 Sequence: [[../sad.md#Критичний потік 1: тижневий цикл збору]] — Covered: AC-01, AC-02, AC-09; trivial: AC-08 (dead-letter гілка); **Missing:** AC-10 (вікно backfill не деталізоване окремо — потік малює лише «читає нові повідомлення», без розбивки на глибину N тижнів). Чесно позначено в `_generation.md`, не приховано.
+- 🌐 Sequence: [[../sad.md#Критичний потік 1: тижневий цикл збору — авторизовані чати, дедуп при надолуженні (AC-01, AC-02, AC-09)]] — Covered: AC-01, AC-02, AC-09; trivial: AC-08 (dead-letter гілка); **Missing:** AC-10 (вікно backfill не деталізоване окремо — потік малює лише «читає нові повідомлення», без розбивки на глибину N тижнів). Чесно позначено в `_generation.md`, не приховано.
 - 🗄 Data delta: див. нижче
 - 🌐 API contract: `_API surface: none — internal story._`
 - 📜 Relevant ADR: [[../adr/0001-direct-mtproto-library-over-interactive-mcp|ADR-0001]] (пряма MTProto-бібліотека), [[../adr/0002-per-chat-backoff-queue-for-flood-wait|ADR-0002]] (backoff-черга), [[../adr/0003-json-file-for-cycle-state|ADR-0003]] (стан циклу — JSON, не SQL)
@@ -90,6 +90,7 @@ JSON-структуру.
 ## Definition of Done
 
 - [ ] Усі checklist steps зроблені, всі AC зелені.
+- [ ] AC-09 anti-regression: повторний прогін циклу для того самого `week_of` не створює других `messages`-рядків — `UNIQUE(chat_id, telegram_message_id)` ловить дубль на catch-up.
 - [ ] Lint + типи clean (per SAD §2 Constraints).
 - [ ] Integration test покриває всі ACs цієї story.
 - [ ] PR linked back to this story file (`tasks/S-1-tg-assistant.md`).

@@ -6,11 +6,11 @@
 ## Фаза
 
 **Курс:** M3, M4, M5 здано. M5 разом із capstone закрито 2026-08-04 — вимір,
-рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 у роботі: уроки 6.3
-(write-prd), 6.4 (architecture-design), 6.5 (complete-sequence-diagrams +
-generate-data-model) і 6.6 (api-forge) здані обома рівнями 2026-08-06/07/10 —
-PRD, SAD, §6 sequence-потоки, data-model + staged-міграції і тепер API/events-
-контракти для `tg-assistant` та `rules-change-monitor` готові, далі `tasks/`.
+рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 SDLC-серія (6.1-6.7)
+здана обома рівнями 2026-08-05→10 — інвентаризація, ideation, PRD, SAD, §6
+sequence-потоки, data-model + staged-міграції, API/events-контракти і тепер
+`tasks/` для `tg-assistant` та `rules-change-monitor` готові. Далі — не курс,
+а реальний білд: T1+T2 `tg-assistant` за `tasks/tracker.md`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 183 node-тести + 15 UI зелені.
@@ -21,8 +21,47 @@ PRD, SAD, §6 sequence-потоки, data-model + staged-міграції і т�
 
 ## Зараз у роботі
 
-**Нічого — урок 6.6 (api-forge) закрито 2026-08-10.**
-Далі за чергою: `tasks/` для `tg-assistant` ([BACKLOG.md](BACKLOG.md) → NOW).
+**Нічого — урок 6.7 (task-packages) закрито 2026-08-10, M6 SDLC-серія (6.1-6.7) завершена.**
+Далі за чергою: реальний білд `tg-assistant` — S-1 (collector) з
+[tasks/tracker.md](features/tg-assistant/tasks/tracker.md) ([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-10 (курс, урок 6.7 — task-packages, обидва рівні):
+- [x] Простий рівень: готовий (невендорений) `sdlc-task-packages`
+  (`docs/course/agentic-engineering-course/playbook/skills/sdlc-task-packages`
+  — не `sdlc/plugin/skills/break-tasks`, яке текст завдання називає, але не
+  описує дослівно; плутанина зафіксована в плані сесії) прогнаний вручну на
+  `tg-assistant`: 4 stories в 4 хвилях, по одній на модуль лінійного пайплайна
+  (`sad.md` §5: «виконуються послідовно») — жодного паралелізму, і це чесно
+  назване властивістю пайплайна, не недоглядом нарізки. Реальний
+  `AskUserQuestion`-checkpoint (Accept без правок). Один навмисний
+  fail→regenerate на Stage 2 (S-2, gate #5) — виявив не формальну нестачу
+  рядків, а реальний пропуск: чернетка не реалізовувала AC-04 (дедуп) узагалі
+  — [tg-assistant/tasks/](features/tg-assistant/tasks/) (7 файлів)
+- [x] Складний рівень: той самий протокол на `rules-change-monitor`
+  (`target_surfaces: ["worker"]`, без дрейфу frontmatter, на відміну від
+  tg-assistant) — 5 stories в 4 хвилях, **з реальним паралелізмом** у хвилі 2
+  (класифікаційний гейт без фетчу не залежить від fetch-пайплайна). Нарізка
+  йшла по гілках `alt`-блоку одного файлу (`diff.mjs` — єдина точка істини
+  для всіх 7 станів AC-03), не по файлах-модулях механічно — знахідка, що не
+  повторила простий підхід tg-assistant. Усі 8 gate перевірені на КОЖНІЙ з 5
+  stories, не вибірково — [rules-change-monitor/tasks/](features/rules-change-monitor/tasks/)
+  (8 файлів)
+- [x] `CONTEXT.md` для `rules-change-monitor` доповнено до 5 секцій — реальний
+  шаблон `fix-term` має лише 3 H2 (`Glossary`/`Invariants`/`Out of scope`);
+  текст завдання просив 5. Додано `Sentinel errors` (типові
+  `failure_reason`-значення, не вигаданий `module.error_name`-реєстр) і
+  `Org-filter invariant` (`N/A: немає org-межі, соло-локальний інструмент`,
+  з поясненням, не мовчки пропущено) — розширення шаблону, не заміна, той
+  самий патерн, що `rules-migrations-baseline.md`
+- [x] Власний скіл `.claude/skills/tasks-forge/` — вивід у
+  `docs/features/<slug>/tasks/`, не `delivery/`; reference-шляхи реальної
+  структури репо (`scripts/<slug>/*.mjs`, `app/lib/**`), не курсовий Go
+  hexagonal-приклад; API contract excerpt читає `events.md` **або**
+  `openapi.yaml` залежно від того, що реально є (курсовий жорстко очікує
+  `openapi.yaml`); sentinel errors з реальних доменних полів; wave-scaling
+  зважає на `.size` (S → 2-3, типово; M → 3-4). Порівняльний прогін цього
+  разу не робився (не в git-стратегії плану сесії) —
+  [.claude/skills/tasks-forge/](../.claude/skills/tasks-forge/)
 
 Закрито 2026-08-10 (курс, урок 6.6 — api-forge, обидва рівні):
 - [x] Простий рівень: готовий (невендорений) `api-forge` прогнаний вручну на
@@ -286,8 +325,11 @@ PRD, SAD, §6 sequence-потоки, data-model + staged-міграції і т�
 Порядок узгоджений з Mike 2026-08-03 і тримається на **воротах, а не на модулях
 курсу** — обґрунтування в [DECISIONS.md](DECISIONS.md), запис 2026-08-03.
 
-1. **`tg-assistant` T1+T2** — короткий PRD → `tasks/`. Блокер знято: движок
-   звірений 10/10, тож G1 тепер міряє попит на те, що ми можемо гарантувати.
+1. **`tg-assistant` T1+T2 — реальний білд.** SDLC-документація завершена
+   (PRD → SAD → data-model → contracts → `tasks/`), `tasks/tracker.md` називає
+   S-1 (collector: chats/messages/cycle_runs/cycle_chat_failures) першим
+   ready-story. Блокер знято: движок звірений 10/10, тож G1 тепер міряє
+   попит на те, що ми можемо гарантувати.
 2. **Витрати поза JDG** — інкубатор фактичних витрат не віднімає (див. блокери).
 
 Повна черга — [BACKLOG.md](BACKLOG.md).
