@@ -38,6 +38,7 @@ erDiagram
         text matrix_value
         varchar source_url
         varchar failure_reason
+        numeric diff_percent
         timestamptz checked_at
         timestamptz created_at
     }
@@ -84,8 +85,14 @@ erDiagram
 | `matrix_value` | TEXT | NOT NULL | значення матриці на момент звірки |
 | `source_url` | VARCHAR(255) | NOT NULL | |
 | `failure_reason` | VARCHAR(255) | NULL | заповнено лише при «не вдалось перевірити» (AC-08) |
+| `diff_percent` | NUMERIC(6,2) | NULL | наскільки джерело відрізняється від матриці, %; заповнено лише коли `state` — розбіжність (AC-04/05) |
 | `checked_at` | TIMESTAMPTZ | NOT NULL | момент звірки цього запису |
 | `created_at` | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+
+<!-- 2026-08-10: `diff_percent` додано навмисно для симуляції розходження при прогоні
+api-forge --reconcile (лекція api-forge, складний рівень). Ще без staged-міграції —
+це робота generate-data-model, поза межами цього прогону; api-forge лише читає модель,
+не породжує SQL. -->
 
 **Aggregate root:** `cycle_runs` (FK `cycle_id`).
 **Access patterns:**
