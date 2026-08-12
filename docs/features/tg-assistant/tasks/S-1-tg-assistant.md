@@ -78,7 +78,7 @@ JSON-структуру.
 - [ ] Step 2 — Додати чергу по чатах з експоненційним backoff, що читає конкретне значення X із `FLOOD_WAIT_X` (ADR-0002); при вичерпаних ретраях (3 поспіль) писати рядок у `cycle_chat_failures.reason` замість тихого нуля (AC-08).
 - [ ] Step 3 — Реалізувати `state.ts`: ключ ідемпотентності `cycle_runs.week_of`, дедуп нового повідомлення проти вже зібраних через UNIQUE(`chat_id`, `telegram_message_id`) — повторний прогін циклу для того самого тижня не дублює (AC-09).
 - [ ] Step 4 — Для чату з `chats.created_at` новішим за N тижнів (конфігурований дефолт — PRD §8 відкрите питання, зараз 4) обмежити глибину читання вікном N тижнів і явно позначити межу вікна в даних, що підуть у звіт (AC-10).
-- [ ] Step 5 — Прогнати staged-міграції `migrations/` проти живого `node:sqlite` (roundtrip up→down→up, як на `rules-change-monitor` — `_audit/data-model-2026-08-07.md`) і звірити з `data-model.md` Entities.
+- [x] Step 5 — Прогнати staged-міграції `migrations/` проти живого `node:sqlite` (roundtrip up→down→up, як на `rules-change-monitor` — `_audit/data-model-2026-08-07.md`) і звірити з `data-model.md` Entities. Скриптовано: `scripts/verify-tg-assistant-migrations.mjs` + `scripts/test-verify-tg-assistant-migrations.sh` (лекція 7.2, Ralph loop).
 
 ## Edge cases (optional)
 
