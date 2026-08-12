@@ -21,9 +21,28 @@ sequence-потоки, data-model + staged-міграції, API/events-конт
 
 ## Зараз у роботі
 
-**Нічого — урок 6.7 (task-packages) закрито 2026-08-10, M6 SDLC-серія (6.1-6.7) завершена.**
-Далі за чергою: реальний білд `tg-assistant` — S-1 (collector) з
-[tasks/tracker.md](features/tg-assistant/tasks/tracker.md) ([BACKLOG.md](BACKLOG.md) → NOW).
+**Нічого — урок 7.2 (Ralph loop) закрито 2026-08-12.** Далі за чергою: реальний білд
+`tg-assistant` — S-1 (collector), 1/5 checklist-кроків уже зроблено (Step 5, нижче),
+решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
+([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-12 (курс, урок 7.2 — Ralph loop, обидва рівні):
+- [x] Простий рівень: демо `7.2-ralph-loop` оглянуто (README, `ralph.sh`, `PROMPT.md`,
+  `Makefile`, скіл `ralph-prep`) без запуску — `make verify` тут не відтворює RED
+  (`uv`/`pytest` відсутні в контейнері, PyPI поза allowlist, задокументовано в
+  `environment-limits.md`). Власний `PROMPT.md` (3 секції) — реальний Step 5 з
+  [S-1-tg-assistant.md](features/tg-assistant/tasks/S-1-tg-assistant.md) (roundtrip
+  staged-міграцій проти `node:sqlite`), не вигадана kata-задача
+- [x] Складний рівень: обидва канонічні шляхи запуску виявились нежиттєздатними в цій
+  самій сесії — `ralph.sh` дедлочиться на вкладеному `claude -p` (задокументований
+  блокер), плагін `ralph-loop` є в кеші маркетплейсу, але не активований і Stop-hook
+  підхоплюється лише наступною сесією (нова знахідка, `environment-limits.md`). Ролі
+  циклу (warm, 1 ітерація з ліміту 5) виконав сам агент — `scripts/verify-tg-assistant-migrations.mjs`
+  + `scripts/test-verify-tg-assistant-migrations.sh`, зелено з першого разу, S-1 Step 5
+  відмічено done. Найгірше, що сталось — не в логіці (жодного відкату), а в
+  `pre-commit-gate`: перша спроба коміту впала на відсутньому трейлері
+  `Co-Authored-By`, той самий клас помилки, що вже описаний у CLAUDE.md
+- [x] Гілка `feat/ralph-migration-roundtrip`, 3 коміти, змерджена в `master`
 
 Закрито 2026-08-10 (курс, урок 6.7 — task-packages, обидва рівні):
 - [x] Простий рівень: готовий (невендорений) `sdlc-task-packages`
