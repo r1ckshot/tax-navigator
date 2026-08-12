@@ -21,10 +21,34 @@ sequence-потоки, data-model + staged-міграції, API/events-конт
 
 ## Зараз у роботі
 
-**Нічого — урок 7.2 (Ralph loop) закрито 2026-08-12.** Далі за чергою: реальний білд
-`tg-assistant` — S-1 (collector), 1/5 checklist-кроків уже зроблено (Step 5, нижче),
-решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
+**Нічого — урок 7.3 (/goal) закрито 2026-08-12.** Далі за чергою: реальний білд
+`tg-assistant` — S-1 (collector), 2/5 checklist-кроків уже зроблено (Step 3, Step 5,
+нижче), решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
 ([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-12 (курс, урок 7.3 — /goal, обидва рівні):
+- [x] Простий рівень: демо `7.3-goal` оглянуто (`uv`/`pytest` той самий блокер, що 7.2;
+  `make demo`/`make demo-weak` — чисті `@echo`, прогнані реально). Власна пара умов на
+  реальному repo-гепі, не kata: слабка `/goal add a good test for the results screen
+  and make sure it works` закрилась за 1 хід — не через сліпу пляму оцінювача, а бо я
+  сам чесно прогнав тест і виклав вивід. Робоча умова (3 частини, `npm test` +
+  `git status --porcelain`) — 6 ходів; оцінювач тримав буквальний текст умови навіть
+  ПІСЛЯ мого вербального override, поки Mike сам не ввів `/goal clear` — сліпа пляма
+  не спрацювала, натомість проявилась протилежна межа (жорсткість оцінювача проти
+  живого human override). Побічний реальний результат: `app/page.tsx` і
+  `ComparisonTable` мали непокритий дрейф-ризик порядку сценаріїв, закрито двома
+  новими тестами — [page.test.tsx](../app/__tests__/page.test.tsx),
+  [comparison-table-order.test.tsx](../app/components/__tests__/comparison-table-order.test.tsx)
+- [x] Складний рівень: мета-промптинг (subagent проти власного чорновика умови) на
+  S-1 Step 3 (`state.ts` dedup, AC-09) — свіжий агент зловив вимогу друкувати exit-код
+  дослівно в транскрипт, я зловив, що його ж constraint-частина була прозовою без
+  машинного сліду. Живий прогін виявив два реальні розриви між умовою і репо (не
+  вигадані): `npx tsc --noEmit` і bare `vitest run` не бачать `research/` (root-конфіги
+  скоуплені на `app/**`) — виправлено власними `vitest.config.ts`/`tsconfig.json`
+  усередині `research/tg-assistant/`, без правки кореневих. Третя, більша знахідка:
+  кореневий `.gitignore` бланкетно ігнорував увесь `research/`, тож жоден файл
+  `tg-assistant` узагалі не міг потрапити в git — звужено до `research/tg-mining/`
+  окремим комітом. 5 комітів, S-1 Step 3 відмічено done
 
 Закрито 2026-08-12 (курс, урок 7.2 — Ralph loop, обидва рівні):
 - [x] Простий рівень: демо `7.2-ralph-loop` оглянуто (README, `ralph.sh`, `PROMPT.md`,
