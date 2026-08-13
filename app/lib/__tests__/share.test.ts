@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { encodeAnswers, decodeAnswers } from '@/lib/share';
 import { quantizeRevenue } from '@/lib/calc/quantize';
-import { assessResidency } from '../residency';
-import { baseAnswers, withAnswers } from './fixtures';
+import { assessResidency } from '../calc/residency';
+import { baseAnswers, withAnswers } from '../calc/__tests__/fixtures';
 
 describe('шеринг — точний дохід не витікає', () => {
   it('URL несе лише квантизоване значення, не точну суму', () => {

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { visibleScreens, resumeIndex } from '@/lib/questions/schema';
 import { clearDraft, loadDraft, saveDraft } from '@/lib/storage';
-import { baseAnswers } from './fixtures';
+import { baseAnswers } from '../calc/__tests__/fixtures';
 
 /** Мінімальний sessionStorage, щоб гонити storage у node-пулі без jsdom. */
 function installFakeWindow(): void {

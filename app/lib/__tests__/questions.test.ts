@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SCREENS, visibleScreens, visibleFields, isScreenComplete } from '@/lib/questions/schema';
-import { baseAnswers, withAnswers } from './fixtures';
+import { baseAnswers, withAnswers } from '../calc/__tests__/fixtures';
 
 describe('анкета — умовні екрани', () => {
   it('медіанний шлях = 10 екранів', () => {
