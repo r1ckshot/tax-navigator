@@ -215,9 +215,9 @@ describe('український тягар ФОП', () => {
 
     const burden = screen.getByRole('table', { name: t('fop.burden.label') });
     expect(within(burden).getByText(t('fop.burden.esv'))).toBeDefined();
-    // Підпис мусить називати дію («платиш») і бік («український»): саме цих двох
+    // Підпис мусить називати дію («сплачується») і бік («український»): саме цих двох
     // слів бракувало, коли 2 850 zł прочитались як дохід.
-    expect(t('fop.burden.label')).toMatch(/платиш/);
+    expect(t('fop.burden.label')).toMatch(/сплачується/);
     expect(t('fop.burden.label')).toMatch(/[Уу]країнськ/);
   });
 });
