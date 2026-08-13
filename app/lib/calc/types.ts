@@ -35,7 +35,7 @@ export interface Answers {
   hasParallelUop: boolean;
   formerEmployer: FormerEmployer;
   jdgStatus: JdgStatus;
-  /** Умовне: лише коли jdgStatus === 'none' | 'lt6' | 'from6to24'. */
+  /** Умовне: лише коли jdgStatus === 'none' | 'lt6' | 'from6to30'. */
   hadJdgInLast60Months?: boolean;
   voluntarySickness: boolean;
 }

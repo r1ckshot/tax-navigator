@@ -145,7 +145,7 @@
   "app/page.tsx:44": [
     "<button type=\"button\" data-variant=\"primary\">"
   ],
-  "globals.css:174": [
+  "globals.css:173": [
     "button[data-variant='primary'] {"
   ],
   "RiskBadge.tsx:24": [
@@ -188,7 +188,7 @@
   "SourceCitation.tsx:7": [
     "export function SourceCitation({ sources }: { sources: Source[] }) {"
   ],
-  "globals.css:158-189": [
+  "globals.css:157-188": [
     "button {",
     "}"
   ],
@@ -234,11 +234,11 @@
     "<table className={styles.subforms}>",
     "</table>"
   ],
-  "globals.css:153-156": [
+  "globals.css:152-155": [
     ":focus-visible {",
     "}"
   ],
-  "globals.css:166": [
+  "globals.css:165": [
     "min-height: 44px;"
   ],
   "app/questionnaire/page.tsx:134": [
@@ -320,21 +320,25 @@
   ".dependency-cruiser.cjs:16": [
     "const ADAPTERS = '^app/lib/(storage|share|format)\\\\.ts$|^app/lib/(questions|i18n)/';"
   ],
-  "ARCHITECTURE.md:72-76": [
+  "ARCHITECTURE.md:76-85": [
     "- `app/lib/i18n/uk.ts` лежить у `lib/`, але за роллю це presentation. Ядром не",
-    "трактуваннях), але класифікація розходиться."
+    "практичного ефекту. Лишаємо розбіжність назви, не поведінки."
   ],
   "app/layout.tsx:9-12": [
     "title: t(\"app.title\"),",
     ""
   ],
+  "ARCHITECTURE.md:35-39": [
+    "- Браузерні API (`window`, `document`, `sessionStorage`) — лише в `storage.ts`,",
+    "про те, що адаптери й ядро не повинні мовчки чіпати браузер повз нього."
+  ],
   "calc/types.ts:38": [
-    "/** Умовне: лише коли jdgStatus === 'none' | 'lt6' | 'from6to24'. */"
+    "/** Умовне: лише коли jdgStatus === 'none' | 'lt6' | 'from6to30'. */"
   ],
   "residency.test.ts:79": [
-    "it('житло в обох країнах → вирішує центр інтересів', () => {"
+    "it('житло в обох країнах, нічия по центру інтересів → вирішує звичайне перебування (дні)', () => {"
   ],
-  "globals.css:45": [
-    "--measure: 66ch;"
+  "app/lib/calc/types.ts:38": [
+    "/** Умовне: лише коли jdgStatus === 'none' | 'lt6' | 'from6to30'. */"
   ]
 }

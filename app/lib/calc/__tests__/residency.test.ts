@@ -76,7 +76,7 @@ describe('резидентство — тай-брейки Конвенції 19
     expect(r.tiebreak).toEqual({ resolvedAt: 'permanentHome', result: 'PL' });
   });
 
-  it('житло в обох країнах → вирішує центр інтересів', () => {
+  it('житло в обох країнах, нічия по центру інтересів → вирішує звичайне перебування (дні)', () => {
     const r = assessResidency(
       withAnswers({ personalCenter: 'UA', economicCenter: 'PL', permanentHomeInUa: true, daysInPl: 'gte183' })
     );
