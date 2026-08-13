@@ -21,10 +21,38 @@ sequence-потоки, data-model + staged-міграції, API/events-конт
 
 ## Зараз у роботі
 
-**Нічого — урок 7.4 (dynamic workflows) закрито 2026-08-13.** Далі за чергою: реальний
-білд `tg-assistant` — S-1 (collector), 2/5 checklist-кроків уже зроблено (Step 3, Step 5,
-нижче), решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
+**Нічого — урок 7.5 (фонове виконання і розклад) закрито 2026-08-13.** Далі за чергою:
+реальний білд `tg-assistant` — S-1 (collector), 2/5 checklist-кроків уже зроблено (Step 3,
+Step 5, нижче), решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
 ([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-13 (курс, урок 7.5 — фонове виконання і розклад, обидва рівні):
+- [x] Простий рівень: демо `7.5-background` оглянуто — `make matrix` (чистий shell,
+  без Python) зелений, `make verify` той самий `uv`/`pytest`-блокер, що 7.2-7.4;
+  `recipes/loop.md`, `background.md`, `dashboard.md`, `routines/README.md` прочитані.
+  На собі — GitHub issue-тріаж + git-watchdog на розсинхрон STATE.md, звʼязані в один
+  живий `/loop`-аналог: сам `/loop` клієнтський slash-command, недосяжний з-під
+  SDK-сесії (той самий клас, що `/goal`/`/workflow`, [environment-limits.md](../.claude/rules/environment-limits.md)),
+  обхід — `CronCreate` як реальний tool-еквівалент. 4 цикли по ~2 хв, самозупинка
+  власним лічильником через `CronDelete` на себе
+- [x] Пастка «хмара не бачить локальних файлів» підтверджена не абстрактно: watchdog
+  зловив живий приклад — незакомічений edit `environment-limits.md` посеред цієї ж
+  сесії, а STATE.md «Зараз у роботі» про нього ще мовчав. Cloud `/schedule` побачив би
+  «clean» на свіжій копії з git; живий `git status` показав дрейф
+- [x] Складний рівень: той самий cron як реально запущений процес зі страхувальною
+  сіткою — жорсткий лічильник циклів замість `/goal`-оцінювача (детермінований
+  read-only чекліст, суддя був би зайвим ризиком), мінімум прав (append лише в
+  scratchpad поза git), сесійність (non-durable, помирає з сесією), перевірено
+  `CLAUDE_CODE_DISABLE_CRON` (не встановлена, рубильник доступний)
+- [x] Нова знахідка: `tax-navigator-red.vercel.app` — allowlisted, `getent` резолвить,
+  але `curl` висить до `--max-time` і повертає `000` — той самий anycast-дрейф ipset,
+  що `tax.gov.ua`. Задокументовано в `environment-limits.md`
+- [x] Дашборд `claude agents` перевірено наживо (Mike, окремий термінал) — порожній
+  стан із трьома категоріями (Needs input / Working / Completed). Не збій: дашборд
+  бачить окремі сесії (`/background`, рутини), а внутрішні тіки `CronCreate` в межах
+  поточної сесії туди не потрапляють — межа, а не помилка
+- [x] Гілка `docs/lesson-7.5-background` — коміт із новою знахідкою в
+  `environment-limits.md` зроблено; злиття в `master` чекає підтвердження Mike
 
 Закрито 2026-08-13 (курс, урок 7.4 — dynamic workflows, обидва рівні):
 - [x] Простий рівень: демо `7.4-dynamic-workflows` оглянуто — `make verify` той самий
