@@ -1,6 +1,7 @@
 export function filterKnownChats(
-  _candidateChatIds: readonly string[],
-  _knownChatIds: readonly string[]
+  candidateChatIds: readonly string[],
+  knownChatIds: readonly string[]
 ): string[] {
-  throw new Error('not implemented');
+  const known = new Set(knownChatIds);
+  return candidateChatIds.filter((chatId) => known.has(chatId));
 }
