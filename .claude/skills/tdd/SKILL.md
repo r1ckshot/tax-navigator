@@ -123,7 +123,7 @@ Agent(
   - Якщо ні: STOP з `Phase 3 gate failed: refactor broke tests. SHA: <REFACTOR_SHA>.`
 - `git diff --name-only HEAD~1 HEAD -- '**/*.test.ts'` — output MUST be порожній.
   - Якщо непорожній: STOP з `Phase 3 gate failed: refactorer modified a test file. SHA: <REFACTOR_SHA>. Files: <files>.`
-- `git show --stat HEAD -- research/tg-assistant/*.ts | grep -v test.ts` знайти змінений feature-файл, потім `grep -cE '^function _|^const _.*=.*=>' <feature>.ts` — output MUST be ≥ 2 (мінімум 2 приватні helpers, не-експортовані).
+- `git show --stat HEAD -- research/tg-assistant/*.ts | grep -v test.ts` знайти змінений feature-файл, потім `grep -cE '^function \w|^const \w+\s*=\s*\(' <feature>.ts` — output MUST be ≥ 2 (мінімум 2 приватні helpers, не-експортовані; `export function`/`export const` не матчаться, бо не починаються з `function`/`const`). Не Python-конвенція з `_underscore` — цей репо називає приватні helpers звичайним camelCase (див. `state.ts`), без префікса.
   - Якщо < 2: STOP з `Phase 3 gate failed: refactorer extracted only <n> helpers, expected ≥ 2. SHA: <REFACTOR_SHA>.`
 
 ## Final report

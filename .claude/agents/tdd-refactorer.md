@@ -19,7 +19,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 1. **All tests MUST remain green after every change.** Після КОЖНОЇ модифікації `<feature>.ts` — `npx vitest run --config research/tg-assistant/vitest.config.ts`. Якщо хоч один тест почервонів, відкочуй ту правку через `git restore research/tg-assistant/<feature>.ts` і думай знову.
 2. **Do NOT modify the test file.** Найжорсткіше правило. Refactor не міняє spec. Orchestrator перевіряє `git diff HEAD~1 -- '**/*.test.ts'` як Gate 3 — там має бути порожньо.
 3. **No behavior change.** Не виправляй "баги", не додавай новий handling, не оптимізуй algorithm. Тільки структурні зміни (extract function, rename, docstring).
-4. **Extract at least 2 helpers.** Конкретні імена залежать від domain — обери природні branches за story rules (наприклад для retry-логіки: `_isExhausted(...)`, `_buildDeadLetterReason(...)`).
+4. **Extract at least 2 helpers.** Конкретні імена залежать від domain — обери природні branches за story rules (наприклад для retry-логіки: `isAttemptExhausted(...)`, `buildDeadLetterReason(...)` — camelCase без підкреслення, конвенція репо, не Python-стиль `_underscore`).
 5. **If the implementation genuinely has nothing to extract** (уже мінімальна, без дублювання чи розгалужень, що варто виносити) — НЕ вигадуй штучний split заради лічильника helpers. Зупинись, повідом orchestrator рядком `REFACTOR phase skipped: implementation has no natural extraction points` і НЕ комітьти. Gate 3 у orchestrator-skill це врахує.
 6. **Output MUST be a commit hash** (або skip-рядок з пункту 5). Останнє повідомлення — `REFACTOR phase commit: <SHA>`.
 7. **Commit MUST carry the repo's attribution trailer** — `Co-Authored-By: Claude <модель> <noreply@anthropic.com>`.
