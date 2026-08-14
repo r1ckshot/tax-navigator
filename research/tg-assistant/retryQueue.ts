@@ -16,17 +16,30 @@ export interface RetryOutcome {
   reason: string | null; // присутнє лише при action === 'dead_letter'
 }
 
+/** Чат вичерпав ліміт спроб для цього номера спроби (ADR-0002: поріг = 3 поспіль). */
+function isAttemptExhausted(attemptNumber: number): boolean {
+  return attemptNumber >= 3;
+}
+
+/** Людинозрозуміла причина dead-letter: скільки спроб і яким був останній FLOOD_WAIT_X. */
+function buildDeadLetterReason(
+  attemptNumber: number,
+  currentFloodWaitSeconds: number
+): string {
+  return `Chat exhausted after ${attemptNumber} consecutive FLOOD_WAIT retries (last FLOOD_WAIT_X=${currentFloodWaitSeconds}s); moving to dead letter queue`;
+}
+
 export function decideChatRetry(
   priorAttempts: readonly FloodWaitAttempt[],
   currentFloodWaitSeconds: number
 ): RetryOutcome {
   const attemptNumber = priorAttempts.length + 1;
 
-  if (attemptNumber >= 3) {
+  if (isAttemptExhausted(attemptNumber)) {
     return {
       action: 'dead_letter',
       waitMs: null,
-      reason: `Chat exhausted after ${attemptNumber} consecutive FLOOD_WAIT retries (last FLOOD_WAIT_X=${currentFloodWaitSeconds}s); moving to dead letter queue`,
+      reason: buildDeadLetterReason(attemptNumber, currentFloodWaitSeconds),
     };
   }
 
