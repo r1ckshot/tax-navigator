@@ -81,6 +81,8 @@ ALLOWED_DOMAINS=(
   "objects.githubusercontent.com"
   "codeload.github.com"
   "registry.npmjs.org"
+  "cdn.playwright.dev"
+  "playwright.download.prss.microsoft.com"
   "vercel.com"
   "api.vercel.com"
   "tax-navigator-red.vercel.app"
