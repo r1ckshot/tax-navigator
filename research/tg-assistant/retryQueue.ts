@@ -4,8 +4,6 @@
  * Pure-function частина per-chat backoff черги: сама MTProto-черга (реальні
  * мережеві виклики) залишається поза скоупом — тут лише рішення "retry чи
  * dead-letter" для одного чату на основі історії його попередніх спроб.
- *
- * RED phase: реалізація навмисно відсутня, лише кидає помилку.
  */
 
 export interface FloodWaitAttempt {
@@ -19,8 +17,22 @@ export interface RetryOutcome {
 }
 
 export function decideChatRetry(
-  _priorAttempts: readonly FloodWaitAttempt[],
-  _currentFloodWaitSeconds: number
+  priorAttempts: readonly FloodWaitAttempt[],
+  currentFloodWaitSeconds: number
 ): RetryOutcome {
-  throw new Error('not implemented');
+  const attemptNumber = priorAttempts.length + 1;
+
+  if (attemptNumber >= 3) {
+    return {
+      action: 'dead_letter',
+      waitMs: null,
+      reason: `Chat exhausted after ${attemptNumber} consecutive FLOOD_WAIT retries (last FLOOD_WAIT_X=${currentFloodWaitSeconds}s); moving to dead letter queue`,
+    };
+  }
+
+  return {
+    action: 'retry',
+    waitMs: currentFloodWaitSeconds * 1000,
+    reason: null,
+  };
 }
