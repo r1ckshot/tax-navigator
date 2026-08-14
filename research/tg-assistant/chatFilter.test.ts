@@ -7,8 +7,8 @@ describe('filterKnownChats — AC-02', () => {
     expect(result).toEqual(['chat-1', 'chat-2']);
   });
 
-  it('AC-02.2: один чат з candidates відсутній у known — відсутній і в результаті', () => {
-    const result = filterKnownChats(['chat-1'], []);
+  it('AC-02.2: один чат з candidates відсутній у known (known непорожній) — відсутній і в результаті', () => {
+    const result = filterKnownChats(['chat-1'], ['chat-9']);
     expect(result).toEqual([]);
   });
 
