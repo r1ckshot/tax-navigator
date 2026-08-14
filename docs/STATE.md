@@ -9,8 +9,10 @@
 рішення й пруфи в [CAPSTONE_LOG.md](../CAPSTONE_LOG.md). M6 SDLC-серія (6.1-6.7)
 здана обома рівнями 2026-08-05→10 — інвентаризація, ideation, PRD, SAD, §6
 sequence-потоки, data-model + staged-міграції, API/events-контракти і тепер
-`tasks/` для `tg-assistant` та `rules-change-monitor` готові. Далі — не курс,
-а реальний білд: T1+T2 `tg-assistant` за `tasks/tracker.md`.
+`tasks/` для `tg-assistant` та `rules-change-monitor` готові. M7 execution &
+scale (7.1-7.7) здана обома рівнями 2026-08-12→14, останній урок 7.7 (TDD
+discipline) закрито 2026-08-14. Далі — не курс, а реальний білд: T1+T2
+`tg-assistant` за `tasks/tracker.md`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 183 node-тести + 17 UI зелені.
@@ -21,12 +23,47 @@ sequence-потоки, data-model + staged-міграції, API/events-конт
 
 ## Зараз у роботі
 
-**Нічого — урок 7.6 (feedback loops, останній у серії M7) закрито 2026-08-14.** Далі за чергою:
-реальний білд `tg-assistant` — S-1 (collector), 2/5 checklist-кроків уже зроблено (Step 3,
-Step 5, нижче), решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
+**Нічого — урок 7.7 (TDD discipline, останній у серії M7) закрито 2026-08-14.** Далі за чергою:
+реальний білд `tg-assistant` — S-1 (collector), 3/5 checklist-кроків уже зроблено (Step 3,
+Step 4, Step 5, нижче) + Step 1 і Step 2 частково скриптовані (pure-function зрізи без
+MTProto/мережі), решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
 ([BACKLOG.md](BACKLOG.md) → NOW).
 
-Закрито 2026-08-14 (курс, урок 7.6 — feedback loops, обидва рівні, останній урок M7):
+Закрито 2026-08-14 (курс, урок 7.7 — TDD discipline, обидва рівні, останній урок M7):
+- [x] Демо `7.7-tdd-discipline` оглянуто: `make test` RED заблокований (`uv`/`pytest`
+  відсутні — той самий блокер, що 7.2-7.5, `environment-limits.md`), `make demo`
+  прогнано (друкує кроки, python не потрібен), 3 agent-файли й `SKILL.md` прочитані
+- [x] Простий рівень: реальний AC-10 (S-1 Step 4, backfill window) вручну — 6 AC з
+  GWT, RED-коміт (6 тестів чесно падають на throw, не на import), GREEN з першої
+  спроби, тести не чіпані — `research/tg-assistant/window.ts`
+- [x] Складний рівень: власні `.claude/agents/tdd-{test-writer,implementer,refactorer}.md`
+  + `.claude/skills/tdd/SKILL.md`, адаптовані під vitest/TS (колоковані `*.test.ts`
+  замість окремої `tests/`-теки, обов'язковий `Co-Authored-By`-gate, якого демо не
+  знає). 2 реальні історії з S-1 (AC-08 retry-queue, AC-02 chat-filter) прогнані і
+  через `/tdd`-агентів, і через одну сесію на 4 окремих гілках. Метрики й mini-essay
+  здані як текст на завдання курсу, свідомо не як файл у репо
+- [x] `--review-tests` зловив реальний дефект: AC-02.2 дублював AC-02.5 замість
+  тестувати власний сценарій — виправлено до GREEN, саме той клас помилки, що мав
+  би зловити людина-рев'ювер
+- [x] Живий прогін знайшов і власний баг координатора: Gate 3 очікував Python
+  `_underscore`-конвенцію для приватних helpers, тоді як цей репо (camelCase,
+  `state.ts`) — реальний refactor дав 2 helpers, які gate спершу порахував як 0.
+  Виправлено, перенесено на infra-гілку до старту другої історії
+- [x] `.claude/agents/*.md` не підхопились цієї сесії (відомий, задокументований
+  environment-limit) — ізоляцію контексту відтворено через `general-purpose` Agent
+  tool з повністю вбудованими інструкціями кожного агента; вікно контексту було
+  ізольоване по-справжньому, `tools:`-обмеження з frontmatter — ні
+  (`general-purpose` бачить усі інструменти)
+- [x] 3 переможні гілки (`feat/tg-assistant-backfill-window`, `exp/tdd-agents-retry-queue`,
+  `exp/tdd-agents-chat-filter`) rebase+ff-merged у `master` лінійно, без merge-комітів.
+  `exp/tdd-single-*` і `feat/tdd-orchestrator-infra` лишені не змерджені як доказ.
+  25/25 нових тестів + 183/183 наявних + `test:arch` clean після мержу
+- [x] S-1 checklist: Step 4 позначено `[x]` (повний pure-function зріз AC-10); Step 1 і
+  Step 2 лишились `[ ]`, але отримали примітку про частковий скрипт (chat-filter,
+  retry-decision) — не заявлено зробленим те, що не зроблено (MTProto/мережа поза
+  скоупом уроку)
+
+Закрито 2026-08-14 (курс, урок 7.6 — feedback loops, обидва рівні):
 - [x] Демо `7.6-feedback-loops` оглянуто: `make verify` RED на story-28 (test-first,
   `sortQueue` стаб), `make gate` (`tsc --noEmit && npm test`) теж RED — той самий гейт,
   що pre-commit/Stop-hook; скіли `verify-ui`, `verify-gate`, `code-reviewer-subagent`
