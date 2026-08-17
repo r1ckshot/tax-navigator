@@ -125,7 +125,9 @@
         "eureka.mf.gov.pl",
         "zakon.rada.gov.ua",
         "tax.gov.ua",
-        "www.tax.gov.ua"
+        "www.tax.gov.ua",
+        "context7.com",
+        "www.context7.com"
       ],
       "allowManagedDomainsOnly": false
     },

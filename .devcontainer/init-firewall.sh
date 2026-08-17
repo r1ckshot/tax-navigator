@@ -106,6 +106,11 @@ ALLOWED_DOMAINS=(
   "zakon.rada.gov.ua"
   "tax.gov.ua"
   "www.tax.gov.ua"
+  # context7 MCP (npx @upstash/context7-mcp) - реальний endpoint context7.com/api/*.
+  # Vercel anycast (76.76.21.21, той самий патерн, що tax-navigator-red.vercel.app) -
+  # може відвалитись після ротації IP, лікується Rebuild Container.
+  "context7.com"
+  "www.context7.com"
 )
 
 for domain in "${ALLOWED_DOMAINS[@]}"; do
