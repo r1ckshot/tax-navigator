@@ -11,8 +11,10 @@
 sequence-потоки, data-model + staged-міграції, API/events-контракти і тепер
 `tasks/` для `tg-assistant` та `rules-change-monitor` готові. M7 execution &
 scale (7.1-7.7) здана обома рівнями 2026-08-12→14, останній урок 7.7 (TDD
-discipline) закрито 2026-08-14. Далі — не курс, а реальний білд: T1+T2
-`tg-assistant` за `tasks/tracker.md`.
+discipline) закрито 2026-08-14. M8 MCP: уроки 8.4 (екосистема готових серверів)
+і 8.5 (`claude mcp serve`) здані обома рівнями 2026-08-17 — деталі в BACKLOG.md
+→ Курс. Пріоритет лишається реальний білд: T1+T2 `tg-assistant` за
+`tasks/tracker.md`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 183 node-тести + 17 UI зелені.
