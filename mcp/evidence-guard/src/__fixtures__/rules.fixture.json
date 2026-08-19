@@ -1,0 +1,31 @@
+{
+  "tax_year": 2026,
+  "profile": "TEST",
+  "verified_at": "2026-08-01",
+  "rules": [
+    {
+      "rule_id": "fixture.fresh",
+      "params": { "monthly": 1000 },
+      "source_url": "https://www.zus.pl/fixture-fresh",
+      "verified_at": "2026-08-01"
+    },
+    {
+      "rule_id": "fixture.exactly_at_threshold",
+      "params": { "rate": 0.12 },
+      "source_url": "https://www.zus.pl/fixture-threshold",
+      "verified_at": "2026-05-21"
+    },
+    {
+      "rule_id": "fixture.one_day_over",
+      "params": { "rate": 0.085 },
+      "source_url": "https://www.podatki.gov.pl/fixture-over",
+      "verified_at": "2026-05-20"
+    },
+    {
+      "rule_id": "fixture.ancient",
+      "params": { "days": 183 },
+      "source_url": "https://www.zus.pl/fixture-ancient",
+      "verified_at": "2025-01-01"
+    }
+  ]
+}

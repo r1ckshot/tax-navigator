@@ -1,0 +1,19 @@
+{
+  "tax_year": 2026,
+  "profile": "TEST",
+  "verified_at": "2026-08-01",
+  "rules": [
+    {
+      "rule_id": "fixture.ok",
+      "params": { "monthly": 1000 },
+      "source_url": "https://www.zus.pl/fixture-ok",
+      "verified_at": "2026-08-01"
+    },
+    {
+      "rule_id": "fixture.no_source",
+      "params": { "monthly": 2000 },
+      "source_url": "",
+      "verified_at": "2026-08-01"
+    }
+  ]
+}
