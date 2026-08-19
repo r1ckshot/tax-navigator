@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "evidence-guard": {
+      "command": "node",
+      "args": ["dist/channel.js"],
+      "env": {
+        "EVIDENCE_GUARD_TOKEN": "${EVIDENCE_GUARD_TOKEN:-local-dev-token}",
+        "EVIDENCE_GUARD_PORT": "${EVIDENCE_GUARD_PORT:-8790}"
+      }
+    }
+  }
+}
