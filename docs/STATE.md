@@ -12,9 +12,11 @@ sequence-потоки, data-model + staged-міграції, API/events-конт
 `tasks/` для `tg-assistant` та `rules-change-monitor` готові. M7 execution &
 scale (7.1-7.7) здана обома рівнями 2026-08-12→14, останній урок 7.7 (TDD
 discipline) закрито 2026-08-14. M8 MCP: уроки 8.4 (екосистема готових серверів)
-і 8.5 (`claude mcp serve`) здані обома рівнями 2026-08-17 — деталі в BACKLOG.md
-→ Курс. Пріоритет лишається реальний білд: T1+T2 `tg-assistant` за
-`tasks/tracker.md`.
+і 8.5 (`claude mcp serve`) здані обома рівнями 2026-08-17, уроки 8.6-8.8 (перший
+сервер, Inspector, web-chat канал) Mike здав сам 2026-08-18/19 — деталі в
+BACKLOG.md → Курс. Capstone M8 у роботі на гілці `feat/m8-capstone`
+([docs/capstones/m8.md](capstones/m8.md)). Пріоритет лишається
+реальний білд: T1+T2 `tg-assistant` за `tasks/tracker.md`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 183 node-тести + 17 UI зелені.
@@ -25,11 +27,50 @@ discipline) закрито 2026-08-14. M8 MCP: уроки 8.4 (екосисте�
 
 ## Зараз у роботі
 
-**Нічого — урок 7.7 (TDD discipline, останній у серії M7) закрито 2026-08-14.** Далі за чергою:
+**Нічого — capstone M8 (MCP) закрито 2026-08-19.** Далі за чергою:
 реальний білд `tg-assistant` — S-1 (collector), 3/5 checklist-кроків уже зроблено (Step 3,
 Step 4, Step 5, нижче) + Step 1 і Step 2 частково скриптовані (pure-function зрізи без
 MTProto/мережі), решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
 ([BACKLOG.md](BACKLOG.md) → NOW).
+
+Закрито 2026-08-19 (курс, capstone M8 — MCP, обидва рівні):
+
+Власний сервер і канал `evidence-guard` над rules-as-data репо:
+[mcp/evidence-guard/](../mcp/evidence-guard/), звіт і виміри —
+[docs/capstones/m8.md](capstones/m8.md).
+- [x] Простий рівень: `context7` уже на project scope + власний `evidence-guard`
+  у `.mcp.json`; 3 tools (`list_rules` / `get_rule` / `check_freshness`),
+  resource `evidence://summary`, prompt `verify-rule`
+- [x] `outputSchema` + `structuredContent` на `check_freshness`; зламане поле
+  винесено в постійний двійник `server.broken-output.ts` — SDK ловить його як
+  `Output validation error`, не як биті дані
+- [x] 50 тестів пакета зелені (store + MCP через `InMemoryTransport` + вебхук +
+  канал); мутація `>` → `>=` у порозі свіжості валить 3 з них; тест парності зі
+  `scripts/check-stale-rules.mjs` тримає два визначення «протермінованого» разом
+- [x] Inspector CLI (пін `@1.0.1`): щасливий і помилковий шляхи + `make contract`
+  — три однорядники з exit-кодами (0 проти чесного сервера, 1 проти зламаного)
+- [x] Складний рівень: канал `claude/channel` + `POST /webhook` з трьома
+  запобіжниками (секрет `timingSafeEqual` fail-closed, `z.strictObject`-allowlist,
+  санітизація тексту); curl-докази 401 / 400 / 202 зняті
+- [x] Кореневий `npm run verify` і 183 node + 17 UI лишились зелені
+- [x] Живі прогони Mike у чистих терміналах: `claude mcp list` (`context7` +
+      `evidence-guard` ✔ Connected), два виклики `get_rule` (щасливий і неіснуючий id
+      → помилка з підказкою), `make inspect` / `inspect-error` / `inspect-broken` /
+      `contract`
+- [x] Живий канал: подія з `POST /webhook` виринула тегом `<channel>` у сесії, Claude
+      сам пішов по `get_rule`, сходив на живий `zus.pl` (200, 4806 zł підтверджено) і
+      закрив подію `ack_event` з вердиктом `no-change` — без жодного повідомлення від
+      людини. Інʼєкція `</channel><system>…` приїхала без кутових дужок і як дані
+- [x] Два гейти каналу, знайдені по дорозі: (1) `Channels are not currently available` —
+      фіча-флаг, який ховає `DISABLE_TELEMETRY=1` (спостереження Mike, issue 45918);
+      env із settings підхоплюється лише на старті, тож потрібна свіжа сесія.
+      Резервний, незалежний гейт — `{"channelsEnabled": true}` у
+      `/etc/claude-code/managed-settings.json`; (2) сесію треба піднімати з теки
+      пакета — у корені те саме імʼя веде на сервер без capability каналу
+- [x] Другий запис `evidence-guard-channel` у кореневому `.mcp.json` відкинуто: зайвий
+      сервер у кожній сесії, а при зайнятому порті — `CONNECTION_CLOSED` на весь
+      MCP-сервер. Замість нього — `server.on("error")`, після якого зайнятий порт
+      лишає канал і tools живими
 
 Закрито 2026-08-14 (курс, урок 7.7 — TDD discipline, обидва рівні, останній урок M7):
 - [x] Демо `7.7-tdd-discipline` оглянуто: `make test` RED заблокований (`uv`/`pytest`
