@@ -304,9 +304,6 @@
     "'risk.jdg.formerEmployer.identical':",
     "'Частковий збіг із колишніми обовʼязками: ричалт лишається, але пільговий ZUS втрачається.',"
   ],
-  "SPEC.md:46": [
-    "| 5 | **G2:** 10/10 тестових профілів збігаються з державними калькуляторами (zus.pl, podatki.gov.pl) | ⏳ не пройдено, ворота перед M7 |"
-  ],
   "fop.ts:31-32": [
     "rangeMonthly: null,",
     "noRangeReasonKey: 'fop.noPlTakeHome',"
