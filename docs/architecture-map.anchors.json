@@ -311,8 +311,8 @@
     "rangeMonthly: null,",
     "noRangeReasonKey: 'fop.noPlTakeHome',"
   ],
-  "CLAUDE.md:74": [
-    "- `.env` ніколи в git, тільки `.env.example`."
+  "CLAUDE.md:80": [
+    "- PR-флоу (draft PR, авто-рев'ю, Rule of Two) додається з Module 9, коли з'явиться CI."
   ],
   "ARCHITECTURE.md:20": [
     "| **presentation** | `app/components/`, `app/**/page.tsx`, `app/layout.tsx`, `app/lib/i18n/` | React, CSS Modules, українські тексти | усе нижче |"
