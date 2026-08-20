@@ -14,8 +14,10 @@ scale (7.1-7.7) здана обома рівнями 2026-08-12→14, остан
 discipline) закрито 2026-08-14. M8 MCP: уроки 8.4 (екосистема готових серверів)
 і 8.5 (`claude mcp serve`) здані обома рівнями 2026-08-17, уроки 8.6-8.8 (перший
 сервер, Inspector, web-chat канал) Mike здав сам 2026-08-18/19 — деталі в
-BACKLOG.md → Курс. Capstone M8 у роботі на гілці `feat/m8-capstone`
-([docs/capstones/m8.md](capstones/m8.md)). Пріоритет лишається
+BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
+([docs/capstones/m8.md](capstones/m8.md)). **M9 Collaboration розпочато
+2026-08-20** — план і сетап готові, уроки ще не робились
+([docs/capstones/m9.md](capstones/m9.md)). Пріоритет поза курсом лишається
 реальний білд: T1+T2 `tg-assistant` за `tasks/tracker.md`.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
@@ -27,8 +29,24 @@ BACKLOG.md → Курс. Capstone M8 у роботі на гілці `feat/m8-ca
 
 ## Зараз у роботі
 
-**Нічого — capstone M8 (MCP) закрито 2026-08-19.** Далі за чергою:
-реальний білд `tg-assistant` — S-1 (collector), 3/5 checklist-кроків уже зроблено (Step 3,
+**M9 Collaboration — сетап зроблено 2026-08-20, наступний крок урок 9.1.**
+Де саме стоїмо — [COURSE-NOW.md](capstones/COURSE-NOW.md) (курсова сесія
+починає звідти), план складних рівнів — [m9.md](capstones/m9.md), прості рівні —
+`RUNBOOK.md` у теці `9-collaboration` курсової збірки.
+
+Закрито в сетапі:
+- [x] Курсову теку оновлено (14 комітів позаду + CRLF, через який `make sandbox`
+  падав на `$'\r'`); свіжий клон перевірено живим прогоном 9.1
+- [x] Виявлено, що `gh` не встановлений попри `Dockerfile:31-41` — потрібен
+  Rebuild Container і `gh auth login`; блокує 9.4, 9.6, 9.7 і капстоун
+- [x] `CLAUDE.md` шле курсову сесію в `COURSE-NOW.md`; два застарілі твердження
+  виправлені (статус модуля, якір карти на CI), G2 знято з боргу в
+  `SPEC.md`/`architecture-map.md` — ворота пройдені ще 2026-08-05
+- [x] Обидва MCP-сервери перевірені живими викликами; знайдено, що
+  `evidence-guard` не підніметься у worktree (`dist/` ігнорується) — розбір на 9.2
+
+Поза курсом за чергою: реальний білд `tg-assistant` — S-1 (collector),
+3/5 checklist-кроків уже зроблено (Step 3,
 Step 4, Step 5, нижче) + Step 1 і Step 2 частково скриптовані (pure-function зрізи без
 MTProto/мережі), решта потребує живого Telegram — [tasks/tracker.md](features/tg-assistant/tasks/tracker.md)
 ([BACKLOG.md](BACKLOG.md) → NOW).
