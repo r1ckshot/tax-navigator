@@ -20,10 +20,16 @@ session.json
 # Матеріали курсу (вкладені git-репозиторії)
 docs/course/
 
-# Local tier (персональні override, не для команди)
-.claude/settings.local.json
-.claude/*.local.md
+# Local tier (персональні override, не для команди).
+# `**/` обов'язкове: патерн зі слешем усередині git якорить на корінь репо, тож
+# без нього вкладений mcp/evidence-guard/.claude/ лишався невиключеним.
+**/.claude/settings.local.json
+**/.claude/*.local.md
+
+# Worktrees. `.worktrees/` — ручні `git worktree add`;
+# `.claude/worktrees/` — те, що створює `claude --worktree`.
 .worktrees/
+.claude/worktrees/
 
 # Приватне: нотатки, чернетки здачі, tg-mining pipeline (дані + протокол)
 docs/notes/
