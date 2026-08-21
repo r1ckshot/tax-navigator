@@ -15,8 +15,8 @@ discipline) закрито 2026-08-14. M8 MCP: уроки 8.4 (екосисте�
 і 8.5 (`claude mcp serve`) здані обома рівнями 2026-08-17, уроки 8.6-8.8 (перший
 сервер, Inspector, web-chat канал) Mike здав сам 2026-08-18/19 — деталі в
 BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
-([docs/capstones/m8.md](capstones/m8.md)). **M9 Collaboration розпочато
-2026-08-20** — план і сетап готові, уроки ще не робились
+([docs/capstones/m8.md](capstones/m8.md)). **M9 Collaboration у роботі з
+2026-08-20** — складні рівні 9.1-9.3 закриті 2026-08-21
 ([docs/capstones/m9.md](capstones/m9.md)). Пріоритет поза курсом лишається
 реальний білд: T1+T2 `tg-assistant` за `tasks/tracker.md`.
 
@@ -29,10 +29,33 @@ BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
 
 ## Зараз у роботі
 
-**M9 Collaboration — 9.2 закрито 2026-08-21, наступний крок урок 9.3.**
+**M9 Collaboration — 9.3 закрито 2026-08-21, наступний крок урок 9.4.**
 Де саме стоїмо — [COURSE-NOW.md](capstones/COURSE-NOW.md) (курсова сесія
 починає звідти), план складних рівнів — [m9.md](capstones/m9.md), прості рівні —
 `RUNBOOK.md` у теці `9-collaboration` курсової збірки.
+
+Закрито 2026-08-21 (урок 9.3, складний рівень — гілки `fix/gate-worktree-branch-9-3`,
+`feat/push-guard-9-3`, `docs/merge-policy-9-3`; PR [#10](https://github.com/r1ckshot/tax-navigator/pull/10),
+[#11](https://github.com/r1ckshot/tax-navigator/pull/11), [#12](https://github.com/r1ckshot/tax-navigator/pull/12)):
+- [x] Шар 2: `block-force-push-master.mjs` блокує будь-який push у `master`/`main` —
+  force, звичайний, refspec і `--delete`; `--tags` лишається дозволеним, бо реліз
+  9.7 тегує з `master`. 27 кейсів, мутація валить 8
+- [x] Шар 3: GitHub-ruleset на `master` — `pull_request`, `non_fast_forward`,
+  `deletion`, bypass-лист порожній. Виставив Mike (`gh api -X PUT` ріже
+  класифікатор — той самий клас, що `settings.json`)
+- [x] Шар 1: `CLAUDE.md` §Git одним рядком називає всі три і merge-політику
+- [x] Merge-коміт замість rebase — DECISIONS 2026-08-21. `4d96003` перший в історії
+  репо: 9.1 і 9.2 злиті `--rebase`, тож вимога капстоуна не мала предмета
+- [x] Два worktree на спільному рядку §Git → реальний конфлікт → розвʼязаний
+  обʼєднанням (`8160c47`), вливання по одній зі звіркою `git diff master..<branch>`
+- [x] Cleanup: `git worktree remove` × 2 + `prune`, список чистий
+- [x] Побічно (діри 9.2, знайдені першим же комітом із worktree): гейт визначав
+  гілку по кореню сесії — кожен коміт із worktree читався як коміт у `master`;
+  `docs/capstones/` (в `.gitignore`, але з посиланнями зі STATE/BACKLOG) валив
+  `verify` шістьма мертвими лінками. Обидві закриті, `.worktreeinclude` доповнено
+- [x] Ручний `git worktree add` не застосовує ні `.worktreeinclude`, ні
+  `symlinkDirectories` — обидва механізми належать Claude Code, не git
+  (`environment-limits.md`)
 
 Закрито 2026-08-21 (урок 9.2, складний рівень — гілка `feat/worktree-hygiene-9-2`,
 draft PR [#8](https://github.com/r1ckshot/tax-navigator/pull/8)):
