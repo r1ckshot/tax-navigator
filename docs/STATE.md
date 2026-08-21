@@ -29,10 +29,32 @@ BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
 
 ## Зараз у роботі
 
-**M9 Collaboration — 9.1 закрито 2026-08-21, наступний крок урок 9.2.**
+**M9 Collaboration — 9.2 закрито 2026-08-21, наступний крок урок 9.3.**
 Де саме стоїмо — [COURSE-NOW.md](capstones/COURSE-NOW.md) (курсова сесія
 починає звідти), план складних рівнів — [m9.md](capstones/m9.md), прості рівні —
 `RUNBOOK.md` у теці `9-collaboration` курсової збірки.
+
+Закрито 2026-08-21 (урок 9.2, складний рівень — гілка `feat/worktree-hygiene-9-2`,
+draft PR [#8](https://github.com/r1ckshot/tax-navigator/pull/8)):
+- [x] `.gitignore`: `**/.claude/settings.local.json` і `**/.claude/*.local.md`
+  (патерн зі слешем якорився на корінь, вкладений `mcp/evidence-guard/.claude/`
+  лишався невиключеним) + `.claude/worktrees/`, яку доти виключав лише
+  `.git/info/exclude` — локальний шар, у клон не їде
+- [x] `.worktreeinclude`: `.env`, `.env.local`, `.env.development.local`,
+  `.claude/settings.local.json`. `dist/`, `data/`, `node_modules/`, `.next/`
+  свідомо не копіюємо, причина кожного записана в самому файлі
+- [x] Ізоляція портів: `scripts/worktree-ports.mjs` виводить порт із worktree,
+  головний лишається на 3000/8790. Підключено до `npm run dev`/`start` і до
+  `PORT` у `mcp/evidence-guard/Makefile`. 10 тестів, мутація підтверджена
+- [x] Доказ: два канали одночасно на 8790 і 8798, обидва віддали HTTP 202,
+  лічильники подій незалежні
+- [x] Заміряно: `npm ci` у свіжому worktree 377 с, `git worktree add` 11 с,
+  холодний імпорт MCP SDK на 9p 17,8 с — усе в `environment-limits.md`
+- [x] `worktree.symlinkDirectories` у `.claude/settings.json` і перевірка живим
+  worktree: обидва симлінки й усі чотири файли з `.worktreeinclude` створюються
+  автоматично. `.worktreeinclude` читається з головного репо, не з гілки worktree
+- [x] Побічно: `node_modules/` зі слешем не матчить симлінк, тож після кожного
+  `claude -w` два рядки висіли untracked — патерн виправлено на `node_modules`
 
 Закрито 2026-08-21 (урок 9.1, складний рівень — гілка `feat/git-hygiene-9-1`,
 draft PR [#7](https://github.com/r1ckshot/tax-navigator/pull/7)):
@@ -55,7 +77,8 @@ draft PR [#7](https://github.com/r1ckshot/tax-navigator/pull/7)):
   виправлені (статус модуля, якір карти на CI), G2 знято з боргу в
   `SPEC.md`/`architecture-map.md` — ворота пройдені ще 2026-08-05
 - [x] Обидва MCP-сервери перевірені живими викликами; знайдено, що
-  `evidence-guard` не підніметься у worktree (`dist/` ігнорується) — розбір на 9.2
+  `evidence-guard` не підніметься у worktree (`dist/` ігнорується) — закрито на
+  9.2: `dist/` свідомо не копіюємо, у worktree одна команда `build`
 
 Поза курсом за чергою: реальний білд `tg-assistant` — S-1 (collector),
 3/5 checklist-кроків уже зроблено (Step 3,
