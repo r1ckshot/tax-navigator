@@ -157,6 +157,45 @@ branch_case "first commit ever, on master" deny-branch         master       unbo
 branch_case "first commit ever, on feat/x" passed-branch-gate  feat/x       unborn
 
 echo
+echo "Worktree gate — commit runs somewhere else than the hook (marker: checkout -b):"
+
+# Хук стартує в корені сесії, а з М9 коміти йдуть із worktree. Фікстура тримає
+# обидва дерева одразу: корінь на master і linked worktree на feat/x. Кейси
+# ганяються з КОРЕНЯ — тобто рівно в тих умовах, у яких хук працює насправді.
+worktree_case() {
+  local name="$1" expected="$2" command_from_root="$3"
+  local dir out verdict
+  dir=$(mktemp -d)
+  (
+    cd "$dir" || exit 1
+    git init -q -b master root
+    cd root || exit 1
+    git -c user.email=ci@example.com -c user.name=ci commit -q --allow-empty -m init
+    git worktree add -q ../wt -b feat/x
+  ) >/dev/null 2>&1
+  # WT= підставляється в команду кейса вже після створення фікстури.
+  local command=${command_from_root//WT/$dir\/wt}
+  out=$(cd "$dir/root" && printf '{"tool_name":"Bash","tool_input":{"command":%s}}' "$command" | node "$HOOK" 2>/dev/null)
+  rm -rf "$dir"
+  if printf '%s' "$out" | grep -q 'checkout -b'; then verdict=deny-branch; else verdict=passed-branch-gate; fi
+  if [ "$verdict" = "$expected" ]; then
+    printf '  OK    %-52s %s\n' "$name" "$verdict"
+  else
+    printf '  FAIL  %-52s expected %s, got %s\n' "$name" "$expected" "$verdict"
+    fails=$((fails + 1))
+  fi
+}
+
+worktree_case "git -C <worktree on feat/x>"  passed-branch-gate '"git -C WT commit -m \"fix: x\""'
+worktree_case "cd <worktree> && git commit"  passed-branch-gate '"cd WT && git commit -m \"fix: x\""'
+worktree_case "cd <worktree>, then git add"  passed-branch-gate '"cd WT && git add a.txt && git commit -m \"fix: x\""'
+# Корінь фікстури сидить на master: без -C/cd гілка та сама, що й була, — блок.
+worktree_case "no -C, hook stays on master"  deny-branch        '"git commit -m \"fix: x\""'
+# Шлях, якого нема (змінна, підстановка шелла): гейт мусить впасти назад на
+# корінь сесії й судити по ньому, а не мовчки пропустити коміт.
+worktree_case "nonexistent -C path"          deny-branch        '"git -C /nope/nope commit -m \"fix: x\""'
+
+echo
 if [ "$fails" -eq 0 ]; then
   echo "All cases passed."
 else
