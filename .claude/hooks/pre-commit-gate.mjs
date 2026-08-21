@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 /**
- * PreToolUse + matcher Bash + if: git commit* — гейт перед комітом.
+ * PreToolUse + matcher Bash — гейт на git-операції перед комітом.
  *
- * Замінює інлайн `npm test` у settings.json. Три чеки, всі мають ловити проблему
- * ДО коміту, не після: гілка (правило "у master напряму не комітимо" протекло
- * 2026-08-04 — вісім файлів були застейджені просто в master), кирилиця в message
- * (правило CLAUDE.md "коміти англійською" протекло в subject 2026-07-31) і
+ * Замінює інлайн `npm test` у settings.json. Чеки ловлять проблему ДО коміту, не
+ * після: стейджинг `.env*` (`git add -f .env` обходив і deny-правила, і
+ * `block-env-writes` — той дивиться на запис у файл, не на індекс), гілка
+ * (правило "у master напряму не комітимо" протекло 2026-08-04 — вісім файлів
+ * були застейджені просто в master), кирилиця в message (правило CLAUDE.md
+ * "коміти англійською" протекло в subject 2026-07-31), трейлер атрибуції і
  * `npm test` + `npm run verify` (той самий клас, що й check-docs.mjs, лишень
  * рівнем раніше).
  *
- * Порядок чеків = від найдешевшого: обидва перші відповідають миттєво, тож на
- * заблокованому коміті не витрачається півхвилини на тести.
+ * Порядок чеків = від найдешевшого: усі, крім останніх двох, відповідають
+ * миттєво, тож на заблокованому коміті не витрачається півхвилини на тести.
+ * Стейджинг стоїть найпершим ще й тому, що він єдиний спрацьовує не на
+ * `git commit`, а на `git add`.
  */
 import { spawnSync } from 'node:child_process';
 
@@ -29,7 +33,23 @@ process.stdin.on('end', () => {
   // поле `if` фактично не фільтрує — хук отримував КОЖНУ Bash-команду і ганяв на
   // ній повний `npm test` + `verify`, а кирилиця в будь-якому echo читалась як
   // кирилиця в commit message. Перевірено 2026-08-03 живими викликами.
-  if (!gitInvocations(command).some((i) => i.sub === 'commit')) process.exit(0);
+  const invocations = gitInvocations(command);
+
+  const staging = envStaging(invocations);
+  if (staging) {
+    deny(
+      staging.wildcard
+        ? `\`git add ${staging.target}\` із --force — форс знімає .gitignore, а під ним лежать ` +
+            '.env, .env.local і решта секретів (CLAUDE.md, розділ Git).\n' +
+            'Стейджити файли за іменем: git add <шлях> без -f.'
+        : `Стейджинг \`${staging.target}\` — .env ніколи в git, тільки .env.example ` +
+            '(CLAUDE.md, розділ Git).\n' +
+            'Якщо треба показати змінну — додай її в .env.example без значення.'
+    );
+    return;
+  }
+
+  if (!invocations.some((i) => i.sub === 'commit')) process.exit(0);
 
   const branch = currentBranch();
   if (branch === 'master' || branch === 'main') {
@@ -106,6 +126,36 @@ function gitInvocations(command) {
     }
   }
   return found;
+}
+
+/**
+ * Спроба застейджити секрет. Два різні вектори, обидва повз наявні запобіжники:
+ * пряме `git add .env` (deny-правила в settings.json дивляться на Read/Edit, а
+ * `block-env-writes` — на запис у файл; індекс не бачить ні той, ні той) і
+ * `git add -f .` — форс знімає `.gitignore`, тож `.env` їде разом з усім каталогом,
+ * жодного разу не названий у команді.
+ *
+ * `.env.example` лишається дозволеним: він у git за задумом, на нього спирається
+ * onboarding — і саме на ньому ламається наївний патерн `*.env*`.
+ */
+function envStaging(invocations) {
+  const ENV_TARGET = /^(?:[^/]*\/)*\.env(?:\.[A-Za-z0-9_-]+)*$/;
+  const IS_TEMPLATE = /\.(example|sample|template|dist)$/;
+  const FORCE = /^(?:-f|--force)$/;
+  // Цілі, що розкриваються в набір файлів: під форсом кожна тягне ігнороване.
+  const WILDCARD = /^(?:\.|\.\/|\*|-A|--all|(?:[^\s]*\/)?\*)$/;
+
+  for (const { sub, args } of invocations) {
+    if (sub !== 'add' && sub !== 'stage') continue;
+
+    const forced = args.some((a) => FORCE.test(a));
+    for (const arg of args) {
+      const target = arg.replace(/^['"]|['"]$/g, '');
+      if (ENV_TARGET.test(target) && !IS_TEMPLATE.test(target)) return { target, forced };
+      if (forced && WILDCARD.test(target)) return { target, forced, wildcard: true };
+    }
+  }
+  return null;
 }
 
 /**

@@ -40,6 +40,25 @@ check "git commit-tree (plumbing)"         pass '"git commit-tree abc123"'
 check "word commit inside a string"        pass '"echo \"commit later\""'
 
 echo
+echo "Staging a secret — must deny (the check fires on git add, not on commit):"
+check "git add .env"                       deny '"git add .env"'
+check "git add -f .env"                    deny '"git add -f .env"'
+check "git add --force .env.local"         deny '"git add --force .env.local"'
+check "nested .env"                        deny '"git add mcp/evidence-guard/.env"'
+check "after another command"              deny '"git status && git add .env.production"'
+check "forced whole directory"             deny '"git add -f ."'
+check "forced -A"                          deny '"git add -f -A"'
+
+echo
+echo "Legitimate staging — must pass:"
+check "ordinary file"                      pass '"git add app/lib/calc/index.ts"'
+check ".env.example"                       pass '"git add .env.example"'
+check "plain git add ."                    pass '"git add ."'
+check "plain git add -A"                   pass '"git add -A"'
+check "file with env in the name"          pass '"git add app/lib/environment.ts"'
+check "reading .env, not staging"          pass '"grep -c X .env"'
+
+echo
 echo "Real commit with Cyrillic in the message — must deny:"
 check "subject in Ukrainian"               deny '"git commit -m \"виправлення\""'
 check "flags between git and commit"       deny '"git -c user.name=x commit -m \"тест\""'
