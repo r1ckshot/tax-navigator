@@ -17,6 +17,8 @@
  * `git commit`, а на `git add`.
  */
 import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -49,9 +51,15 @@ process.stdin.on('end', () => {
     return;
   }
 
-  if (!invocations.some((i) => i.sub === 'commit')) process.exit(0);
+  const commit = invocations.find((i) => i.sub === 'commit');
+  if (!commit) process.exit(0);
 
-  const branch = currentBranch();
+  // Каталог, у якому коміт справді відбудеться. Хук завжди стартує в корені
+  // сесії (/workspace), а з М9 коміти йдуть із worktree — і гейт бачив гілку
+  // кореня (master) замість гілки worktree, тобто відмовляв КОЖНОМУ комітові
+  // з worktree і при цьому ганяв тести не на тому дереві.
+  const dir = commit.dir;
+  const branch = currentBranch(dir);
   if (branch === 'master' || branch === 'main') {
     deny(
       `Коміт напряму в \`${branch}\` — CLAUDE.md, розділ Git: гілка на фічу, ` +
@@ -80,13 +88,13 @@ process.stdin.on('end', () => {
     return;
   }
 
-  const test = spawnSync('npm', ['test', '--silent'], { encoding: 'utf8' });
+  const test = spawnSync('npm', ['test', '--silent'], { encoding: 'utf8', cwd: dir });
   if (test.status !== 0) {
     deny(`npm test впав — коміт заблоковано.\n${tail(test.stdout + test.stderr)}`);
     return;
   }
 
-  const verify = spawnSync('npm', ['run', 'verify', '--silent'], { encoding: 'utf8' });
+  const verify = spawnSync('npm', ['run', 'verify', '--silent'], { encoding: 'utf8', cwd: dir });
   if (verify.status !== 0) {
     deny(`npm run verify впав — коміт заблоковано.\n${tail(verify.stdout + verify.stderr)}`);
     return;
@@ -110,22 +118,49 @@ process.stdin.on('end', () => {
 function gitInvocations(command) {
   const OPTIONS_WITH_VALUE = new Set(['-c', '-C', '--git-dir', '--work-tree', '--namespace', '--exec-path']);
   const found = [];
+  // Каталог, у якому опиниться git: `cd <dir> &&` тягнеться на наступні
+  // сегменти, `git -C <dir>` діє лише на свій виклик. Без цього гейт судив про
+  // гілку й ганяв тести в корені сесії, хоч коміт ішов у worktree.
+  let chdir = null;
 
   for (const segment of command.split(/&&|\|\||;|\||\n/)) {
     const tokens = segment.trim().split(/\s+/).filter(Boolean);
+
+    if (tokens[0] === 'cd' && tokens[1] && !tokens[1].startsWith('-')) {
+      chdir = unquote(tokens[1]);
+      continue;
+    }
+
     const gitAt = tokens.findIndex((t) => t === 'git' || t.endsWith('/git'));
     if (gitAt === -1) continue;
 
+    let dir = chdir;
     for (let i = gitAt + 1; i < tokens.length; i++) {
       const token = tokens[i];
       if (!token.startsWith('-')) {
-        found.push({ sub: token, args: tokens.slice(i + 1) });
+        found.push({ sub: token, args: tokens.slice(i + 1), dir: resolveDir(dir) });
         break;
       }
+      if (token === '-C' && tokens[i + 1]) dir = unquote(tokens[i + 1]);
       if (OPTIONS_WITH_VALUE.has(token)) i++;
     }
   }
   return found;
+}
+
+function unquote(token) {
+  return token.replace(/^['"]|['"]$/g, '');
+}
+
+/**
+ * Каталог із команди — лише якщо він справді існує. Неіснуючий шлях означає, що
+ * розбір промахнувся (змінна, підстановка шелла); тоді чесніше судити по кореню
+ * сесії, ніж мовчки пропустити коміт, бо `git rev-parse` не мав де відпрацювати.
+ */
+function resolveDir(dir) {
+  if (!dir) return process.cwd();
+  const resolved = resolve(process.cwd(), dir);
+  return existsSync(resolved) ? resolved : process.cwd();
 }
 
 /**
@@ -174,8 +209,8 @@ function messageIsInCommand(command) {
  * перед вливанням у master дозволена (DECISIONS 2026-07-29), а коміти всередині
  * rebase взагалі не проходять через цей хук.
  */
-function currentBranch() {
-  const r = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { encoding: 'utf8' });
+function currentBranch(dir = process.cwd()) {
+  const r = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { encoding: 'utf8', cwd: dir });
   if (r.status === 0) return r.stdout.trim();
 
   // Репо без жодного коміта: `rev-parse` на НЕНАРОДЖЕНІЙ гілці падає, хоча гілка
@@ -183,7 +218,7 @@ function currentBranch() {
   // коміт у свіжому репо йшов повз гейт саме там, де гейт найпотрібніший.
   // Знайдено не локально, а в CI: там нема user.email, тестова фікстура не змогла
   // створити коміт — і кейс «коміт у master» раптом став зеленим.
-  const symbolic = spawnSync('git', ['symbolic-ref', '--short', 'HEAD'], { encoding: 'utf8' });
+  const symbolic = spawnSync('git', ['symbolic-ref', '--short', 'HEAD'], { encoding: 'utf8', cwd: dir });
   return symbolic.status === 0 ? symbolic.stdout.trim() : '';
 }
 
