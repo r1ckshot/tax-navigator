@@ -1,5 +1,5 @@
 {
-  "package.json:30": [
+  "package.json:31": [
     "\"typescript\": \"^5.7.0\","
   ],
   "tsconfig.json:7": [
@@ -11,31 +11,37 @@
   "tsconfig.json:22": [
     "\"@/*\": [\"./app/*\"]"
   ],
-  "package.json:16": [
+  "package.json:17": [
     "\"next\": \"^15.1.0\","
   ],
-  "package.json:17": [
+  "package.json:18": [
     "\"react\": \"^19.0.0\","
   ],
-  "package.json:15-19": [
+  "package.json:16-20": [
     "\"dependencies\": {",
     "},"
   ],
-  "package.json:31": [
+  "package.json:32": [
     "\"vitest\": \"^4.1.10\""
   ],
-  "package.json:22": [
+  "package.json:23": [
     "\"@testing-library/react\": \"^16.3.2\","
   ],
-  "package.json:29": [
+  "package.json:30": [
     "\"jsdom\": \"^29.1.1\","
   ],
-  "package.json:28": [
+  "package.json:29": [
     "\"dependency-cruiser\": \"^18.1.0\","
   ],
-  "package.json:5-13": [
+  "package.json:5-14": [
     "\"scripts\": {",
     "\"verify\": \"node scripts/verify.mjs\""
+  ],
+  "package.json:6": [
+    "\"dev\": \"node scripts/worktree-ports.mjs -- next dev\","
+  ],
+  "package.json:8": [
+    "\"start\": \"node scripts/worktree-ports.mjs -- next start\","
   ],
   "next.config.mjs:7": [
     "distDir: process.env.NEXT_DIST_DIR || '.next',"

@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 export default defineConfig({
   plugins: [react()],
   test: {
-    include: ['app/**/*.test.ts'],
+    include: ['app/**/*.test.ts', 'scripts/**/*.test.mjs'],
     environment: 'node',
   },
   resolve: {

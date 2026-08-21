@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/worktree-ports.mjs -- next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/worktree-ports.mjs -- next start",
+    "ports": "node scripts/worktree-ports.mjs",
     "test": "vitest run && npm run test:arch",
     "test:watch": "vitest",
     "test:arch": "depcruise app",
