@@ -1,0 +1,32 @@
+# Що копіювати з головного репо у свіжий worktree (`claude --worktree`).
+#
+# Синтаксис — gitignore. Кандидати беруться з
+# `git ls-files --others --ignored --exclude-standard --directory`, тобто сюди
+# має сенс писати ТІЛЬКИ те, що вже ігнорується: трековані файли worktree і так
+# дістає чекаутом.
+#
+# Копіювання — саме копіювання, не симлінк. Великі теки сюди не писати:
+# для них є `worktree.symlinkDirectories` у `.claude/settings.json`.
+
+# Локальні env. Без них `next dev` у worktree стартує з порожньою конфігурацією.
+.env
+.env.local
+.env.development.local
+
+# Локальний tier налаштувань. Корінний файл Claude Code копіює й сам, окремою
+# гілкою коду; тримаємо рядок явно, щоб намір читався з файла, а не з бінарника.
+.claude/settings.local.json
+
+# --- Свідомо НЕ копіюємо ---
+#
+# mcp/evidence-guard/dist/  — зібраний JS. Копія відв'язана від джерел worktree,
+#   тож сервер тихо віддавав би стару логіку. Краще гучний збій: у worktree
+#   `npm --prefix mcp/evidence-guard run build` перед першим запуском.
+#
+# mcp/evidence-guard/data/  — журнал ack-ів вебхука, робочі дані. Дві копії
+#   аудит-логу неминуче розійдуться; worktree починає з чистого.
+#
+# node_modules/, mcp/evidence-guard/node_modules/ — тисячі файлів на 9p.
+#   Симлінк через `worktree.symlinkDirectories`, не копія.
+#
+# .next/ — кеш збірки, прив'язаний до дерева. Кожен worktree будує свій.
