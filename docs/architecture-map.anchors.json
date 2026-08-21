@@ -308,8 +308,8 @@
     "rangeMonthly: null,",
     "noRangeReasonKey: 'fop.noPlTakeHome',"
   ],
-  "CLAUDE.md:80": [
-    "- PR-флоу (draft PR, авто-рев'ю, Rule of Two) додається з Module 9, коли з'явиться CI."
+  "CLAUDE.md:81": [
+    "- Решта PR-флоу (title-конвенція, тіло, темплейт, `Closes #N`, авто-рев'ю) — секція `## Pull requests`, додається уроком 9.4 разом із текою `.github/`."
   ],
   "ARCHITECTURE.md:20": [
     "| **presentation** | `app/components/`, `app/**/page.tsx`, `app/layout.tsx`, `app/lib/i18n/` | React, CSS Modules, українські тексти | усе нижче |"
