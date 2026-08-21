@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Git-рівневий запобіжник: секрет не потрапляє в коміт, хто б його не робив.
+#
+# Навіщо він, якщо `.claude/hooks/pre-commit-gate.mjs` уже ловить `git add .env`:
+# той хук стоїть у каналі агента (PreToolUse на Bash-виклики Claude Code) і команду,
+# набрану людиною в терміналі, не бачить взагалі. Тут — навпаки: git запускає цей
+# файл на кожен коміт у репо, незалежно від того, звідки прийшла команда.
+#
+# Дивиться на ІНДЕКС, а не на команду: `git add -f .`, `git add -f -A` і пряме
+# `git add .env` приходять сюди однаково — як шлях у списку застейдженого.
+#
+# Вмикається один раз на клон:  git config core.hooksPath .githooks
+# (за замовчуванням git читає .git/hooks/, а та тека не трекається).
+set -uo pipefail
+
+# `.env.example` і решта шаблонів лишаються дозволеними: вони в git за задумом,
+# на них спирається onboarding.
+leak=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '(^|/)\.env(\.[A-Za-z0-9_-]+)*$' \
+  | grep -Ev '\.(example|sample|template|dist)$' || true)
+
+if [ -n "$leak" ]; then
+  echo "ЗАБЛОКОВАНО: у коміт потрапляє секрет." >&2
+  printf '  %s\n' $leak >&2
+  echo "" >&2
+  echo ".env ніколи в git, тільки .env.example (CLAUDE.md, розділ Git)." >&2
+  echo "Прибрати з індексу: git restore --staged <шлях>" >&2
+  exit 1
+fi
+
+exit 0
