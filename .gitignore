@@ -3,8 +3,11 @@
 .env.*
 !.env.example
 
-# Build / deps
-node_modules/
+# Build / deps.
+# Без слеша на кінці: `worktree.symlinkDirectories` кладе в кожен worktree
+# СИМЛІНК на node_modules головного репо, а патерн зі слешем матчить лише теки —
+# симлінки висіли б untracked після кожного `claude --worktree`.
+node_modules
 .next/
 .next-verify/
 dist/
