@@ -221,5 +221,8 @@
     "DISABLE_FEEDBACK_COMMAND": "1",
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
-  }
+  },
+  "worktree": {
+  "symlinkDirectories": ["node_modules", "mcp/evidence-guard/node_modules"]
+}
 }
