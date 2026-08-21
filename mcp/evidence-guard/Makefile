@@ -7,7 +7,12 @@
 
 INSPECTOR := npx @modelcontextprotocol/inspector@1.0.1
 TOKEN ?= local-dev-token
-PORT ?= 8790
+
+# Порт розводиться по worktree, інакше два паралельні `make channel` б'ються за
+# 8790. У головному worktree offset нульовий, тобто рівно 8790 як і раніше.
+# Фолбек на випадок, коли Makefile смикають поза git-деревом.
+REPO_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))../..)
+PORT ?= $(shell node $(REPO_ROOT)/scripts/worktree-ports.mjs --get EVIDENCE_GUARD_PORT 2>/dev/null || echo 8790)
 
 .PHONY: install build test run channel inspect inspect-error inspect-broken \
 	contract webhook-noauth webhook-ok webhook-injection clean
