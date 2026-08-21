@@ -29,7 +29,7 @@ process.stdin.on('end', () => {
   // поле `if` фактично не фільтрує — хук отримував КОЖНУ Bash-команду і ганяв на
   // ній повний `npm test` + `verify`, а кирилиця в будь-якому echo читалась як
   // кирилиця в commit message. Перевірено 2026-08-03 живими викликами.
-  if (!isGitCommit(command)) process.exit(0);
+  if (!gitInvocations(command).some((i) => i.sub === 'commit')) process.exit(0);
 
   const branch = currentBranch();
   if (branch === 'master' || branch === 'main') {
@@ -76,14 +76,20 @@ process.stdin.on('end', () => {
 });
 
 /**
- * Чи є в команді справжній `git commit`. Регексом це не робиться надійно: між
- * `git` і підкомандою стоять глобальні опції, і частина з них має ОКРЕМИМ токеном
- * значення (`git -c user.name=x commit`). Тому — розбір токенів: пропускаємо
- * прапорці, перший непрапорцевий токен і є підкоманда. Так `git commit-tree` і
- * `grep commit` лишаються поза гейтом, а `npm test && git commit -m …` — усередині.
+ * Усі git-виклики в команді: `{ sub, args }` на кожен сегмент шелла. Регексом це
+ * не робиться надійно: між `git` і підкомандою стоять глобальні опції, і частина
+ * з них має ОКРЕМИМ токеном значення (`git -c user.name=x commit`). Тому — розбір
+ * токенів: пропускаємо прапорці, перший непрапорцевий токен і є підкоманда. Так
+ * `git commit-tree` і `grep commit` лишаються поза гейтом, а `npm test && git
+ * commit -m …` — усередині.
+ *
+ * Збирається САМЕ список, а не перше влучання: попередня версія віддавала вердикт
+ * по першому ж git-сегменті й на `git log --oneline && git commit -m …` казала
+ * "це не коміт" — гейт мовчки пропускав усе, що йшло другою git-командою.
  */
-function isGitCommit(command) {
+function gitInvocations(command) {
   const OPTIONS_WITH_VALUE = new Set(['-c', '-C', '--git-dir', '--work-tree', '--namespace', '--exec-path']);
+  const found = [];
 
   for (const segment of command.split(/&&|\|\||;|\||\n/)) {
     const tokens = segment.trim().split(/\s+/).filter(Boolean);
@@ -92,11 +98,14 @@ function isGitCommit(command) {
 
     for (let i = gitAt + 1; i < tokens.length; i++) {
       const token = tokens[i];
-      if (!token.startsWith('-')) return token === 'commit';
+      if (!token.startsWith('-')) {
+        found.push({ sub: token, args: tokens.slice(i + 1) });
+        break;
+      }
       if (OPTIONS_WITH_VALUE.has(token)) i++;
     }
   }
-  return false;
+  return found;
 }
 
 /**

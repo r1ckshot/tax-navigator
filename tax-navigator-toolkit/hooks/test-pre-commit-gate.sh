@@ -46,6 +46,8 @@ check "flags between git and commit"       deny '"git -c user.name=x commit -m \
 check "compound command"                   deny '"npm test && git commit -m \"тест\""'
 check "Cyrillic in heredoc body"           deny '"git commit -F- <<EOF\nтіло\nEOF"'
 check "amend with Cyrillic"                deny '"git commit --amend -m \"тест\""'
+# Гейт читав ЛИШЕ перший git-сегмент і на цьому рядку відповідав "це не коміт".
+check "commit after another git subcommand" deny '"git log --oneline && git commit -m \"тест\""'
 
 echo
 echo "Attribution trailer — marker: the reason names Co-Authored-By."
