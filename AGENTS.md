@@ -10,7 +10,7 @@ Codex його не читають узагалі, тож усе, що має д
 | Claude Code | `CLAUDE.md`, `.claude/rules/*.md`, `.claude/skills/*/SKILL.md`, цей файл | активний |
 | GitHub App `claude-code-action` | `CLAUDE.md` + цей файл (працює в тому ж репо) | встановлений, два workflow нижче |
 | Codex | цей файл, секція `## Review guidelines` | `codex` CLI у середовищі відсутній (`command -v codex` порожній) — не підключений |
-| GitHub Copilot code review | `.github/copilot-instructions.md` (**немає в репо**) + цей файл | недоступний на цьому акаунті: `POST .../requested_reviewers` з `copilot-pull-request-reviewer[bot]` віддає `200`, а список рев'юерів лишається порожній (перевірено на PR #21, 2026-08-22) |
+| GitHub Copilot code review | `.github/copilot-instructions.md` (**немає в репо**) + цей файл | **підключений**, рев'ює. `POST .../requested_reviewers` віддає `200` і лишає список рев'юерів порожнім — це не відмова: рев'ю приходить від `copilot-pull-request-reviewer` окремою подією (перевірено на PR #21, 2026-08-22) |
 | CodeRabbit / Greptile | власний конфіг, цей файл не читають | не підключені |
 
 **Дублювання заборонене.** Кожен P0 нижче — один рядок і посилання на канонічне
@@ -101,6 +101,14 @@ worker-скриптах `research/` — там generic-загрози **реал
 **кожен пуш у кожен відкритий PR**, а тут PR відкривається чернеткою після першого
 ж коміта: платили б токенами і хвилинами CI за кожен проміжний коміт. Рев'ю стоїть
 там само, де його ставить `CLAUDE.md` — на оголошенні готовності (`gh pr ready`).
+
+**Зелений джоб ≠ рев'ю відбулось.** `claude-code-action` порівнює workflow-файл
+у PR із версією на `master` і при розбіжності пропускає себе, лишаючи джоб
+`success`: `Workflow validation failed. The workflow file must exist and have
+identical content to the version on the repository's default branch`. Це захист
+від підміни workflow у самому PR. Наслідок для читача чек-рану: після будь-якої
+правки цих файлів перший прогін на PR порожній, і судити про рев'ю треба за
+коментарями, а не за галочкою.
 
 Три запобіжники периметра, у порядку зростання ризику:
 
