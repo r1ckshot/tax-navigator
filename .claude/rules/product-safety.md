@@ -2,7 +2,7 @@
 description: Product safety rules for tax UI copy and calculations — ranges not exact amounts, no personal recommendations, Ukrainian UI text, no raw income storage
 paths:
   - "app/**/*.tsx"
-  - "app/api/**/*.ts"
+  - "app/lib/i18n/*.ts"
 ---
 
 # Product Safety Rules (UI & Calculations)
