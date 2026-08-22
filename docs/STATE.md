@@ -16,7 +16,7 @@ discipline) закрито 2026-08-14. M8 MCP: уроки 8.4 (екосисте�
 сервер, Inspector, web-chat канал) Mike здав сам 2026-08-18/19 — деталі в
 BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
 ([docs/capstones/m8.md](capstones/m8.md)). **M9 Collaboration у роботі з
-2026-08-20** — складні рівні 9.1-9.3 закриті 2026-08-21
+2026-08-20** — складні рівні 9.1-9.4 закриті 2026-08-21/22
 ([docs/capstones/m9.md](capstones/m9.md)). Пріоритет поза курсом лишається
 реальний білд: T1+T2 `tg-assistant` за `tasks/tracker.md`.
 
@@ -29,10 +29,30 @@ BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
 
 ## Зараз у роботі
 
-**M9 Collaboration — 9.3 закрито 2026-08-21, наступний крок урок 9.4.**
+**M9 Collaboration — 9.4 закрито 2026-08-22, наступний крок урок 9.5.**
 Де саме стоїмо — [COURSE-NOW.md](capstones/COURSE-NOW.md) (курсова сесія
 починає звідти), план складних рівнів — [m9.md](capstones/m9.md), прості рівні —
 `RUNBOOK.md` у теці `9-collaboration` курсової збірки.
+
+Закрито 2026-08-22 (урок 9.4, складний рівень — гілка `feat/pr-conventions-9-4`,
+issue [#14](https://github.com/r1ckshot/tax-navigator/issues/14),
+PR [#15](https://github.com/r1ckshot/tax-navigator/pull/15)):
+- [x] `CLAUDE.md` §Pull requests: title = subject майбутнього merge-коміта, шість
+  секцій тіла з правилом `N/A — <причина>` замість видалення, `Closes #N` і
+  вимога заводити issue ДО PR, таблиця чотирьох команд `gh` із дозволом на кожну
+- [x] Перший файл у `.github/` — `pull_request_template.md`; `gh pr create`
+  підтягує його сам
+- [x] Дозволи розведені: `gh pr create`/`view`/`diff`/`ready` + `gh issue
+  list`/`view` в `allow`, `gh pr merge *` в `ask`. `ask` б'є `allow`, тож ширший
+  патерн на `gh`, який колись заїде в `allow`, останні людські ворота не зніме
+- [x] Реальний прогін власного правила: issue #14 → гілка → коміт → push →
+  `gh pr create --draft` з `Closes #14` після ПЕРШОГО коміта, не наприкінці
+- [x] Знахідка про середовище: `permissions` у `.claude/settings.json`
+  підхоплюються серед сесії, на відміну від `hooks` — межа проходить по ключах,
+  не по файлу (`environment-limits.md` виправлено)
+- [x] `check-anchors` зловив дрейф від нової секції: карта архітектури цитувала
+  `CLAUDE.md:81` з текстом «CI і решта PR-флоу заплановані з Module 9» —
+  половина вже неправда, твердження переписане, якір перепризначений на `:83`
 
 Закрито 2026-08-21 (урок 9.3, складний рівень — гілки `fix/gate-worktree-branch-9-3`,
 `feat/push-guard-9-3`, `docs/merge-policy-9-3`; PR [#10](https://github.com/r1ckshot/tax-navigator/pull/10),
