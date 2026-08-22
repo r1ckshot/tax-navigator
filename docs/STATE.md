@@ -29,10 +29,35 @@ BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
 
 ## Зараз у роботі
 
-**M9 Collaboration — 9.5 закрито 2026-08-22, наступний крок урок 9.6.**
+**M9 Collaboration — 9.6 закрито 2026-08-22, наступний крок урок 9.7.**
 Де саме стоїмо — [COURSE-NOW.md](capstones/COURSE-NOW.md) (курсова сесія
 починає звідти), план складних рівнів — [m9.md](capstones/m9.md), прості рівні —
 `RUNBOOK.md` у теці `9-collaboration` курсової збірки.
+
+Закрито 2026-08-22 (урок 9.6, складний рівень — гілка `feat/platform-layer-9-6`,
+issue [#20](https://github.com/r1ckshot/tax-navigator/issues/20),
+PR [#21](https://github.com/r1ckshot/tax-navigator/pull/21)):
+- [x] [AGENTS.md](../AGENTS.md) — крос-тульний дім правил рев'ю: таблиця «рушій →
+  файл правил» складена по самих файлах, `## Review guidelines`, P0/P1/P2 і три
+  P0 одним рядком кожен із лінком на канонічне правило. Повні списки лишаються в
+  `product-safety-review/SKILL.md` — два описи одного правила неминуче розійдуться
+- [x] `/install-github-app` (виконував Mike) поставив App, секрет
+  `CLAUDE_CODE_OAUTH_TOKEN` і два workflow. Файли перенесені з його PR #22 у
+  гілку уроку, сам PR закритий: один PR на робочий шматок
+- [x] Тригер рев'ю звужений проти дефолту — без `synchronize`, з `if: draft ==
+  false` і `paths` на код. Дефолт стріляв би на кожен пуш у кожен відкритий PR, а
+  тут PR відкривається чернеткою з першого коміта
+- [x] Доказ на навмисному P0-1 (PR [#23](https://github.com/r1ckshot/tax-navigator/pull/23),
+  закритий без мержу): Copilot і Claude назвали ту саму цифру в тому самому
+  рядку, обидва з посиланням на правило репо. Copilot ужив саме наш номер P0-1,
+  тобто прочитав `AGENTS.md`. `npm run verify` і `npm test` на тому діфі зелені
+- [x] Виправлено власний хибний висновок: порожній `requested_reviewers` після
+  `POST` читався як «Copilot недоступний» — насправді рев'ю приходить окремою
+  подією від `copilot-pull-request-reviewer`. Codex лишається N/A, CLI немає
+- [x] Знахідка про платформу: `claude-code-action` звіряє workflow-файл у PR із
+  версією на дефолтній гілці й пропускає себе при розбіжності, лишаючи джоб
+  зеленим. Тобто на PR, що править `.github/workflows/**`, рев'ю не буде, а
+  галочка стоятиме (`environment-limits.md`)
 
 Закрито 2026-08-22 (урок 9.5, складний рівень — гілка `feat/review-stack-9-5`,
 issue [#18](https://github.com/r1ckshot/tax-navigator/issues/18),
