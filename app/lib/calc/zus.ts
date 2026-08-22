@@ -66,3 +66,11 @@ export function assessZus(answers: Answers): ZusResult {
       return { stage: 'duzy', socialMonthly: p.duzyMonthly, reasonKeys: ['zus.duzy'], sources };
   }
 }
+
+/** Мінімальна складка zdrowotna на місяць для ryczałt до 60 000 zł річного доходу. */
+const HEALTH_MIN_MONTHLY = 461.66;
+
+/** Складка zdrowotna нижнього ярусу ryczałt — показується у картці сценарію. */
+export function healthMinMonthly(): number {
+  return HEALTH_MIN_MONTHLY;
+}
