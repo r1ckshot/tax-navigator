@@ -1,0 +1,84 @@
+name: Release
+
+# The gate is the merge, not this file. Everything a human reviews — the version
+# number, the changelog entry, the release notes — is already in the PR; merging
+# it is what turns that into a tag and a published release.
+#
+# No `paths:` filter on purpose. Filtering on `package.json` would put the
+# trigger in two places at once, and the real signal is one: the version in the
+# file. If its tag already exists, the job is a no-op and costs ~20 seconds.
+on:
+  push:
+    branches: [master]
+  # Manual re-run for the case where the job failed after the merge (a missing
+  # notes file, a token blip). The guards below make a repeat run harmless.
+  workflow_dispatch:
+
+# Two release PRs merged back to back must not race for the same tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      # Tag + release only. The job never touches product code, and it has no
+      # reason to read secrets, issues or pull requests.
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Full history + tags: the guard below asks whether this version was
+          # already released, and a shallow clone cannot answer that.
+          fetch-depth: 0
+
+      - name: Read the version from package.json
+        id: version
+        run: |
+          value="$(node -p "require('./package.json').version")"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+          echo "tag=v$value" >> "$GITHUB_OUTPUT"
+          echo "package.json says $value"
+
+      - name: Skip when this version is already released
+        id: guard
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$tag already exists — nothing to release. Bump the version in package.json to cut a new one."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Require release notes for this version
+        if: steps.guard.outputs.release == 'true'
+        run: |
+          notes="docs/releases/${{ steps.version.outputs.value }}.md"
+          if [ ! -f "$notes" ]; then
+            echo "::error::$notes is missing. A release without notes is a number nobody can read — write them and merge again."
+            exit 1
+          fi
+
+      - name: Tag the merged commit
+        if: steps.guard.outputs.release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.version.outputs.tag }}" -m "Tax Navigator ${{ steps.version.outputs.value }}"
+          # Pushed with GITHUB_TOKEN on purpose: pushes made with it do not
+          # start new workflow runs, so the gate cannot trigger itself.
+          git push origin "${{ steps.version.outputs.tag }}"
+
+      - name: Publish the release
+        if: steps.guard.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --verify-tag \
+            --title "Tax Navigator ${{ steps.version.outputs.value }}" \
+            --notes-file "docs/releases/${{ steps.version.outputs.value }}.md"
