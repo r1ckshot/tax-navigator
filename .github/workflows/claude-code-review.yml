@@ -1,0 +1,47 @@
+name: Claude Code Review
+
+# Trigger narrowed on purpose (lesson 9.6). The generated default fired on
+# `synchronize` too, i.e. once per push to any open PR, and this repo opens a
+# draft PR after the FIRST commit — that default would bill tokens and CI
+# minutes for every intermediate commit of every branch.
+# Here the review runs exactly where CLAUDE.md puts it: when readiness is
+# declared (`gh pr ready`), and only for diffs that carry product risk.
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+    paths:
+      - "app/**"
+      - "mcp/**"
+      - "research/**"
+      - "scripts/**"
+      - ".github/workflows/**"
+
+jobs:
+  claude-review:
+    # Drafts show direction, they do not ask for review.
+    if: github.event.pull_request.draft == false
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
+          plugins: 'code-review@claude-code-plugins'
+          prompt: '/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # or https://code.claude.com/docs/en/cli-reference for available options
