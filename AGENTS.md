@@ -8,9 +8,9 @@ Codex його не читають узагалі, тож усе, що має д
 | Рушій | Що читає в цьому репо | Стан |
 |---|---|---|
 | Claude Code | `CLAUDE.md`, `.claude/rules/*.md`, `.claude/skills/*/SKILL.md`, цей файл | активний |
-| GitHub App `claude-code-action` | `CLAUDE.md` + цей файл (працює в тому ж репо) | ставиться на 9.6 |
-| Codex | цей файл, секція `## Review guidelines` | `codex` CLI у середовищі відсутній — не підключений |
-| GitHub Copilot code review | `.github/copilot-instructions.md` (**немає в репо**) + цей файл | не підключений |
+| GitHub App `claude-code-action` | `CLAUDE.md` + цей файл (працює в тому ж репо) | встановлений, два workflow нижче |
+| Codex | цей файл, секція `## Review guidelines` | `codex` CLI у середовищі відсутній (`command -v codex` порожній) — не підключений |
+| GitHub Copilot code review | `.github/copilot-instructions.md` (**немає в репо**) + цей файл | недоступний на цьому акаунті: `POST .../requested_reviewers` з `copilot-pull-request-reviewer[bot]` віддає `200`, а список рев'юерів лишається порожній (перевірено на PR #21, 2026-08-22) |
 | CodeRabbit / Greptile | власний конфіг, цей файл не читають | не підключені |
 
 **Дублювання заборонене.** Кожен P0 нижче — один рядок і посилання на канонічне
@@ -89,9 +89,18 @@ worker-скриптах `research/` — там generic-загрози **реал
 
 ## Автоматизація на PR
 
-Workflow ставить `/install-github-app` у `.github/workflows/`. Тригер лишається
-на явній згадці `@claude`, не на кожному `pull_request`: кожен джоб коштує
-токени Claude API **і** хвилини CI.
+Обидва workflow поклав `/install-github-app`; секрет — `CLAUDE_CODE_OAUTH_TOKEN`
+(шлях підписки, не окремий API-ключ).
+
+| Файл | Роль | Тригер |
+|---|---|---|
+| [`claude.yml`](.github/workflows/claude.yml) | Claude **пише**: відповідає, править, готує зміни | явна згадка `@claude` в issue, коментарі або рев'ю |
+| [`claude-code-review.yml`](.github/workflows/claude-code-review.yml) | Claude **читає**: рев'ю діфу коментарями | `opened` / `ready_for_review`, не draft, і лише коли дифф чіпає `app/`, `mcp/`, `research/`, `scripts/`, `.github/workflows/` |
+
+Тригер рев'ю звужений свідомо. Згенерований дефолт мав ще `synchronize` — джоб на
+**кожен пуш у кожен відкритий PR**, а тут PR відкривається чернеткою після першого
+ж коміта: платили б токенами і хвилинами CI за кожен проміжний коміт. Рев'ю стоїть
+там само, де його ставить `CLAUDE.md` — на оголошенні готовності (`gh pr ready`).
 
 Три запобіжники периметра, у порядку зростання ризику:
 
