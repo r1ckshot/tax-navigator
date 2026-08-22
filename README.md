@@ -16,7 +16,7 @@
 Деталі: [docs/PROJECT.md](docs/PROJECT.md).
 
 ## Статус
-FREE-анкета в проді: [tax-navigator-red.vercel.app](https://tax-navigator-red.vercel.app) — вердикт резидентства + порівняння 6 сценаріїв рахуються детерміновано на клієнті. Курс Agentic Engineering: M5 здано, M6 (SDLC-артефакти) у роботі. Живий стан проєкту: [docs/STATE.md](docs/STATE.md).
+FREE-анкета в проді: [tax-navigator-red.vercel.app](https://tax-navigator-red.vercel.app) — вердикт резидентства + порівняння 6 сценаріїв рахуються детерміновано на клієнті. Перший позначений реліз — `0.1.0`, зміни по версіях у [CHANGELOG.md](CHANGELOG.md). Курс Agentic Engineering: M8 здано, M9 (collaboration) у роботі. Живий стан проєкту: [docs/STATE.md](docs/STATE.md).
 
 ## Стек
 Next.js, TypeScript, mobile-first, українська локалізація.
