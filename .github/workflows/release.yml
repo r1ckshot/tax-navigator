@@ -1,0 +1,200 @@
+name: Release
+
+# The gate is the merge, not this file. A human reviews the version bump in the
+# PR and merges it; that merge is what tags, curates and publishes. Nothing here
+# asks for a second confirmation, and nothing here runs before one.
+#
+# No `paths:` filter on purpose. Filtering on `package.json` would put the
+# trigger in two places at once, and the real signal is one: the version in the
+# file. If that version is already released, the job is a no-op.
+on:
+  push:
+    branches: [master]
+  # Manual re-run for the case where the job failed after the merge (a curation
+  # blip, a token error). The guards below make a repeat run harmless.
+  # Restricted to `master` by the job-level `if:` — a dispatch can name any ref,
+  # and without that check this trigger would publish a release from a branch
+  # nobody merged, i.e. exactly the gate this file claims to respect.
+  workflow_dispatch:
+
+# Two release PRs merged back to back must not race for the same tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # No-op for the `push` trigger, which is already branch-filtered; the whole
+    # point is `workflow_dispatch`, which is not.
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      # Tag, release, and the changelog Release-PR. Nothing else: the job never
+      # touches product code.
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Full history + tags: the curation step reads the merged commits and
+          # the guard asks what the previous release was. A shallow clone can
+          # answer neither.
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Read the version from package.json
+        id: version
+        run: |
+          value="$(node -p "require('./package.json').version")"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+          echo "tag=v$value" >> "$GITHUB_OUTPUT"
+          echo "package.json says $value"
+
+      - name: Skip when this version is already released
+        id: guard
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          # The question is "was this version RELEASED", not "does the tag
+          # exist". Tagging and publishing are two separate remote writes: if
+          # the first succeeds and the second fails, a tag-based guard would
+          # report "already done" on every re-run and the release would never
+          # appear, while the job stayed green.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$TAG is already released — nothing to do. Bump the version in package.json to cut a new one."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Work out what this release contains
+        id: range
+        if: steps.guard.outputs.release == 'true'
+        run: |
+          # Everything since the previous release tag. On the first release
+          # there is no previous tag, and the range is the whole history.
+          previous="$(git tag --list 'v*' --sort=-v:refname | head -n 1)"
+          if [ -n "$previous" ]; then
+            echo "value=$previous..HEAD" >> "$GITHUB_OUTPUT"
+            echo "previous release: $previous"
+          else
+            echo "value=HEAD" >> "$GITHUB_OUTPUT"
+            echo "first release — reading the full history"
+          fi
+
+      - name: Install Claude Code
+        if: steps.guard.outputs.release == 'true'
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s stable
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Curate the notes and the changelog from the merged history
+        id: curate
+        if: steps.guard.outputs.release == 'true'
+        continue-on-error: true
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          VERSION: ${{ steps.version.outputs.value }}
+          RANGE: ${{ steps.range.outputs.value }}
+        run: |
+          mkdir -p .release
+          # The agent reads git log and writes prose. It may not commit, push or
+          # open a PR — the steps below do that, and a human reviews the result.
+          # `continue-on-error` on purpose: a curation blip must not swallow a
+          # release that a human already approved by merging. The publish step
+          # falls back to the reviewed notes file in the repo.
+          claude -p "$(cat .github/prompts/release-notes.md)" \
+            --allowed-tools "Bash(git log:*)" "Read(docs/**)" "Read(CHANGELOG.md)" "Edit(CHANGELOG.md)" "Write(.release/**)" \
+            --model claude-sonnet-5 \
+            --max-turns 12
+
+      - name: Tag the merged commit
+        if: steps.guard.outputs.release == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          # Idempotent on purpose: a previous run may have pushed the tag and
+          # then failed to publish. Re-tagging would abort the retry.
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::notice::$TAG already exists — reusing it for the release."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Tax Navigator $VERSION"
+          # Pushed with GITHUB_TOKEN on purpose: pushes made with it do not
+          # start new workflow runs, so the gate cannot trigger itself.
+          git push origin "$TAG"
+
+      - name: Publish the release
+        if: steps.guard.outputs.release == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          body=".release/notes.md"
+          if [ ! -s "$body" ]; then
+            # Curation produced nothing. The reviewed notes from the release PR
+            # are the fallback, and their absence is a real failure: a release
+            # nobody can read is worse than no release.
+            body="docs/releases/$VERSION.md"
+            echo "::warning::curated notes are missing — publishing the reviewed $body instead"
+          fi
+          if [ ! -s "$body" ]; then
+            echo "::error::no release notes at all for $VERSION — nothing to publish"
+            exit 1
+          fi
+          gh release create "$TAG" \
+            --verify-tag \
+            --title "Tax Navigator $VERSION" \
+            --notes-file "$body"
+
+      - name: Open the changelog Release-PR
+        if: steps.guard.outputs.release == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          # The agent edited CHANGELOG.md in the working tree; it never pushes to
+          # master. If the release PR already carried a curated section for this
+          # version, the agent was told to leave the file alone and there is
+          # nothing to open.
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "::notice::CHANGELOG.md already covers $TAG — no Release-PR needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "changelog/$TAG"
+          git add CHANGELOG.md
+          # The entry is Claude's work, so the commit carries the attribution
+          # trailer the repo requires. The model name here must stay in step
+          # with `--model` in the curation step above — they are the same run.
+          git commit -m "docs(changelog): curate the $TAG entry from the merged history" \
+                     -m "Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
+          git push -u origin "changelog/$TAG"
+          printf '%s\n' \
+            "## Why" "" \
+            "The $TAG release is out, and its changelog entry was curated on the" \
+            "server from the commits that went into it. A human applies it — this" \
+            "workflow never pushes to master." "" \
+            "## What" "" \
+            "- CHANGELOG.md — the $TAG section, assembled from the merged history." "" \
+            "## Verification" "" \
+            "N/A — prose only, generated from git log. Read the diff." "" \
+            "## Risk / rollback" "" \
+            "N/A — docs only. Close the PR and nothing happened." "" \
+            "## Screenshots" "" \
+            "N/A — no visual surface." "" \
+            "## Task" "" \
+            "Follows the release of $TAG." \
+            > /tmp/pr-body.md
+          gh pr create \
+            --title "docs(changelog): curate the $TAG entry from the merged history" \
+            --body-file /tmp/pr-body.md \
+            --base master \
+            --head "changelog/$TAG"
