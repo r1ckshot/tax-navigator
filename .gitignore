@@ -11,6 +11,10 @@ node_modules
 .next/
 .next-verify/
 dist/
+# Curated release artefacts: the release workflow writes them on the runner,
+# and a local dry-run of the same step writes them here. They belong to a run,
+# not to the repo — the reviewed copy lives in docs/releases/.
+.release/
 *.tsbuildinfo
 
 # Крах-дампи Git Bash на Windows

@@ -102,15 +102,31 @@ jobs:
           RANGE: ${{ steps.range.outputs.value }}
         run: |
           mkdir -p .release
-          # The agent reads git log and writes prose. It may not commit, push or
-          # open a PR — the steps below do that, and a human reviews the result.
+          # The shell decides the facts, the agent writes the prose. Handing the
+          # history over in the prompt keeps the agent from needing a shell of
+          # its own: the first attempt allowed only `Bash(git log:*)`, so it
+          # could not even read $VERSION, wrote itself a script to try, and
+          # burned every turn on that.
+          history="$(git log $RANGE --pretty=format:'%h %s')"
+          # `Edit(...)`, not `Write(...)`: file permission checks only match Edit
+          # rules, and an Edit rule covers every file-writing tool. A Write rule
+          # silently grants nothing — the CLI says so and then denies the write.
           # `continue-on-error` on purpose: a curation blip must not swallow a
           # release that a human already approved by merging. The publish step
           # falls back to the reviewed notes file in the repo.
-          claude -p "$(cat .github/prompts/release-notes.md)" \
-            --allowed-tools "Bash(git log:*)" "Read(docs/**)" "Read(CHANGELOG.md)" "Edit(CHANGELOG.md)" "Write(.release/**)" \
+          claude -p "$(cat .github/prompts/release-notes.md)
+
+          ## This release
+
+          Version: $VERSION
+          Today: $(date +%Y-%m-%d)
+
+          Merged history (one commit per line):
+
+          $history" \
+            --allowed-tools "Read(docs/**)" "Read(CHANGELOG.md)" "Edit(CHANGELOG.md)" "Edit(.release/**)" \
             --model claude-sonnet-5 \
-            --max-turns 12
+            --max-turns 20
 
       - name: Tag the merged commit
         if: steps.guard.outputs.release == 'true'

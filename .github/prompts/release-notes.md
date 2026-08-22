@@ -3,17 +3,12 @@ for Ukrainians living in Poland. The product speaks Ukrainian, so everything you
 write for a reader is in Ukrainian. This prompt runs headless on a GitHub
 runner, right after a release PR was merged.
 
-Two environment variables are set: `VERSION` (e.g. `0.1.0`) and `RANGE` (a git
-revision range covering everything released in this version, e.g.
-`v0.1.0..HEAD`, or a single `HEAD` when this is the first release).
+The version number, today's date and the full list of merged commits are
+appended to this prompt under `## This release`. That list is your only input:
+do not invent anything that is not in it, and do not go looking for a shell —
+you have no tool that runs one.
 
-## Step 1 — read the merged history
-
-Run `git log $RANGE --pretty=format:'%h %s'` and, where a subject is not enough,
-`git log $RANGE --pretty=format:'%h %s%n%b'`. That history is your only input.
-Do not invent anything that is not in it.
-
-## Step 2 — write `.release/notes.md`
+## Step 1 — write `.release/notes.md`
 
 Release notes for a person who uses the site and has never seen the code.
 
@@ -34,14 +29,14 @@ Release notes for a person who uses the site and has never seen the code.
 Start the file with `# Tax Navigator <VERSION>` and keep it under roughly 40
 lines.
 
-## Step 3 — update `CHANGELOG.md`
+## Step 2 — update `CHANGELOG.md`
 
 The file follows Keep a Changelog with six categories (Added, Changed,
 Deprecated, Removed, Fixed, Security).
 
 - **If a `## [<VERSION>]` section already exists, change nothing.** A human
   curated it in the release PR, and their wording wins.
-- Otherwise promote `## [Unreleased]` into `## [<VERSION>] — <today's date>`,
+- Otherwise promote `## [Unreleased]` into `## [<VERSION>] — <the date given above>`,
   curate the merged commits into the six categories, and leave a fresh empty
   `## [Unreleased]` above it.
 - Curating means three things: drop what nobody outside the repo would notice,
