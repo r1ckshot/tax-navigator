@@ -16,11 +16,11 @@ reflects_commit: "be3e254"
 
 ## Стек
 
-- Мова: TypeScript `^5.7.0` (`package.json:31`), `strict: true` (`tsconfig.json:7`), таргет ES2017 (`tsconfig.json:3`), аліас `@/* → ./app/*` (`tsconfig.json:22`)
+- Мова: TypeScript `^5.7.0` (`package.json:33`), `strict: true` (`tsconfig.json:7`), таргет ES2017 (`tsconfig.json:3`), аліас `@/* → ./app/*` (`tsconfig.json:22`)
 - Фреймворк: Next.js `^15.1.0` App Router (`package.json:17`), React `^19.0.0` (`package.json:18`)
-- **Рантайм-залежностей рівно три** — `next`, `react`, `react-dom` (`package.json:16-20`). Нуль UI-бібліотек, нуль CSS-in-JS, нуль стор-менеджерів
-- Тести: vitest `^4.1.10` (`package.json:32`), `@testing-library/react` (`package.json:23`), jsdom (`package.json:30`), dependency-cruiser `^18.1.0` (`package.json:29`)
-- Команди (`package.json:5-14`): `npm test` → `vitest run && npm run test:arch` (node, `app/**/*.test.ts` + `scripts/**/*.test.mjs`); `npm run test:ui` → окремий jsdom-конфіг (лише `*.test.tsx`); `npm run test:arch` → `depcruise app`; `npm run verify` → `node scripts/verify.mjs`; `npm run ports` → показує порти цього worktree
+- **Рантайм-залежностей рівно три** — `next`, `react`, `react-dom` (`package.json:17-21`). Нуль UI-бібліотек, нуль CSS-in-JS, нуль стор-менеджерів
+- Тести: vitest `^4.1.10` (`package.json:34`), `@testing-library/react` (`package.json:25`), jsdom (`package.json:32`), dependency-cruiser `^18.1.0` (`package.json:31`), Playwright `^1.62.1` (`package.json:23`)
+- Команди (`package.json:5-15`): `npm test` → `vitest run && npm run test:arch` (node, `app/**/*.test.ts` + `scripts/**/*.test.mjs`); `npm run test:ui` → окремий jsdom-конфіг (лише `*.test.tsx`); `npm run test:arch` → `depcruise app`; `npm run test:visual` → Playwright-матриця скріншотів (**лише на CI** — браузера в контейнері немає); `npm run verify` → `node scripts/verify.mjs`; `npm run ports` → показує порти цього worktree
 - `npm run dev` і `npm run start` ідуть через `scripts/worktree-ports.mjs`: порт виводиться з worktree, головний лишається на 3000 (`package.json:6`, `package.json:8`)
 - `distDir` перемикається через `NEXT_DIST_DIR`, щоб dev і build не ділили `.next` (`next.config.mjs:7`)
 - **Лінтера немає** — ні скрипта, ні конфіга. Найближче до нього — `test:arch` + `app/lib/__tests__/architecture.test.ts`

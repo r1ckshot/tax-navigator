@@ -17,6 +17,13 @@ dist/
 .release/
 *.tsbuildinfo
 
+# Вивід Playwright: звіт, трейси і `-actual`/`-diff` картинки одного прогону.
+# Самі еталони (visual/__screenshots__/) трекаються — без них нема з чим
+# порівнювати.
+test-results/
+playwright-report/
+blob-report/
+
 # Крах-дампи Git Bash на Windows
 *.stackdump
 
