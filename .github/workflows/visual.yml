@@ -1,0 +1,83 @@
+name: Visual regression
+
+# Цей workflow існує не заради галочки на CI, а тому що це єдиний доступний
+# проєкту канал до живого браузера. У девконтейнері його немає: завантаження
+# Playwright-браузера флапає на рівні edge-балансувальника, і Rebuild без кешу
+# цього не виправив (`.claude/rules/environment-limits.md`). Тобто на цій машині
+# екран результату не бачить жоден тест — ні тут, ні в `npm test`.
+on:
+  pull_request:
+    # `synchronize` тут навмисно, на відміну від claude-code-review.yml: там
+    # кожен прогін коштує токенів і сенс має лише на оголошеній готовності, а це
+    # звичайний тест — він має падати на тому ж коміті, що вніс регресію.
+    # Чернетки теж не виключаємо: PR у цьому репо відкривається чернеткою після
+    # ПЕРШОГО коміта, і саме там еталони мають народитись.
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "app/**"
+      - "visual/**"
+      - "playwright.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/visual.yml"
+  push:
+    branches: [master]
+
+# Наступний пуш у ту саму гілку скасовує попередній прогін: еталони звіряються
+# з вершиною гілки, проміжний результат нікого не цікавить.
+concurrency:
+  group: visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    # Версія раннера пришпилена свідомо. Еталони — це пікселі, а пікселі
+    # залежать від шрифтів образу; `ubuntu-latest` одного дня переїде на
+    # наступний реліз і перефарбує весь набір без жодної зміни в коді.
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Тільки chromium: матриця перевіряє вʼюпорти й теми, не рушії. Три
+      # браузери потроїли б час прогону, не додавши жодного нового питання.
+      - name: Install the browser
+        run: npx playwright install --with-deps chromium
+
+      # Окремим кроком, а не всередині `webServer`: `next build` заборонений у
+      # контейнері розробки (`environment-limits.md`), тож конфіг Playwright не
+      # має права запускати його сам. Тут збірка безпечна — тека одноразова.
+      - name: Build the app
+        run: npm run build
+
+      - name: Run the screenshot matrix
+        run: npm run test:visual
+
+      # `always()`, бо цінність артефакту зворотна результату: на червоному
+      # прогоні в ньому лежать діффи, а на першому прогоні гілки — щойно
+      # народжені еталони, яких у репо ще немає взагалі.
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-${{ github.run_id }}
+          path: |
+            visual/__screenshots__/
+            test-results/
+            playwright-report/
+          retention-days: 14
+          if-no-files-found: warn
