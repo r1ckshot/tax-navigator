@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { encodeAnswers } from '../app/lib/share';
 import { baseAnswers } from '../app/lib/calc/__tests__/fixtures';
 
@@ -17,12 +17,29 @@ const RESULT_URL = `/questionnaire?${encodeAnswers(baseAnswers)}`;
 /** Шість сценаріїв порівняння — стільки ж карток «Деталей» на екрані. */
 const SCENARIO_COUNT = 6;
 
+/**
+ * Горизонтальний скрол — окреме ствердження, а не робота діффа пікселів.
+ * `fullPage`-скріншот сторінки, що поїхала вбік, просто виходить ширшим за
+ * вʼюпорт, і різниця читається як «щось змінилось», не називаючи що саме.
+ *
+ * Перевірка не теоретична: перший же прогін цього набору дав 384px при вʼюпорті
+ * 375 — підпис «Чистими, zł/міс» не влазив у пару з найширшим числом і виносив
+ * сторінку за екран.
+ */
+async function expectNoHorizontalOverflow(page: Page) {
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow, 'сторінка їде горизонтально').toBe(0);
+}
+
 test('лендинг', async ({ page }) => {
   await page.goto('/');
 
   // Структурна перевірка перед скріншотом навмисно: якщо сторінка взагалі не
   // та, тест має сказати це словами, а не діффом пікселів.
   await expect(page.getByRole('listitem')).toHaveCount(SCENARIO_COUNT);
+  await expectNoHorizontalOverflow(page);
 
   await expect(page).toHaveScreenshot('landing.png', { fullPage: true });
 });
@@ -35,6 +52,7 @@ test('екран результату, картки згорнуті', async ({ 
   // на нерозкодованому лінку сторінка показала б перший екран анкети.
   await expect(cards).toHaveCount(SCENARIO_COUNT);
   await expect(cards.first()).not.toHaveAttribute('open', '');
+  await expectNoHorizontalOverflow(page);
 
   await expect(page).toHaveScreenshot('result-collapsed.png', { fullPage: true });
 });
@@ -45,6 +63,7 @@ test('екран результату, перша картка розкрита'
   const first = page.locator('details').first();
   await first.locator('summary').click();
   await expect(first).toHaveAttribute('open', '');
+  await expectNoHorizontalOverflow(page);
 
   await expect(page).toHaveScreenshot('result-expanded.png', { fullPage: true });
 });

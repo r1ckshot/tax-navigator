@@ -235,7 +235,7 @@
   "ScenarioCard.tsx:28": [
     "<details className={styles.card}>"
   ],
-  "ComparisonTable.tsx:30-82": [
+  "ComparisonTable.tsx:30-91": [
     "<table className={styles.table} role=\"table\">",
     "</table>"
   ],
