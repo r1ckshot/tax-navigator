@@ -20,6 +20,14 @@
 самих даних і зняв два хибні твердження воркерів: про «проєкт 2024 р.» як
 джерело 52zr і про воєнний стан як єдиний годинник UA-цифр.
 
+Третій прохід — агентом [ro-reviewer](../../../.claude/agents/ro-reviewer.md)
+(`tools: Read, Grep, Glob`, без жодного шляху до запису) — виправив уже саму
+механіку: гейт тримає якір у `architecture-map.md`, а не ключ-сирота у
+відбитку; посилання на EVIDENCE вело не в ту секцію; годинників під UA-цифрами
+рівно три, а не «три плюс четвертий». Він же додав клас, якого не бачив жоден
+попередній прохід: **виконувані** `grep`-и з іменем файла всередині команд і
+скілів, що після перейменування мовчки повертають порожньо.
+
 Стан коду на момент збору: коміт `2486841`, 2026-08-25.
 
 ---
@@ -68,7 +76,8 @@
 | `rules/types.ts:26,32,43,48` | `getRule`/`getParams`/`sourceOf`/`sourcesOf` не мають року в сигнатурі |
 | `rules/types.ts:16` | `tax_year` оголошений у типі, але ніде не читається як ключ вибору |
 | [calc/types.ts:26,99,113](../../../app/lib/calc/types.ts#L26) | `specialLaw52zr`, `'declaration52zr'`, `sunsetNote` — у схемі відповідей і результату |
-| [architecture-map.anchors.json:88](../../architecture-map.anchors.json#L88) | ключ якоря `app/lib/rules/rules.2026.json:44-57` у відбитку, який читає [check-anchors.mjs:30](../../../scripts/check-anchors.mjs#L30) — це **гейт**, а не текст: перейменування файла завалить `npm run verify` |
+| [architecture-map.md:74](../../architecture-map.md#L74) (та `:57`) | якір `app/lib/rules/rules.2026.json:44-57` у самій карті — це **гейт**, а не текст: [check-anchors.mjs:87](../../../scripts/check-anchors.mjs#L87) віддасть `FAIL: файл не знайдено`, а `verify.mjs:119` тягне його в `npm run verify`. Ключ-сирота у відбитку [architecture-map.anchors.json:88](../../architecture-map.anchors.json#L88) сам по собі мовчить — падіння дає саме якір у карті |
+| [.claude/commands/scaffold-rule.md:10](../../../.claude/commands/scaffold-rule.md#L10) | виконуваний `grep` по імені файла всередині команди — після перейменування віддасть **порожній список мовчки**, без помилки. Той самий клас: `audit-i18n-safety.md:58`, `.claude/skills/sdlc-audit/SKILL.md:89` і дубль `tax-navigator-toolkit/commands/scaffold-rule.md:10` |
 | [.claude/hooks/layer-boundary.mjs:122](../../../.claude/hooks/layer-boundary.mjs#L122) | ім'я файла в тексті `why` хука межі шарів — той самий «повідомлення бреше», що в `.dependency-cruiser.cjs`, і **продубльований** у `tax-navigator-toolkit/hooks/layer-boundary.mjs:122` |
 | [scripts/check-stale-rules.mjs:15](../../../scripts/check-stale-rules.mjs#L15) | `RULES_FILE` — жорсткий шлях на файл 2026 |
 | [mcp/evidence-guard/src/server.ts:25](../../../mcp/evidence-guard/src/server.ts#L25) | той самий жорсткий шлях + ім'я файла в тексті помилки (`:166`) |
@@ -139,13 +148,15 @@
 - база zdrowotnej — GUS публікує в січні 2027.
 - `fop.zaklad_in_pl` — уже зараз `numericRangeAvailable: false`,
   `unverifiedComponents` непорожній.
-- UA-цифри — **три незалежні годинники, не один** (`docs/EVIDENCE.md` §4):
-  `vzTiedToMartialLaw: true` стосується лише ВЗ; `minimumWageMonthlyUah` і
-  `esvMinMonthlyUah` висять на щорічному законі про Держбюджет. Звідти ж
-  четвертий ризик, якого цей перелік спершу не бачив: звільнення ФОП від ЄСВ не
+- UA-цифри — **три незалежні годинники, не один** (`docs/EVIDENCE.md` §6, п. 4):
+  (а) мінзарплата, з якої виводиться мінімальний ЄСВ — щорічний закон про
+  Держбюджет (те, що це один годинник, а не два, тримає
+  [rules.test.ts:83](../../../app/lib/calc/__tests__/rules.test.ts#L83):
+  `esvMin ≈ minimumWage × esvRate`); (б) саме звільнення ФОП від ЄСВ не
   скасоване, а **зупиняється на рік окремим пунктом кожного бюджету** — без
   такого пункту в бюджеті-2027 воно оживає, і цифра зміниться без жодної зміни
-  ставки.
+  ставки; (в) ВЗ прив'язаний до воєнного стану — це і є `vzTiedToMartialLaw:
+  true`, який стосується **лише** ВЗ.
 
 ---
 
