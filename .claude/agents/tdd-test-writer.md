@@ -1,6 +1,7 @@
 ---
 name: tdd-test-writer
 description: RED phase agent для TDD-pipeline (адаптація демо 7.7-tdd-discipline під стек tax-navigator). Читає acceptance criteria зі story-файлу (шлях передається у prompt), пише failing tests у research/tg-assistant/*.test.ts, запускає vitest для confirm-RED, робить commit з префіксом test(scope):, ВИХОДИТЬ. Викликається orchestrator-skill /tdd через Agent tool — не самостійно.
+model: inherit
 tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

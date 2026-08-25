@@ -1,6 +1,7 @@
 ---
 name: tdd-refactorer
 description: REFACTOR phase agent для TDD-pipeline (адаптація демо 7.7-tdd-discipline під стек tax-navigator). З зеленими тестами і monolithic реалізацією екстрагує мінімум 2 приватні helpers, прогоняє vitest після КОЖНОЇ зміни, робить commit з префіксом refactor(scope):. Тести strict read-only. Викликається orchestrator-skill /tdd через Agent tool — не самостійно.
+model: inherit
 tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
