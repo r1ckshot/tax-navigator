@@ -20,6 +20,14 @@ on:
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/visual.yml"
+      # Обидва файли несучі, хоч і не виглядають так. `next.config.mjs` тримає
+      # `distDir`, тобто вирішує, чи `build` і `start` узагалі дивляться в ту
+      # саму теку; `worktree-ports.mjs` віддає `PORT`, з якого конфіг збирає
+      # `baseURL` і в який має забіндитись `webServer`. Без них PR, що чіпає
+      # лише їх, не запускав би цю матрицю взагалі, і регресію було б видно
+      # аж на прогоні після мержу.
+      - "next.config.mjs"
+      - "scripts/worktree-ports.mjs"
   push:
     branches: [master]
 
@@ -27,7 +35,12 @@ on:
 # з вершиною гілки, проміжний результат нікого не цікавить.
 concurrency:
   group: visual-${{ github.ref }}
-  cancel-in-progress: true
+  # ...але тільки для PR. Для `push` у master `github.ref` однаковий у КОЖНОГО
+  # мержу, тож скасування зняло б прогін на щойно злитому коміті, щойно за ним
+  # зливається наступний PR — і матриця на тому коміті не виконалась би ніколи.
+  # Той самий висновок, що вже зроблено в release.yml: два мержі поспіль не
+  # мають гасити один одного.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   screenshots:
@@ -74,7 +87,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: visual-${{ github.run_id }}
+          # `run_attempt` обовʼязковий, а не косметика: `run_id` при
+          # «Re-run failed jobs» не міняється, а артефакт у v4 незмінний і двічі
+          # під тим самим імʼям не заливається — крок упав би з 409 саме на
+          # повторі, тобто рівно там, де по цей артефакт і приходять
+          # (`visual/README.md`, крок 2).
+          name: visual-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             visual/__screenshots__/
             test-results/
