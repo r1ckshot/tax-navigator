@@ -16,11 +16,11 @@ reflects_commit: "be3e254"
 
 ## Стек
 
-- Мова: TypeScript `^5.7.0` (`package.json:31`), `strict: true` (`tsconfig.json:7`), таргет ES2017 (`tsconfig.json:3`), аліас `@/* → ./app/*` (`tsconfig.json:22`)
+- Мова: TypeScript `^5.7.0` (`package.json:33`), `strict: true` (`tsconfig.json:7`), таргет ES2017 (`tsconfig.json:3`), аліас `@/* → ./app/*` (`tsconfig.json:22`)
 - Фреймворк: Next.js `^15.1.0` App Router (`package.json:17`), React `^19.0.0` (`package.json:18`)
-- **Рантайм-залежностей рівно три** — `next`, `react`, `react-dom` (`package.json:16-20`). Нуль UI-бібліотек, нуль CSS-in-JS, нуль стор-менеджерів
-- Тести: vitest `^4.1.10` (`package.json:32`), `@testing-library/react` (`package.json:23`), jsdom (`package.json:30`), dependency-cruiser `^18.1.0` (`package.json:29`)
-- Команди (`package.json:5-14`): `npm test` → `vitest run && npm run test:arch` (node, `app/**/*.test.ts` + `scripts/**/*.test.mjs`); `npm run test:ui` → окремий jsdom-конфіг (лише `*.test.tsx`); `npm run test:arch` → `depcruise app`; `npm run verify` → `node scripts/verify.mjs`; `npm run ports` → показує порти цього worktree
+- **Рантайм-залежностей рівно три** — `next`, `react`, `react-dom` (`package.json:17-21`). Нуль UI-бібліотек, нуль CSS-in-JS, нуль стор-менеджерів
+- Тести: vitest `^4.1.10` (`package.json:34`), `@testing-library/react` (`package.json:25`), jsdom (`package.json:32`), dependency-cruiser `^18.1.0` (`package.json:31`), Playwright `^1.62.1` (`package.json:23`)
+- Команди (`package.json:5-15`): `npm test` → `vitest run && npm run test:arch` (node, `app/**/*.test.ts` + `scripts/**/*.test.mjs`); `npm run test:ui` → окремий jsdom-конфіг (лише `*.test.tsx`); `npm run test:arch` → `depcruise app`; `npm run test:visual` → Playwright-матриця скріншотів (**лише на CI** — браузера в контейнері немає); `npm run verify` → `node scripts/verify.mjs`; `npm run ports` → показує порти цього worktree
 - `npm run dev` і `npm run start` ідуть через `scripts/worktree-ports.mjs`: порт виводиться з worktree, головний лишається на 3000 (`package.json:6`, `package.json:8`)
 - `distDir` перемикається через `NEXT_DIST_DIR`, щоб dev і build не ділили `.next` (`next.config.mjs:7`)
 - **Лінтера немає** — ні скрипта, ні конфіга. Найближче до нього — `test:arch` + `app/lib/__tests__/architecture.test.ts`
@@ -103,7 +103,7 @@ C4Container
   - **Примітиву картки немає.** Однаковий набір `--surface` + `--hairline` + радіус + `--shadow-sm` продубльовано в п'яти місцях: `ComparisonTable.module.css:1-8`, `ResidencyVerdict.module.css:1-2`, `Question.module.css:1-6`, `app/page.module.css:1-9`, `questionnaire/page.module.css:46-54`. З 2026-08-04 картка сценарію свого фону вже НЕ має — рамку й радіус тримає спільний контейнер `.cards`, а `ScenarioCard.module.css:7-10` лишає тільки лінійку між сусідами
   - Слайдер — узагальнений, керується `SliderConfig` (`schema.ts:12-20`), обслуговує дві осі (виручка `:159-166`, дні `:74`), має `openEnded` для «+» (`Question.tsx:88`)
   - Акордеон — на нативному `<details>` (`ScenarioCard.tsx:28`), в окремий примітив не витягнутий
-  - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:30-82`) і таблиця підформ (`ScenarioCard.tsx:69-93`)
+  - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:30-83`) і таблиця підформ (`ScenarioCard.tsx:69-93`)
 - **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:152-155`), мінімум 44px на клікабельних (`globals.css:165`), `prefers-reduced-motion` у 4 файлах, `aria-live="polite"` на результаті (`app/questionnaire/page.tsx:134`)
 - **Найближчий прецедент екрана:** результатний — `Result` (`app/questionnaire/page.tsx:119-163`); простий статичний — `app/page.tsx:30-52`; інтерактивний кроковий — `Question` (`Question.tsx:18-29`)
 

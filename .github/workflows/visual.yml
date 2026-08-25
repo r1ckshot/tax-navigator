@@ -1,0 +1,101 @@
+name: Visual regression
+
+# Цей workflow існує не заради галочки на CI, а тому що це єдиний доступний
+# проєкту канал до живого браузера. У девконтейнері його немає: завантаження
+# Playwright-браузера флапає на рівні edge-балансувальника, і Rebuild без кешу
+# цього не виправив (`.claude/rules/environment-limits.md`). Тобто на цій машині
+# екран результату не бачить жоден тест — ні тут, ні в `npm test`.
+on:
+  pull_request:
+    # `synchronize` тут навмисно, на відміну від claude-code-review.yml: там
+    # кожен прогін коштує токенів і сенс має лише на оголошеній готовності, а це
+    # звичайний тест — він має падати на тому ж коміті, що вніс регресію.
+    # Чернетки теж не виключаємо: PR у цьому репо відкривається чернеткою після
+    # ПЕРШОГО коміта, і саме там еталони мають народитись.
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "app/**"
+      - "visual/**"
+      - "playwright.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/visual.yml"
+      # Обидва файли несучі, хоч і не виглядають так. `next.config.mjs` тримає
+      # `distDir`, тобто вирішує, чи `build` і `start` узагалі дивляться в ту
+      # саму теку; `worktree-ports.mjs` віддає `PORT`, з якого конфіг збирає
+      # `baseURL` і в який має забіндитись `webServer`. Без них PR, що чіпає
+      # лише їх, не запускав би цю матрицю взагалі, і регресію було б видно
+      # аж на прогоні після мержу.
+      - "next.config.mjs"
+      - "scripts/worktree-ports.mjs"
+  push:
+    branches: [master]
+
+# Наступний пуш у ту саму гілку скасовує попередній прогін: еталони звіряються
+# з вершиною гілки, проміжний результат нікого не цікавить.
+concurrency:
+  group: visual-${{ github.ref }}
+  # ...але тільки для PR. Для `push` у master `github.ref` однаковий у КОЖНОГО
+  # мержу, тож скасування зняло б прогін на щойно злитому коміті, щойно за ним
+  # зливається наступний PR — і матриця на тому коміті не виконалась би ніколи.
+  # Той самий висновок, що вже зроблено в release.yml: два мержі поспіль не
+  # мають гасити один одного.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  screenshots:
+    # Версія раннера пришпилена свідомо. Еталони — це пікселі, а пікселі
+    # залежать від шрифтів образу; `ubuntu-latest` одного дня переїде на
+    # наступний реліз і перефарбує весь набір без жодної зміни в коді.
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Тільки chromium: матриця перевіряє вʼюпорти й теми, не рушії. Три
+      # браузери потроїли б час прогону, не додавши жодного нового питання.
+      - name: Install the browser
+        run: npx playwright install --with-deps chromium
+
+      # Окремим кроком, а не всередині `webServer`: `next build` заборонений у
+      # контейнері розробки (`environment-limits.md`), тож конфіг Playwright не
+      # має права запускати його сам. Тут збірка безпечна — тека одноразова.
+      - name: Build the app
+        run: npm run build
+
+      - name: Run the screenshot matrix
+        run: npm run test:visual
+
+      # `always()`, бо цінність артефакту зворотна результату: на червоному
+      # прогоні в ньому лежать діффи, а на першому прогоні гілки — щойно
+      # народжені еталони, яких у репо ще немає взагалі.
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          # `run_attempt` обовʼязковий, а не косметика: `run_id` при
+          # «Re-run failed jobs» не міняється, а артефакт у v4 незмінний і двічі
+          # під тим самим імʼям не заливається — крок упав би з 409 саме на
+          # повторі, тобто рівно там, де по цей артефакт і приходять
+          # (`visual/README.md`, крок 2).
+          name: visual-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            visual/__screenshots__/
+            test-results/
+            playwright-report/
+          retention-days: 14
+          if-no-files-found: warn

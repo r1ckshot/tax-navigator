@@ -1,5 +1,5 @@
 {
-  "package.json:31": [
+  "package.json:33": [
     "\"typescript\": \"^5.7.0\","
   ],
   "tsconfig.json:7": [
@@ -12,28 +12,31 @@
     "\"@/*\": [\"./app/*\"]"
   ],
   "package.json:17": [
-    "\"next\": \"^15.1.0\","
+    "\"dependencies\": {"
   ],
   "package.json:18": [
-    "\"react\": \"^19.0.0\","
+    "\"next\": \"^15.1.0\","
   ],
-  "package.json:16-20": [
+  "package.json:17-21": [
     "\"dependencies\": {",
     "},"
   ],
-  "package.json:32": [
+  "package.json:34": [
     "\"vitest\": \"^4.1.10\""
   ],
-  "package.json:23": [
+  "package.json:25": [
     "\"@testing-library/react\": \"^16.3.2\","
   ],
-  "package.json:30": [
+  "package.json:32": [
     "\"jsdom\": \"^29.1.1\","
   ],
-  "package.json:29": [
+  "package.json:31": [
     "\"dependency-cruiser\": \"^18.1.0\","
   ],
-  "package.json:5-14": [
+  "package.json:23": [
+    "\"@playwright/test\": \"^1.62.1\","
+  ],
+  "package.json:5-15": [
     "\"scripts\": {",
     "\"verify\": \"node scripts/verify.mjs\""
   ],
@@ -232,7 +235,7 @@
   "ScenarioCard.tsx:28": [
     "<details className={styles.card}>"
   ],
-  "ComparisonTable.tsx:30-82": [
+  "ComparisonTable.tsx:30-83": [
     "<table className={styles.table} role=\"table\">",
     "</table>"
   ],

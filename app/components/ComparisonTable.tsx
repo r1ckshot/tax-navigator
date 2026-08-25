@@ -55,10 +55,11 @@ export function ComparisonTable({ scenarios }: { scenarios: ScenarioResult[] }) 
               >
                 {s.rangeMonthly ? (
                   <>
-                    {formatRange(s.rangeMonthly)}
-                    {/* Підпис колонки — одразу за числом, дрібним кеглем: на
-                        телефоні шапки не видно. Для читалки `aria-hidden`,
-                        бо звʼязок дає сама шапка. */}
+                    {/* Сума нерозривна сама по собі — по тире вона не рветься. */}
+                    <span className={styles.amount}>{formatRange(s.rangeMonthly)}</span>
+                    {/* Підпис колонки — під числом, дрібним кеглем: на телефоні
+                        шапки не видно. Для читалки `aria-hidden`, бо звʼязок
+                        дає сама шапка. */}
                     <span className={styles.stackedLabel} aria-hidden="true">
                       {t('chart.col.range')}
                     </span>
