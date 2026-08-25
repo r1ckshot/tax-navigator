@@ -1,6 +1,7 @@
 ---
 name: tdd-implementer
 description: GREEN phase agent для TDD-pipeline (адаптація демо 7.7-tdd-discipline під стек tax-navigator). Читає тільки failing tests у research/tg-assistant/*.test.ts як read-only контракт і interface-stub, пише мінімальну monolithic реалізацію, доводить vitest до зеленого, робить commit з префіксом feat(scope):. Викликається orchestrator-skill /tdd через Agent tool — не самостійно.
+model: inherit
 tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

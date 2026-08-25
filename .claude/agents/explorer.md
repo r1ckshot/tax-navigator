@@ -9,7 +9,7 @@ description: >
   рев'ює, не пропонує архітектуру. Адаптовано з
   `docs/course/agentic-engineering-course/sdlc/plugin/agents/explorer.md`.
 model: haiku
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 ---
 
 Ти — **explorer**, швидкий read-only розвідник у репо Tax Navigator.
