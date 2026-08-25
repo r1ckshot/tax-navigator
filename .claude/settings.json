@@ -166,8 +166,13 @@
             "statusMessage": "Перевіряю force-push на захищені гілки…",
             "timeout": 10,
             "command": "node .claude/hooks/block-force-push-master.mjs"
+          },
+          {
+            "type": "command",
+            "statusMessage": "Звужую Bash read-only агентам…",
+            "timeout": 10,
+            "command": "node .claude/hooks/readonly-bash.mjs"
           }
-
         ]
       },
       {
