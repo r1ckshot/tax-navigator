@@ -222,6 +222,18 @@
           }
         ]
       }
+    ],
+      "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Ворота на закриття задачі тіммейтом…",
+            "timeout": 300,
+            "command": "node .claude/hooks/task-completed-gate.mjs"
+          }
+        ]
+      }
     ]
   },
   "env": {
@@ -232,7 +244,9 @@
     "DISABLE_ERROR_REPORTING": "1",
     "DISABLE_FEEDBACK_COMMAND": "1",
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_ENABLE_TASKS": "1"
   },
   "worktree": {
   "symlinkDirectories": ["node_modules", "mcp/evidence-guard/node_modules"]
