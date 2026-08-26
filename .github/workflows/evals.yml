@@ -4,10 +4,11 @@
 #   job `lint`  — статичний, нуль токенів, БЛОКУЮЧИЙ на кожен PR, що чіпає
 #                 `.claude/**` або `evals/**`. Червоний лінт = свідома зміна
 #                 контракту без правки контракту.
-#   job `evals` — поведінковий, коштує токени, nightly + вручну,
-#                 `continue-on-error`. Одиничний FAIL недетермінованого
-#                 агента ще не регресія; регресія — це кейс, червоний
-#                 кілька ночей поспіль.
+#   job `evals` — поведінковий, коштує токени, nightly + вручну, і
+#                 non-blocking просто тому, що на `pull_request` не ходить.
+#                 Одиничний FAIL недетермінованого агента ще не регресія —
+#                 звідси три прогони й толерантність 2 з 3; регресія — це
+#                 кейс, червоний кілька ночей поспіль.
 #
 # П'ятий файл у цій теці. Наявні чотири (`claude.yml`,
 # `claude-code-review.yml`, `release.yml`, `visual.yml`) не чіпає.
@@ -60,7 +61,11 @@ jobs:
     name: 'шари 2-4 · поведінкові evals (токени, non-blocking)'
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    continue-on-error: true
+    # `continue-on-error` тут стояв і мовчки вимикав джоб `report`: з ним
+    # `needs.evals.result` дорівнює `success` навіть на червоних кроках, тож
+    # умова `== 'failure'` не спрацьовувала НІКОЛИ. Знято, і нічого не втрачено:
+    # non-blocking цей джоб уже тим, що не ходить на `pull_request` узагалі —
+    # блокувати йому нема чого.
     permissions:
       contents: read
       issues: write
@@ -80,7 +85,14 @@ jobs:
       # --repeat 3 руками: агент недетермінований, тож одиничний прогін не
       # відрізняє регресію від невдалого кидка. Три прогони дають pass-rate,
       # а не булеве «пройшло».
-      - name: 'Шари 2-3 · поведінковий прогін diff-reviewer ×3'
+      #
+      # Суддя всередині циклу, а не окремим кроком після нього. Перший нічний
+      # прогін показав, чому: шари 2-3 дали 3/3, а суддя, якому дістався один
+      # прогін із трьох, завалив увесь джоб. Тобто трьом шарам ми пробачали
+      # один промах, а четвертому — ні, при тому що недетермінізм у них
+      # спільний. Тепер ітерація зараховується, лише коли пройшли всі чотири
+      # шари, і толерантність одна на всіх.
+      - name: 'Шари 2-4 · поведінковий прогін diff-reviewer ×3'
         id: behaviour
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -88,20 +100,14 @@ jobs:
           passed=0
           for i in 1 2 3; do
             echo "::group::прогін $i/3"
-            if python3 evals/check.py; then
+            if python3 evals/check.py && python3 evals/judge.py; then
               passed=$((passed + 1))
             fi
             echo "::endgroup::"
           done
           echo "passrate=$passed/3" >> "$GITHUB_OUTPUT"
-          echo "::notice::pass-rate шарів 2-3: $passed/3"
+          echo "::notice::pass-rate шарів 2-4: $passed/3"
           test "$passed" -ge 2
-
-      - name: 'Шар 4 · суддя за рубрикою (поріг 0.7)'
-        if: always()
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: python3 evals/judge.py
 
       - name: 'Guardrail · вміст .env не виїхав у транскрипт'
         if: always()
