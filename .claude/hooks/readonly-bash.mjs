@@ -82,6 +82,24 @@ const FORBIDDEN_CONSTRUCTS = [
   { what: 'heredoc', re: /<</ },
 ];
 
+/**
+ * Читання секретів — дірка, якої allowlist команд не закриває в принципі.
+ * `cat` у списку саме тому, що рев'юеру треба читати файли; той самий `cat`
+ * читає `.env`. Дзеркальна половина `block-env-writes.mjs`: той боронить
+ * запис у `.env`, цей — читання з нього.
+ *
+ * Знайдено 2026-08-26 guardrail-кейсом `evals/check_env_leak.py`: агент
+ * попросили показати `.env`, і він відмовився САМ. Зелений кейс, який
+ * доводив лише те, що агент не захотів. Межа має бути в хуку, а не в
+ * настрої моделі — рівно те розрізнення, на якому стоїть урок 10.3.
+ *
+ * `.env.example` і рідня дозволені свідомо: вони в git і секретів не несуть.
+ */
+// Сепаратор перед іменем — не лише `/`: `git show HEAD:.env` дістає той самий
+// вміст через двокрапку. Знайдено власним тестом, а не здогадкою.
+const ENV_TOKEN = /(?:^|[/:])\.env\b/;
+const ENV_PUBLIC = /(?:^|[/:])\.env\.(?:example|sample|template)$/;
+
 /** `curl -o` — це запис. Єдиний дозволений приймач — /dev/null. */
 const CURL_OUTPUT = /\s-(?:o|-output)(?:[=\s]+)(\S+)/;
 /** `curl -O` / `--remote-name` кладе файл у cwd без явного імені. */
@@ -111,11 +129,12 @@ process.stdin.on('end', () => {
   const command = (payload.tool_input || {}).command || '';
   if (!command) process.exit(0);
 
-  const block = (reason) => {
+  const block = (reason, hint) => {
     process.stderr.write(
       `ЗАБЛОКОВАНО для агента ${agent}: ${reason}.\n` +
         `Цей агент має read-only роль, і ця межа не в промпті, а в хуку.\n` +
-        `Дозволено лише: ${Object.keys(allow).sort().join(', ')} — без редиректів і підстановок.\n` +
+        (hint ||
+          `Дозволено лише: ${Object.keys(allow).sort().join(', ')} — без редиректів і підстановок.\n`) +
         `Якщо для роботи справді потрібна ця команда — це привід змінити роль агента, а не обійти хук.\n`,
     );
     process.exit(2);
@@ -134,6 +153,18 @@ process.stdin.on('end', () => {
     }
 
     const tokens = seg.split(/\s+/).filter(Boolean);
+
+    // Секрети — до розбору команди: блокує будь-яку форму, а не лише `cat`.
+    for (const token of tokens) {
+      const arg = token.replace(/^['"]+|['"]+$/g, '');
+      if (ENV_TOKEN.test(arg) && !ENV_PUBLIC.test(arg)) {
+        block(
+          `звернення до секретів у «${arg}»`,
+          `Файли .env цьому агенту недоступні ні на читання, ні на запис — ` +
+            `дозволений лише .env.example.\n`,
+        );
+      }
+    }
     // Присвоєння змінної перед командою (`FOO=1 git status`) не команда.
     while (tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[0])) tokens.shift();
     if (!tokens.length) continue;
