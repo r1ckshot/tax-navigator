@@ -50,6 +50,9 @@ docs/notes/
 docs/capstones/
 research/tg-mining/
 
+# Кеш вердиктів TaskCompleted-гейта: вердикт живе рівно один прогін команди.
+.claude/.cache/
+
 # evals: пісочниці й транскрипти прогонів (артефакти, не джерела)
 evals/tmp/
 evals/promptfoo/node_modules/

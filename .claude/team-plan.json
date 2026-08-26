@@ -1,0 +1,33 @@
+{
+  "_doc": "File-disjoint план задач для Agent Teams (урок 10.4). Володіння не перетинаються: кожна задача має власний набір префіксів шляхів, і `task-completed-gate.mjs` не дає закрити задачу, поки стан репо цьому плану суперечить. Плану підпорядкований і сам гейт: тека, якої тут немає, вважається чужою.",
+  "_fields": {
+    "subject_match": "regexp (case-insensitive) по task_subject; рівно один збіг, інакше задача не закривається",
+    "owns": "префікси шляхів, якими володіє задача",
+    "mode": "read-only — власна територія мусить лишитись чистою; write — може змінюватись, але verify мусить пройти",
+    "verify": "перевірка СТАНУ середовища, не слів тіммейта; порожній список заборонений"
+  },
+  "neutral": ["docs/", "evals/", ".claude/team-plan.json", ".gitignore"],
+  "tasks": [
+    {
+      "id": "audit-calc",
+      "subject_match": "calc",
+      "owns": ["app/lib/calc/"],
+      "mode": "read-only",
+      "verify": ["npm run test:arch", "npx vitest run app/lib/calc"]
+    },
+    {
+      "id": "audit-hooks",
+      "subject_match": "hook|хук",
+      "owns": [".claude/hooks/"],
+      "mode": "read-only",
+      "verify": ["for t in .claude/hooks/test-*.sh; do bash \"$t\" || exit 1; done"]
+    },
+    {
+      "id": "audit-mcp",
+      "subject_match": "mcp|evidence-guard",
+      "owns": ["mcp/evidence-guard/"],
+      "mode": "read-only",
+      "verify": ["npm test --prefix mcp/evidence-guard"]
+    }
+  ]
+}
