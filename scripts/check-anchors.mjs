@@ -44,8 +44,13 @@ const src = readFileSync(MAP, "utf8");
 const RE = /`([A-Za-z0-9_./-]+\.(?:ts|tsx|json|css|mjs|cjs|md)):(\d+)(?:[-,](\d+))?`/g;
 
 // Файли репо, крім курсу й залежностей — для розв'язання коротких імен.
+// `evals/tmp` тут не косметика: пісочниці eval-харнесу — це КОПІЇ файлів репо
+// всередині репо, і кожна така копія робить короткий якір (`zus.ts:34`)
+// неоднозначним. Гейт червонів на 19 живих якорях, при тому що тека в
+// `.gitignore` і в комміт не заходить взагалі. Будь-яка майбутня копія зрізу
+// репо всередину репо зламає його так само.
 const all = globSync("**/*.{ts,tsx,json,css,mjs,cjs,md}", {
-  exclude: (p) => /node_modules|\.next|docs\/course|\.git/.test(p),
+  exclude: (p) => /node_modules|\.next|docs\/course|\.git|evals\/tmp/.test(p),
 });
 
 const byBasename = new Map();

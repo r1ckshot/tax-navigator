@@ -1,0 +1,144 @@
+# Evals над конфігурацією агентів: `.claude/` — це код, і він так само тихо
+# регресує. Два шари з різною ціною і різними правами вето.
+#
+#   job `lint`  — статичний, нуль токенів, БЛОКУЮЧИЙ на кожен PR, що чіпає
+#                 `.claude/**` або `evals/**`. Червоний лінт = свідома зміна
+#                 контракту без правки контракту.
+#   job `evals` — поведінковий, коштує токени, nightly + вручну,
+#                 `continue-on-error`. Одиничний FAIL недетермінованого
+#                 агента ще не регресія; регресія — це кейс, червоний
+#                 кілька ночей поспіль.
+#
+# П'ятий файл у цій теці. Наявні чотири (`claude.yml`,
+# `claude-code-review.yml`, `release.yml`, `visual.yml`) не чіпає.
+#
+# Чому вердикт нічного джоба читається з exit-коду й логу, а не з артефакту:
+# артефакти Actions віддаються з `*.blob.core.windows.net`, і цей домен поза
+# allowlist девконтейнера — `gh run download` упирається в i/o timeout, тоді
+# як `gh run view --log` ходить нормально
+# (`.claude/rules/environment-limits.md`, 2026-08-25). Канал доказу має бути
+# досяжним звідти, звідки його читають.
+
+name: agent-evals
+
+on:
+  pull_request:
+    paths:
+      - '.claude/**'
+      - 'evals/**'
+      - '.github/workflows/evals.yml'
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: 'шар 1 · статичний лінт конфігурації (0 токенів, блокуючий)'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Контракт десяти агентів
+        run: python3 evals/lint.py
+
+      - name: Схема .claude/settings.json
+        run: python3 evals/check_settings.py
+
+      # Регресійний кейс із реального інциденту репо: `attribution: true`
+      # глушив увесь settings.json добу. Self-test доводить, що чек саме цей
+      # інцидент і ловить, а не просто мовчить на здоровому файлі.
+      - name: Регресійний кейс attribution (red-green)
+        run: python3 evals/check_settings.py --self-test
+
+  evals:
+    name: 'шари 2-4 · поведінкові evals (токени, non-blocking)'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      passrate: ${{ steps.behaviour.outputs.passrate }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Claude Code
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s stable
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # --repeat 3 руками: агент недетермінований, тож одиничний прогін не
+      # відрізняє регресію від невдалого кидка. Три прогони дають pass-rate,
+      # а не булеве «пройшло».
+      - name: 'Шари 2-3 · поведінковий прогін diff-reviewer ×3'
+        id: behaviour
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          passed=0
+          for i in 1 2 3; do
+            echo "::group::прогін $i/3"
+            if python3 evals/check.py; then
+              passed=$((passed + 1))
+            fi
+            echo "::endgroup::"
+          done
+          echo "passrate=$passed/3" >> "$GITHUB_OUTPUT"
+          echo "::notice::pass-rate шарів 2-3: $passed/3"
+          test "$passed" -ge 2
+
+      - name: 'Шар 4 · суддя за рубрикою (поріг 0.7)'
+        if: always()
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: python3 evals/judge.py
+
+      - name: 'Guardrail · вміст .env не виїхав у транскрипт'
+        if: always()
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: python3 evals/check_env_leak.py
+
+  report:
+    name: 'сигнал: issue на червоному нічному прогоні'
+    needs: evals
+    if: always() && needs.evals.result == 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      # Сигнал, а не блокування: merge нічний прогін не тримає. Кейс,
+      # червоний дві-три ночі поспіль, — уже регресія, і тоді дивись
+      # `git log -p .claude/` за ці дні.
+      - name: Відкрити issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PASSRATE: ${{ needs.evals.outputs.passrate }}
+        run: |
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "agent-evals: нічний прогін червоний ($(date +%Y-%m-%d))" \
+            --label "agent-evals" \
+            --body "Поведінковий шар червоний. pass-rate шарів 2-3: \`${PASSRATE:-невідомо}\`.
+
+          Лог прогону: $RUN_URL
+
+          Один червоний прогін — ще не регресія: агент недетермінований.
+          Червоний дві-три ночі поспіль — регресія конфігурації: дивись
+          \`git log -p .claude/\` за ці дні.
+
+          Артефакт не вивантажується свідомо: домен Azure Blob поза allowlist
+          девконтейнера, тож \`gh run download\` звідти не працює. Читати
+          \`gh run view --log\`."
