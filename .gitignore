@@ -54,3 +54,4 @@ research/tg-mining/
 evals/tmp/
 evals/promptfoo/node_modules/
 evals/**/results.json
+__pycache__/
