@@ -44,7 +44,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Контракт дев''яти... тобто десяти агентів
+      - name: Контракт десяти агентів
         run: python3 evals/lint.py
 
       - name: Схема .claude/settings.json
