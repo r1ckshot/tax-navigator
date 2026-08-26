@@ -196,6 +196,61 @@ worktree_case "no -C, hook stays on master"  deny-branch        '"git commit -m 
 worktree_case "nonexistent -C path"          deny-branch        '"git -C /nope/nope commit -m \"fix: x\""'
 
 echo
+echo "Record-only branch — the ceremony gate (own sandbox repo):"
+# Своя пісочниця, бо чек читає стан git: гілку, коміти попереду master і індекс.
+# Судити по робочій копії репо не можна — тест став би недетермінованим.
+CEREMONY="$(mktemp -d)"
+trap 'rm -rf "$CEREMONY"' EXIT
+G() { git -C "$CEREMONY" -c core.hooksPath=/dev/null -c user.email=t@example.test -c user.name=Test "$@"; }
+mkdir -p "$CEREMONY/docs" "$CEREMONY/app"
+printf 'seed\n' > "$CEREMONY/app/x.ts"
+printf 'seed\n' > "$CEREMONY/docs/STATE.md"
+G -c init.defaultBranch=master init -q .
+G add -A >/dev/null && G commit -qm seed
+
+# Хук читає стан того каталогу, в якому його запустили, тож кейс іде з cd.
+ceremony_case() {
+  local name="$1" expected="$2" command="$3"
+  local out verdict
+  out=$(printf '{"tool_name":"Bash","tool_input":{"command":%s}}' "$command" \
+    | (cd "$CEREMONY" && node "$HOOK") 2>/dev/null)
+  if printf '%s' "$out" | grep -q 'один PR на робочий шматок'; then verdict=deny; else verdict=pass; fi
+  if [ "$verdict" = "$expected" ]; then
+    printf '  OK    %-52s %s\n' "$name" "$verdict"
+  else
+    printf '  FAIL  %-52s expected %s, got %s\n' "$name" "$expected" "$verdict"
+    fails=$((fails + 1))
+  fi
+}
+
+# 1. Гілка лише із записом у STATE.md — саме той патерн, що тримався весь M9-M10.
+G checkout -q -b docs/state-followup
+printf 'record\n' >> "$CEREMONY/docs/STATE.md"
+G add docs/STATE.md >/dev/null
+ceremony_case "commit of a records-only branch"     deny '"git commit -m \"docs(state): note\""'
+
+# PR судиться по закомічених змінах — тому кейс іде після коміту, як у житті.
+G commit -qm "docs(state): note"
+ceremony_case "gh pr create for the same branch"    deny '"gh pr create --draft --title x --body-file b.md"'
+
+# 2. Та сама гілка, але в ній уже лежить справжня робота: запис — фінальний
+#    коміт того самого шматка, а не другий PR.
+printf 'work\n' >> "$CEREMONY/app/x.ts"
+G add app/x.ts >/dev/null && G commit -qm "feat: real work"
+ceremony_case "records ride along with real work"   pass '"gh pr create --draft --title x --body-file b.md"'
+
+# 3. Feature-документи це самостійна робота, не запис про неї.
+G checkout -q -b docs/prd-something master
+mkdir -p "$CEREMONY/docs/features/slug"
+printf 'PRD\n' > "$CEREMONY/docs/features/slug/PRD.md"
+G add -A >/dev/null && G commit -qm "docs(prd): slug"
+ceremony_case "docs/features/<slug>/PRD.md branch"  pass '"gh pr create --draft --title x --body-file b.md"'
+
+# 4. На master чек мовчить — там працює окремий чек про гілку.
+G checkout -q master
+ceremony_case "on master the gate stays out"        pass '"gh pr create --draft --title x --body-file b.md"'
+
+echo
 if [ "$fails" -eq 0 ]; then
   echo "All cases passed."
 else

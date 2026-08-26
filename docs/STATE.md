@@ -93,10 +93,19 @@ PR [#44](https://github.com/r1ckshot/tax-navigator/pull/44)):
   не на прогоні команди. Межа записана в
   [environment-limits.md](../.claude/rules/environment-limits.md)
 - [x] Гейт зелений: 193 node + `test:arch` + `npm run verify` + 8 наборів хуків
+- [x] **Церемонія навколо записів закрита механічно, а не памʼяткою.** Патерн
+  тримався весь M9 і M10: шматок зливається, а `STATE.md`/`BACKLOG.md`, знахідка
+  чи здача їдуть окремою гілкою й окремим PR — дев'ять docs-only PR за шість днів
+  (#13, #16, #17, #24, #28, #31, #32, #33, #42). Правило в CLAUDE.md було весь
+  цей час, тож бракувало не правила. П'ятий чек у
+  [pre-commit-gate.mjs](../.claude/hooks/pre-commit-gate.mjs) блокує `git commit`
+  і `gh pr create` на гілці, де немає нічого, крім записів; межа по типу файла, а
+  не по теці — `docs/features/<slug>/PRD.md` лишається самостійним шматком
+  (+5 кейсів у власній git-пісочниці)
 
 Закрито 2026-08-26 (курс, урок 10.3 — складний рівень, гілка
 `feat/agent-evals-10-3`, issue [#38](https://github.com/r1ckshot/tax-navigator/issues/38),
-PR [#39](https://github.com/r1ckshot/tax-navigator/pull/39) — чекає скрінів Mike і мержу):
+PR [#39](https://github.com/r1ckshot/tax-navigator/pull/39) — змержено `b60fccb`):
 - [x] **Крок нуль зроблено ПЕРЕД копіюванням харнесу, і він себе виправдав.**
   [claude-scrubbed.sh](../evals/claude-scrubbed.sh) — один env-скраб на всі
   скрипти. Заміряно контрольним прогоном на однаковому виклику з tool-use:

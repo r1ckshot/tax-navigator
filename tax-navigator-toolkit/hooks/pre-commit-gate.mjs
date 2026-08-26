@@ -51,6 +51,19 @@ process.stdin.on('end', () => {
     return;
   }
 
+  const ceremony = recordOnlyBranch(command, invocations);
+  if (ceremony) {
+    deny(
+      `Гілка \`${ceremony.branch}\` не містить нічого, крім записів: ${ceremony.files.join(', ')}.\n` +
+        'CLAUDE.md, розділ Pull requests: один PR на робочий шматок, не на знахідку. ' +
+        'STATE.md, BACKLOG.md, JOURNAL.md, DECISIONS.md і здача — це записи ПРО шматок, ' +
+        'вони їдуть у його ж PR.\n' +
+        'Шматок уже злитий — правка лишається в робочому дереві до наступного, ' +
+        'а не отримує власну гілку.'
+    );
+    return;
+  }
+
   const commit = invocations.find((i) => i.sub === 'commit');
   if (!commit) process.exit(0);
 
@@ -102,6 +115,60 @@ process.stdin.on('end', () => {
 
   process.exit(0);
 });
+
+/**
+ * П'ятий чек: церемонія навколо записів.
+ *
+ * Патерн, який ловимо, тримався весь M9 і M10 і не піддався ні правилу в
+ * CLAUDE.md, ні памʼятці: шматок роботи зливається, а `STATE.md`/`BACKLOG.md`,
+ * знахідка чи здача їдуть слідом ОКРЕМОЮ гілкою й окремим PR. За шість днів так
+ * вийшло дев'ять docs-only PR (#13, #16, #17, #24, #28, #31, #32, #33, #42).
+ * Правило вже було написане — механічної перевірки не було, тож і не діяло; той
+ * самий висновок, що з трейлером атрибуції (`attribution` у settings.json нічого
+ * не гарантує, гарантує хук).
+ *
+ * Межа проходить по ТИПУ файлів, не по теці. `docs/features/<slug>/PRD.md` —
+ * самостійна робота (SDLC-стадія), її docs-only гілка законна. `STATE.md`,
+ * `BACKLOG.md`, `JOURNAL.md`, `DECISIONS.md`, `capstones/`, `README`,
+ * `CHANGELOG` — записи ПРО роботу, вони належать її ж PR.
+ *
+ * Коміт із записами ВСЕРЕДИНІ гілки шматка проходить: там уже лежить справжня
+ * робота, тобто це фінальний коміт того самого PR, а не другий PR.
+ */
+function recordOnlyBranch(command, invocations) {
+  const isPrCreate = /\bgh\s+pr\s+create\b/.test(command);
+  const commit = invocations.find((i) => i.sub === 'commit');
+  if (!isPrCreate && !commit) return null;
+
+  const dir = commit ? commit.dir : process.cwd();
+  const branch = currentBranch(dir);
+  if (!branch || branch === 'master' || branch === 'main') return null;
+
+  const git = (args) => {
+    const r = spawnSync('git', args, { encoding: 'utf8', cwd: dir });
+    return r.status === 0 ? r.stdout.trim() : null;
+  };
+  const base = git(['rev-parse', '--verify', '--quiet', 'origin/master']) ? 'origin/master' : 'master';
+  if (!git(['rev-parse', '--verify', '--quiet', base])) return null;
+
+  const onBranch = (git(['diff', '--name-only', `${base}...HEAD`]) || '').split('\n').filter(Boolean);
+  const staged = commit ? (git(['diff', '--cached', '--name-only']) || '').split('\n').filter(Boolean) : [];
+  const files = [...new Set([...onBranch, ...staged])];
+  if (!files.length) return null;
+
+  const RECORDS = [
+    /^docs\/STATE\.md$/,
+    /^docs\/BACKLOG\.md$/,
+    /^docs\/JOURNAL\.md$/,
+    /^docs\/DECISIONS\.md$/,
+    /^docs\/capstones\//,
+    /^README\.md$/,
+    /^CHANGELOG\.md$/,
+  ];
+  if (!files.every((f) => RECORDS.some((re) => re.test(f)))) return null;
+
+  return { branch, files };
+}
 
 /**
  * Усі git-виклики в команді: `{ sub, args }` на кожен сегмент шелла. Регексом це
