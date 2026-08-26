@@ -49,3 +49,8 @@ docs/course/
 docs/notes/
 docs/capstones/
 research/tg-mining/
+
+# evals: пісочниці й транскрипти прогонів (артефакти, не джерела)
+evals/tmp/
+evals/promptfoo/node_modules/
+evals/**/results.json
