@@ -56,11 +56,17 @@ GIT_ID = ["-c", "user.email=evals@example.test", "-c", "user.name=evals",
           "-c", "commit.gpgsign=false"]
 
 
-def build(sandbox: Path) -> Path:
+def build(sandbox: Path, extra: list[str] | None = None) -> Path:
+    """Зріз репо в пісочницю.
+
+    `extra` — додаткові шляхи для воріт над іншим агентом (`check_drift.py`).
+    Розширювати сам `SLICE` не можна: він і є предмет перевірки в `check.py`,
+    і кожен зайвий файл у ньому змінює те, що бачить diff-reviewer.
+    """
     shutil.rmtree(sandbox, ignore_errors=True)
     sandbox.mkdir(parents=True)
 
-    for item in SLICE:
+    for item in [*SLICE, *(extra or [])]:
         src = REPO / item
         dst = sandbox / item
         dst.parent.mkdir(parents=True, exist_ok=True)

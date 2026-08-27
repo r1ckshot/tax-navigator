@@ -58,3 +58,6 @@ evals/tmp/
 evals/promptfoo/node_modules/
 evals/**/results.json
 __pycache__/
+
+# Історія прогонів звірки — робочі дані, не код
+scripts/rules-change-monitor/data/

@@ -29,6 +29,10 @@ CONTRACT = {
         "tools": {"Read", "Grep", "Glob", "Bash"},
         "model": "sonnet",
     },
+    "drift-reviewer": {
+        "tools": {"Read", "Grep", "Glob"},
+        "model": "opus",
+    },
     "env-scout": {
         "tools": {"Read", "Grep", "Glob", "Bash", "Write", "Edit"},
         "model": "sonnet",

@@ -109,6 +109,26 @@ jobs:
           echo "::notice::pass-rate шарів 2-4: $passed/3"
           test "$passed" -ge 2
 
+      # Той самий принцип pass-rate на других воротах: агент інший
+      # (`drift-reviewer`, предмет — звіт звірки, а не дифф), недетермінізм
+      # той самий. Поріг теж той самий — два з трьох.
+      - name: 'Ворота drift-reviewer · golden-task ×3'
+        id: drift
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          passed=0
+          for i in 1 2 3; do
+            echo "::group::drift-прогін $i/3"
+            if python3 evals/check_drift.py; then
+              passed=$((passed + 1))
+            fi
+            echo "::endgroup::"
+          done
+          echo "passrate=$passed/3" >> "$GITHUB_OUTPUT"
+          echo "::notice::pass-rate воріт drift-reviewer: $passed/3"
+          test "$passed" -ge 2
+
       - name: 'Guardrail · вміст .env не виїхав у транскрипт'
         if: always()
         env:
