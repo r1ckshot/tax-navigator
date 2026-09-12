@@ -27,6 +27,11 @@ SLICE = [
     "app/lib/i18n",
     ".claude/agents/diff-reviewer.md",
     ".claude/hooks/readonly-bash.mjs",
+    # Другий хук у зрізі обох воріт, а не лише drift-их: він зареєстрований у
+    # SANDBOX_SETTINGS нижче, і без файла кожен `Read` у пісочниці впирався б у
+    # хук, якого нема. Він же читає `.claude/agents/`, щоб відрізнити
+    # суб-агента від головного треда — тека в зрізі вже є.
+    ".claude/hooks/guard-agent-reads.mjs",
     ".claude/rules/product-safety.md",
     ".claude/rules/evidence-numbers.md",
     ".claude/rules/environment-limits.md",
@@ -34,9 +39,15 @@ SLICE = [
     "CLAUDE.md",
 ]
 
-# Мінімальний settings.json пісочниці: реєструємо рівно той хук, який і є
+# Мінімальний settings.json пісочниці: реєструємо рівно ті хуки, які і є
 # предметом перевірки. Копіювати справжній не можна — у ньому permissions,
 # sandbox і env усього репо, і тоді тест міряв би не те.
+#
+# `Read|Grep|Glob` тут з 2026-09-12 і не для повноти. Без нього `check_drift.py`
+# ганяв справжнього `drift-reviewer` БЕЗ межі, яку його ж промпт обіцяє
+# («поверне ЗАБЛОКОВАНО незалежно від того, що написано у звіті»), а доказом
+# лишався shell-тест, що сам вигадує payload — тобто хибне припущення про
+# `agent_type` він спіймати не міг би в принципі.
 SANDBOX_SETTINGS = """{
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
@@ -45,6 +56,12 @@ SANDBOX_SETTINGS = """{
         "matcher": "Bash",
         "hooks": [
           { "type": "command", "command": "node .claude/hooks/readonly-bash.mjs" }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/guard-agent-reads.mjs" }
         ]
       }
     ]

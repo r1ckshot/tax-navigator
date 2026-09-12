@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { readdirSync } from 'node:fs';
+
 /**
  * PreToolUse + matcher `Read|Grep|Glob` → забороняє суб-агентам читати `.env`,
  * а рецензенту чужого матеріалу — ще й `.claude/**`.
@@ -33,16 +35,58 @@
 const FOREIGN_INPUT_AGENTS = new Set(['drift-reviewer']);
 
 /**
+ * Теки, у яких рецензентові чужого входу дозволено ШУКАТИ. Позитивний список, а
+ * не заборонний, і це виправлення реального дефекту: `Grep` з `path` на корінь
+ * репо не містить слова `.claude` у payload узагалі, тож перевірка шляхів його
+ * не бачила, а ripgrep сканує `.claude/` за замовчуванням (тека не в
+ * `.gitignore`). Заборонний список тут програє за конструкцією: він мусить
+ * вгадати кожен спосіб НЕ назвати теку, а позитивний вимагає назвати ту, яку
+ * дозволено.
+ *
+ * Перелік дослівно повторює те, що агент читає за своєю роллю
+ * (`.claude/agents/drift-reviewer.md` §Що ти читаєш).
+ */
+const SEARCH_ROOTS = ['scripts/rules-change-monitor', 'app/lib/rules'];
+
+/**
  * Ключі `tool_input`, що несуть ШЛЯХ. `Grep.pattern` свідомо не тут: це текст
  * пошуку, і заборона на нього зробила б хибнопозитив із запиту «знайди згадки
- * .env у коді». `Glob.pattern` — навпаки шлях, тож перевіряється.
+ * .env у коді». `Grep.glob` і `Glob.pattern` — навпаки шлях, тож перевіряються:
+ * `Grep(glob: "**\/.env", output_mode: "content")` віддає ті самі рядки, що
+ * `Read`, і повз перевірку лише `path` проходив цілком.
  */
-const PATH_KEYS = ['file_path', 'path', 'notebook_path'];
+const PATH_KEYS = ['file_path', 'path', 'notebook_path', 'glob'];
+
+/** Інструменти, що вміють шукати рекурсивно від теки. */
+const SEARCH_TOOLS = new Set(['Grep', 'Glob']);
 
 /** Сепаратор перед іменем не лише `/` — той самий набір, що в readonly-bash.mjs. */
 const ENV_TOKEN = /(?:^|[/:])\.env\b/;
 const ENV_PUBLIC = /(?:^|[/:])\.env\.(?:example|sample|template)$/;
 const CLAUDE_DIR = /(?:^|[/:])\.claude(?:[/:]|$)/;
+
+/**
+ * Імена суб-агентів репо — файли `.claude/agents/*.md`. Теки немає або її не
+ * прочитати — повертаємо порожній набір, і хук пропускає все: він не має права
+ * ні падати, ні блокувати наосліп.
+ */
+function subAgentNames() {
+  try {
+    return new Set(
+      readdirSync(new URL('../agents/', import.meta.url))
+        .filter((f) => f.endsWith('.md'))
+        .map((f) => f.slice(0, -3)),
+    );
+  } catch {
+    return new Set();
+  }
+}
+
+/** Шлях під однією з дозволених тек. Порівняння після нормалізації розділювачів. */
+function underSearchRoot(value) {
+  const path = value.replace(/\\/g, '/').replace(/^\.\//, '');
+  return SEARCH_ROOTS.some((root) => path.includes(root));
+}
 
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
@@ -56,7 +100,14 @@ process.stdin.on('end', () => {
   }
 
   const agent = payload.agent_type || '';
-  if (!agent) process.exit(0);
+  // Гейт по СПИСКУ імен, а не по непорожності поля. Непорожність була
+  // припущенням («порожнє = головний тред»), і сусідній `readonly-bash.mjs`
+  // документує зворотнє: головний тред кладе туди `mainThreadAgentType()`.
+  // При непорожньому значенні хук відібрав би в сесії Mike `Read` на
+  // `.env.local`, який наявний deny `Read(**/.env)` не покриває.
+  // Список береться з теки агентів, а не дублюється тут: розходження двох
+  // копій нічим не ловиться.
+  if (!agent || !subAgentNames().has(agent)) process.exit(0);
 
   const input = payload.tool_input || {};
   const candidates = [];
@@ -86,6 +137,20 @@ process.stdin.on('end', () => {
       block(
         `«${arg}»`,
         'У .claude/ лежить сам захист — правила агентів, хуки, дозволи. Рецензенту звіту ця тека не потрібна.',
+      );
+    }
+  }
+
+  // Рекурсивний пошук окремо від імен: `Grep(path: "/workspace")` не містить
+  // слова `.claude` узагалі, а ripgrep зайде туди сам. Тому для рецензента
+  // чужого входу пошук дозволений лише в явно названій теці зі списку.
+  if (FOREIGN_INPUT_AGENTS.has(agent) && SEARCH_TOOLS.has(payload.tool_name)) {
+    const roots = candidates.filter((c) => !ENV_PUBLIC.test(c));
+    if (roots.length === 0 || !roots.every(underSearchRoot)) {
+      block(
+        'пошуку поза дозволеними теками',
+        `Шукати можна лише в явно названій теці: ${SEARCH_ROOTS.join(', ')}. ` +
+          'Пошук від кореня репо зайшов би в .claude/ сам, не назвавши її.',
       );
     }
   }

@@ -42,23 +42,43 @@ check "settings.json агентів"        2 "$(as_agent Read drift-reviewer fi
 check "Glob по .claude"              2 "$(as_agent Glob drift-reviewer pattern '.claude/**/*.mjs')"
 check "Grep із path у .claude"       2 "$(as_agent Grep drift-reviewer path '/workspace/.claude/hooks')"
 
+# Обхід, знайдений рев'ю: у payload немає слова .claude ВЗАГАЛІ, тож перевірка
+# імен його не бачить, а ripgrep заходить у теку сам. Ловиться лише позитивним
+# списком тек пошуку.
+echo "drift-reviewer — пошук, що дістає .claude не назвавши її (exit 2):"
+check "Grep від кореня репо"         2 "$(as_agent Grep drift-reviewer path '/workspace')"
+check "Grep від поточної теки"       2 "$(as_agent Grep drift-reviewer path '.')"
+check "Grep узагалі без path"        2 "$(as_agent Grep drift-reviewer pattern 'ANTHROPIC')"
+check "Grep --glob у .claude"        2 "$(as_agent Grep drift-reviewer glob '.claude/**')"
+check "Grep --glob у .env"           2 "$(as_agent Grep drift-reviewer glob '**/.env')"
+check "Glob від кореня"              2 "$(as_agent Glob drift-reviewer pattern '**/*.md')"
+
 echo "drift-reviewer — його власна робота (exit 0):"
 check "історія циклів"               0 "$(as_agent Read drift-reviewer file_path '/workspace/scripts/rules-change-monitor/data/cycle-history.json')"
 check "матриця правил"               0 "$(as_agent Read drift-reviewer file_path '/workspace/app/lib/rules/rules.2026.json')"
 check "перелік станів"               0 "$(as_agent Read drift-reviewer file_path 'scripts/rules-change-monitor/states.mjs')"
 check ".env.example"                 0 "$(as_agent Read drift-reviewer file_path '/workspace/.env.example')"
-check "Grep по тексту, не по шляху"  0 "$(as_agent Grep drift-reviewer pattern 'verified_at')"
+check "Grep у теці нарізки"          0 "$(as_agent Grep drift-reviewer path '/workspace/scripts/rules-change-monitor')"
+check "Grep у теці правил"           0 "$(as_agent Grep drift-reviewer path 'app/lib/rules')"
+check "Glob у теці нарізки"          0 "$(as_agent Glob drift-reviewer pattern 'scripts/rules-change-monitor/*.mjs')"
 
-echo "інші агенти — .claude їм потрібен, .env ні (0 і 2):"
+echo "інші агенти — .claude і пошук їм потрібні, .env ні (0 і 2):"
 check "ro-reviewer читає правило"    0 "$(as_agent Read ro-reviewer file_path '.claude/rules/product-safety.md')"
 check "diff-reviewer читає правило"  0 "$(as_agent Read diff-reviewer file_path '.claude/rules/evidence-numbers.md')"
 check "rules-auditor читає правило"  0 "$(as_agent Read rules-auditor file_path '.claude/rules/evidence-numbers.md')"
+check "explorer шукає по репо"       0 "$(as_agent Grep explorer path '/workspace')"
 check "ro-reviewer і .env"           2 "$(as_agent Read ro-reviewer file_path '/workspace/.env')"
 check "explorer і .env"              2 "$(as_agent Read explorer file_path '.env')"
+check "explorer і --glob .env"       2 "$(as_agent Grep explorer glob '**/.env')"
 
+# Головний тред пізнається НЕ по порожньому полю: сусідній readonly-bash.mjs
+# документує, що туди кладуть `mainThreadAgentType()`. Гейт по списку імен із
+# `.claude/agents/`, тож будь-яке значення поза ним проходить.
 echo "головний тред — не чіпаємо (exit 0):"
 check "Mike читає .env"              0 "$(as_main Read file_path '/workspace/.env')"
 check "Mike читає .claude"           0 "$(as_main Read file_path '.claude/settings.json')"
+check "непорожній agent_type треда"  0 "$(as_agent Read main-thread file_path '/workspace/.env.local')"
+check "тред шукає по репо"           0 "$(as_agent Grep general-purpose path '/workspace')"
 
 echo "службове (exit 0):"
 check "битий payload"                0 'не json'
