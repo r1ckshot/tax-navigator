@@ -203,6 +203,20 @@ describe('runCycle: кожне правило виходить рівно з о�
     expect(cycle.status).toBe('blocked');
   });
 
+  /**
+   * Тихо обрізаний вхід читався б як «джерело мовчало»: стан однаковий,
+   * причина різна. Різницю має бачити людина, а не лише код.
+   */
+  it('обрізаний вхід називає обрізання причиною, а не порожнечу', async () => {
+    const cycle = await runCycle({
+      rules: [inScope],
+      now: NOW,
+      fetchImpl: okFetch('<p>нічого схожого на ставку</p>'.padEnd(1_500_001, ' ')),
+    });
+    expect(cycle.checks[0].state).toBe(STATES.UNAVAILABLE);
+    expect(cycle.checks[0].failure_reason).toMatch(/обрізано за стелею/);
+  });
+
   it('жоден запис не має зникнути дорогою', async () => {
     await expect(
       runCycle({

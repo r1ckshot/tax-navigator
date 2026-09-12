@@ -67,6 +67,19 @@ describe('screenSource: чужа сторінка перед моделлю', ()
     expect(result.html.length).toBeLessThanOrEqual(MAX_INPUT_CHARS);
   });
 
+  /**
+   * Анти-регрес на порядок кроків. Обрізання стояло ПЕРШИМ, і зріз усередині
+   * `<script>` лишав хвіст чужої аналітики без закривального тега: той уже не
+   * вирізався, а `apiKey` у ньому матчився — звичайна сторінка ZUS дістала б
+   * `blocked` і код виходу 2.
+   */
+  it('зріз усередині <script> не дає хибного блокування', () => {
+    const filler = 'x'.repeat(MAX_INPUT_CHARS);
+    const result = screenSource(`<p>4 806 zł</p><script>var apiKey="s";${filler}</script>`);
+    expect(result.blocked).toBe(false);
+    expect(result.html).not.toContain('apiKey');
+  });
+
   it('null від недоступного джерела проходить наскрізь і не стає «заблоковано»', () => {
     const result = screenSource(null);
     expect(result.blocked).toBe(false);

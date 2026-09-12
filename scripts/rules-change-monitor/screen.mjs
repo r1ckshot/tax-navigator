@@ -114,14 +114,18 @@ export function detectInjection(text) {
 }
 
 /**
- * Прохід сторінки перед усім іншим: обрізати → вирізати інертні блоки →
+ * Прохід сторінки перед усім іншим: вирізати інертні блоки → обрізати →
  * перевірити → прибрати коментарі.
  *
- * Порядок не косметичний. Обрізання перше, бо все подальше платить за довжину.
- * Інертні блоки — до перевірки (див. `INERT_BLOCKS`). Коментарі ріжуться
- * ОСТАННІМИ: спершу їх треба прочитати, інакше прихована інструкція просто
- * зникла б, цикл пройшов би зелено, і ми ніколи не дізнались би, що сторінку
- * чіпали.
+ * Порядок не косметичний, і саме він був спершу неправильний. Обрізання стояло
+ * ПЕРШИМ (щоб регулярки платили за меншу довжину), але зріз посеред `<script>`
+ * лишав у тексті хвіст чужої аналітики без закривального тега — той уже не
+ * матчився, а слова на кшталт `apiKey` матчились, і звичайна сторінка дістала б
+ * `blocked` разом із кодом виходу 2. Тож інертні блоки ріжуться до обрізання.
+ *
+ * Коментарі — ОСТАННІМИ: спершу їх треба прочитати, інакше прихована інструкція
+ * просто зникла б, цикл пройшов би зелено, і ми ніколи не дізнались би, що
+ * сторінку чіпали.
  *
  * @param {string|null} html
  * @returns {{ html: string|null, blocked: boolean, failure_reason: string|null, truncated: boolean }}
@@ -131,12 +135,13 @@ export function screenSource(html) {
     return { html: null, blocked: false, failure_reason: null, truncated: false };
   }
 
-  const truncated = html.length > MAX_INPUT_CHARS;
-  let text = truncated ? html.slice(0, MAX_INPUT_CHARS) : html;
-
+  let text = html;
   for (const block of INERT_BLOCKS) {
     text = text.replace(block, " ");
   }
+
+  const truncated = text.length > MAX_INPUT_CHARS;
+  if (truncated) text = text.slice(0, MAX_INPUT_CHARS);
 
   const hit = detectInjection(text);
   if (hit) {

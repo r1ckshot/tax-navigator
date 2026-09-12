@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 
 import { classifyScope } from "./allowlist.mjs";
 import { compareValues } from "./diff.mjs";
-import { screenSource } from "./screen.mjs";
+import { screenSource, MAX_INPUT_CHARS } from "./screen.mjs";
 import { EXTRACTORS, fetchSource, noExtractorCheck } from "./sources.mjs";
 import { renderReport, summaryLine } from "./report.mjs";
 import { appendCycle, readHistory, writeHistory } from "./state.mjs";
@@ -115,8 +115,7 @@ export async function runCycle({
       continue;
     }
 
-    checks.push(
-      compareValues({
+    const check = compareValues({
         rule_id: rule.rule_id,
         matrix_value,
         fetched_raw: screened.html === null ? null : extractor.extract(screened.html),
@@ -127,8 +126,15 @@ export async function runCycle({
         source_url: rule.source_url ?? null,
         verified_at: rule.verified_at ?? null,
         failure_reason,
-      })
-    );
+    });
+
+    // Обрізаний вхід не має губитись. Зріз може відсікти маркер, і тоді запис
+    // виходить `unavailable` — з причиною «порожньо», яка читається як
+    // «джерело мовчало». Причина інша, і людина має бачити саме її.
+    if (screened.truncated && check.state === STATES.UNAVAILABLE) {
+      check.failure_reason = `${check.failure_reason} (сторінку обрізано за стелею ${MAX_INPUT_CHARS} символів)`;
+    }
+    checks.push(check);
   }
 
   const finalChecks = drop ? checks.slice(0, -1) : mutate ? checks.map(mutate) : checks;
