@@ -39,7 +39,7 @@ producer і consumer тут той самий локальний процес (`
   "data": {
     "id": "<uuid — cycle_runs.id>",
     "month": "<string, YYYY-MM — cycle_runs.month>",
-    "status": "<completed|partial — cycle_runs.status>",
+    "status": "<completed|partial|blocked — cycle_runs.status>",
     "started_at": "<iso8601 — cycle_runs.started_at>",
     "finished_at": "<iso8601|null — cycle_runs.finished_at>"
   }
@@ -49,6 +49,7 @@ producer і consumer тут той самий локальний процес (`
 - **Required fields:** `event_id, event_type, version, occurred_at, data.id, data.month, data.status, data.started_at`.
 - **Origin:** `sad.md` §6 Потік 1 (`Cycle->>Report: Формує місячний звіт`) + `data-model.md` → `cycle_runs`.
 - **Backwards-compat policy:** additive-only — нове опційне поле можна додавати; видалення/перейменування — нова версія (`v2`).
+- **`blocked` додано 2026-09-12** (урок 11.1): цикл відхилив джерело, бо сторінка несла звернення до агента, а не лише текст для людини. Розширення enum, не нове поле, тож формально ширше за additive-only; версію не бампимо свідомо — підписаних консюмерів у каналу немає (див. `Consumers` вище), а злиття цього стану з `partial` приховало б різницю між поганою погодою і чужим втручанням.
 
 ## Event: `rules_change_monitor.rule_check.v1`
 
@@ -66,14 +67,15 @@ producer і consumer тут той самий локальний процес (`
     "source_value": "<string|null — rule_checks.source_value>",
     "matrix_value": "<string — rule_checks.matrix_value>",
     "failure_reason": "<string|null — rule_checks.failure_reason, AC-08>",
-    "diff_percent": "<number|null — rule_checks.diff_percent, AC-04/05>"
+    "diff_percent": "<number|null — rule_checks.diff_percent, AC-04/05>",
+    "blocked": "<boolean|absent — вхід відхилено перевіркою до моделі (screen.mjs)>"
   }
 }
 ```
 
 - **Required fields:** `event_id, event_type, version, occurred_at, data.id, data.cycle_id, data.rule_id, data.state, data.matrix_value`. `diff_percent` — опційне (NULL, доки `state` не розбіжність).
 - **Origin:** `sad.md` §6 Потік 1 (`Cycle->>Diff: Визначає стан запису`) + Потік 3 (класифікація) + `data-model.md` → `rule_checks`.
-- **Backwards-compat policy:** additive-only. `diff_percent` додано 2026-08-10 як опційне поле — сумісно, без бампу версії (`v1` лишається `v1`).
+- **Backwards-compat policy:** additive-only. `diff_percent` додано 2026-08-10 як опційне поле — сумісно, без бампу версії (`v1` лишається `v1`). `blocked` додано 2026-09-12 так само опційним: `state` при ньому лишається одним із семи (`unavailable` — цифру не перевірено), тож AC-03 не переписується; поле несе лише різницю між «джерело мовчало» і «вхід відхилено».
 
 ## Idempotency & retry
 

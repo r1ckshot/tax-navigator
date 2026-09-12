@@ -17,6 +17,41 @@ function makeCheck(overrides = {}) {
   };
 }
 
+describe('renderReport — заблоковані входи', () => {
+  const blocked = makeCheck({
+    rule_id: 'common.minimum_wage',
+    state: STATES.UNAVAILABLE,
+    blocked: true,
+    matrix_value: null,
+    fetched_value: null,
+    failure_reason: 'вхід заблоковано до моделі: згадка файлів із секретами (secret-file)',
+    fetched_from: 'https://www.zus.pl/baza-wiedzy/x',
+  });
+
+  it('стоїть першою секцією — вона ставить під сумнів решту звіту', () => {
+    const report = renderReport({ month: '2026-09', status: 'blocked', checks: [blocked] });
+    expect(report.indexOf('## Заблоковані входи')).toBeGreaterThanOrEqual(0);
+    expect(report.indexOf('## Розбіжності')).toBeGreaterThan(report.indexOf('## Заблоковані входи'));
+  });
+
+  it('шапка називає блокування, а не «цикл неповний»', () => {
+    const report = renderReport({ month: '2026-09', status: 'blocked', checks: [blocked] });
+    expect(report).toContain('звернення до агента');
+    expect(report).not.toContain('Цикл неповний');
+  });
+
+  it('друкує причину й сторінку, але не значення — його не брали', () => {
+    const report = renderReport({ month: '2026-09', status: 'blocked', checks: [blocked] });
+    expect(report).toContain('secret-file');
+    expect(report).toContain('вхід відхилено до витягу значення');
+  });
+
+  it('порожній розділ друкується явно — відсутність не читається як «не перевіряли»', () => {
+    const report = renderReport({ month: '2026-09', status: 'completed', checks: [makeCheck()] });
+    expect(report).toContain('## Заблоковані входи\n\nНемає.');
+  });
+});
+
 describe('renderReport', () => {
   it('секція розбіжностей стоїть вище за рядок match/cosmetic', () => {
     const cycle = {
