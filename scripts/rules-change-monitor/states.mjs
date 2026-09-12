@@ -63,6 +63,9 @@ export const UNCONFIRMED_STATES = Object.freeze([
  * @property {number|string|null} fetched_value  що віддало джерело (null, якщо не питали або не вийшло)
  * @property {number|null} diff_percent  розбіжність у відсотках; null, доки стан не divergence
  * @property {string|null} failure_reason  чому не вийшло; null на успіху
+ * @property {boolean} [blocked]         вхід відхилено перевіркою до моделі (`screen.mjs`);
+ *                                       стан при цьому `unavailable` — цифру не перевірено,
+ *                                       але причина інша, ніж мовчання джерела
  * @property {string|null} fetched_from   сторінка, з якої реально взято `fetched_value`
  * @property {string|null} source_url    джерело, записане в матриці
  * @property {string|null} verified_at   дата останньої ручної звірки з матриці

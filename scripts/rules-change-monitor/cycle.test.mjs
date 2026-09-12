@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { runCycle, monthOf } from './cycle.mjs';
+import { renderReport } from './report.mjs';
 import { STATES, ALL_STATES } from './states.mjs';
+
+const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '__fixtures__');
+const fixture = (name) => readFileSync(join(FIXTURES, name), 'utf8');
 
 const NOW = new Date('2026-09-14T08:00:00Z');
 
@@ -136,6 +144,77 @@ describe('runCycle: кожне правило виходить рівно з о�
         mutate: (check) => ({ ...check, state: 'ok' }),
       })
     ).rejects.toThrow(/без валідного стану/);
+  });
+
+  /**
+   * Пара входів як постійна перевірка (урок 11.1). Обидва прогони йдуть через
+   * СПРАВЖНІЙ екстрактор `EXTRACTORS`, а не через підставний: перевірка стоїть
+   * між фетчем і витягом, і підмінений екстрактор не довів би, що вона там.
+   */
+  it('шкідливий вхід: сторінка з прихованою інструкцією не доїжджає до витягу', async () => {
+    const cycle = await runCycle({
+      rules: [inScope],
+      now: NOW,
+      fetchImpl: okFetch(fixture('zus-skladki-poisoned.html')),
+    });
+    expect(cycle.checks[0].blocked).toBe(true);
+    expect(cycle.checks[0].state).toBe(STATES.UNAVAILABLE);
+    expect(cycle.checks[0].fetched_value).toBeNull();
+    expect(cycle.status).toBe('blocked');
+
+    // Наскрізна асерція, і вона про те, чого в звіті НЕМАЄ. Звіт читає
+    // `drift-reviewer`: доїде туди наказ дослівно — перевірка сама стане
+    // каналом доставки, який ми щойно перекрили. Перевіряється на справжньому
+    // ланцюгу фетч → перевірка → запис → звіт, а не на зібраному руками записі.
+    const report = renderReport(cycle);
+    for (const word of ['ignore all previous', 'OAUTH', 'collector.example', '3200', 'rules.2026.json']) {
+      expect(report.toLowerCase()).not.toContain(word.toLowerCase());
+    }
+  });
+
+  it('безпечний вхід: та сама сторінка зі зміненою ставкою дає розбіжність', async () => {
+    const cycle = await runCycle({
+      rules: [inScope],
+      now: NOW,
+      fetchImpl: okFetch(fixture('zus-skladki-raised.html')),
+    });
+    expect(cycle.checks[0].blocked).toBeUndefined();
+    expect(cycle.checks[0].state).toBe(STATES.DIVERGENCE);
+    expect(cycle.checks[0].fetched_value).toBe(4950);
+    expect(cycle.status).toBe('completed');
+  });
+
+  /**
+   * `blocked` не має права розчинитись у загальному `partial`: недоступне
+   * джерело і відхилений вхід вимагають різної реакції людини.
+   */
+  it('заблокований вхід переважує недоступне джерело у статусі циклу', async () => {
+    let call = 0;
+    const cycle = await runCycle({
+      rules: [inScope, inScope],
+      now: NOW,
+      fetchImpl: async () => {
+        call += 1;
+        if (call === 1) throw new Error('ECONNRESET');
+        return { ok: true, status: 200, text: async () => fixture('zus-skladki-poisoned.html') };
+      },
+    });
+    expect(cycle.checks.map((c) => c.blocked)).toEqual([undefined, true]);
+    expect(cycle.status).toBe('blocked');
+  });
+
+  /**
+   * Тихо обрізаний вхід читався б як «джерело мовчало»: стан однаковий,
+   * причина різна. Різницю має бачити людина, а не лише код.
+   */
+  it('обрізаний вхід називає обрізання причиною, а не порожнечу', async () => {
+    const cycle = await runCycle({
+      rules: [inScope],
+      now: NOW,
+      fetchImpl: okFetch('<p>нічого схожого на ставку</p>'.padEnd(1_500_001, ' ')),
+    });
+    expect(cycle.checks[0].state).toBe(STATES.UNAVAILABLE);
+    expect(cycle.checks[0].failure_reason).toMatch(/обрізано за стелею/);
   });
 
   it('жоден запис не має зникнути дорогою', async () => {

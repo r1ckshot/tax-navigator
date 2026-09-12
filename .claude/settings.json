@@ -185,7 +185,19 @@
             "command": "node .claude/hooks/layer-boundary.mjs"
           }
         ]
+      },
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Перевіряю, чи агент не читає .env і .claude/…",
+            "timeout": 10,
+            "command": "node .claude/hooks/guard-agent-reads.mjs"
+          }
+        ]
       }
+
     ],
     "PostToolUse": [
       {

@@ -27,6 +27,9 @@ on:
     paths:
       - '.claude/**'
       - 'evals/**'
+      # Межа з чужими сторінками живе тут, і ворота над нею мусять ходити на
+      # її зміну теж — інакше правка `screen.mjs` проїхала б повз лінт.
+      - 'scripts/rules-change-monitor/**'
       - '.github/workflows/evals.yml'
   schedule:
     - cron: '0 3 * * *'
@@ -56,6 +59,15 @@ jobs:
       # інцидент і ловить, а не просто мовчить на здоровому файлі.
       - name: Регресійний кейс attribution (red-green)
         run: python3 evals/check_settings.py --self-test
+
+      # Треті ворота стоять у блокуючому джобі, а не в нічному, саме тому, що
+      # коштують нуль токенів: перевірка, яку вони стережуть, спрацьовує ДО
+      # моделі, і модель тут не запускається взагалі.
+      - name: 'Межа з чужими сторінками · пара шкідливий/безпечний вхід'
+        run: python3 evals/check_injection.py
+
+      - name: 'Хук на читання .env і .claude/** суб-агентами'
+        run: bash .claude/hooks/test-guard-agent-reads.sh
 
   evals:
     name: 'шари 2-4 · поведінкові evals (токени, non-blocking)'
