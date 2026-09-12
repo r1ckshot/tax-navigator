@@ -39,7 +39,6 @@ MIRROR = EVALS / "tmp" / "injection"
 # зріз тут не зібрався б.
 MIRROR_SLICE = [
     "scripts/rules-change-monitor",
-    "app/lib/rules/rules.2026.json",
     "evals/injection_pair.mjs",
 ]
 

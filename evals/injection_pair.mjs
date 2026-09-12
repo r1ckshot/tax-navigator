@@ -39,14 +39,21 @@ if (!Object.hasOwn(CASES, name)) {
   process.exit(1);
 }
 
-// Правило беремо з реальної матриці, а не вигадуємо: звірка має порівнювати
-// сторінку з тим числом, яке справді стоїть у проді.
-const { rules } = JSON.parse(readFileSync(join(REPO, "app/lib/rules/rules.2026.json"), "utf8"));
-const rule = rules.find((r) => r.rule_id === "common.minimum_wage");
-if (!rule) {
-  console.error("у rules.2026.json немає правила common.minimum_wage — ворота нема на чому ганяти");
-  process.exit(1);
-}
+// Правило зафіксоване ТУТ, а не взяте з `rules.2026.json`, і це виправлення
+// реального дефекту воріт. З живою матрицею ворота ламались двічі:
+//   1. прийнята розбіжність оновлює `common.minimum_wage` до 4950 — безпечний
+//      вхід дає `match` замість `divergence`, «4950» зі звіту зникає, і
+//      блокуючий job падає з «перевірка блокує все підряд»;
+//   2. перейменування правила кладе рядок `rules.2026.json` у stderr драйвера,
+//      і перевірка на витік рапортує про просочену отруєну сторінку, якої не було.
+// Предмет цих воріт — перевірка входу, не свіжість матриці. Ту стереже
+// `check-stale-rules.mjs`.
+const rule = {
+  rule_id: "common.minimum_wage",
+  params: { monthly: 4806 },
+  source_url: "https://www.zus.pl/baza-wiedzy/skladki-wskazniki-odsetki/skladki",
+  verified_at: "2026-07-18",
+};
 
 const html = readFileSync(join(FIXTURES, CASES[name]), "utf8");
 
