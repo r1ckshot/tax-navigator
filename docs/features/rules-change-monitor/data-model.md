@@ -64,7 +64,7 @@ erDiagram
 |---|---|---|---|
 | `id` | UUID | PK, app-generated (UUID v7) | |
 | `month` | VARCHAR(7) | NOT NULL, UNIQUE | `YYYY-MM` — ключ ідемпотентності циклу |
-| `status` | VARCHAR(32) | NOT NULL | `completed` \| `partial` — enum-in-app |
+| `status` | VARCHAR(32) | NOT NULL | `completed` \| `partial` \| `blocked` — enum-in-app. `blocked` з 2026-09-12 (урок 11.1): цикл відхилив джерело, бо сторінка несла звернення до агента. Окреме значення, а не `partial`: недоступне джерело — погана погода, відхилений вхід — чуже втручання, і реакція людини різна |
 | `started_at` | TIMESTAMPTZ | NOT NULL | |
 | `finished_at` | TIMESTAMPTZ | NULL | NULL, доки цикл не завершено |
 | `created_at` | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
@@ -132,8 +132,11 @@ api-forge --reconcile (лекція api-forge, складний рівень). �
 
 <!-- Проєкт не має ORM/тестового DB-шару (client-only, vitest) — фабрики описані як план. -->
 
-- `newCycleRun(overrides?)` — цикл зі `status: 'completed'`.
-- `newRuleCheck(cycleId, overrides?)` — перевірка зі `state: 'matches'` за замовчуванням.
+- `newCycleRun(overrides?)` — цикл зі `status: 'completed'`; `overrides` мусить
+  покривати й `blocked`, інакше єдиний статус, що вимагає окремої реакції
+  людини, не матиме жодної фікстури.
+- `newRuleCheck(cycleId, overrides?)` — перевірка зі `state: 'matches'` за
+  замовчуванням; опційне `blocked: true` йде разом зі `state: 'unavailable'`.
 - `newVetoEntry(overrides?)` — ветований запис із фейковим `rule_id`.
 
 PII guard: дані — публічні державні ставки, PII немає (PRD §6.1). Seed-даних не потрібно
