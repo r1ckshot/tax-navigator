@@ -17,6 +17,7 @@ from pathlib import Path
 
 AGENTS_DIR = Path(".claude/agents")
 HOOK = Path(".claude/hooks/readonly-bash.mjs")
+READ_HOOK = Path(".claude/hooks/guard-agent-reads.mjs")
 
 # ──────────────────────────────────────────────────────────────────────────
 # Контракт. Агента, якого тут немає, лінт валить — новий агент без свідомого
@@ -117,6 +118,20 @@ def hook_allowlisted_agents() -> set:
     return set(re.findall(r"^\s{2}'([^']+)':", block.group(1), re.M))
 
 
+def read_guarded_agents() -> set:
+    """Імена з FOREIGN_INPUT_AGENTS у guard-agent-reads.mjs.
+
+    Та сама крос-перевірка, що для `readonly-bash.mjs`, і з тієї ж причини:
+    перейменований агент лишає в хуку ключ, який більше нікого не фільтрує, —
+    і межа зникає мовчки, бо хук при цьому цілком валідний.
+    """
+    if not READ_HOOK.exists():
+        return set()
+    src = READ_HOOK.read_text(encoding="utf-8")
+    block = re.search(r"FOREIGN_INPUT_AGENTS = new Set\(\[(.*?)\]\)", src, re.S)
+    return set(re.findall(r"'([^']+)'", block.group(1))) if block else set()
+
+
 def main() -> int:
     failed = False
     seen = set()
@@ -171,6 +186,10 @@ def main() -> int:
     # а агент із Bash поза ALLOWLISTS має повний Bash попри «read-only» роль.
     for name in sorted(hook_allowlisted_agents() - seen):
         print(f"✗ readonly-bash.mjs: allowlist для «{name}», а такого агента нема")
+        failed = True
+
+    for name in sorted(read_guarded_agents() - seen):
+        print(f"✗ guard-agent-reads.mjs: заборона для «{name}», а такого агента нема")
         failed = True
 
     print()
