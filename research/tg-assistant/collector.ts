@@ -75,6 +75,8 @@ export interface RunCycleInput {
   sleep: (ms: number) => Promise<void>;
   windowWeeks: number;
   maxFloodWaitSeconds: number;
+  /** Тривалість одного читання чату, вдалого чи ні, за годинником `now` (урок 11.3). */
+  onChatRead?: (durationMs: number) => void;
 }
 
 export type RunCycleResult =
@@ -160,9 +162,12 @@ export async function runCycle(input: RunCycleInput): Promise<RunCycleResult> {
     const since = marker && marker.lastReadAt > windowStartIso ? marker.lastReadAt : windowStartIso;
 
     let raw: RawMessage[];
+    const readStartedMs = input.now().getTime();
     try {
       raw = await input.port.readMessagesSince(entry.chat.id, since);
+      input.onChatRead?.(input.now().getTime() - readStartedMs);
     } catch (err) {
+      input.onChatRead?.(input.now().getTime() - readStartedMs);
       const failure: ReadFailure =
         err instanceof TelegramReadError ? err.failure : { kind: 'failed', code: err instanceof Error ? err.name : 'unknown' };
       const reason = describeFailure(failure, entry.attempts, input.maxFloodWaitSeconds);

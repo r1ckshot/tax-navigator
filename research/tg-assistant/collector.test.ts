@@ -323,3 +323,22 @@ describe('runCycle — ADR-0002 черга FLOOD_WAIT по чатах', () => {
     expect(result.report.failures[0].reason).toBe('FLOOD_WAIT_X=3600s exceeds the per-cycle limit of 600s; moving to dead letter queue');
   });
 });
+
+describe('runCycle — тривалість читання для метрик (урок 11.3)', () => {
+  it('кожна спроба читання, вдала чи ні, дає одне вимірювання за годинником циклу', async () => {
+    const h = harness(W38);
+    const port = fakePort({
+      clock: h.clock,
+      chats: [chat('-1001', 'alpha_chat'), chat('-1002', 'beta_chat')],
+      messages: { '-1001': [msg(10, W38 - DAY)] },
+      failures: { '-1002': [{ kind: 'failed', code: 'TimeoutError' }] },
+      readTakesMs: 3000,
+    });
+    const durations: number[] = [];
+    const result = await run({ ...h.base(port, defaultState(), ['alpha_chat', 'beta_chat']), onChatRead: (ms) => durations.push(ms) });
+
+    // Фейк рухає годинник лише на вдалому читанні: 3000 мс для alpha, 0 для beta, що впав одразу.
+    expect(durations).toEqual([3000, 0]);
+    expect(result.report.failures).toHaveLength(1);
+  });
+});
