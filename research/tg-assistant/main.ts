@@ -1,7 +1,7 @@
 /**
  * Точка входу воркера (sad.md §5 `cycle.ts`).
  *
- *   node main.ts run    — довгоживучий процес: розклад, цикл, /health
+ *   node main.ts run    — довгоживучий процес: розклад, цикл, /health, /metrics
  *   node main.ts chats  — список груп і каналів акаунта, щоб заповнити TG_CHATS
  *
  * Лог — JSON-рядки у stdout. У лог не йде ні текст повідомлень, ні значення
@@ -12,8 +12,9 @@ import { createServer } from 'node:http';
 import { runCycle } from './collector.ts';
 import { ConfigError, parseConfig, type WorkerConfig } from './config.ts';
 import { evaluateHealth } from './health.ts';
+import { CollectorMetrics } from './metrics.ts';
 import { isCycleDue, isoWeek } from './schedule.ts';
-import { hasCycleRun, loadState, saveState, type CycleState } from './state.ts';
+import { hasCycleRun, latestReport, loadState, saveState, type CycleState } from './state.ts';
 import { createClient, GramjsPort } from './telegram.ts';
 
 const TICK_MS = 60 * 1000;
@@ -45,6 +46,7 @@ async function connect(apiId: number, apiHash: string, session: string) {
 
 async function run(config: WorkerConfig): Promise<void> {
   const processStartedAt = new Date();
+  const metrics = new CollectorMetrics(processStartedAt);
 
   // Том перевіряється на запис до першого циклу: ненаписаний стан виявився б
   // лише через тиждень, а так контейнер падає одразу.
@@ -55,23 +57,29 @@ async function run(config: WorkerConfig): Promise<void> {
   log('worker_started', { chats: config.chats.length, schedule: config.schedule, windowWeeks: config.windowWeeks });
 
   const server = createServer((req, res) => {
-    if (req.url !== '/health') {
+    if (req.url !== '/health' && req.url !== '/metrics') {
       res.writeHead(404).end();
       return;
     }
     const { state, error } = readState(config.statePath);
+    const telegramConnected = client.connected === true;
     const health = evaluateHealth({
       now: new Date(),
       processStartedAt,
       schedule: config.schedule,
       state,
       stateError: error,
-      telegramConnected: client.connected === true,
+      telegramConnected,
     });
+    if (req.url === '/metrics') {
+      res.writeHead(200, { 'content-type': 'text/plain; version=0.0.4' });
+      res.end(metrics.render({ health, telegramConnected, lastReport: state ? latestReport(state) : null }));
+      return;
+    }
     res.writeHead(health.ok ? 200 : 503, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ ...health, stateError: error }));
   });
-  // Лише loopback: healthcheck Docker ходить зсередини контейнера, назовні порт не потрібен.
+  // Лише loopback: healthcheck і детектор ходять зсередини контейнера, назовні порт не потрібен.
   server.listen(config.healthPort, '127.0.0.1');
 
   let running = false;
@@ -85,6 +93,7 @@ async function run(config: WorkerConfig): Promise<void> {
 
     running = true;
     log('cycle_started', { weekOf: isoWeek(now) });
+    const readDurations: number[] = [];
     try {
       const result = await runCycle({
         port,
@@ -94,9 +103,14 @@ async function run(config: WorkerConfig): Promise<void> {
         sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
         windowWeeks: config.windowWeeks,
         maxFloodWaitSeconds: config.maxFloodWaitSeconds,
+        onChatRead: (ms) => {
+          readDurations.push(ms);
+          metrics.observeChatRead(ms);
+        },
       });
       if (result.skipped) return;
       saveState(config.statePath, result.state);
+      metrics.recordCycle(result.report);
       // S-2 (фільтр) ще не існує: зібраний текст рахується і відпускається з пам'яті.
       log('cycle_finished', {
         weekOf: result.weekOf,
@@ -106,9 +120,11 @@ async function run(config: WorkerConfig): Promise<void> {
         failures: result.report.failures.map((f) => ({ ref: f.ref, reason: f.reason })),
         windowed: result.report.chats.filter((c) => c.windowStartAt !== null).map((c) => c.ref),
         durationMs: Date.parse(result.report.finishedAt) - Date.parse(result.report.startedAt),
+        slowestChatReadMs: readDurations.length > 0 ? Math.max(...readDurations) : null,
       });
     } catch (err) {
       retryAfter = Date.now() + RETRY_AFTER_ERROR_MS;
+      metrics.recordCycleError();
       log('cycle_error', { error: err instanceof Error ? err.name : 'unknown', retryAfter: new Date(retryAfter).toISOString() });
     } finally {
       running = false;

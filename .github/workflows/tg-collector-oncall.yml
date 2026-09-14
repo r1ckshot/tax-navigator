@@ -1,0 +1,229 @@
+# Черговий для колектора tg-assistant, урок 11.3. Прокидається лише тоді, коли
+# звичайний код (watch.ts) уже знайшов аномалію і deploy-tg-collector впав.
+#
+# Шлях розрізаний надвоє:
+#   investigate — модель. Одноразовий ubuntu-latest, `contents: read`, чекаут
+#                 без збережених кредів (git push фізично нікуди), лише звіт
+#                 і чистий код. Стеля: --max-budget-usd 2 і timeout job-а.
+#                 Далі ворота доказів — з копії, знятої ДО агента.
+#   open-draft  — запис. Жодної моделі: застосовує патч, ще раз проганяє
+#                 ворота своєю копією і відкриває ЧЕРНЕТКУ PR. Merge — людина.
+#
+# Мало доказів → зупинка без пропозиції: investigate зелений, open-draft пропущено.
+
+name: tg-collector-oncall
+
+on:
+  workflow_run:
+    workflows: [deploy-tg-collector]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Commit or branch to investigate (drill)'
+        required: true
+        default: master
+      report:
+        description: 'Path in that checkout to a stored report.json (drill)'
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: tg-collector-oncall
+  cancel-in-progress: false
+
+env:
+  CLAUDE_CODE_VERSION: stable
+
+jobs:
+  investigate:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      proposal: ${{ steps.gate.outputs.proposal }}
+      sha: ${{ steps.sha.outputs.sha }}
+    env:
+      ONCALL_DIR: ${{ runner.temp }}/oncall
+      PRISTINE_DIR: ${{ runner.temp }}/pristine
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - id: sha
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Get the watcher report
+        id: report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          DRILL_REPORT: ${{ inputs.report }}
+        run: |
+          mkdir -p "$ONCALL_DIR"
+          if [ -n "$DRILL_REPORT" ]; then
+            cp "$DRILL_REPORT" "$ONCALL_DIR/report.json"
+          elif ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name watch-report --dir "$ONCALL_DIR"; then
+            # Deploy упав до вікна нагляду (тести, збірка, healthcheck): це не аномалія після релізу.
+            echo "no watcher report in run $RUN_ID: the run failed before the watch window" >> "$GITHUB_STEP_SUMMARY"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          verdict=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).verdict)" "$ONCALL_DIR/report.json")
+          echo "watcher verdict: $verdict"
+          echo "found=$([ "$verdict" = anomaly ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Snapshot the gate before the agent touches the checkout
+        if: steps.report.outputs.found == 'true'
+        run: cp -r research/tg-assistant/observability "$PRISTINE_DIR"
+
+      - uses: actions/setup-node@v4
+        if: steps.report.outputs.found == 'true'
+        with:
+          node-version: '22'
+
+      - name: Install toolchain (tsc, vitest) and worker dependencies
+        if: steps.report.outputs.found == 'true'
+        run: |
+          npm ci
+          npm ci --prefix research/tg-assistant
+
+      - name: Install Claude Code
+        if: steps.report.outputs.found == 'true'
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s "$CLAUDE_CODE_VERSION"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Investigate (model, read-only token, spend cap)
+        if: steps.report.outputs.found == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Прибирає токен з оточення дочірніх процесів агента (vitest виконує код
+          # колектора). Це зменшує, а не закриває ризик: код того ж користувача
+          # може прочитати оточення предка з /proc. Справжня межа — вхід без
+          # чужого тексту (errorLines) і job без прав на запис.
+          CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
+        run: |
+          prompt=$(sed "s|\$ONCALL_DIR|$ONCALL_DIR|g" "$PRISTINE_DIR/oncall-prompt.md")
+          claude -p "$prompt" \
+            --add-dir "$ONCALL_DIR" \
+            --max-budget-usd 2 \
+            --permission-mode acceptEdits \
+            --allowedTools "Read" "Grep" "Glob" "Edit" "Write" "Bash(npx tsc:*)" "Bash(npx vitest:*)" \
+            --disallowedTools "Bash(git:*)" "Bash(gh:*)" "Bash(curl:*)" "WebFetch" "WebSearch" \
+            > "$ONCALL_DIR/claude-output.txt" || echo "::warning::claude exited non-zero; the gate decides on the resulting state"
+          tail -n 40 "$ONCALL_DIR/claude-output.txt"
+
+      - name: Evidence gate (pristine copy, no model)
+        id: gate
+        if: steps.report.outputs.found == 'true'
+        run: |
+          changed=$(git ls-files --modified --others --deleted --exclude-standard | sort -u)
+          echo "changed files:"; echo "${changed:-(none)}"
+          set +e
+          echo "$changed" | node "$PRISTINE_DIR/gate.ts" "$ONCALL_DIR/report.json" "$ONCALL_DIR/notes.md" > "$ONCALL_DIR/gate.txt"
+          code=$?
+          set -e
+          cat "$ONCALL_DIR/gate.txt"
+          { echo '### on-call gate'; cat "$ONCALL_DIR/gate.txt"; } >> "$GITHUB_STEP_SUMMARY"
+          grep '^proposal=' "$ONCALL_DIR/gate.txt" >> "$GITHUB_OUTPUT"
+          # rejected: агент зачепив нагляд, тести чи файли поза колектором — це червоний прогін, не тиша.
+          exit $code
+
+      - name: Typecheck and tests on the proposed change
+        if: steps.gate.outputs.proposal == 'true'
+        run: |
+          npx tsc -p research/tg-assistant/tsconfig.json
+          npx vitest run --config research/tg-assistant/vitest.config.ts
+
+      - name: Package the proposal
+        if: steps.gate.outputs.proposal == 'true'
+        run: |
+          git add -A
+          # --no-renames: перейменування йде як видалення + додавання, і ворота в
+          # open-draft бачать обидва шляхи. Інакше numstat показує лише нове ім'я,
+          # і перенесений gate.ts чи *.test.ts проходить як дозволений файл.
+          git diff --cached --binary --no-renames > "$ONCALL_DIR/proposal.patch"
+          git diff --cached --stat
+
+      - name: Keep the evidence
+        if: always() && steps.report.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: oncall-evidence
+          path: |
+            ${{ runner.temp }}/oncall/report.json
+            ${{ runner.temp }}/oncall/notes.md
+            ${{ runner.temp }}/oncall/gate.txt
+            ${{ runner.temp }}/oncall/proposal.patch
+          if-no-files-found: ignore
+          retention-days: 14
+
+  open-draft:
+    needs: investigate
+    if: needs.investigate.outputs.proposal == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.investigate.outputs.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: oncall-evidence
+          path: ${{ runner.temp }}/oncall
+
+      - name: Re-run the gate on the patch, then apply it
+        # Ворота йдуть з цього чекауту ДО git apply: патч, що правив би gate.ts,
+        # не встигає підмінити перевірку, яка його оцінює.
+        run: |
+          # Патч пакується з --no-renames; заголовок перейменування чи копії означає, що його підмінили.
+          if grep -qE '^(rename|copy) (from|to) ' "$RUNNER_TEMP/oncall/proposal.patch"; then
+            echo "patch carries rename/copy headers: not produced by the investigate job, refusing"
+            exit 1
+          fi
+          git apply --numstat "$RUNNER_TEMP/oncall/proposal.patch" | cut -f3 \
+            | node research/tg-assistant/observability/gate.ts "$RUNNER_TEMP/oncall/report.json" "$RUNNER_TEMP/oncall/notes.md" \
+            | tee gate.txt
+          grep -q '^proposal=true$' gate.txt
+          git apply --index "$RUNNER_TEMP/oncall/proposal.patch"
+
+      - name: Open a draft PR (never merge)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="oncall/tg-collector-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -m "fix(tg-assistant): on-call proposal for run ${GITHUB_RUN_ID}"
+          git push origin "$branch"
+          {
+            echo '## Why'; echo
+            echo "The post-release watcher reported an anomaly. This draft is a proposal from the on-call agent; a human decides."; echo
+            echo '## Watcher report'; echo; echo '```json'; cat "$RUNNER_TEMP/oncall/report.json"; echo '```'; echo
+            echo '## Agent notes (untrusted until reviewed)'; echo; cat "$RUNNER_TEMP/oncall/notes.md"; echo
+            echo '## Verification'; echo
+            echo '- evidence gate (pristine copy, then again on the applied patch):'; echo '```'; cat gate.txt; echo '```'
+            echo '- `tsc` and `vitest` passed in the investigate job'; echo
+            echo '## Risk / rollback'; echo; echo 'Draft only. Close the PR to discard.'; echo
+            echo '## Screenshots'; echo; echo 'N/A — no visual surface'; echo
+            echo '## Task'; echo; echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > pr-body.md
+          gh pr create --draft --base master --head "$branch" \
+            --title "fix(tg-assistant): on-call proposal for run ${GITHUB_RUN_ID}" \
+            --body-file pr-body.md

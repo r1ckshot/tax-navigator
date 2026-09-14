@@ -1,10 +1,18 @@
-# Деплой колектора tg-assistant (S-1) на спільний VPS, урок 11.2.
+# Деплой колектора tg-assistant (S-1) на спільний VPS, урок 11.2, і нагляд після нього, урок 11.3.
 #
-# Два джоби з різними правами:
+# Джоби з різними правами:
 #   test   — GitHub-hosted, типи й тести воркера; без нього deploy не стартує.
 #   deploy — self-hosted runner на VPS із ВЛАСНОЮ міткою `tax-navigator-vps`.
 #            Голе `self-hosted` не годиться: на машині живе інший проєкт, і
 #            чужий job приїхав би до нас, а наш — до нього.
+#   drill  — лише ручний запуск: пише в лог контейнера синтетичний рядок
+#            помилки, щоб перевірити, що нагляд справді спрацьовує.
+#   watch  — той самий runner, лише читання: `docker inspect/logs/exec GET /metrics`,
+#            жодного секрету і жодного токена моделі. Аномалія → exit 42, звіт
+#            артефактом; далі його підбирає tg-collector-oncall.yml.
+#            Межа чесна: користувач runner-а в групі docker, тож «лише читання»
+#            тримає код watch.ts, а не права ОС. Твердий розріз проходить між
+#            цим workflow і oncall, де працює модель.
 #
 # Секретів у GitHub цей workflow не потребує: runner уже на сервері, SSH-ключ і
 # IP не потрібні. Секрети Telegram лежать у файлі на сервері, шлях до нього —
@@ -21,7 +29,16 @@ on:
     paths:
       - 'research/tg-assistant/**'
       - '.github/workflows/deploy-tg-collector.yml'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      watch_minutes:
+        description: 'Post-release watch window, minutes'
+        default: '20'
+      drill:
+        description: 'error_line = write a synthetic cycle_error into the container log before the window'
+        type: choice
+        options: [none, error_line]
+        default: none
 
 permissions:
   contents: read
@@ -52,12 +69,18 @@ jobs:
     needs: test
     runs-on: [self-hosted, linux, x64, tax-navigator-vps]
     timeout-minutes: 20
+    outputs:
+      released_at: ${{ steps.mark.outputs.at }}
     env:
       COMPOSE: docker compose -f research/tg-assistant/compose.vps.yml
       TG_ENV_FILE: ${{ vars.TG_ENV_FILE }}
       RELEASE_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Mark the release start (the watcher reads logs from here)
+        id: mark
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - name: Refuse to deploy without the server-side secrets file
         run: |
@@ -91,3 +114,62 @@ jobs:
         run: |
           $COMPOSE ps
           $COMPOSE exec -T tg-collector node -v || true
+
+  drill:
+    needs: deploy
+    if: github.event_name == 'workflow_dispatch' && inputs.drill == 'error_line'
+    runs-on: [self-hosted, linux, x64, tax-navigator-vps]
+    timeout-minutes: 5
+    steps:
+      - name: Write a synthetic error line into the collector log
+        # Не рестарт і не зупинка: колектор і цикл не зачіпаються. Рядок іде в
+        # stdout PID 1, тобто туди ж, куди пише main.ts, і docker logs його бачить.
+        run: |
+          id=$(docker ps -q --filter label=com.docker.compose.project=tax-navigator --filter label=com.docker.compose.service=tg-collector)
+          test -n "$id" || { echo "collector container not found"; exit 1; }
+          docker exec "$id" sh -c 'echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"event\":\"cycle_error\",\"error\":\"DrillError\"}" > /proc/1/fd/1'
+
+  watch:
+    needs: [deploy, drill]
+    # drill пропускається на push; watch при цьому мусить іти, а на провалі drill — ні.
+    if: ${{ !cancelled() && needs.deploy.result == 'success' && needs.drill.result != 'failure' }}
+    runs-on: [self-hosted, linux, x64, tax-navigator-vps]
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Watch the release window (read-only, no model)
+        id: watch
+        env:
+          MODE: release
+          WINDOW_MINUTES: ${{ inputs.watch_minutes || '20' }}
+          INTERVAL_SECONDS: '60'
+          SINCE: ${{ needs.deploy.outputs.released_at }}
+          RELEASE_SHA: ${{ github.sha }}
+          REPORT_PATH: ${{ runner.temp }}/report.json
+        run: |
+          export CONTAINER=$(docker ps -q --filter label=com.docker.compose.project=tax-navigator --filter label=com.docker.compose.service=tg-collector)
+          test -n "$CONTAINER" || CONTAINER=missing
+          set +e
+          node research/tg-assistant/observability/watch.ts
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Keep the report for the on-call workflow
+        if: always() && steps.watch.outputs.exit_code != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: watch-report
+          path: ${{ runner.temp }}/report.json
+          retention-days: 14
+
+      - name: Fail the run on an anomaly
+        if: steps.watch.outputs.exit_code != '0'
+        run: |
+          echo "watcher exit code: ${{ steps.watch.outputs.exit_code }} (42 = anomaly, see the step summary)"
+          exit 1
