@@ -27,16 +27,35 @@ if (existsSync(target)) {
 }
 
 const rl = createInterface({ input: stdin, output: stdout });
+// Ctrl+C: у контейнері Node — PID 1, і без власного обробника сигнал ігнорується.
+rl.on('SIGINT', () => process.exit(130));
+rl.on('close', () => process.exit(130));
+
+function errorCode(err: Error): string {
+  // errorMessage — службовий код Telegram (API_ID_INVALID, PHONE_CODE_INVALID), не секрет.
+  return 'errorMessage' in err ? String((err as { errorMessage: unknown }).errorMessage) : err.message;
+}
+
 const client = createClient(Number(TG_API_ID), TG_API_HASH, '');
 
-await client.start({
-  phoneNumber: () => rl.question('Phone number (+48…): '),
-  phoneCode: () => rl.question('Code from Telegram: '),
-  password: () => rl.question('2FA password (empty if none): '),
-  onError: (err) => {
-    process.stderr.write(`login error: ${err.name}\n`);
-  },
-});
+try {
+  await client.start({
+    phoneNumber: () => rl.question('Phone number (+48…): '),
+    phoneCode: () => rl.question('Code from Telegram: '),
+    password: () => rl.question('2FA password (empty if none): '),
+    // true зупиняє gramjs: без цього будь-яка помилка знову питає номер, по колу.
+    onError: async (err) => {
+      process.stderr.write(`login error: ${errorCode(err)}\n`);
+      return true;
+    },
+  });
+} catch (err) {
+  if (!(err instanceof Error && err.message === 'AUTH_USER_CANCEL')) {
+    process.stderr.write(`login failed: ${err instanceof Error ? errorCode(err) : 'unknown'}\n`);
+  }
+  process.exit(1);
+}
+rl.removeAllListeners('close');
 rl.close();
 
 const session = String(client.session.save());
