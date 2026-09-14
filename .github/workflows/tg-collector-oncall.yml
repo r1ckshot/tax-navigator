@@ -104,8 +104,10 @@ jobs:
         if: steps.report.outputs.found == 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Агент може запустити vitest, а vitest виконує код колектора: токен не
-          # має доїжджати до дочірніх процесів, де його прочитав би змінений код.
+          # Прибирає токен з оточення дочірніх процесів агента (vitest виконує код
+          # колектора). Це зменшує, а не закриває ризик: код того ж користувача
+          # може прочитати оточення предка з /proc. Справжня межа — вхід без
+          # чужого тексту (errorLines) і job без прав на запис.
           CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
         run: |
           prompt=$(sed "s|\$ONCALL_DIR|$ONCALL_DIR|g" "$PRISTINE_DIR/oncall-prompt.md")
@@ -144,7 +146,10 @@ jobs:
         if: steps.gate.outputs.proposal == 'true'
         run: |
           git add -A
-          git diff --cached --binary > "$ONCALL_DIR/proposal.patch"
+          # --no-renames: перейменування йде як видалення + додавання, і ворота в
+          # open-draft бачать обидва шляхи. Інакше numstat показує лише нове ім'я,
+          # і перенесений gate.ts чи *.test.ts проходить як дозволений файл.
+          git diff --cached --binary --no-renames > "$ONCALL_DIR/proposal.patch"
           git diff --cached --stat
 
       - name: Keep the evidence
@@ -186,6 +191,11 @@ jobs:
         # Ворота йдуть з цього чекауту ДО git apply: патч, що правив би gate.ts,
         # не встигає підмінити перевірку, яка його оцінює.
         run: |
+          # Патч пакується з --no-renames; заголовок перейменування чи копії означає, що його підмінили.
+          if grep -qE '^(rename|copy) (from|to) ' "$RUNNER_TEMP/oncall/proposal.patch"; then
+            echo "patch carries rename/copy headers: not produced by the investigate job, refusing"
+            exit 1
+          fi
           git apply --numstat "$RUNNER_TEMP/oncall/proposal.patch" | cut -f3 \
             | node research/tg-assistant/observability/gate.ts "$RUNNER_TEMP/oncall/report.json" "$RUNNER_TEMP/oncall/notes.md" \
             | tee gate.txt
