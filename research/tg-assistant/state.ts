@@ -11,13 +11,47 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
+/**
+ * Маркер catch-up на чат (AC-09): з якого моменту читати наступного разу.
+ * Окремо від `cycleRuns`, бо чат, що впав у dead-letter цього тижня, мусить
+ * наступного тижня дочитати й цей проміжок, а не почати з нового циклу.
+ */
+export interface ChatMarker {
+  ref: string;
+  title: string;
+  firstReadAt: string;
+  lastReadAt: string;
+}
+
+/**
+ * Тижневий звіт збору — лише похідні дані, без тексту повідомлень
+ * (PRD §6.1: сирий текст на диск не пишеться).
+ */
+export interface CycleReport {
+  weekOf: string;
+  status: 'completed' | 'partial' | 'failed';
+  startedAt: string;
+  finishedAt: string;
+  chats: Array<{ ref: string; title: string; newMessages: number; windowStartAt: string | null }>;
+  failures: Array<{ ref: string; title: string | null; reason: string }>;
+}
+
 export interface CycleState {
   cycleRuns: Record<string, { weekOf: string; startedAt: string }>;
   seenMessages: Record<string, true>;
+  chats?: Record<string, ChatMarker>;
+  reports?: Record<string, CycleReport>;
 }
 
 export function defaultState(): CycleState {
   return { cycleRuns: {}, seenMessages: {} };
+}
+
+/** Останній звіт за `finishedAt`, або null, якщо циклів ще не було. */
+export function latestReport(state: CycleState): CycleReport | null {
+  const reports = Object.values(state.reports ?? {});
+  if (reports.length === 0) return null;
+  return reports.reduce((a, b) => (a.finishedAt >= b.finishedAt ? a : b));
 }
 
 export function loadState(filePath: string): CycleState {

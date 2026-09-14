@@ -1,0 +1,19 @@
+{
+  "name": "tg-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Weekly Telegram collector for G1 measurement (story S-1)",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node main.ts run",
+    "chats": "node main.ts chats",
+    "login": "node login.ts",
+    "healthcheck": "node healthcheck.ts"
+  },
+  "dependencies": {
+    "telegram": "2.26.22"
+  }
+}
