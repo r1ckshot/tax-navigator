@@ -1,0 +1,13 @@
+node_modules
+*.test.ts
+vitest.config.ts
+tsconfig.json
+tsconfig.tsbuildinfo
+tasks
+.env
+*.env
+.env.*
+*.session*
+tg-session*
+compose.vps.yml
+Dockerfile

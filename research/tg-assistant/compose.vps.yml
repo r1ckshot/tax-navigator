@@ -1,0 +1,35 @@
+# Колектор tg-assistant на спільному VPS. Ізоляція від сусіднього проєкту:
+#   - власне ім'я проєкту `tax-navigator` (контейнери, мережа, том з цим префіксом);
+#   - власний іменований том, до чужих томів доступу немає;
+#   - жодного опублікованого порту: /health слухає loopback усередині контейнера;
+#   - ліміти пам'яті й CPU, щоб збій циклу не з'їв ресурси сусіда.
+#
+# НІКОЛИ `docker compose down -v` на цій машині: `-v` зносить томи, а поруч живуть чужі.
+
+name: tax-navigator
+
+services:
+  tg-collector:
+    build:
+      context: .
+    image: tax-navigator/tg-collector:${RELEASE_SHA:-local}
+    restart: unless-stopped
+    # Секрети живуть у файлі на сервері, поза репо і поза робочою текою runner-а.
+    # Без змінної compose падає одразу, а не стартує без секретів.
+    env_file:
+      - ${TG_ENV_FILE:?set TG_ENV_FILE to the server-side env file}
+    environment:
+      RELEASE_SHA: ${RELEASE_SHA:-local}
+    volumes:
+      - tg-collector-data:/data
+    mem_limit: 256m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  tg-collector-data:
+    name: tax-navigator-tg-collector-data
