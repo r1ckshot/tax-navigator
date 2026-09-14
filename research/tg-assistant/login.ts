@@ -1,9 +1,14 @@
 /**
- * Одноразовий інтерактивний логін: номер, код із Telegram, пароль 2FA →
- * рядок сесії у файл з правами 0600. У термінал рядок не друкується ніколи
- * (research/tg-mining/01-SETUP.md: вміст сесії не виводиться).
+ * Одноразовий інтерактивний логін → рядок сесії у файл з правами 0600. У
+ * термінал рядок не друкується ніколи (research/tg-mining/01-SETUP.md: вміст
+ * сесії не виводиться).
  *
- *   TG_API_ID=… TG_API_HASH=… node login.ts <шлях-до-файла>
+ *   TG_API_ID=… TG_API_HASH=… node login.ts <шлях-до-файла>          QR-код
+ *   TG_API_ID=… TG_API_HASH=… node login.ts <шлях-до-файла> --phone  номер + код
+ *
+ * QR — за замовчуванням: з IP дата-центру Telegram приймав запит на код для
+ * нового api_id і не доставляв сам код ні на телефон, ні на десктоп
+ * (2026-09-14, VPS). QR код не шле взагалі — телефон сам підтверджує вхід.
  *
  * Далі вміст файла стає значенням TG_SESSION у .env на сервері, а сам файл
  * видаляється.
@@ -12,13 +17,15 @@
 import { existsSync, writeFileSync } from 'node:fs';
 import { stdin, stdout } from 'node:process';
 import { createInterface } from 'node:readline/promises';
+import qrcode from 'qrcode-terminal';
 import { createClient } from './telegram.ts';
 
 const target = process.argv[2];
+const usePhone = process.argv.includes('--phone');
 const { TG_API_ID, TG_API_HASH } = process.env;
 
-if (!target || !TG_API_ID || !TG_API_HASH) {
-  process.stderr.write('usage: TG_API_ID=… TG_API_HASH=… node login.ts <session-file>\n');
+if (!target || target.startsWith('--') || !TG_API_ID || !TG_API_HASH) {
+  process.stderr.write('usage: TG_API_ID=… TG_API_HASH=… node login.ts <session-file> [--phone]\n');
   process.exit(2);
 }
 if (existsSync(target)) {
@@ -37,18 +44,37 @@ function errorCode(err: Error): string {
 }
 
 const client = createClient(Number(TG_API_ID), TG_API_HASH, '');
+const password = () => rl.question('2FA password (empty if none): ');
+// true зупиняє gramjs: без цього будь-яка помилка знову питає номер, по колу.
+const onError = async (err: Error) => {
+  process.stderr.write(`login error: ${errorCode(err)}\n`);
+  return true;
+};
 
 try {
-  await client.start({
-    phoneNumber: () => rl.question('Phone number (+48…): '),
-    phoneCode: () => rl.question('Code from Telegram: '),
-    password: () => rl.question('2FA password (empty if none): '),
-    // true зупиняє gramjs: без цього будь-яка помилка знову питає номер, по колу.
-    onError: async (err) => {
-      process.stderr.write(`login error: ${errorCode(err)}\n`);
-      return true;
-    },
-  });
+  if (usePhone) {
+    await client.start({
+      phoneNumber: () => rl.question('Phone number (+48…): '),
+      phoneCode: () => rl.question('Code from Telegram: '),
+      password,
+      onError,
+    });
+  } else {
+    await client.connect();
+    await client.signInUserWithQrCode(
+      { apiId: Number(TG_API_ID), apiHash: TG_API_HASH },
+      {
+        qrCode: async ({ token }) => {
+          // Токен живе ~30 с; gramjs сам просить новий, і QR перемальовується.
+          stdout.write('\x1b[2J\x1b[H');
+          qrcode.generate(`tg://login?token=${token.toString('base64url')}`, { small: true });
+          stdout.write('Phone: Telegram → Settings → Devices → Link Desktop Device, scan this code.\n');
+        },
+        password,
+        onError,
+      }
+    );
+  }
 } catch (err) {
   if (!(err instanceof Error && err.message === 'AUTH_USER_CANCEL')) {
     process.stderr.write(`login failed: ${err instanceof Error ? errorCode(err) : 'unknown'}\n`);
@@ -62,3 +88,4 @@ const session = String(client.session.save());
 writeFileSync(target, session, { mode: 0o600 });
 await client.destroy();
 process.stdout.write(`session written to ${target} (${session.length} chars); move it into TG_SESSION and delete the file\n`);
+process.exit(0);
