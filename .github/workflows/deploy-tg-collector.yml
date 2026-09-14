@@ -1,0 +1,93 @@
+# Деплой колектора tg-assistant (S-1) на спільний VPS, урок 11.2.
+#
+# Два джоби з різними правами:
+#   test   — GitHub-hosted, типи й тести воркера; без нього deploy не стартує.
+#   deploy — self-hosted runner на VPS із ВЛАСНОЮ міткою `tax-navigator-vps`.
+#            Голе `self-hosted` не годиться: на машині живе інший проєкт, і
+#            чужий job приїхав би до нас, а наш — до нього.
+#
+# Секретів у GitHub цей workflow не потребує: runner уже на сервері, SSH-ключ і
+# IP не потрібні. Секрети Telegram лежать у файлі на сервері, шлях до нього —
+# змінна репо TG_ENV_FILE (шлях, не вміст).
+#
+# Репо публічне, тож pull_request сюди не додається ніколи: код із форка не
+# має діставатися машини, де живе сусід.
+
+name: deploy-tg-collector
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'research/tg-assistant/**'
+      - '.github/workflows/deploy-tg-collector.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tg-collector-vps
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install root toolchain (vitest, tsc)
+        run: npm ci
+      - name: Install worker dependencies
+        run: npm ci --prefix research/tg-assistant
+      - name: Typecheck
+        run: npx tsc -p research/tg-assistant/tsconfig.json
+      - name: Tests
+        run: npx vitest run --config research/tg-assistant/vitest.config.ts
+
+  deploy:
+    needs: test
+    runs-on: [self-hosted, linux, x64, tax-navigator-vps]
+    timeout-minutes: 20
+    env:
+      COMPOSE: docker compose -f research/tg-assistant/compose.vps.yml
+      TG_ENV_FILE: ${{ vars.TG_ENV_FILE }}
+      RELEASE_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse to deploy without the server-side secrets file
+        run: |
+          test -n "$TG_ENV_FILE" || { echo "repo variable TG_ENV_FILE is not set"; exit 1; }
+          test -r "$TG_ENV_FILE" || { echo "secrets file is not readable by the runner user"; exit 1; }
+
+      - name: Build and replace the collector (project tax-navigator only)
+        # --remove-orphans бачить лише сервіси проєкту tax-navigator, сусіда не чіпає.
+        # Жодного `down -v`: том зі станом переживає кожен деплой.
+        run: $COMPOSE up -d --build --remove-orphans
+
+      - name: Wait for the container healthcheck
+        run: |
+          id=$($COMPOSE ps -q tg-collector)
+          for attempt in $(seq 1 30); do
+            status=$(docker inspect -f '{{.State.Health.Status}}' "$id")
+            echo "attempt $attempt/30: $status"
+            if [ "$status" = healthy ]; then
+              docker inspect -f '{{range .State.Health.Log}}{{.Output}}{{end}}' "$id"
+              exit 0
+            fi
+            if [ "$status" = unhealthy ]; then break; fi
+            sleep 10
+          done
+          docker inspect -f '{{range .State.Health.Log}}{{.Output}}{{end}}' "$id" || true
+          $COMPOSE logs --tail=50 tg-collector
+          exit 1
+
+      - name: Show what is running
+        if: always()
+        run: |
+          $COMPOSE ps
+          $COMPOSE exec -T tg-collector node -v || true
