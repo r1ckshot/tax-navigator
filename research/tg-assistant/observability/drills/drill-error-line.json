@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "mode": "release",
+  "verdict": "anomaly",
+  "release_sha": "drill",
+  "window_started_at": "2026-09-14T18:29:00Z",
+  "finished_at": "2026-09-14T18:30:06.000Z",
+  "window_minutes": 20,
+  "samples_taken": 1,
+  "anomalies": [
+    {
+      "code": "error_log_lines",
+      "detail": "1 error line(s) since window start"
+    }
+  ],
+  "three_numbers": {
+    "last_cycle_status": "partial",
+    "last_cycle_chats_failed": 1,
+    "last_cycle_new_messages": 53
+  },
+  "last_sample": {
+    "at": "2026-09-14T18:30:05.000Z",
+    "container_status": "running",
+    "restart_count": 0,
+    "health_ok": 1,
+    "telegram_connected": 1,
+    "last_cycle_finished_at": "2026-09-14T06:04:10.000Z",
+    "chat_read_p95_bucket_seconds": null
+  },
+  "error_lines": [
+    "{\"ts\":\"2026-09-14T18:30:01Z\",\"event\":\"cycle_error\",\"error\":\"DrillError\"}"
+  ]
+}
