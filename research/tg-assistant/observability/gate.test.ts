@@ -27,7 +27,16 @@ describe('checkProposal', () => {
   it('нотатки не називають жодної знайденої аномалії — доказів мало', () => {
     const r = checkProposal({ changedFiles: ['research/tg-assistant/collector.ts'], anomalyCodes: anomaly, notes: 'Refactored for clarity.' });
     expect(r.verdict).toBe('no_proposal');
-    expect(checkProposal({ changedFiles: ['research/tg-assistant/collector.ts'], anomalyCodes: anomaly, notes: null }).verdict).toBe('no_proposal');
+  });
+
+  it('нуль змін і нуль нотаток — агент не запускався: червоне, а не «мало доказів»', () => {
+    // Живе навчання 2026-09-15, run 34932454892: CLI впав на старті (немає bubblewrap),
+    // а ворота видали no_proposal і зелений прогін.
+    expect(checkProposal({ changedFiles: [], anomalyCodes: anomaly, notes: null })).toEqual({
+      verdict: 'rejected',
+      reason: 'agent left no notes: it did not run or did not finish',
+    });
+    expect(checkProposal({ changedFiles: ['research/tg-assistant/collector.ts'], anomalyCodes: anomaly, notes: '  ' }).verdict).toBe('rejected');
   });
 
   it.each([

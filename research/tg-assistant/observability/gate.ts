@@ -57,6 +57,15 @@ export function checkProposal(input: GateInput): GateResult {
     return { verdict: 'no_proposal', reason: 'report has no anomalies: nothing to fix' };
   }
 
+  // Промпт вимагає нотаток і тоді, коли агент свідомо зупиняється. Немає нотаток —
+  // агент не запустився або не дійшов до кінця, і «нуль змін» тут не рішення, а
+  // тиша. Знайдено на першому живому навчанні: CLI впав до першого ходу, а
+  // ворота назвали це «мало доказів» і дали зелений прогін.
+  const notes = input.notes?.trim() ?? '';
+  if (notes === '') {
+    return { verdict: 'rejected', reason: 'agent left no notes: it did not run or did not finish' };
+  }
+
   const protectedHits = changed.filter((f) => isTestFile(f) || PROTECTED_PREFIXES.some((p) => f === p || f.startsWith(p)));
   if (protectedHits.length > 0) {
     return { verdict: 'rejected', reason: `protected files touched: ${protectedHits.join(', ')}` };
@@ -70,10 +79,6 @@ export function checkProposal(input: GateInput): GateResult {
     return { verdict: 'no_proposal', reason: 'agent changed nothing: not enough evidence for a fix' };
   }
 
-  const notes = input.notes?.trim() ?? '';
-  if (notes === '') {
-    return { verdict: 'no_proposal', reason: 'change without notes: evidence is not stated' };
-  }
   const cited = input.anomalyCodes.filter((code) => notes.includes(code));
   if (cited.length === 0) {
     return { verdict: 'no_proposal', reason: `notes cite none of the detected anomalies (${input.anomalyCodes.join(', ')})` };

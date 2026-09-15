@@ -104,25 +104,42 @@ jobs:
           curl -fsSL https://claude.ai/install.sh | bash -s "$CLAUDE_CODE_VERSION"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      - name: Install bubblewrap for subprocess isolation
+        # Без bwrap CLI зі SCRUB=1 відмовляється стартувати взагалі (перше живе
+        # навчання, run 34932454892). Ubuntu 24.04 AppArmor за замовчуванням не дає
+        # непривілейованих user namespaces, без яких bwrap не підніме пісочницю;
+        # машина одноразова, тож обмеження знімається лише на її час.
+        if: steps.report.outputs.found == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bubblewrap socat
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          bwrap --ro-bind / / --unshare-all true && echo "bwrap works"
+
       - name: Investigate (model, read-only token, spend cap)
         if: steps.report.outputs.found == 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Прибирає токен з оточення дочірніх процесів агента (vitest виконує код
-          # колектора). Це зменшує, а не закриває ризик: код того ж користувача
-          # може прочитати оточення предка з /proc. Справжня межа — вхід без
-          # чужого тексту (errorLines) і job без прав на запис.
+          # Підпроцеси агента (vitest виконує код колектора) ідуть у пісочниці
+          # bubblewrap без токена в оточенні. Справжня межа все одно не тут, а у
+          # вході без чужого тексту (errorLines) і в job без прав на запис.
           CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
         run: |
           prompt=$(sed "s|\$ONCALL_DIR|$ONCALL_DIR|g" "$PRISTINE_DIR/oncall-prompt.md")
+          set +e
           claude -p "$prompt" \
             --add-dir "$ONCALL_DIR" \
             --max-budget-usd 2 \
             --permission-mode acceptEdits \
             --allowedTools "Read" "Grep" "Glob" "Edit" "Write" "Bash(npx tsc:*)" "Bash(npx vitest:*)" \
             --disallowedTools "Bash(git:*)" "Bash(gh:*)" "Bash(curl:*)" "WebFetch" "WebSearch" \
-            > "$ONCALL_DIR/claude-output.txt" || echo "::warning::claude exited non-zero; the gate decides on the resulting state"
+            > "$ONCALL_DIR/claude-output.txt" 2>&1
+          code=$?
+          set -e
           tail -n 40 "$ONCALL_DIR/claude-output.txt"
+          # Агент, що не відпрацював, — червоний прогін. Колись тут стояв warning, і
+          # «нуль змін» від упалого CLI ворота прочитали як свідому зупинку.
+          exit $code
 
       - name: Evidence gate (pristine copy, no model)
         id: gate
