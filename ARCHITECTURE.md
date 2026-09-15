@@ -16,7 +16,7 @@ feature-first усередині шарів. Обґрунтування вибо
 |---|---|---|---|
 | **rules** | `app/lib/rules/` | `rules.2026.json` (кожне правило = params + `source_url` + `verified_at`) і типи доступу до нього | нічого, крім себе |
 | **calc** | `app/lib/calc/` | резидентство, ZUS, 6 сценаріїв, діапазони — чисті функції | `rules/` |
-| **adapters** | `app/lib/questions/`, `storage.ts`, `share.ts`, `format.ts` | схема анкети, чернетка в `sessionStorage`, share-лінк, форматування | `calc/`, `rules/`, одне одного |
+| **adapters** | `app/lib/questions/`, `storage.ts`, `share.ts`, `format.ts`, `tokens.ts` | схема анкети, чернетка в `sessionStorage`, share-лінк, форматування, розбір словника токенів для `/tokens` | `calc/`, `rules/`, одне одного |
 | **presentation** | `app/components/`, `app/**/page.tsx`, `app/layout.tsx`, `app/lib/i18n/` | React, CSS Modules, українські тексти | усе нижче |
 
 ## Правило залежностей

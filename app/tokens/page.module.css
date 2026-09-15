@@ -1,0 +1,102 @@
+.header {
+  margin: var(--space-6) 0 var(--space-5);
+}
+
+.header h1 {
+  font-size: var(--text-2xl);
+}
+
+.lead {
+  color: var(--ink-secondary);
+  margin: 0;
+  /* \n у тексті → друге речення з нового рядка, як у дисклеймері. */
+  white-space: pre-line;
+}
+
+/* Той самий вигляд картки, що hero лендингу: сторінка має читатись частиною
+   продукту, а не окремим інструментом. */
+.section {
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.hint {
+  color: var(--ink-secondary);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-4);
+}
+
+/* Колонки з мінімальною шириною, а не фіксована кількість: на телефоні одна,
+   на широкому дві-три, без окремого медіазапиту. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--space-4);
+}
+
+.scale {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scaleRow {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+}
+
+.scaleRow + .scaleRow {
+  border-top: 1px solid var(--hairline);
+}
+
+.scaleName {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--ink);
+  line-height: var(--leading-snug);
+}
+
+.scaleValue {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.typeSample {
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.spaceBar {
+  display: block;
+  height: var(--space-3);
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+.radiusBox {
+  display: block;
+  width: var(--space-7);
+  height: var(--space-7);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.row + .row {
+  margin-top: var(--space-4);
+}

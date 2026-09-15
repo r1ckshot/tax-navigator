@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { encodeAnswers } from '../app/lib/share';
 import { baseAnswers } from '../app/lib/calc/__tests__/fixtures';
+import { parseTokens } from '../app/lib/tokens';
 
 /**
  * Екран результату досягається шеринг-лінком, а не клікам по анкеті: анкета —
@@ -66,4 +68,16 @@ test('екран результату, перша картка розкрита'
   await expectNoHorizontalOverflow(page);
 
   await expect(page).toHaveScreenshot('result-expanded.png', { fullPage: true });
+});
+
+test('словник дизайну', async ({ page }) => {
+  await page.goto('/tokens');
+
+  // Кількість зразків виводиться з того самого globals.css, що читає сторінка:
+  // записане тут число розійшлося б зі словником на першому новому кольорі.
+  const dict = parseTokens(readFileSync('app/globals.css', 'utf8'));
+  await expect(page.locator('figure')).toHaveCount(dict.palette.length + dict.colorRoles.length);
+  await expectNoHorizontalOverflow(page);
+
+  await expect(page).toHaveScreenshot('tokens.png', { fullPage: true });
 });

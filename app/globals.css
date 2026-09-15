@@ -95,6 +95,9 @@
   --leading-snug: 1.35;
   --leading-normal: 1.6;
 
+  /* Моноширинний — для назв і значень токенів, щоб колонки вирівнювались. */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
   /* Відступи — одна шкала. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;

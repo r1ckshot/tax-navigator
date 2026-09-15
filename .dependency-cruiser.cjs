@@ -13,7 +13,7 @@
 /** Ядро: детерміновані розрахунки + дані правил. */
 const CORE = '^app/lib/(rules|calc)/';
 /** Адаптери введення/зберігання/лінка + presentation-хелпери. */
-const ADAPTERS = '^app/lib/(storage|share|format)\\.ts$|^app/lib/(questions|i18n)/';
+const ADAPTERS = '^app/lib/(storage|share|format|tokens)\\.ts$|^app/lib/(questions|i18n)/';
 /** Presentation: компоненти і сторінки App Router. */
 const PRESENTATION = '^app/components/|^app/[^/]*\\.tsx$|^app/.*/page\\.tsx$';
 
