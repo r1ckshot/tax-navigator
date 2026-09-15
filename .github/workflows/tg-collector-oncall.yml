@@ -47,10 +47,14 @@ jobs:
     outputs:
       proposal: ${{ steps.gate.outputs.proposal }}
       sha: ${{ steps.sha.outputs.sha }}
-    env:
-      ONCALL_DIR: ${{ runner.temp }}/oncall
-      PRISTINE_DIR: ${{ runner.temp }}/pristine
     steps:
+      # Контекст `runner` недоступний у `jobs.<id>.env`: там такий вираз валить
+      # валідацію всього файла, і workflow не запускається взагалі.
+      - name: Working directories
+        run: |
+          echo "ONCALL_DIR=$RUNNER_TEMP/oncall" >> "$GITHUB_ENV"
+          echo "PRISTINE_DIR=$RUNNER_TEMP/pristine" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref || github.event.workflow_run.head_sha }}
