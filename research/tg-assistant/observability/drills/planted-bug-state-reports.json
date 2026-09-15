@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "mode": "release",
+  "verdict": "anomaly",
+  "release_sha": "drill-planted-bug",
+  "window_started_at": "2026-09-15T06:19:00Z",
+  "finished_at": "2026-09-15T06:20:06.000Z",
+  "window_minutes": 20,
+  "samples_taken": 1,
+  "anomalies": [
+    {
+      "code": "error_log_lines",
+      "detail": "4 error line(s) since window start"
+    },
+    {
+      "code": "metrics_unreachable",
+      "detail": "docker exec failed: 1"
+    }
+  ],
+  "three_numbers": {
+    "last_cycle_status": null,
+    "last_cycle_chats_failed": null,
+    "last_cycle_new_messages": null
+  },
+  "last_sample": {
+    "at": "2026-09-15T06:20:05.000Z",
+    "container_status": "running",
+    "restart_count": 0,
+    "health_ok": null,
+    "telegram_connected": null,
+    "last_cycle_finished_at": null,
+    "chat_read_p95_bucket_seconds": null
+  },
+  "error_lines": [
+    "TypeError: Cannot convert undefined or null to object",
+    "at Function.values (<anonymous>)",
+    "at latestReport (file:///app/state.ts:52:26)",
+    "at Server.<anonymous> (file:///app/main.ts:77:88)"
+  ]
+}
