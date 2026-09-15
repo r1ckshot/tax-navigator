@@ -3179,6 +3179,1636 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "HdjOc",
+      "x": 4361,
+      "y": 0,
+      "name": "Landing 1440 — current",
+      "context": "body",
+      "clip": true,
+      "width": 1440,
+      "height": 679.3,
+      "fill": "#100f0d",
+      "layout": "vertical",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "wFe5a",
+          "name": "main",
+          "context": "main",
+          "width": 828,
+          "layout": "vertical",
+          "padding": [
+            72,
+            18,
+            54,
+            18
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "D8nMD",
+              "name": "section",
+              "context": "section",
+              "width": "fill_container",
+              "height": 553.3,
+              "fill": "#262521",
+              "cornerRadius": 14,
+              "stroke": "#33322f",
+              "strokeWidth": 1.6,
+              "strokeAlignment": "inner",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000066",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 2
+              },
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                55.6,
+                37.6
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "KPmHq",
+                  "name": "Податковий навігатор UA↔PL",
+                  "context": "h1",
+                  "fill": "#f5f4ef",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Податковий навігатор UA↔PL",
+                  "lineHeight": 1.2,
+                  "textAlign": "center",
+                  "fontFamily": "Roboto",
+                  "fontSize": 35.1,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.35
+                },
+                {
+                  "type": "frame",
+                  "id": "e4Yxl",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ndeXM",
+                      "name": "Дохід той самий, а на руках лишається по",
+                      "context": "p",
+                      "fill": "#f5f4ef",
+                      "textGrowth": "fixed-width-height",
+                      "width": 540,
+                      "height": 65.6,
+                      "content": "Дохід той самий, а на руках лишається по-різному — залежно від форми зайнятості.",
+                      "lineHeight": 1.35,
+                      "textAlign": "center",
+                      "fontFamily": "Roboto",
+                      "fontSize": 24.3,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "BGCUU",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "W3sQO",
+                      "name": "Близько десяти коротких питань покажуть ",
+                      "context": "p",
+                      "fill": "#c3c2b7",
+                      "textGrowth": "fixed-width-height",
+                      "width": 612,
+                      "height": 64.8,
+                      "content": "Близько десяти коротких питань покажуть податкове резидентство й приблизну різницю у шести варіантах:",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "Roboto",
+                      "fontSize": 20.25,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "FbzlA",
+                  "name": "ul",
+                  "context": "ul",
+                  "width": "fill_container",
+                  "height": 133.2,
+                  "layout": "vertical",
+                  "padding": [
+                    0,
+                    41.35
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "g5RNU",
+                      "width": "fill_container",
+                      "height": 41.4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "nrNVD",
+                          "name": "Український ФОП",
+                          "context": "li",
+                          "width": 308.18,
+                          "height": 41.4,
+                          "stroke": "#2a5551",
+                          "strokeWidth": {
+                            "right": 1.6
+                          },
+                          "strokeAlignment": "inner",
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "UMY5f",
+                              "fill": "#f5f4ef",
+                              "content": "Український ФОП",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "XJ5Bp",
+                          "name": "Польський JDG",
+                          "context": "li",
+                          "width": 325.93,
+                          "height": 41.4,
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "afJGx",
+                              "fill": "#f5f4ef",
+                              "content": "Польський JDG",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "x2OWE",
+                      "width": "fill_container",
+                      "height": 41.4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "XRbee",
+                          "name": "Інкубатор",
+                          "context": "li",
+                          "width": 308.18,
+                          "height": 41.4,
+                          "stroke": "#2a5551",
+                          "strokeWidth": {
+                            "right": 1.6
+                          },
+                          "strokeAlignment": "inner",
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "pqETe",
+                              "fill": "#f5f4ef",
+                              "content": "Інкубатор",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "zCTWy",
+                          "name": "Без реєстрації (nierejestrowana)",
+                          "context": "li",
+                          "width": 325.93,
+                          "height": 41.4,
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Gk8PI",
+                              "fill": "#f5f4ef",
+                              "content": "Без реєстрації (nierejestrowana)",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "QTg2G",
+                      "width": "fill_container",
+                      "height": 41.4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "sCw7C",
+                          "name": "Договір-доручення (zlecenie)",
+                          "context": "li",
+                          "width": 308.18,
+                          "height": 41.4,
+                          "stroke": "#2a5551",
+                          "strokeWidth": {
+                            "right": 1.6
+                          },
+                          "strokeAlignment": "inner",
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "stR2z",
+                              "fill": "#f5f4ef",
+                              "content": "Договір-доручення (zlecenie)",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OQN8W",
+                          "name": "Трудовий договір (UoP)",
+                          "context": "li",
+                          "width": 325.93,
+                          "height": 41.4,
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "FK86O",
+                              "fill": "#f5f4ef",
+                              "content": "Трудовий договір (UoP)",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "j7Xm5K",
+                  "name": "p",
+                  "context": "p",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "I0q5W",
+                      "name": "Пройти анкету",
+                      "context": "button",
+                      "width": 197.98,
+                      "height": 64.4,
+                      "fill": "#2dd4bf",
+                      "cornerRadius": 6,
+                      "stroke": "#2dd4bf",
+                      "strokeWidth": 1.6,
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        14.4,
+                        27
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "YdD6o",
+                          "fill": "#06302c",
+                          "content": "Пройти анкету",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "TGEIR",
+      "x": 5921,
+      "y": 0,
+      "name": "Landing 390 — current",
+      "context": "body",
+      "clip": true,
+      "width": 390,
+      "fill": "#100f0d",
+      "layout": "vertical",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "dPeqs",
+          "name": "main",
+          "context": "main",
+          "width": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            72,
+            18,
+            54,
+            18
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "y28MDn",
+              "name": "section",
+              "context": "section",
+              "width": "fill_container",
+              "fill": "#262521",
+              "cornerRadius": 14,
+              "stroke": "#33322f",
+              "strokeWidth": 1.6,
+              "strokeAlignment": "inner",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000066",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 2
+              },
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                55.6,
+                37.6
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Hrw79",
+                  "name": "Податковий навігатор UA↔PL",
+                  "context": "h1",
+                  "fill": "#f5f4ef",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Податковий навігатор UA↔PL",
+                  "lineHeight": 1.2,
+                  "textAlign": "center",
+                  "fontFamily": "Roboto",
+                  "fontSize": 35.1,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.35
+                },
+                {
+                  "type": "frame",
+                  "id": "XEhtp",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LXXzo",
+                      "name": "Дохід той самий, а на руках лишається по",
+                      "context": "p",
+                      "fill": "#f5f4ef",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Дохід той самий, а на руках лишається по-різному — залежно від форми зайнятості.",
+                      "lineHeight": 1.35,
+                      "textAlign": "center",
+                      "fontFamily": "Roboto",
+                      "fontSize": 24.3,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "jdkRz",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wEWVm",
+                      "name": "Близько десяти коротких питань покажуть ",
+                      "context": "p",
+                      "fill": "#c3c2b7",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Близько десяти коротких питань покажуть податкове резидентство й приблизну різницю у шести варіантах:",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "Roboto",
+                      "fontSize": 20.25,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ePKbI",
+                  "name": "ul",
+                  "context": "ul",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "padding": [
+                    0,
+                    41.35
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "VcLzc",
+                      "name": "Український ФОП",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "v7jvA8",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Український ФОП",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "X2Wnd",
+                      "name": "Польський JDG",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "oTQ1i",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Польський JDG",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "T6Hii",
+                      "name": "Інкубатор",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "gkcUk",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Інкубатор",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GtVE0",
+                      "name": "Без реєстрації (nierejestrowana)",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "B8WXlV",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Без реєстрації (nierejestrowana)",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "N5YzIL",
+                      "name": "Договір-доручення (zlecenie)",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Z5LapH",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Договір-доручення (zlecenie)",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cqfOk",
+                      "name": "Трудовий договір (UoP)",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "e7GheJ",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Трудовий договір (UoP)",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "w5v50h",
+                  "name": "p",
+                  "context": "p",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "OGXHz",
+                      "name": "Пройти анкету",
+                      "context": "button",
+                      "width": "fill_container",
+                      "height": 64.4,
+                      "fill": "#2dd4bf",
+                      "cornerRadius": 6,
+                      "stroke": "#2dd4bf",
+                      "strokeWidth": 1.6,
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        14.4,
+                        27
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Lz84h",
+                          "fill": "#06302c",
+                          "content": "Пройти анкету",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "PdHg0",
+      "x": 6391,
+      "y": 0,
+      "name": "TrustNote",
+      "reusable": true,
+      "layout": "vertical",
+      "gap": "$space-1",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "F8Ucr6",
+          "name": "Line1",
+          "fill": "$ink-secondary",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Кожна цифра в розрахунках має джерело і дату звірки.",
+          "textAlign": "center",
+          "fontFamily": "Inter",
+          "fontSize": "$text-base",
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "n59AO",
+          "name": "Link",
+          "width": 140,
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "text",
+              "id": "OW0VB",
+              "name": "Line2",
+              "fill": "$accent",
+              "content": "Усі джерела цифр",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": "$text-base",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "id": "vXbwr",
+              "name": "Underline",
+              "fill": "$accent",
+              "width": 140,
+              "height": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "uCOTE",
+      "x": 4361,
+      "y": 799.3,
+      "name": "Landing 1440 — new",
+      "context": "body",
+      "clip": true,
+      "width": 1440,
+      "fill": "#100f0d",
+      "layout": "vertical",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "MszaD",
+          "name": "main",
+          "context": "main",
+          "width": 828,
+          "layout": "vertical",
+          "padding": [
+            72,
+            18,
+            54,
+            18
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "SvmJV",
+              "name": "section",
+              "context": "section",
+              "width": "fill_container",
+              "fill": "#262521",
+              "cornerRadius": 14,
+              "stroke": "#33322f",
+              "strokeWidth": 1.6,
+              "strokeAlignment": "inner",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000066",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 2
+              },
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                55.6,
+                37.6,
+                "$space-5",
+                37.6
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "YKSnp",
+                  "name": "Податковий навігатор UA↔PL",
+                  "context": "h1",
+                  "fill": "#f5f4ef",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Податковий навігатор UA↔PL",
+                  "lineHeight": 1.2,
+                  "textAlign": "center",
+                  "fontFamily": "Roboto",
+                  "fontSize": 35.1,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.35
+                },
+                {
+                  "type": "frame",
+                  "id": "K1KO0",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "hCMYD",
+                      "name": "Дохід той самий, а на руках лишається по",
+                      "context": "p",
+                      "fill": "#f5f4ef",
+                      "textGrowth": "fixed-width-height",
+                      "width": 540,
+                      "height": 65.6,
+                      "content": "Дохід той самий, а на руках лишається по-різному — залежно від форми зайнятості.",
+                      "lineHeight": 1.35,
+                      "textAlign": "center",
+                      "fontFamily": "Roboto",
+                      "fontSize": 24.3,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "u3n8BN",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "i8H9J",
+                      "name": "Близько десяти коротких питань покажуть ",
+                      "context": "p",
+                      "fill": "#c3c2b7",
+                      "textGrowth": "fixed-width-height",
+                      "width": 612,
+                      "height": 64.8,
+                      "content": "Близько десяти коротких питань покажуть податкове резидентство й приблизну різницю у шести варіантах:",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "Roboto",
+                      "fontSize": 20.25,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wrQQl",
+                  "name": "ul",
+                  "context": "ul",
+                  "width": "fill_container",
+                  "height": 133.2,
+                  "layout": "vertical",
+                  "padding": [
+                    0,
+                    41.35
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "vsg9v",
+                      "width": "fill_container",
+                      "height": 41.4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "i8a3za",
+                          "name": "Український ФОП",
+                          "context": "li",
+                          "width": 308.18,
+                          "height": 41.4,
+                          "stroke": "#2a5551",
+                          "strokeWidth": {
+                            "right": 1.6
+                          },
+                          "strokeAlignment": "inner",
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "kzJDg",
+                              "fill": "#f5f4ef",
+                              "content": "Український ФОП",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "z7pGx",
+                          "name": "Польський JDG",
+                          "context": "li",
+                          "width": 325.93,
+                          "height": 41.4,
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "tCBSx",
+                              "fill": "#f5f4ef",
+                              "content": "Польський JDG",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZztMP",
+                      "width": "fill_container",
+                      "height": 41.4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "nQyne",
+                          "name": "Інкубатор",
+                          "context": "li",
+                          "width": 308.18,
+                          "height": 41.4,
+                          "stroke": "#2a5551",
+                          "strokeWidth": {
+                            "right": 1.6
+                          },
+                          "strokeAlignment": "inner",
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "db0LM",
+                              "fill": "#f5f4ef",
+                              "content": "Інкубатор",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "r79bj",
+                          "name": "Без реєстрації (nierejestrowana)",
+                          "context": "li",
+                          "width": 325.93,
+                          "height": 41.4,
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "I4Zq5",
+                              "fill": "#f5f4ef",
+                              "content": "Без реєстрації (nierejestrowana)",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Xi9ZY",
+                      "width": "fill_container",
+                      "height": 41.4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "pCGhP",
+                          "name": "Договір-доручення (zlecenie)",
+                          "context": "li",
+                          "width": 308.18,
+                          "height": 41.4,
+                          "stroke": "#2a5551",
+                          "strokeWidth": {
+                            "right": 1.6
+                          },
+                          "strokeAlignment": "inner",
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "RVRR0",
+                              "fill": "#f5f4ef",
+                              "content": "Договір-доручення (zlecenie)",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "gfgok",
+                          "name": "Трудовий договір (UoP)",
+                          "context": "li",
+                          "width": 325.93,
+                          "height": 41.4,
+                          "layout": "vertical",
+                          "padding": [
+                            4.5,
+                            13.5
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "bhbwr",
+                              "fill": "#f5f4ef",
+                              "content": "Трудовий договір (UoP)",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "aHdjU",
+                  "name": "CtaWithTrust",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-5",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "H9uP8B",
+                      "name": "p",
+                      "context": "p",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BYt3R",
+                          "name": "Пройти анкету",
+                          "context": "button",
+                          "width": 197.98,
+                          "height": 64.4,
+                          "fill": "#2dd4bf",
+                          "cornerRadius": 6,
+                          "stroke": "#2dd4bf",
+                          "strokeWidth": 1.6,
+                          "strokeAlignment": "inner",
+                          "layout": "vertical",
+                          "padding": [
+                            14.4,
+                            27
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "O3DEi",
+                              "fill": "#06302c",
+                              "content": "Пройти анкету",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "LX7Az",
+                      "type": "ref",
+                      "ref": "PdHg0",
+                      "name": "TrustNote",
+                      "width": "fill_container"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "otfQs",
+      "x": 5921,
+      "y": 1310.6,
+      "name": "Landing 390 — new",
+      "context": "body",
+      "clip": true,
+      "width": 390,
+      "fill": "#100f0d",
+      "layout": "vertical",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "gBZUv",
+          "name": "main",
+          "context": "main",
+          "width": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            72,
+            18,
+            54,
+            18
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "hngCi",
+              "name": "section",
+              "context": "section",
+              "width": "fill_container",
+              "fill": "#262521",
+              "cornerRadius": 14,
+              "stroke": "#33322f",
+              "strokeWidth": 1.6,
+              "strokeAlignment": "inner",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000066",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 2
+              },
+              "layout": "vertical",
+              "gap": 18,
+              "padding": [
+                55.6,
+                37.6,
+                "$space-5",
+                37.6
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ePUi7",
+                  "name": "Податковий навігатор UA↔PL",
+                  "context": "h1",
+                  "fill": "#f5f4ef",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Податковий навігатор UA↔PL",
+                  "lineHeight": 1.2,
+                  "textAlign": "center",
+                  "fontFamily": "Roboto",
+                  "fontSize": 35.1,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.35
+                },
+                {
+                  "type": "frame",
+                  "id": "E2Pmhd",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "eHEhb",
+                      "name": "Дохід той самий, а на руках лишається по",
+                      "context": "p",
+                      "fill": "#f5f4ef",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Дохід той самий, а на руках лишається по-різному — залежно від форми зайнятості.",
+                      "lineHeight": 1.35,
+                      "textAlign": "center",
+                      "fontFamily": "Roboto",
+                      "fontSize": 24.3,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qU1Wk",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bWkBL",
+                      "name": "Близько десяти коротких питань покажуть ",
+                      "context": "p",
+                      "fill": "#c3c2b7",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Близько десяти коротких питань покажуть податкове резидентство й приблизну різницю у шести варіантах:",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "Roboto",
+                      "fontSize": 20.25,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "X2jlwv",
+                  "name": "ul",
+                  "context": "ul",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "padding": [
+                    0,
+                    41.35
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "O1ilfe",
+                      "name": "Український ФОП",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "h0fOv",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Український ФОП",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "CJ5Ef",
+                      "name": "Польський JDG",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "JadYc",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Польський JDG",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "StqPu",
+                      "name": "Інкубатор",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ANugG",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Інкубатор",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YJFSU",
+                      "name": "Без реєстрації (nierejestrowana)",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "SPkWx",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Без реєстрації (nierejestrowana)",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "HuiHF",
+                      "name": "Договір-доручення (zlecenie)",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "r5ymMe",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Договір-доручення (zlecenie)",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "UR05j",
+                      "name": "Трудовий договір (UoP)",
+                      "width": "fill_container",
+                      "stroke": "#33322f",
+                      "strokeWidth": {
+                        "top": 1.6
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        9,
+                        13.5
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nQo3A",
+                          "fill": "#f5f4ef",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Трудовий договір (UoP)",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Roboto",
+                          "fontSize": 20.25,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "bSkoF",
+                  "name": "CtaWithTrust",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-5",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "QqlpK",
+                      "name": "p",
+                      "context": "p",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "l0GWq",
+                          "name": "Пройти анкету",
+                          "context": "button",
+                          "width": "fill_container",
+                          "height": 64.4,
+                          "fill": "#2dd4bf",
+                          "cornerRadius": 6,
+                          "stroke": "#2dd4bf",
+                          "strokeWidth": 1.6,
+                          "strokeAlignment": "inner",
+                          "layout": "vertical",
+                          "padding": [
+                            14.4,
+                            27
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "w36s0Q",
+                              "fill": "#06302c",
+                              "content": "Пройти анкету",
+                              "lineHeight": 1.6,
+                              "textAlign": "center",
+                              "fontFamily": "Roboto",
+                              "fontSize": 20.25,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "Q8LVXM",
+                      "type": "ref",
+                      "ref": "PdHg0",
+                      "name": "TrustNote",
+                      "width": "fill_container"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "themes": {
