@@ -33,4 +33,7 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   color: var(--ink-muted);
+  /* Підпис ролі — дві теми двома рядками (\n). Одним рядком на 375px він
+     переносився по дефісу: `stone-` на одному рядку, `26` на наступному. */
+  white-space: pre-line;
 }

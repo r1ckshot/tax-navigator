@@ -52,6 +52,15 @@
   padding: var(--space-2) 0;
 }
 
+/* Телефон: назва над зразком. У дві колонки під зразок лишалось ~130px, і
+   кеглі від lg рвали слово посередині (заміряно на еталоні 375px). */
+@media (max-width: 30rem) {
+  .scaleRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+}
+
 .scaleRow + .scaleRow {
   border-top: 1px solid var(--hairline);
 }
@@ -72,7 +81,6 @@
 
 .typeSample {
   line-height: var(--leading-tight);
-  overflow-wrap: anywhere;
 }
 
 .spaceBar {

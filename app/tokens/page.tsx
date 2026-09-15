@@ -70,7 +70,7 @@ export default function TokensPage() {
             <ColorSwatch
               key={role.name}
               name={role.name}
-              caption={`${t('tokens.light')} ${bare(role.light)} · ${t('tokens.dark')} ${bare(role.dark)}`}
+              caption={`${t('tokens.light')} ${bare(role.light)}\n${t('tokens.dark')} ${bare(role.dark)}`}
             />
           ))}
         </div>
