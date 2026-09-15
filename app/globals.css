@@ -3,32 +3,84 @@
  * шкали — компоненти не тримають ad-hoc значень, а посилаються сюди. Один teal-
  * акцент на нейтральній базі: колір довіри для фінансового інструменту, який не
  * конфліктує зі status-палітрою (🟢/🟡/🔴 лишаються тільки за змістом ризику).
+ *
+ * Колір лежить двома шарами, і межа між ними перевіряється тестом
+ * (app/__tests__/design-tokens.test.ts):
+ *   палітра — сирі значення без жодного знання про призначення;
+ *   ролі    — лише посилання на палітру, жодного hex.
+ * Компоненти читають тільки ролі. Тема перемикає ролі, палітру не чіпає.
  */
 :root {
   color-scheme: light;
 
-  /* Поверхні й чорнило — з довідника dataviz, трохи теплі. Поверхня навмисне не
-     чисто-біла (#fff «пече»), а фон сторінки помітно темніший — щоб картки читались. */
-  --surface: #fefdfb;
-  --plane: #e7e4da;
-  --sunken: #f2f0ea;
-  --ink: #1c1a13;
-  --ink-secondary: #56534b;
-  --ink-muted: #85837a;
-  --hairline: #e3e1db;
-  --hairline-strong: #cdcbc2;
+  /* ── Шар 1: палітра ──────────────────────────────────────────────────────
+     Число в імені — OKLCH-світлота, округлена вниз (0 чорний, 100 білий).
+     Не порядковий номер слота: імʼя виводиться з самого кольору, тож новий
+     відтінок не зсуває сусідів, а різниця чисел читається як відстань за
+     контрастом. Тест перераховує світлоту і валиться, якщо імʼя збрехало. */
+
+  /* Теплі нейтральні — з довідника dataviz. */
+  --stone-99: #fefdfb;
+  --stone-96: #f5f4ef;
+  --stone-95: #f2f0ea;
+  --stone-91: #e7e4da;
+  --stone-90: #e3e1db;
+  --stone-84: #cdcbc2;
+  --stone-81: #c3c2b7;
+  --stone-64: #8f8d86;
+  --stone-60: #85837a;
+  --stone-44: #56534b;
+  --stone-38: #46453f;
+  --stone-31: #33322f;
+  --stone-26: #262521;
+  --stone-22: #1c1b18;
+  --stone-21: #1c1a13;
+  --stone-16: #100f0d;
+  --white: #ffffff;
+
+  --teal-95: #e6f2f0;
+  --teal-85: #5eead4;
+  --teal-81: #9ecdc7;
+  --teal-78: #2dd4bf;
+  --teal-51: #0f766e;
+  --teal-42: #0b5c55;
+  --teal-41: #2a5551;
+  --teal-29: #12332f;
+  --teal-28: #06302c;
+
+  --green-62: #0ca30c;
+  --amber-81: #fab219;
+  --red-57: #d03b3b;
+
+  /* ── Шар 2: ролі ─────────────────────────────────────────────────────────
+     Імʼя за призначенням, значення — посилання на палітру. */
+
+  /* Поверхні й чорнило, трохи теплі. Поверхня навмисне не чисто-біла (#fff
+     «пече»), а фон сторінки помітно темніший — щоб картки читались. */
+  --surface: var(--stone-99);
+  --plane: var(--stone-91);
+  --sunken: var(--stone-95);
+  --ink: var(--stone-21);
+  --ink-secondary: var(--stone-44);
+  --ink-muted: var(--stone-60);
+  --hairline: var(--stone-90);
+  --hairline-strong: var(--stone-84);
 
   /* Бренд-акцент — один, стриманий. Ніколи не «серія» в даних. */
-  --accent: #0f766e;
-  --accent-hover: #0b5c55;
-  --accent-ink: #ffffff;
-  --accent-soft: #e6f2f0;
-  --accent-border: #9ecdc7;
+  --accent: var(--teal-51);
+  --accent-hover: var(--teal-42);
+  --accent-ink: var(--white);
+  --accent-soft: var(--teal-95);
+  --accent-border: var(--teal-81);
 
   /* Status-палітра: фіксована, тільки значення ризику, ніколи не «серія». */
-  --risk-green: #0ca30c;
-  --risk-yellow: #fab219;
-  --risk-red: #d03b3b;
+  --risk-green: var(--green-62);
+  --risk-yellow: var(--amber-81);
+  --risk-red: var(--red-57);
+
+  /* ── Шкали без ролей ─────────────────────────────────────────────────────
+     Типографіка, відступи й радіуси — один шар свідомо: жодна з цих величин
+     не змінюється разом із темою, тож роль над ними була б перейменуванням. */
 
   /* Типографічна шкала (база ~17px, крок ≈1.2). */
   --text-xs: 0.78rem;
@@ -42,6 +94,9 @@
   --leading-tight: 1.2;
   --leading-snug: 1.35;
   --leading-normal: 1.6;
+
+  /* Моноширинний — для назв і значень токенів, щоб колонки вирівнювались. */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Відступи — одна шкала. */
   --space-1: 0.25rem;
@@ -57,32 +112,35 @@
   --radius: 10px;
   --radius-lg: 14px;
 
-  /* Підняття (тінь у світлій темі, рамка — у темній). */
+  /* Підняття (тінь у світлій темі, рамка — у темній). Тінь — композит зі
+     зсувом, розмиттям і альфою, не колір палітри; єдине місце, де rgba
+     дозволено поза шаром 1. */
   --shadow-sm: 0 1px 2px rgba(20, 19, 12, 0.05), 0 1px 3px rgba(20, 19, 12, 0.06);
   --shadow-md: 0 2px 6px rgba(20, 19, 12, 0.06), 0 6px 20px rgba(20, 19, 12, 0.08);
 
   --gap: var(--space-4);
 }
 
-/* Темна тема — власні кроки, а не автоматична інверсія. */
+/* Темна тема — власні кроки палітри, а не автоматична інверсія. Перевизначає
+   лише ролі: палітра одна на обидві теми. */
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
 
-    --surface: #262521;
-    --plane: #100f0d;
-    --sunken: #1c1b18;
-    --ink: #f5f4ef;
-    --ink-secondary: #c3c2b7;
-    --ink-muted: #8f8d86;
-    --hairline: #33322f;
-    --hairline-strong: #46453f;
+    --surface: var(--stone-26);
+    --plane: var(--stone-16);
+    --sunken: var(--stone-22);
+    --ink: var(--stone-96);
+    --ink-secondary: var(--stone-81);
+    --ink-muted: var(--stone-64);
+    --hairline: var(--stone-31);
+    --hairline-strong: var(--stone-38);
 
-    --accent: #2dd4bf;
-    --accent-hover: #5eead4;
-    --accent-ink: #06302c;
-    --accent-soft: #12332f;
-    --accent-border: #2a5551;
+    --accent: var(--teal-78);
+    --accent-hover: var(--teal-85);
+    --accent-ink: var(--teal-28);
+    --accent-soft: var(--teal-29);
+    --accent-border: var(--teal-41);
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.5);
