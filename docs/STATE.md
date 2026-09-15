@@ -20,10 +20,11 @@ BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
 2026-08-25 ([docs/capstones/m9.md](capstones/m9.md)). **M10 Agent teams здано
 2026-08-26** — уроки 10.1-10.5 і капстоун модуля
 ([docs/capstones/m10.md](capstones/m10.md)). **M11 Production розпочато
-2026-08-27** — складні рівні 11.1 і 11.2 закриті, далі 11.3
+2026-08-27** — складні рівні 11.1-11.3 закриті, далі 11.4
 ([docs/capstones/m11.md](capstones/m11.md)); капстоуна в модулі немає,
 11.7 — фінальний урок без завдання. Це останній модуль курсу. S-1 `tg-assistant`
-збирає на VPS з 2026-09-14; S-2 → S-4 чекають POLISH після модуля.
+збирає на VPS з 2026-09-14, з 2026-09-15 під наглядом після кожного деплою;
+S-2 → S-4 чекають POLISH після модуля.
 
 **Продукт:** FREE-анкета в проді на Vercel — вердикт резидентства + порівняння
 6 сценаріїв рахуються детерміновано на клієнті. 328 node-тестів + 17 UI зелені.
@@ -36,7 +37,7 @@ BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
 
 ## Зараз у роботі
 
-**M11 Production у роботі: 11.1 закрито 2026-09-12, 11.2 — 2026-09-14, наступний 11.3. Це
+**M11 Production у роботі: 11.1 закрито 2026-09-12, 11.2 — 2026-09-14, 11.3 — 2026-09-15, наступний 11.4. Це
 останній модуль курсу.** Де саме стоїмо — [COURSE-NOW.md](capstones/COURSE-NOW.md) (курсова
 сесія починає звідти), план складних рівнів — [m11.md](capstones/m11.md),
 прості — `RUNBOOK.md` у теці `11-production` курсової збірки. M10 закрито
@@ -70,6 +71,35 @@ BACKLOG.md → Курс. Capstone M8 закрито 2026-08-19
   проти якого стоїть критерій зупинки з `PRD` §7 (6 циклів, менше 5 питань)
 - [x] Telegram `api_id`/`api_hash` у Mike є — колектор збирає наживо з першого
   дня. Premium лишається за `PROJECT.md` після курсу і після G1
+
+Зроблено 2026-09-15 (курс, **урок 11.3 складний рівень** — нагляд за
+колектором після релізу; PR [#56](https://github.com/r1ckshot/tax-navigator/pull/56),
+фікси [#57](https://github.com/r1ckshot/tax-navigator/pull/57),
+[#58](https://github.com/r1ckshot/tax-navigator/pull/58)):
+- [x] **Третє число — `newMessages`, підписане як повідомлення, не питання.**
+  S-2 лишається в POLISH. Prometheus і Grafana на спільний VPS не ставили:
+  цикл раз на тиждень, малювати нічого; панель — summary job `watch`
+- [x] Сигнали: [metrics.ts](../research/tg-assistant/metrics.ts) (`/metrics` на
+  loopback, мітки лише статус і вид збою), хук тривалості читання чату.
+  Детектор [observability/](../research/tg-assistant/observability/) не
+  імпортує колектор; `watch.ts` exit 0/42, `report.json` фіксованої форми
+- [x] Розріз: `watch` на VPS без секретів і моделі;
+  [tg-collector-oncall.yml](../.github/workflows/tg-collector-oncall.yml) —
+  `investigate` (модель, `contents: read`, без git-кредів, $2) і `open-draft`
+  (запис без моделі, ворота ще раз на патчі до `git apply`, лише чернетка)
+- [x] Тести `research/tg-assistant`: 114 (+46). Мутації: гістограма, хук,
+  поріг помилок, код 42, вердикт без нотаток, `state.reports!` — усі ловляться
+- [x] **Живі прогони.** Здоровий реліз: 20 зразків, `healthy`. Навчання
+  `DrillError`: `watch` 42, агент «stop without a change», ворота
+  `no_proposal`. Підкладений баг: агент правит `state.ts`, `tsc` і 112 тестів,
+  чернетка [#59](https://github.com/r1ckshot/tax-navigator/pull/59), закрита
+- [x] **Три дефекти знайшли лише живі прогони, не тести.** `runner.temp` у
+  `jobs.<id>.env` (GitHub відкидав файл цілком, ловить лише `actionlint`);
+  CLI зі SCRUB=1 без bubblewrap не стартує, і ворота назвали це зупинкою;
+  `latestReport` на свіжому стані не був покритий жодним тестом.
+  `/security-review` знайшов обхід воріт перейменуванням — закрито `--no-renames`
+- [x] Галочка «Allow GitHub Actions to create and approve pull requests»
+  увімкнена Mike 2026-09-15
 
 Зроблено 2026-09-14 (курс, **урок 11.2 складний рівень** — колектор на
 спільному VPS; гілка `feat/tg-assistant-collector`,
