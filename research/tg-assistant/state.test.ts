@@ -3,9 +3,11 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  type CycleReport,
   dedupMessages,
   defaultState,
   hasCycleRun,
+  latestReport,
   loadState,
   recordCycleRun,
   saveState,
@@ -78,5 +80,33 @@ describe('saveState/loadState — atomic write roundtrip', () => {
   it('відсутній файл повертає порожній стан, а не кидає помилку', () => {
     const missing = join(tmpdir(), `tg-assistant-state-missing-${Date.now()}.json`);
     expect(loadState(missing)).toEqual(defaultState());
+  });
+});
+
+describe('latestReport — останній цикл для /health і /metrics', () => {
+  const report = (weekOf: string, finishedAt: string): CycleReport => ({
+    weekOf,
+    status: 'completed',
+    startedAt: finishedAt,
+    finishedAt,
+    chats: [],
+    failures: [],
+  });
+
+  it('свіжий стан без reports: null, а не TypeError', () => {
+    // Навчання on-call 2026-09-15 (run 34947468664): `Object.values(state.reports!)`
+    // валив /metrics на свіжому стані, а 112 тестів лишались зеленими.
+    expect(latestReport(defaultState())).toBeNull();
+  });
+
+  it('бере звіт із пізнішим finishedAt, а не останній за порядком ключів', () => {
+    const state = {
+      ...defaultState(),
+      reports: {
+        '2026-W38': report('2026-W38', '2026-09-14T06:04:10.000Z'),
+        '2026-W37': report('2026-W37', '2026-09-07T06:03:00.000Z'),
+      },
+    };
+    expect(latestReport(state)?.weekOf).toBe('2026-W38');
   });
 });
