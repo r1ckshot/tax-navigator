@@ -1,0 +1,122 @@
+.header {
+  margin: var(--space-6) 0 var(--space-6);
+}
+
+.header h1 {
+  font-size: var(--text-2xl);
+}
+
+.lead {
+  color: var(--ink-secondary);
+  font-size: var(--text-md);
+  margin: 0 0 var(--space-4);
+}
+
+/* Підсумок окремими рядками без розділювачів: на телефоні кожен переноситься
+   сам, і посеред рядка не лишається висячої крапки-розділювача. */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+.summary p {
+  margin: 0;
+}
+
+.staleCount {
+  color: var(--ink);
+}
+
+/* Та сама картка, що секції словника дизайну й hero лендингу. */
+.group {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Лічильник стоїть поруч із назвою, доки вміщається, і сам переходить під неї,
+   коли ні: на 390px так стається з nierejestrowana і zlecenie (заміряно на
+   полотні, design/canvas/report-01c.md). Без медіазапиту. */
+.groupHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  row-gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.groupHeader h2 {
+  font-size: var(--text-md);
+  font-weight: 600;
+  margin: 0;
+}
+
+.groupCount {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  font-size: var(--text-sm);
+}
+
+/* Лінія лише між рядками: під останнім її дала б сама рамка картки. */
+.row + .row {
+  border-top: 1px solid var(--hairline);
+}
+
+.what {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.ruleId {
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.what a {
+  overflow-wrap: anywhere;
+}
+
+.when {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+}
+
+.date {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Телефон: дата і стан під посиланням, як у затвердженому фреймі 390. Поріг
+   той самий, що в SourceCitation. */
+@media (max-width: 40rem) {
+  .row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+}

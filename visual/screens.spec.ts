@@ -81,3 +81,19 @@ test('словник дизайну', async ({ page }) => {
 
   await expect(page).toHaveScreenshot('tokens.png', { fullPage: true });
 });
+
+/**
+ * Єдина сцена, чий вигляд залежить від дати: стан свіжості рахується від
+ * `verified_at` до сьогодні. 2026-10-17 перші 12 правил стануть давніми, і
+ * еталон розійдеться. Це не шум, а той самий сигнал, що дає SessionStart-хук:
+ * правила пора звірити знову. Оновлювати еталон після звірки, а не замість неї.
+ */
+test('джерела цифр', async ({ page }) => {
+  await page.goto('/sources');
+
+  await expect(page.getByRole('heading', { level: 2 })).toHaveCount(8);
+  await expect(page.getByRole('listitem')).toHaveCount(26);
+  await expectNoHorizontalOverflow(page);
+
+  await expect(page).toHaveScreenshot('sources.png', { fullPage: true });
+});

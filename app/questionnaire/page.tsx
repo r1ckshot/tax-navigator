@@ -13,6 +13,7 @@ import { Progress } from '@/components/Progress';
 import { ResidencyVerdict } from '@/components/ResidencyVerdict';
 import { ScenarioCard } from '@/components/ScenarioCard';
 import { ComparisonTable } from '@/components/ComparisonTable';
+import Link from 'next/link';
 import { Disclaimer } from '@/components/Disclaimer';
 import { EmailCta } from '@/components/EmailCta';
 import styles from './page.module.css';
@@ -145,6 +146,9 @@ function Result({
       </div>
 
       <Disclaimer />
+      <p className={styles.sourcesLink}>
+        <Link href="/sources">{t('sources.link')}</Link>
+      </p>
 
       <nav className={styles.nav}>
         <button type="button" onClick={onRestart}>

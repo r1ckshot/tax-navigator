@@ -62,27 +62,27 @@
   "Question.tsx:4": [
     "import { t } from '@/lib/i18n/uk';"
   ],
-  "app/questionnaire/page.tsx:130": [
+  "app/questionnaire/page.tsx:131": [
     "const residency = assessResidency(answers);"
   ],
   "jdg.ts:39": [
     "const noteKeys: string[] = ['jdg.ipBoxNotIncluded', `zus.stage.${zus.stage}`, ...zus.reasonKeys];"
   ],
-  "app/questionnaire/page.tsx:131": [
+  "app/questionnaire/page.tsx:132": [
     "const scenarios = compareScenarios(answers);"
   ],
   "index.ts:17-26": [
     "export function compareScenarios(answers: Answers): ScenarioResult[] {",
     "}"
   ],
-  "app/questionnaire/page.tsx:48": [
+  "app/questionnaire/page.tsx:49": [
     "const screens = useMemo(() => visibleScreens(answers), [answers]);"
   ],
-  "app/questionnaire/page.tsx:44-46": [
+  "app/questionnaire/page.tsx:45-47": [
     "useEffect(() => {",
     "}, [answers, index, hydrated, done]);"
   ],
-  "app/questionnaire/page.tsx:32": [
+  "app/questionnaire/page.tsx:33": [
     "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));"
   ],
   "app/lib/rules/rules.2026.json:44-57": [
@@ -116,7 +116,7 @@
   "calc/types.ts:52": [
     "export type ScenarioId = 'fop' | 'jdg' | 'incubator' | 'nierejestrowana' | 'zlecenie' | 'uop';"
   ],
-  "i18n/uk.ts:162-167": [
+  "i18n/uk.ts:186-191": [
     "'scenario.fop': 'Український ФОП',",
     "'scenario.uop': 'Трудовий договір (UoP)',"
   ],
@@ -170,7 +170,7 @@
     "export function encodeAnswers(answers: Answers): string {",
     "export function decodeAnswers(query: string): Partial<Answers> {"
   ],
-  "app/questionnaire/page.tsx:32-36": [
+  "app/questionnaire/page.tsx:33-37": [
     "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));",
     "} else {"
   ],
@@ -184,7 +184,7 @@
     "it('виручка зберігається квантизованою до 2500, точна сума — ні', () => {",
     "});"
   ],
-  "flow.test.tsx:226-228": [
+  "flow.test.tsx:231-233": [
     "it('точна виручка не потрапляє в sessionStorage', async () => {",
     "expect(window.sessionStorage.getItem('tax-navigator:draft') ?? '').not.toContain('17342');"
   ],
@@ -213,11 +213,11 @@
     ".screen {",
     "padding: var(--space-4) var(--space-5);"
   ],
-  "app/page.module.css:1-9": [
+  "app/page.module.css:1-12": [
     ".hero {",
     "}"
   ],
-  "questionnaire/page.module.css:46-54": [
+  "questionnaire/page.module.css:53-61": [
     ".cards {",
     "}"
   ],
@@ -250,14 +250,14 @@
   "globals.css:223": [
     "min-height: 44px;"
   ],
-  "app/questionnaire/page.tsx:134": [
+  "app/questionnaire/page.tsx:135": [
     "<main aria-live=\"polite\" className={styles.result}>"
   ],
-  "app/questionnaire/page.tsx:119-163": [
+  "app/questionnaire/page.tsx:120-167": [
     "function Result({",
     ");"
   ],
-  "app/page.tsx:30-52": [
+  "app/page.tsx:30-56": [
     "export default function Home() {",
     "}"
   ],
@@ -309,7 +309,7 @@
   "jdg.ts:46": [
     "riskReasonKey: answers.formerEmployer === 'no' ? 'risk.jdg.standard' : `risk.jdg.formerEmployer.${answers.formerEmployer}`,"
   ],
-  "uk.ts:186-189": [
+  "uk.ts:210-213": [
     "'risk.jdg.formerEmployer.identical':",
     "'Частковий збіг із колишніми обовʼязками: ричалт лишається, але пільговий ZUS втрачається.',"
   ],
@@ -324,7 +324,7 @@
     "| **presentation** | `app/components/`, `app/**/page.tsx`, `app/layout.tsx`, `app/lib/i18n/` | React, CSS Modules, українські тексти | усе нижче |"
   ],
   ".dependency-cruiser.cjs:16": [
-    "const ADAPTERS = '^app/lib/(storage|share|format|tokens)\\\\.ts$|^app/lib/(questions|i18n)/';"
+    "const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources)\\\\.ts$|^app/lib/(questions|i18n)/';"
   ],
   "ARCHITECTURE.md:76-85": [
     "- `app/lib/i18n/uk.ts` лежить у `lib/`, але за роллю це presentation. Ядром не",

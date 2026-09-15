@@ -1,0 +1,30 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+.icon {
+  flex: none;
+  line-height: 1;
+}
+
+/* Оптичні поправки гліфів ті самі, що в RiskBadge.module.css, і з тих самих
+   причин: коло малюється дрібнішим, трикутник виглядає завищеним. */
+.badge[data-stale='false'] .icon {
+  font-size: 1.2em;
+  color: var(--risk-green);
+}
+
+.badge[data-stale='true'] .icon {
+  transform: translateY(0.06em);
+  color: var(--risk-yellow);
+}
+
+/* Давній стан читається сильніше за свіжий: підпис чорнилом, не вторинним. */
+.badge[data-stale='true'] .label {
+  color: var(--ink);
+}

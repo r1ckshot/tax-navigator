@@ -77,6 +77,11 @@ describe('анкета — наскрізний прохід', () => {
     expect(screen.getByText(/Це інформаційний калькулятор орієнтовного характеру/)).toBeDefined();
   });
 
+  it('під дисклеймером лінк на повний список джерел', async () => {
+    await walkMedianPath();
+    expect(screen.getByRole('link', { name: t('sources.link') }).getAttribute('href')).toBe('/sources');
+  });
+
   it('ФОП: злотова колонка без числа з поясненням чому', async () => {
     await walkMedianPath();
     // Саме уточнений напис, а не загальне «Без числового діапазону»: у картці

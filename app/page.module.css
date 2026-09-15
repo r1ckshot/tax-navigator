@@ -1,6 +1,9 @@
 .hero {
   margin-top: var(--space-6);
-  padding: var(--space-7) var(--space-6);
+  /* Низ вужчий за верх: під кнопкою стоїть рядок про джерела, і він має сидіти
+     рівно посередині між кнопкою і краєм картки (затверджений фрейм
+     design/sources.pen#uCOTE: 24px і 24px). */
+  padding: var(--space-7) var(--space-6) var(--space-5);
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
@@ -130,4 +133,21 @@
   .cta button {
     width: auto;
   }
+}
+
+/* Рядок довіри: текст і лінк на /sources окремими рядками, по центру, як уся
+   картка. Другорядний до кнопки, тож тихіший за неї, але кегль базовий, щоб
+   лінк не губився. */
+.trust {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin: var(--space-5) 0 0;
+  font-size: var(--text-base);
+  color: var(--ink-secondary);
+}
+
+.trust a {
+  text-decoration: underline;
 }
