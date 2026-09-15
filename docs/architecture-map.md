@@ -77,7 +77,7 @@ C4Container
 - **Ідентифікатори:** `ScenarioId` (`calc/types.ts:52`) → файл `scenarios/<id>.ts` → експорт `calc<Pascal>` → i18n-ключ `scenario.<id>` (`i18n/uk.ts:142-147`). Екрани анкети — camelCase `id`, а `name` поля збігається з ключем `Answers` (`schema.ts:23`)
 - **Пізнє зв'язування через рядки:** calc повертає **ключі** i18n, не тексти (`fop.ts:19-24`, `zus.ts:34,47`), UI резолвить через `t()` (`ScenarioCard.tsx:25,80-82`). Частина ключів будується динамічно — `` t(`zus.stage.${zus.stage}`) `` (`jdg.ts:39`). **Типами це не перевіряється** — головне джерело тихих поломок при перейменуванні
 - **Тести:** `describe` описує правило, `it` містить очікуване число просто в заголовку (`benchmark.test.ts:32-34`). Еталон звіряється з **центром смуги** — `exact(range)` + `toBeCloseTo`, не `rangeContains` (`benchmark.test.ts:11-18`): смуга ±4% це продуктове рішення, а не допуск для арифметики. Спільні дані — `baseAnswers` + `withAnswers(patch)` (`__tests__/fixtures.ts:4,22`). Два різні еталони живуть поруч: ручний вивід із норми (`benchmark.test.ts:20-27`, джерело — `docs/EVIDENCE.md §6`) і відповідь державного калькулятора ZUS у фікстурі (`zus-state.test.ts:8-19`, збирає `scripts/fetch-zus-benchmark.mjs`)
-- **Стилі — варіанти через `data-*`, не класи-модифікатори:** `data-variant="primary"` (`app/page.tsx:44`) → `button[data-variant='primary']` (`globals.css:173`); те саме `data-risk` (`RiskBadge.tsx:24`), `data-empty` (`ComparisonTable.tsx:54`)
+- **Стилі — варіанти через `data-*`, не класи-модифікатори:** `data-variant="primary"` (`app/page.tsx:44`) → `button[data-variant='primary']` (`globals.css:228`); те саме `data-risk` (`RiskBadge.tsx:24`), `data-empty` (`ComparisonTable.tsx:54`)
 - **Локалізація:** усі тексти для людини — через `t()`, у `.tsx` немає кириличних літералів. З 2026-07-29 це **машинна** межа, не дисципліна: скан у `app/lib/__tests__/architecture.test.ts`
 
 ## Сховища даних
@@ -95,16 +95,16 @@ C4Container
 
 ## Фронтенд / UI-фундамент
 
-- **Дизайн-токени:** `app/globals.css`, імпортується рівно один раз (`app/layout.tsx:2`). Групи: поверхні й чорнило (`:12-19`), teal-акцент `#0f766e` (`:22-26`), статуси ризику (`:29-31`), типографіка `--text-xs…2xl` (`:34-45`), відступи `--space-1…7` (`:48-54`), радіуси (`:57-59`), тіні (`:62-63`). Темна тема — окремий набір, не інверсія (`:69-91`). Плаваючий rem: `clamp(16px, 15px + 0.35vw, 18px)` (`:99`)
+- **Дизайн-токени:** `app/globals.css`, імпортується рівно один раз (`app/layout.tsx:2`). Колір двома шарами: палітра `--stone-*`/`--teal-*`/статусні з сирим hex (`:16-53`), ролі лише через `var()` на палітру — поверхні й чорнило (`:60-67`), teal-акцент (`:70-74`), статуси ризику (`:77-79`); межу шарів тримає `app/__tests__/design-tokens.test.ts`. Шкали без ролей: типографіка `--text-xs…2xl` (`:86-96`), відступи `--space-1…7` (`:99-105`), радіуси (`:108-110`), тіні (`:115-116`). Темна тема перевизначає лише ролі, не інверсія (`:123-145`). Плаваючий rem: `clamp(16px, 15px + 0.35vw, 18px)` (`:153`)
 - **Підхід до стилів:** CSS Modules, один файл на компонент — 11 файлів, разом 725 рядків. Імпорт незмінно `import styles from './X.module.css'`
 - **Спільні примітиви — чесна картина:**
   - `RiskBadge` (`RiskBadge.tsx:18`) і `SourceCitation` (`SourceCitation.tsx:7`) — **єдині два реально перевикористовувані** компоненти
-  - Кнопка — глобальний елементний стиль (`globals.css:157-188`), React-компонента `Button` **немає**: сторінки пишуть голий `<button data-variant>`
+  - Кнопка — глобальний елементний стиль (`globals.css:212-243`), React-компонента `Button` **немає**: сторінки пишуть голий `<button data-variant>`
   - **Примітиву картки немає.** Однаковий набір `--surface` + `--hairline` + радіус + `--shadow-sm` продубльовано в п'яти місцях: `ComparisonTable.module.css:1-8`, `ResidencyVerdict.module.css:1-2`, `Question.module.css:1-6`, `app/page.module.css:1-9`, `questionnaire/page.module.css:46-54`. З 2026-08-04 картка сценарію свого фону вже НЕ має — рамку й радіус тримає спільний контейнер `.cards`, а `ScenarioCard.module.css:7-10` лишає тільки лінійку між сусідами
   - Слайдер — узагальнений, керується `SliderConfig` (`schema.ts:12-20`), обслуговує дві осі (виручка `:159-166`, дні `:74`), має `openEnded` для «+» (`Question.tsx:88`)
   - Акордеон — на нативному `<details>` (`ScenarioCard.tsx:28`), в окремий примітив не витягнутий
   - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:30-83`) і таблиця підформ (`ScenarioCard.tsx:69-93`)
-- **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:152-155`), мінімум 44px на клікабельних (`globals.css:165`), `prefers-reduced-motion` у 4 файлах, `aria-live="polite"` на результаті (`app/questionnaire/page.tsx:134`)
+- **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:207-210`), мінімум 44px на клікабельних (`globals.css:220`), `prefers-reduced-motion` у 4 файлах, `aria-live="polite"` на результаті (`app/questionnaire/page.tsx:134`)
 - **Найближчий прецедент екрана:** результатний — `Result` (`app/questionnaire/page.tsx:119-163`); простий статичний — `app/page.tsx:30-52`; інтерактивний кроковий — `Question` (`Question.tsx:18-29`)
 
 ## Де що лежить / найближчі прецеденти
