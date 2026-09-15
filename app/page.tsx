@@ -46,6 +46,10 @@ export default function Home() {
             </button>
           </Link>
         </p>
+        <p className={styles.trust}>
+          {t('app.trust')}
+          <Link href="/sources">{t('sources.link')}</Link>
+        </p>
       </section>
     </main>
   );

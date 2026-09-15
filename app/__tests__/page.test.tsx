@@ -1,12 +1,16 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
 import Home from '@/page';
 import { compareScenarios } from '@/lib/calc/scenarios';
 import { baseAnswers } from '@/lib/calc/__tests__/fixtures';
 import { t } from '@/lib/i18n/uk';
+
+// Без cleanup дерево попереднього render лишається в документі, і однакових
+// лінків стає два.
+afterEach(cleanup);
 
 /**
  * `app/page.tsx` тримає власний хардкоджений список `SCENARIOS` (коментар
@@ -23,5 +27,15 @@ describe('лендинг — список сценаріїв', () => {
     const expected = compareScenarios(baseAnswers).map((s) => t(`scenario.${s.id}`));
 
     expect(items).toEqual(expected);
+  });
+});
+
+describe('лендинг — рядок про джерела', () => {
+  it('під кнопкою анкети лінк на повний список джерел, кнопка лишилась', () => {
+    render(<Home />);
+
+    expect(screen.getByRole('link', { name: t('sources.link') }).getAttribute('href')).toBe('/sources');
+    expect(screen.getByText(t('app.trust'))).toBeDefined();
+    expect(screen.getByRole('button', { name: t('app.start') }).closest('a')?.getAttribute('href')).toBe('/questionnaire');
   });
 });

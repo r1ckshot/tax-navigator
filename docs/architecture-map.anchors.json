@@ -116,7 +116,7 @@
   "calc/types.ts:52": [
     "export type ScenarioId = 'fop' | 'jdg' | 'incubator' | 'nierejestrowana' | 'zlecenie' | 'uop';"
   ],
-  "i18n/uk.ts:184-189": [
+  "i18n/uk.ts:186-191": [
     "'scenario.fop': 'Український ФОП',",
     "'scenario.uop': 'Трудовий договір (UoP)',"
   ],
@@ -213,7 +213,7 @@
     ".screen {",
     "padding: var(--space-4) var(--space-5);"
   ],
-  "app/page.module.css:1-9": [
+  "app/page.module.css:1-12": [
     ".hero {",
     "}"
   ],
@@ -257,7 +257,7 @@
     "function Result({",
     ");"
   ],
-  "app/page.tsx:30-52": [
+  "app/page.tsx:30-56": [
     "export default function Home() {",
     "}"
   ],
@@ -309,7 +309,7 @@
   "jdg.ts:46": [
     "riskReasonKey: answers.formerEmployer === 'no' ? 'risk.jdg.standard' : `risk.jdg.formerEmployer.${answers.formerEmployer}`,"
   ],
-  "uk.ts:208-211": [
+  "uk.ts:210-213": [
     "'risk.jdg.formerEmployer.identical':",
     "'Частковий збіг із колишніми обовʼязками: ричалт лишається, але пільговий ZUS втрачається.',"
   ],
