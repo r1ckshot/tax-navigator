@@ -49,7 +49,7 @@ export function defaultState(): CycleState {
 
 /** Останній звіт за `finishedAt`, або null, якщо циклів ще не було. */
 export function latestReport(state: CycleState): CycleReport | null {
-  const reports = Object.values(state.reports!);
+  const reports = Object.values(state.reports ?? {});
   if (reports.length === 0) return null;
   return reports.reduce((a, b) => (a.finishedAt >= b.finishedAt ? a : b));
 }
