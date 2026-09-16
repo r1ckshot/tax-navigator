@@ -17,7 +17,7 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { classifyScope } from "./allowlist.mjs";
+import { classifyScope, domainOf } from "./allowlist.mjs";
 import { compareValues } from "./diff.mjs";
 import { screenSource, MAX_INPUT_CHARS } from "./screen.mjs";
 import { EXTRACTORS, fetchSource, noExtractorCheck } from "./sources.mjs";
@@ -31,6 +31,37 @@ export const DEFAULT_HISTORY_PATH = join(HERE, "data", "cycle-history.json");
 export const DEFAULT_REPORTS_DIR = join(HERE, "data", "reports");
 export const VETO_REGISTRY_PATH = join(HERE, "veto-registry.json");
 const RULES_PATH = resolve(HERE, "../../app/lib/rules/rules.2026.json");
+
+/**
+ * Пауза між двома запитами до одного домену (`sad.md` §4 стовп 2, QG-4).
+ * Фіксована, без адаптивного backoff — так вирішено в SAD. Опублікованого
+ * ліміту ні zus.pl, ні podatki.gov.pl не мають, тож число не з джерела, а з
+ * бюджету: навіть 26 правил матриці на одному домені дають менше хвилини
+ * пауз, а QG-3 дозволяє циклу 15 хвилин.
+ */
+export const SAME_DOMAIN_PAUSE_MS = 2_000;
+
+/**
+ * Пам'ять одного циклу: коли закінчився останній запит до кожного домену.
+ * Відлік від КІНЦЯ запиту, не від початку: повільна відповідь — якраз ознака
+ * навантаженого сервера, і вона не має з'їдати паузу.
+ */
+function createPacer({ pauseMs, sleep, clock }) {
+  const lastDone = new Map();
+  return {
+    async wait(url) {
+      const prev = lastDone.get(domainOf(url));
+      if (prev === undefined) return;
+      const remaining = pauseMs - (clock() - prev);
+      if (remaining > 0) await sleep(remaining);
+    },
+    done(url) {
+      lastDone.set(domainOf(url), clock());
+    },
+  };
+}
+
+const realSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** `YYYY-MM` того дня, коли цикл запущено. Місяць — ключ унікальності циклу. */
 export function monthOf(date) {
@@ -90,6 +121,9 @@ export async function runCycle({
   // Порожній дефолт — лише для тестів і `evals/`, яким veto не предмет.
   // Живий прогін (`main`) читає реєстр сам і падає, якщо файла немає.
   vetoes = [],
+  pauseMs = SAME_DOMAIN_PAUSE_MS,
+  sleep = realSleep,
+  clock = Date.now,
   // Два діагностичні гачки — тільки для тестів гейта. Без них інваріант
   // неможливо перевірити інакше як тавтологією: сам `runCycle` кидає раніше,
   // ніж хтось побачить поганий запис.
@@ -98,6 +132,7 @@ export async function runCycle({
 } = {}) {
   const started_at = now.toISOString();
   const checks = [];
+  const pacer = createPacer({ pauseMs, sleep, clock });
 
   for (const rule of rules) {
     const scope = classifyScope(rule);
@@ -113,7 +148,9 @@ export async function runCycle({
     }
 
     const matrix_value = extractor.matrixValue(rule.params);
+    await pacer.wait(extractor.url);
     const { html, failure_reason } = await fetchSource(extractor.url, { fetchImpl });
+    pacer.done(extractor.url);
 
     // Перевірка стоїть МІЖ фетчем і екстрактором, а не після нього: після
     // витягу числа чужий текст уже пройшов через регулярки й міг потрапити в

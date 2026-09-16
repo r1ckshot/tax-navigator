@@ -5,6 +5,7 @@
 // стабільного місця, де лежить саме це значення. Правило без запису тут
 // лишається поза автозвіркою з названою причиною, а не отримує тихий `match`.
 
+import { challengeReason, detectChallenge } from "./challenge.mjs";
 import { STATES } from "./states.mjs";
 
 /** Скільки чекаємо сторінку. Довше за це — цикл важливіший за одне джерело. */
@@ -111,10 +112,17 @@ export async function fetchSource(url, { fetchImpl = fetch, timeoutMs = FETCH_TI
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetchImpl(url, { signal: controller.signal });
+    // Тіло читаємо і на помилковому коді: 403 від WAF і 403 від самого сайту
+    // вимагають різної реакції, а різницю видно лише зі сторінки.
+    const body = await response.text().catch(() => null);
+    const vendor = detectChallenge(body);
+    if (vendor) {
+      return { html: null, failure_reason: challengeReason(vendor, response.status) };
+    }
     if (!response.ok) {
       return { html: null, failure_reason: `джерело відповіло ${response.status}` };
     }
-    return { html: await response.text(), failure_reason: null };
+    return { html: body, failure_reason: null };
   } catch (error) {
     return { html: null, failure_reason: `запит не вдався: ${error?.message ?? error}` };
   } finally {
