@@ -86,7 +86,7 @@ C4Container
 |---|---|---|---|
 | Чернетка анкети | `window.sessionStorage` | `app/lib/storage.ts:25` | Єдиний ключ `tax-navigator:draft`; **не** localStorage |
 | Share-лінк | URL query | `app/lib/share.ts:21,33` | Вхідний канал теж: має пріоритет над чернеткою (`app/questionnaire/page.tsx:33-37`) |
-| БД | — | — | Немає. `.env.example:8` містить `DATABASE_URL` із позначкою «у FREE-зрізі не використовується» (`:6-7`) |
+| БД | — | — | Немає. Серверна БД лише Postgres і лише під платний tier або waitlist; `DATABASE_URL` прибрано з `.env.example` (DECISIONS 2026-09-16) |
 
 **Що свідомо не зберігається:** точна виручка. Квантизується до кроку 2 500 перед
 записом (`storage.ts:23`) і перед потраплянням у лінк (`share.ts:29`). Тести

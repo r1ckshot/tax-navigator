@@ -57,8 +57,8 @@ These are perf / scale topics, not contract topics. Owned by SRE / DBA, decided 
 ## Контекст цього репо (не з курсового шаблону — дописано при бутстрапі)
 
 `docs/architecture-map.md` §Сховища даних прямо каже: «БД | — | — | Немає» — основний
-застосунок client-only, `DATABASE_URL` у `.env.example` позначений «у FREE-зрізі не
-використовується». Живого дерева `migrations/` у репо нема, тож промоут staged-міграцій
+застосунок client-only, `DATABASE_URL` з `.env.example` прибрано до першого коду, що
+її читає (DECISIONS 2026-09-16). Живого дерева `migrations/` у репо нема, тож промоут staged-міграцій
 `implement-tasks`-ом — гіпотетичний крок, не готовий до виконання. Фічі `tg-assistant` і
 `rules-change-monitor` — окремі worker-скрипти поза цим правилом, кожна свідомо обрала
 JSON-файл, не SQL (ADR-0003 / ADR-0002 відповідно). Дані нижче — навчальний прогін
