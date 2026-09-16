@@ -350,7 +350,25 @@ printf 'reporter\n' > "$CHUNK/research/tg-assistant/reporter.ts"
 K add -A >/dev/null && K commit -qm "feat: story four"
 chunk_case "overlap only on the pipeline entry point" pass "$PR"
 
-# 7. Коміт цей чек не чіпає — він стоїть тільки на gh pr create.
+# 7. Точка входу rules-change-monitor: так само, як main.ts вище. Тест поруч
+#    виняток НЕ отримує: перетин на ньому лишається перетином.
+mkdir -p "$CHUNK/scripts/rules-change-monitor"
+K checkout -q -b feat/monitor-veto master
+printf 'wire veto\n' > "$CHUNK/scripts/rules-change-monitor/cycle.mjs"
+printf 'veto test\n' > "$CHUNK/scripts/rules-change-monitor/cycle.test.mjs"
+K add -A >/dev/null && K commit -qm "feat: veto"
+K checkout -q master
+K merge -q --no-ff feat/monitor-veto -m "Merge pull request #4 from feat/monitor-veto"
+K checkout -q -b feat/monitor-pause master
+printf 'wire pause\n' >> "$CHUNK/scripts/rules-change-monitor/cycle.mjs"
+printf 'pause\n' > "$CHUNK/scripts/rules-change-monitor/pace.mjs"
+K add -A >/dev/null && K commit -qm "feat: pause"
+chunk_case "overlap only on the monitor entry point" pass "$PR"
+printf 'pause test\n' >> "$CHUNK/scripts/rules-change-monitor/cycle.test.mjs"
+K add -A >/dev/null && K commit -qm "test: pause"
+chunk_case "monitor entry point test is still overlap" deny "$PR"
+
+# 8. Коміт цей чек не чіпає — він стоїть тільки на gh pr create.
 chunk_case "plain git commit is not this gate"      pass '"git commit -m \"feat: x\""'
 
 echo

@@ -255,6 +255,10 @@ function comparable(files) {
     // модуль, тож наступна story за мерж попередньої чіпає її неминуче.
     // Знайдено на S-4 (2026-09-16), що дописала команду `report` за годину після S-3.
     /^research\/tg-assistant\/main\.ts$/,
+    // Той самий випадок у rules-change-monitor: `cycle.mjs` вшиває кожен крок
+    // конвеєра. Лише сама точка входу, не її тест: тест ловить справжній хвіст.
+    // Знайдено на сесії 6 POLISH (2026-09-16), пауза за годину після veto.
+    /^scripts\/rules-change-monitor\/cycle\.mjs$/,
   ];
   const IGNORED = [...RECORDS, ...MAPS];
   return files.filter(Boolean).filter((f) => !IGNORED.some((re) => re.test(f)));
