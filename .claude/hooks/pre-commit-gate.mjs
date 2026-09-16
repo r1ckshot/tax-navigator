@@ -20,6 +20,17 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+/** Записи ПРО роботу, не сама робота. Спільні для 5-го і 6-го чеків. */
+const RECORDS = [
+  /^docs\/STATE\.md$/,
+  /^docs\/BACKLOG\.md$/,
+  /^docs\/JOURNAL\.md$/,
+  /^docs\/DECISIONS\.md$/,
+  /^docs\/capstones\//,
+  /^README\.md$/,
+  /^CHANGELOG\.md$/,
+];
+
 let raw = '';
 process.stdin.on('data', (d) => (raw += d));
 process.stdin.on('end', () => {
@@ -60,6 +71,21 @@ process.stdin.on('end', () => {
         'вони їдуть у його ж PR.\n' +
         'Шматок уже злитий — правка лишається в робочому дереві до наступного, ' +
         'а не отримує власну гілку.'
+    );
+    return;
+  }
+
+  const second = secondPrForSameChunk(command);
+  if (second) {
+    deny(
+      `Ця гілка чіпає файли, які щойно поїхали в master іншим PR (${second.subject}): ` +
+        `${second.shared.join(', ')}.\n` +
+        'CLAUDE.md, розділ Pull requests: один PR на робочий шматок, не на знахідку — ' +
+        'гілка живе, поки шматок не закінчено, і merge один раз, наприкінці.\n' +
+        'Якщо це продовження того шматка — його не слід було мержити; правка лишається ' +
+        'в дереві до наступного шматка.\n' +
+        'Якщо це справді новий шматок — перетин випадковий, і виняток дописується ' +
+        'у comparable() у .claude/hooks/pre-commit-gate.mjs.'
     );
     return;
   }
@@ -156,18 +182,78 @@ function recordOnlyBranch(command, invocations) {
   const files = [...new Set([...onBranch, ...staged])];
   if (!files.length) return null;
 
-  const RECORDS = [
-    /^docs\/STATE\.md$/,
-    /^docs\/BACKLOG\.md$/,
-    /^docs\/JOURNAL\.md$/,
-    /^docs\/DECISIONS\.md$/,
-    /^docs\/capstones\//,
-    /^README\.md$/,
-    /^CHANGELOG\.md$/,
-  ];
   if (!files.every((f) => RECORDS.some((re) => re.test(f)))) return null;
 
   return { branch, files };
+}
+
+/**
+ * Шостий чек: другий PR на той самий шматок.
+ *
+ * CLAUDE.md, розділ Pull requests, каже прямо: «Один PR на робочий шматок, не на
+ * знахідку… Merge один раз, наприкінці». Правило протекло 2026-08-22 (три гілки
+ * за сесію) і ще раз 2026-09-16 (три PR на урок 11.6) — тобто текст його не
+ * тримає, рівно як не тримав трейлер атрибуції.
+ *
+ * Механічний слід у того, що шматок продовжується: гілка чіпає файл, який щойно
+ * поїхав у master ІНШИМ PR. Свіжий шматок так робить рідко — а от «забув
+ * дописати» повертається саме в той самий файл.
+ *
+ * Два звуження, обидва зняті з реальної історії репо, не вгадані:
+ *  - вікно 6 годин. #66 чіпав ті самі файли, що #64, але через 19 годин — це
+ *    новий шматок, і ширше вікно дало б хибне спрацювання;
+ *  - файли-записи й карта архітектури не рахуються: їх чіпає майже кожен PR,
+ *    тож на них перетин означав би лише «сьогодні вже щось зливали».
+ * На 11 мержах за три дні: три спрацювання (#68, #70, #58), жодного хибного.
+ *
+ * Спрацювало хибно — розширювати список винятків нижче, а не знімати чек. Той
+ * самий шлях, що з винятком пісочниць у `scripts/check-anchors.mjs`.
+ */
+function secondPrForSameChunk(command) {
+  if (!/\bgh\s+pr\s+create\b/.test(command)) return null;
+
+  const dir = process.cwd();
+  const git = (args) => {
+    const r = spawnSync('git', args, { encoding: 'utf8', cwd: dir });
+    return r.status === 0 ? r.stdout.trim() : null;
+  };
+  const base = git(['rev-parse', '--verify', '--quiet', 'origin/master']) ? 'origin/master' : 'master';
+  if (!git(['rev-parse', '--verify', '--quiet', base])) return null;
+
+  const mine = comparable((git(['diff', '--name-only', `${base}...HEAD`]) || '').split('\n'));
+  if (!mine.length) return null;
+
+  const merges = (git(['log', base, '--merges', '--since=6 hours ago', '--format=%H']) || '')
+    .split('\n')
+    .filter(Boolean);
+
+  for (const sha of merges) {
+    const theirs = comparable((git(['diff', '--name-only', `${sha}^1`, sha]) || '').split('\n'));
+    const shared = mine.filter((f) => theirs.includes(f));
+    if (shared.length) return { subject: git(['log', '-1', '--format=%s', sha]) || sha, shared };
+  }
+  return null;
+}
+
+/**
+ * Файли, на яких перетин щось означає: без записів і без КАРТ.
+ *
+ * Карта — документ, який описує репо цілком, тож її чіпає майже кожен шматок, і
+ * перетин по ній означає лише «сьогодні вже щось зливали». `TEAM-CONTOUR.md`
+ * потрапив сюди на власному прикладі: гілка, що додала цей-таки 6-й чек, була
+ * ним же й заблокована — карта оновлювалась тому, що документує сам хук.
+ *
+ * Ціна названа, а не схована: випадок #68 (2026-09-16) після цього винятку
+ * проходив би, бо карта була єдиним його файлом.
+ */
+function comparable(files) {
+  const MAPS = [
+    /^docs\/architecture-map\.md$/,
+    /^docs\/architecture-map\.anchors\.json$/,
+    /^docs\/TEAM-CONTOUR\.md$/,
+  ];
+  const IGNORED = [...RECORDS, ...MAPS];
+  return files.filter(Boolean).filter((f) => !IGNORED.some((re) => re.test(f)));
 }
 
 /**

@@ -251,6 +251,94 @@ G checkout -q master
 ceremony_case "on master the gate stays out"        pass '"gh pr create --draft --title x --body-file b.md"'
 
 echo
+echo "Second PR for the same chunk — the overlap gate (own sandbox repo):"
+# Ще одна пісочниця: цей чек читає merge-історію master, якої в попередній немає.
+CHUNK="$(mktemp -d)"
+trap 'rm -rf "$CEREMONY" "$CHUNK"' EXIT
+K() { git -C "$CHUNK" -c core.hooksPath=/dev/null -c user.email=t@example.test -c user.name=Test "$@"; }
+mkdir -p "$CHUNK/docs" "$CHUNK/app"
+printf 'seed\n' > "$CHUNK/app/a.ts"
+printf 'seed\n' > "$CHUNK/app/b.ts"
+printf 'seed\n' > "$CHUNK/docs/STATE.md"
+K -c init.defaultBranch=master init -q .
+K add -A >/dev/null && K commit -qm seed
+
+chunk_case() {
+  local name="$1" expected="$2" command="$3"
+  local out verdict
+  out=$(printf '{"tool_name":"Bash","tool_input":{"command":%s}}' "$command" \
+    | (cd "$CHUNK" && node "$HOOK") 2>/dev/null)
+  if printf '%s' "$out" | grep -q 'щойно поїхали в master'; then verdict=deny; else verdict=pass; fi
+  if [ "$verdict" = "$expected" ]; then
+    printf '  OK    %-52s %s\n' "$name" "$verdict"
+  else
+    printf '  FAIL  %-52s expected %s, got %s\n' "$name" "$expected" "$verdict"
+    fails=$((fails + 1))
+  fi
+}
+
+PR='"gh pr create --draft --title x --body-file b.md"'
+
+# Шматок №1 зливається в master просто зараз: чіпає app/a.ts і docs/STATE.md.
+K checkout -q -b feat/chunk-one
+printf 'work\n' >> "$CHUNK/app/a.ts"
+printf 'record\n' >> "$CHUNK/docs/STATE.md"
+K add -A >/dev/null && K commit -qm "feat: chunk one"
+K checkout -q master
+K merge -q --no-ff feat/chunk-one -m "Merge pull request #1 from feat/chunk-one"
+
+# 1. Забута правка того ж шматка повертається в той самий файл — це і є патерн.
+K checkout -q -b docs/forgot-a-bit master
+printf 'more\n' >> "$CHUNK/app/a.ts"
+K add -A >/dev/null && K commit -qm "fix: forgot a bit"
+chunk_case "same file as a merge minutes ago"       deny "$PR"
+
+# 2. Інший файл — справді новий шматок, чек мовчить.
+K checkout -q -b feat/chunk-two master
+printf 'work\n' >> "$CHUNK/app/b.ts"
+K add -A >/dev/null && K commit -qm "feat: chunk two"
+chunk_case "different file, genuinely new chunk"    pass "$PR"
+
+# 3. Перетин ЛИШЕ по записах не рахується: STATE.md чіпає майже кожен PR.
+#    Тому в гілці є і своя справжня робота — інакше спрацював би 5-й чек.
+K checkout -q -b feat/chunk-three master
+printf 'work\n' >> "$CHUNK/app/b.ts"
+printf 'record\n' >> "$CHUNK/docs/STATE.md"
+K add -A >/dev/null && K commit -qm "feat: chunk three"
+chunk_case "overlap only on records"                pass "$PR"
+
+# 4. Той самий файл, але мерж старий: за межею вікна це новий шматок, не хвіст.
+K checkout -q -b feat/chunk-old master
+printf 'old\n' >> "$CHUNK/app/old.ts"
+K add -A >/dev/null && K commit -qm "feat: old chunk"
+K checkout -q master
+OLD_DATE="$(date -d '2 days ago' -Iseconds)"
+GIT_COMMITTER_DATE="$OLD_DATE" GIT_AUTHOR_DATE="$OLD_DATE" \
+  K -c user.email=t@example.test -c user.name=Test merge -q --no-ff feat/chunk-old -m "Merge pull request #0 from feat/chunk-old"
+K checkout -q -b feat/much-later master
+printf 'later\n' >> "$CHUNK/app/old.ts"
+K add -A >/dev/null && K commit -qm "feat: much later"
+chunk_case "same file, merge outside the window"    pass "$PR"
+
+# 5. Перетин ЛИШЕ по карті не рахується: карту чіпає майже кожен шматок.
+#    Знайдено на власному прикладі — гілка з цим-таки чеком оновлювала
+#    TEAM-CONTOUR.md, бо документує сам хук, і була ним же заблокована.
+K checkout -q -b feat/map-chunk master
+printf 'map\n' > "$CHUNK/docs/TEAM-CONTOUR.md"
+printf 'work\n' >> "$CHUNK/app/a.ts"
+K add -A >/dev/null && K commit -qm "feat: map chunk"
+K checkout -q master
+K merge -q --no-ff feat/map-chunk -m "Merge pull request #2 from feat/map-chunk"
+K checkout -q -b feat/next-hook master
+printf 'map row\n' >> "$CHUNK/docs/TEAM-CONTOUR.md"
+printf 'work\n' >> "$CHUNK/app/b.ts"
+K add -A >/dev/null && K commit -qm "feat: next hook"
+chunk_case "overlap only on the contour map"        pass "$PR"
+
+# 6. Коміт цей чек не чіпає — він стоїть тільки на gh pr create.
+chunk_case "plain git commit is not this gate"      pass '"git commit -m \"feat: x\""'
+
+echo
 if [ "$fails" -eq 0 ]; then
   echo "All cases passed."
 else
