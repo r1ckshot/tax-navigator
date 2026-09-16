@@ -320,7 +320,22 @@ printf 'later\n' >> "$CHUNK/app/old.ts"
 K add -A >/dev/null && K commit -qm "feat: much later"
 chunk_case "same file, merge outside the window"    pass "$PR"
 
-# 5. Коміт цей чек не чіпає — він стоїть тільки на gh pr create.
+# 5. Перетин ЛИШЕ по карті не рахується: карту чіпає майже кожен шматок.
+#    Знайдено на власному прикладі — гілка з цим-таки чеком оновлювала
+#    TEAM-CONTOUR.md, бо документує сам хук, і була ним же заблокована.
+K checkout -q -b feat/map-chunk master
+printf 'map\n' > "$CHUNK/docs/TEAM-CONTOUR.md"
+printf 'work\n' >> "$CHUNK/app/a.ts"
+K add -A >/dev/null && K commit -qm "feat: map chunk"
+K checkout -q master
+K merge -q --no-ff feat/map-chunk -m "Merge pull request #2 from feat/map-chunk"
+K checkout -q -b feat/next-hook master
+printf 'map row\n' >> "$CHUNK/docs/TEAM-CONTOUR.md"
+printf 'work\n' >> "$CHUNK/app/b.ts"
+K add -A >/dev/null && K commit -qm "feat: next hook"
+chunk_case "overlap only on the contour map"        pass "$PR"
+
+# 6. Коміт цей чек не чіпає — він стоїть тільки на gh pr create.
 chunk_case "plain git commit is not this gate"      pass '"git commit -m \"feat: x\""'
 
 echo

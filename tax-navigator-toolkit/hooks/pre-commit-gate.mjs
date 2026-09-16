@@ -235,9 +235,24 @@ function secondPrForSameChunk(command) {
   return null;
 }
 
-/** Файли, на яких перетин щось означає: без записів і без карти архітектури. */
+/**
+ * Файли, на яких перетин щось означає: без записів і без КАРТ.
+ *
+ * Карта — документ, який описує репо цілком, тож її чіпає майже кожен шматок, і
+ * перетин по ній означає лише «сьогодні вже щось зливали». `TEAM-CONTOUR.md`
+ * потрапив сюди на власному прикладі: гілка, що додала цей-таки 6-й чек, була
+ * ним же й заблокована — карта оновлювалась тому, що документує сам хук.
+ *
+ * Ціна названа, а не схована: випадок #68 (2026-09-16) після цього винятку
+ * проходив би, бо карта була єдиним його файлом.
+ */
 function comparable(files) {
-  const IGNORED = [...RECORDS, /^docs\/architecture-map\.md$/, /^docs\/architecture-map\.anchors\.json$/];
+  const MAPS = [
+    /^docs\/architecture-map\.md$/,
+    /^docs\/architecture-map\.anchors\.json$/,
+    /^docs\/TEAM-CONTOUR\.md$/,
+  ];
+  const IGNORED = [...RECORDS, ...MAPS];
   return files.filter(Boolean).filter((f) => !IGNORED.some((re) => re.test(f)));
 }
 
