@@ -112,8 +112,12 @@ api-forge --reconcile (лекція api-forge, складний рівень). �
 | `rule_id` | VARCHAR(64) | NOT NULL | |
 | `vetoed_value` | VARCHAR(255) | NOT NULL | скасована/ветована цифра (напр. ставка reformy zdrowotnej) |
 | `reason` | VARCHAR(255) | NOT NULL | коротке пояснення (посилання на інцидент) |
-| `source_url` | VARCHAR(255) | NOT NULL | |
+| `source` | VARCHAR(255) | NOT NULL | де veto задокументовано: URL або шлях у репо. Було `source_url`; перейменовано 2026-09-16, бо перше джерело — `docs/EVIDENCE.md`, а не сторінка |
 | `created_at` | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+
+**Реалізовано (2026-09-16):** `scripts/rules-change-monitor/veto-registry.json`, JSON у git
+за ADR-0002 без `id` (ключ — `rule_id` + `vetoed_value`); не в `data/`, бо та тека
+ігнорується як робочі дані прогонів.
 
 **Aggregate root:** root.
 **Access patterns:** «чи нове значення джерела збігається з відомою ветованою цифрою для

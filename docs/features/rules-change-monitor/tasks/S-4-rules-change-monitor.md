@@ -7,7 +7,7 @@ priority: Must
 estimate: 1d
 blocks: [S-5]
 blocked_by: [S-2, S-3]
-status: todo
+status: done
 context_budget: ~2000 tokens
 created: 2026-08-10
 ---
