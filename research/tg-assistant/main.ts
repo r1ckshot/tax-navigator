@@ -3,6 +3,7 @@
  *
  *   node main.ts run    — довгоживучий процес: розклад, цикл, /health, /metrics
  *   node main.ts chats  — список груп і каналів акаунта, щоб заповнити TG_CHATS
+ *   node main.ts report [2026-W39] — тижневий звіт зі стану (S-4); без тижня — останній цикл
  *
  * Лог — JSON-рядки у stdout. У лог не йде ні текст повідомлень, ні значення
  * змінних середовища: лише події, лічильники і службові коди.
@@ -14,6 +15,7 @@ import { ConfigError, parseConfig, type WorkerConfig } from './config.ts';
 import { evaluateHealth } from './health.ts';
 import { loadMatrix } from './labeler.ts';
 import { CollectorMetrics } from './metrics.ts';
+import { buildWeeklyReport, renderWeeklyReport } from './reporter.ts';
 import { isCycleDue, isoWeek } from './schedule.ts';
 import { hasCycleRun, latestReport, loadState, saveState, type CycleState } from './state.ts';
 import { createClient, GramjsPort } from './telegram.ts';
@@ -173,12 +175,25 @@ async function listChats(): Promise<void> {
   await client.destroy();
 }
 
+/**
+ * Звіт читає лише файл стану: ні секретів Telegram, ні з'єднання не потрібно,
+ * тож його можна зібрати поруч із працюючим воркером (`docker compose exec`).
+ * Незавершений або відсутній тиждень — exit 1, щоб скрипт не прийняв його за звіт.
+ */
+function printReport(weekOf: string | undefined): void {
+  if (weekOf !== undefined && !/^\d{4}-W\d{2}$/.test(weekOf)) throw new ConfigError(`week must look like 2026-W39, got "${weekOf}"`);
+  const report = buildWeeklyReport(loadState(process.env.STATE_PATH || '/data/state.json'), weekOf);
+  process.stdout.write(renderWeeklyReport(report));
+  if (report.state !== 'finished') process.exit(1);
+}
+
 const command = process.argv[2];
 try {
   if (command === 'run') await run(parseConfig(process.env));
   else if (command === 'chats') await listChats();
+  else if (command === 'report') printReport(process.argv[3]);
   else {
-    process.stderr.write('usage: node main.ts run | chats\n');
+    process.stderr.write('usage: node main.ts run | chats | report [week]\n');
     process.exit(2);
   }
 } catch (err) {
