@@ -335,7 +335,22 @@ printf 'work\n' >> "$CHUNK/app/b.ts"
 K add -A >/dev/null && K commit -qm "feat: next hook"
 chunk_case "overlap only on the contour map"        pass "$PR"
 
-# 6. Коміт цей чек не чіпає — він стоїть тільки на gh pr create.
+# 6. Точка входу пайплайна tg-assistant: наступна story реєструє себе в тому ж
+#    main.ts, що й щойно злита. Власний модуль поруч — перетину немає.
+mkdir -p "$CHUNK/research/tg-assistant"
+K checkout -q -b feat/story-three master
+printf 'wire labeler\n' > "$CHUNK/research/tg-assistant/main.ts"
+printf 'labeler\n' > "$CHUNK/research/tg-assistant/labeler.ts"
+K add -A >/dev/null && K commit -qm "feat: story three"
+K checkout -q master
+K merge -q --no-ff feat/story-three -m "Merge pull request #3 from feat/story-three"
+K checkout -q -b feat/story-four master
+printf 'wire reporter\n' >> "$CHUNK/research/tg-assistant/main.ts"
+printf 'reporter\n' > "$CHUNK/research/tg-assistant/reporter.ts"
+K add -A >/dev/null && K commit -qm "feat: story four"
+chunk_case "overlap only on the pipeline entry point" pass "$PR"
+
+# 7. Коміт цей чек не чіпає — він стоїть тільки на gh pr create.
 chunk_case "plain git commit is not this gate"      pass '"git commit -m \"feat: x\""'
 
 echo
