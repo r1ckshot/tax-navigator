@@ -12,6 +12,7 @@ import { createServer } from 'node:http';
 import { runCycle } from './collector.ts';
 import { ConfigError, parseConfig, type WorkerConfig } from './config.ts';
 import { evaluateHealth } from './health.ts';
+import { loadMatrix } from './labeler.ts';
 import { CollectorMetrics } from './metrics.ts';
 import { isCycleDue, isoWeek } from './schedule.ts';
 import { hasCycleRun, latestReport, loadState, saveState, type CycleState } from './state.ts';
@@ -33,6 +34,16 @@ function readState(path: string): { state: CycleState | null; error: string | nu
   }
 }
 
+/** Матриця публічна, тож причину збою можна показати цілком, разом зі шляхом. */
+function readMatrix(path: string) {
+  try {
+    return loadMatrix(path);
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    throw new ConfigError(`RULES_PATH ${path}: ${code ?? (err as Error).message}`);
+  }
+}
+
 async function connect(apiId: number, apiHash: string, session: string) {
   const client = createClient(apiId, apiHash, session);
   await client.connect();
@@ -51,10 +62,12 @@ async function run(config: WorkerConfig): Promise<void> {
   // Том перевіряється на запис до першого циклу: ненаписаний стан виявився б
   // лише через тиждень, а так контейнер падає одразу.
   saveState(config.statePath, loadState(config.statePath));
+  // Матриця теж до першого циклу: без неї тиждень питань став би білими плямами.
+  const matrix = readMatrix(config.rulesPath);
 
   const client = await connect(config.apiId, config.apiHash, config.session);
   const port = new GramjsPort(client);
-  log('worker_started', { chats: config.chats.length, schedule: config.schedule, windowWeeks: config.windowWeeks });
+  log('worker_started', { chats: config.chats.length, schedule: config.schedule, windowWeeks: config.windowWeeks, rules: matrix.rules.length, rulesVerifiedAt: matrix.verified_at });
 
   const server = createServer((req, res) => {
     if (req.url !== '/health' && req.url !== '/metrics') {
@@ -103,6 +116,7 @@ async function run(config: WorkerConfig): Promise<void> {
         sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
         windowWeeks: config.windowWeeks,
         maxFloodWaitSeconds: config.maxFloodWaitSeconds,
+        matrix,
         onChatRead: (ms) => {
           readDurations.push(ms);
           metrics.observeChatRead(ms);
@@ -111,13 +125,14 @@ async function run(config: WorkerConfig): Promise<void> {
       if (result.skipped) return;
       saveState(config.statePath, result.state);
       metrics.recordCycle(result.report);
-      // S-3 (розмітка) ще не існує: органічні питання рахуються і відпускаються з пам'яті.
       log('cycle_finished', {
         weekOf: result.weekOf,
         status: result.report.status,
         chatsRead: result.report.chats.length,
         newMessages: result.messages.length,
         organicQuestions: result.organic.length,
+        covered: result.report.labels?.covered ?? 0,
+        whiteSpots: result.report.labels?.whiteSpot ?? 0,
         failures: result.report.failures.map((f) => ({ ref: f.ref, reason: f.reason })),
         windowed: result.report.chats.filter((c) => c.windowStartAt !== null).map((c) => c.ref),
         durationMs: Date.parse(result.report.finishedAt) - Date.parse(result.report.startedAt),

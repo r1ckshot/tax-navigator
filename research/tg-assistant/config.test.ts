@@ -28,6 +28,8 @@ describe('parseConfig', () => {
     const config = parseConfig(BASE);
     expect(config.chats).toEqual(['ukraine_poland_chat', 'nakordoni_poland', '-1001234567890']);
     expect(config.statePath).toBe('/data/state.json');
+    // Шлях матриці в образі (Dockerfile COPY --from=rules).
+    expect(config.rulesPath).toBe('/app/rules/rules.2026.json');
     expect(config.windowWeeks).toBe(4);
     expect(config.schedule).toEqual({ weekday: 1, hourUtc: 6 });
     expect(config.apiId).toBe(12345);

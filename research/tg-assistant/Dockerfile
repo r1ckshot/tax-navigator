@@ -7,6 +7,7 @@ FROM node:22-bookworm-slim
 
 ENV NODE_ENV=production \
     STATE_PATH=/data/state.json \
+    RULES_PATH=/app/rules/rules.2026.json \
     HEALTH_PORT=8080
 
 WORKDIR /app
@@ -16,6 +17,9 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Лише код воркера: тести, конфіги vitest/tsc і нотатки уроків відсікає .dockerignore.
 COPY *.ts ./
+# Матриця для розмітки S-3 — контекст `rules` з compose.vps.yml. Без нього збірка
+# падає тут, а не контейнер через тиждень.
+COPY --from=rules rules.2026.json ./rules/
 
 # Іменований том при першому монтуванні бере власника з образу: без цього
 # /data належала б root, і процес від node не зміг би записати стан.

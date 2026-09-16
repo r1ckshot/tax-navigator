@@ -6,12 +6,13 @@
  * із чергою FLOOD_WAIT, перевіряється тестом без живого акаунта.
  *
  * Текст повідомлень живе лише в пам'яті (`messages` і `organic` у результаті).
- * Фільтр S-2 проходить по партії тут же, тож у звіт потрапляють лише його
- * лічильники. На диск через стан потрапляють id, маркери і звіт.
+ * Фільтр S-2 і розмітка S-3 проходять по партії тут же, тож на диск через стан
+ * потрапляють id, маркери, мітки без тексту і звіт.
  */
 
 import { filterKnownChats } from './chatFilter.ts';
 import { filterBatch } from './filter.ts';
+import { countLabels, labelQuestions, type Matrix } from './labeler.ts';
 import { decideChatRetry, type FloodWaitAttempt } from './retryQueue.ts';
 import { isoWeek } from './schedule.ts';
 import {
@@ -81,6 +82,8 @@ export interface RunCycleInput {
   sleep: (ms: number) => Promise<void>;
   windowWeeks: number;
   maxFloodWaitSeconds: number;
+  /** Чинна rules-матриця на момент циклу: проти неї розмічаються питання (S-3). */
+  matrix: Matrix;
   /** Тривалість одного читання чату, вдалого чи ні, за годинником `now` (урок 11.3). */
   onChatRead?: (durationMs: number) => void;
 }
@@ -220,16 +223,19 @@ export async function runCycle(input: RunCycleInput): Promise<RunCycleResult> {
   }
 
   const filtered = filterBatch(messages);
+  const finishedIso = input.now().toISOString();
+  const labeled = labelQuestions(input.state.labels ?? {}, filtered.organic, input.matrix, finishedIso);
   const report: CycleReport = {
     weekOf,
     status: reportStatus(chats.length, failures.length),
     startedAt: startedIso,
-    finishedAt: input.now().toISOString(),
+    finishedAt: finishedIso,
     chats,
     failures,
     filter: { organic: filtered.organic.length, rejected: filtered.rejected },
+    labels: { ...countLabels(labeled.labels, labeled.added), matrixVerifiedAt: input.matrix.verified_at },
   };
-  state = recordCycleRun({ ...state, chats: markers }, weekOf);
+  state = recordCycleRun({ ...state, chats: markers, labels: labeled.labels }, weekOf);
   state = { ...state, reports: { ...(state.reports ?? {}), [weekOf]: report } };
 
   return { skipped: false, weekOf, state, report, messages, organic: filtered.organic };
