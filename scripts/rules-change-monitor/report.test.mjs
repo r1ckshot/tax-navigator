@@ -131,6 +131,28 @@ describe('renderReport', () => {
     expect(report).toContain('раніше ветовано');
   });
 
+  it('ветована цифра несе обидва значення, джерело veto і посилання матриці', () => {
+    const report = renderReport({
+      month: '2026-09',
+      checks: [
+        makeCheck({
+          rule_id: 'jdg.zdrowotna.ryczalt',
+          state: STATES.NEEDS_CONFIRMATION,
+          matrix_value: 498.35,
+          fetched_value: 376.16,
+          failure_reason: 'джерело повертає ветовану цифру 376.16: реформа 2025',
+          fetched_from: 'https://example.test/zdrowotna',
+          veto: { vetoed_value: '376.16', reason: 'реформа 2025', source: 'docs/EVIDENCE.md' },
+        }),
+      ],
+    });
+
+    for (const part of ['матриця: 498.35', 'джерело: 376.16', 'veto задокументовано: docs/EVIDENCE.md',
+      'взято зі сторінки: https://example.test/zdrowotna', 'https://zus.pl/przykladowe-zrodlo', '2026-08-01']) {
+      expect(report).toContain(part);
+    }
+  });
+
   it('match і cosmetic згорнуті в один рядок-лічильник, не перелічені кожен', () => {
     const cycle = {
       month: '2026-08',

@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { runCycle, monthOf } from './cycle.mjs';
-import { renderReport } from './report.mjs';
+import { runCycle, monthOf, writeReport } from './cycle.mjs';
+import { renderReport, summaryLine } from './report.mjs';
 import { STATES, ALL_STATES } from './states.mjs';
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '__fixtures__');
@@ -227,5 +228,22 @@ describe('runCycle: кожне правило виходить рівно з о�
         drop: true,
       })
     ).rejects.toThrow(/жоден не має зникнути/);
+  });
+});
+
+describe('writeReport: місячний звіт лишається файлом', () => {
+  it('пише data/reports/YYYY-MM.md з тим самим текстом, що в stdout, і заміщає при повторі', async () => {
+    const dir = join(mkdtempSync(join(tmpdir(), 'monitor-')), 'reports');
+    const first = await runCycle({ rules: [inScope], now: NOW, fetchImpl: okFetch('5 000,00 zł'), extractors });
+    const path = writeReport(dir, first);
+
+    expect(path).toBe(join(dir, '2026-09.md'));
+    expect(readFileSync(path, 'utf8')).toBe(`${renderReport(first)}\n${summaryLine(first)}\n`);
+
+    const second = await runCycle({ rules: [inScope], now: NOW, fetchImpl: okFetch('4806'), extractors });
+    writeReport(dir, second);
+    const text = readFileSync(path, 'utf8');
+    expect(text).toContain('розбіжностей 0');
+    expect(text).not.toContain('5000');
   });
 });

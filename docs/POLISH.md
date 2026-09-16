@@ -82,7 +82,7 @@ STATE «наступна сесія починає X», а не переповн
 | 2 | S-3 розмітка «покрито» / «біла пляма» | ✅ 2026-09-16, issue #75, збіг 91,7% | Claude + Mike (мітки еталона) |
 | 3 | S-4 тижневий звіт | ✅ 2026-09-16, issue #77, `node main.ts report` | Claude |
 | 4 | Точність на свіжих даних | вибірка з першого циклу після S-2 (пн 2026-09-21) розмічена, число в STATE | Mike розмічає, Claude рахує |
-| 5 | `rules-change-monitor`: veto-гілка, реєстр veto, місячний звіт | три пункти кроку 3; PR | Claude |
+| 5 | `rules-change-monitor`: veto-гілка, реєстр veto, місячний звіт | ✅ 2026-09-16, issue #79, PR #80 | Claude |
 | 6 | `rules-change-monitor`: пауза між запитами, challenge-сторінка WAF | два пункти кроку 3; PR | Claude |
 | 7 | Два рішення: waitlist і дві бази | записи в DECISIONS; без коду | Mike вирішує, Claude пише |
 | 8 | Тексти під `product-safety.md` + OG-картинка | PR зі скріншотами | Claude, око Mike |

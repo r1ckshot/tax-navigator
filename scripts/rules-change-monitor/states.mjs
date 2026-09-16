@@ -23,9 +23,9 @@ export const STATES = Object.freeze({
   /** У матриці немає `verified_at` — звіряти нема з чим, спершу верифікація. */
   NOT_VERIFIED: "not_verified",
   /**
-   * Цифру колись ветовано, і джерело пропонує її знову. Присвоюється в S-4:
-   * потрібен реєстр veto, якого ця нарізка не будує. Оголошено тут, щоб
-   * інваріант «рівно один стан із СЕМИ» не переписувався заднім числом.
+   * Цифру колись ветовано, і джерело пропонує її знову. Присвоює лише
+   * `veto.mjs` поверх уже порахованого diff (S-4), за реєстром
+   * `veto-registry.json`.
    */
   NEEDS_CONFIRMATION: "needs_confirmation",
 });
@@ -33,7 +33,7 @@ export const STATES = Object.freeze({
 /** Усі сім значень у стабільному порядку. */
 export const ALL_STATES = Object.freeze(Object.values(STATES));
 
-/** Стани, які присвоює ця нарізка. `needs_confirmation` — S-4, не тут. */
+/** Стани, які присвоює `diff`/`allowlist`/`sources`. `needs_confirmation` — лише `veto.mjs`. */
 export const STATES_IN_SCOPE = Object.freeze(ALL_STATES.filter((s) => s !== STATES.NEEDS_CONFIRMATION));
 
 export function isState(value) {

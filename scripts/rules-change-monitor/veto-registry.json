@@ -1,0 +1,25 @@
+{
+  "entries": [
+    {
+      "rule_id": "jdg.zdrowotna.ryczalt",
+      "vetoed_value": "376.16",
+      "reason": "ставка ryczałt до 60k з ветованої реформи zdrowotnej 2025; чинна 498.35",
+      "source": "docs/EVIDENCE.md, Нестабільності п.1",
+      "created_at": "2026-09-16"
+    },
+    {
+      "rule_id": "jdg.zdrowotna.ryczalt",
+      "vetoed_value": "626.93",
+      "reason": "ставка ryczałt 60-300k з ветованої реформи zdrowotnej 2025; чинна 830.58",
+      "source": "docs/EVIDENCE.md, Нестабільності п.1",
+      "created_at": "2026-09-16"
+    },
+    {
+      "rule_id": "jdg.zdrowotna.ryczalt",
+      "vetoed_value": "1128.48",
+      "reason": "ставка ryczałt понад 300k з ветованої реформи zdrowotnej 2025; чинна 1495.04",
+      "source": "docs/EVIDENCE.md, Нестабільності п.1",
+      "created_at": "2026-09-16"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 // Звірка одного правила: матрична цифра проти сирого значення з джерела.
 // Повертає рівно один `RuleCheck` (форма — `states.mjs`), стан — рівно один
-// із `STATES_IN_SCOPE` (сьомий, `needs_confirmation`, присвоює лише S-4).
+// із `STATES_IN_SCOPE` (сьомий, `needs_confirmation`, присвоює лише `veto.mjs`).
 
 import { STATES } from "./states.mjs";
 import { normalizeNumber, sameAfterNormalize } from "./normalize.mjs";
