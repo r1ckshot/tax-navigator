@@ -7,7 +7,7 @@ priority: Must
 estimate: 1d
 blocks: []
 blocked_by: [S-3]
-status: todo
+status: done
 context_budget: ~1800 tokens
 created: 2026-08-10
 ---
@@ -50,21 +50,25 @@ NO NEW TABLE — reporter лише читає messages + question_labels + cycle
 
 ## Acceptance criteria (GWT)
 
-- [ ] **AC-07:** Given цикл завершив збір і розмітку, when дослідник відкриває тижневий звіт, then кожне питання показане з міткою «покрито»/«біла пляма» і службовим посиланням на першоджерело.
-- [ ] **AC-07-derived (housekeeping):** Given усі попередні модулі пайплайна відпрацювали (S-1..S-3), when reporter завершує збірку звіту, then `cycle_runs.status` переходить у `completed`, а `finished_at` фіксується — PRD дає лише 1 AC для US-04, тож за протоколом Stage 2 п.2 додано похідний AC із `data-model.md` (не вигаданий поза джерелами).
+- [x] **AC-07:** Given цикл завершив збір і розмітку, when дослідник відкриває тижневий звіт, then кожне питання показане з міткою «покрито»/«біла пляма» і службовим посиланням на першоджерело.
+- [x] **AC-07-derived (housekeeping):** Given усі попередні модулі пайплайна відпрацювали (S-1..S-3), when reporter завершує збірку звіту, then `cycle_runs.status` переходить у `completed`, а `finished_at` фіксується — PRD дає лише 1 AC для US-04, тож за протоколом Stage 2 п.2 додано похідний AC із `data-model.md` (не вигаданий поза джерелами).
 
 ## Checklist (atomic steps for impl-agent)
 
-- [ ] Step 1 — Реалізувати `reporter.ts`: зібрати всі `messages` тижня з `is_organic = TRUE` разом із `question_labels` (мітка + `rule_id`) і посиланням на першоджерело (chat_id + telegram_message_id).
-- [ ] Step 2 — Включити явний перелік недоступних чатів цього тижня з `cycle_chat_failures.reason` (AC-08, дзеркалить S-1) — звіт не мовчить про часткову недоступність.
-- [ ] Step 3 — Позначити в звіті межу вікна backfill для чатів, які пройшли через AC-10 цього тижня (S-1 крок 4) — не приховувати, що це неповна історія.
-- [ ] Step 4 — По завершенню збірки виставити `cycle_runs.status = 'completed'`, `finished_at = now()` (AC-07-derived).
+- [x] Step 1 — Реалізувати `reporter.ts`: зібрати всі `messages` тижня з `is_organic = TRUE` разом із `question_labels` (мітка + `rule_id`) і посиланням на першоджерело (chat_id + telegram_message_id).
+- [x] Step 2 — Включити явний перелік недоступних чатів цього тижня з `cycle_chat_failures.reason` (AC-08, дзеркалить S-1) — звіт не мовчить про часткову недоступність.
+- [x] Step 3 — Позначити в звіті межу вікна backfill для чатів, які пройшли через AC-10 цього тижня (S-1 крок 4) — не приховувати, що це неповна історія.
+- [x] Step 4 — По завершенню збірки виставити `cycle_runs.status = 'completed'`, `finished_at = now()` (AC-07-derived).
 
 ## Definition of Done
 
-- [ ] Усі checklist steps зроблені, всі AC зелені.
-- [ ] AC-07-derived: `cycle_runs.finished_at` лишається `NULL` доти, доки `reporter.ts` не завершить збірку — тест перевіряє це на проміжному стані, не лише на фінальному.
-- [ ] Lint + типи clean (per SAD §2 Constraints).
-- [ ] Integration test покриває всі ACs цієї story.
-- [ ] PR linked back to this story file (`tasks/S-4-tg-assistant.md`).
-- [ ] `tracker.md` оновлено: status `done`.
+- [x] Усі checklist steps зроблені, всі AC зелені.
+- [x] AC-07-derived: `cycle_runs.finished_at` лишається `NULL` доти, доки `reporter.ts` не завершить збірку — тест перевіряє це на проміжному стані, не лише на фінальному.
+- [x] Lint + типи clean (per SAD §2 Constraints).
+- [x] Integration test покриває всі ACs цієї story.
+- [x] PR linked back to this story file (`tasks/S-4-tg-assistant.md`).
+- [x] `tracker.md` оновлено: status `done`.
+
+## Implementation note (2026-09-16)
+
+Data model is `state.json` (ADR-0003), not SQL: `messages`/`question_labels`/`cycle_chat_failures` map to `labels`, `chats` and `reports[week].failures`. The cycle writes labels and the report in one atomic save, so an intermediate state is a `cycleRuns` entry without a report. `reporter.ts` shows it as an unfinished week, not zero questions (test `AC-07-derived`). `node main.ts report [week]` prints the report. PR: issue #77.

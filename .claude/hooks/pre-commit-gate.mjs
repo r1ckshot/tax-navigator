@@ -236,7 +236,7 @@ function secondPrForSameChunk(command) {
 }
 
 /**
- * Файли, на яких перетин щось означає: без записів і без КАРТ.
+ * Файли, на яких перетин щось означає: без записів, без КАРТ і без точки входу пайплайна.
  *
  * Карта — документ, який описує репо цілком, тож її чіпає майже кожен шматок, і
  * перетин по ній означає лише «сьогодні вже щось зливали». `TEAM-CONTOUR.md`
@@ -251,6 +251,10 @@ function comparable(files) {
     /^docs\/architecture-map\.md$/,
     /^docs\/architecture-map\.anchors\.json$/,
     /^docs\/TEAM-CONTOUR\.md$/,
+    // Точка входу лінійного пайплайна: кожна story S-1…S-4 реєструє в ній свій
+    // модуль, тож наступна story за мерж попередньої чіпає її неминуче.
+    // Знайдено на S-4 (2026-09-16), що дописала команду `report` за годину після S-3.
+    /^research\/tg-assistant\/main\.ts$/,
   ];
   const IGNORED = [...RECORDS, ...MAPS];
   return files.filter(Boolean).filter((f) => !IGNORED.some((re) => re.test(f)));
