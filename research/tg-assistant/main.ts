@@ -111,12 +111,13 @@ async function run(config: WorkerConfig): Promise<void> {
       if (result.skipped) return;
       saveState(config.statePath, result.state);
       metrics.recordCycle(result.report);
-      // S-2 (фільтр) ще не існує: зібраний текст рахується і відпускається з пам'яті.
+      // S-3 (розмітка) ще не існує: органічні питання рахуються і відпускаються з пам'яті.
       log('cycle_finished', {
         weekOf: result.weekOf,
         status: result.report.status,
         chatsRead: result.report.chats.length,
         newMessages: result.messages.length,
+        organicQuestions: result.organic.length,
         failures: result.report.failures.map((f) => ({ ref: f.ref, reason: f.reason })),
         windowed: result.report.chats.filter((c) => c.windowStartAt !== null).map((c) => c.ref),
         durationMs: Date.parse(result.report.finishedAt) - Date.parse(result.report.startedAt),

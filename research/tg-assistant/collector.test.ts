@@ -22,8 +22,8 @@ function chat(id: string, username: string | null, createdAgoWeeks = 52): Joined
   return { id, username, title: `Title ${id}`, createdAt: iso(W38 - createdAgoWeeks * WEEK) };
 }
 
-function msg(id: number, postedAtMs: number): RawMessage {
-  return { telegramMessageId: id, postedAt: iso(postedAtMs), text: `private text #${id}` };
+function msg(id: number, postedAtMs: number, overrides: Partial<RawMessage> = {}): RawMessage {
+  return { telegramMessageId: id, postedAt: iso(postedAtMs), text: `private text #${id}`, outgoing: false, forwarded: false, channelPost: false, ...overrides };
 }
 
 /** Фейковий Telegram: віддає повідомлення не раніше `since`, помилки — за сценарієм. */
@@ -340,5 +340,60 @@ describe('runCycle — тривалість читання для метрик (
     // Фейк рухає годинник лише на вдалому читанні: 3000 мс для alpha, 0 для beta, що впав одразу.
     expect(durations).toEqual([3000, 0]);
     expect(result.report.failures).toHaveLength(1);
+  });
+});
+
+describe('runCycle — S-2 фільтр у циклі (AC-03, AC-04)', () => {
+  const QUESTION = 'Підкажіть, чи платити ZUS на JDG?';
+
+  it('органічні питання окремо від шуму; звіт несе лічильники, стан — жодного тексту', async () => {
+    const h = harness(W38);
+    const port = fakePort({
+      clock: h.clock,
+      chats: [chat('-1001', 'alpha_chat'), chat('-1002', 'beta_chat')],
+      messages: {
+        '-1001': [
+          msg(1, W38 - DAY, { text: QUESTION }),
+          msg(2, W38 - DAY, { text: QUESTION, forwarded: true }),
+          msg(3, W38 - DAY, { text: QUESTION, outgoing: true }),
+          msg(4, W38 - DAY, { text: 'Пропонуємо ведення JDG, звертайтесь t.me/buh' }),
+        ],
+        // Той самий telegramMessageId в іншому чаті — окреме питання.
+        '-1002': [msg(1, W38 - DAY, { text: QUESTION }), msg(5, W38 - DAY, { text: 'Хто на футбол у суботу?' })],
+      },
+    });
+
+    const result = await run(h.base(port, defaultState(), ['alpha_chat', 'beta_chat']));
+
+    expect(result.messages).toHaveLength(6);
+    expect(result.organic.map((m) => [m.chatId, m.telegramMessageId])).toEqual([
+      ['-1001', 1],
+      ['-1002', 1],
+    ]);
+    expect(result.report.filter).toEqual({
+      organic: 2,
+      rejected: { own_post: 1, repost: 1, channel_post: 0, advert: 1, off_topic: 1, not_question: 0, not_own: 0 },
+    });
+    expect(JSON.stringify(result.state)).not.toContain('ZUS');
+  });
+
+  it('AC-04: повідомлення, що прийшло двічі за цикл, рахується один раз', async () => {
+    const h = harness(W38);
+    const multiTopic = msg(9, W38 - DAY, { text: 'Я резидент? І що з ZUS, PIT і бухгалтером на JDG?' });
+    const port = fakePort({ clock: h.clock, chats: [chat('-1001', 'alpha_chat')], messages: { '-1001': [multiTopic, { ...multiTopic }] } });
+
+    const result = await run(h.base(port, defaultState(), ['alpha_chat']));
+
+    expect(result.organic).toHaveLength(1);
+    expect(result.report.filter?.organic).toBe(1);
+  });
+
+  it('порожній тиждень — нуль питань у звіті, а не відсутній підсумок', async () => {
+    const h = harness(W38);
+    const port = fakePort({ clock: h.clock, chats: [chat('-1001', 'alpha_chat')], messages: { '-1001': [] } });
+
+    const result = await run(h.base(port, defaultState(), ['alpha_chat']));
+
+    expect(result.report.filter?.organic).toBe(0);
   });
 });
