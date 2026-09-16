@@ -29,7 +29,7 @@
     "source=tax-navigator-node-modules,target=/workspace/node_modules,type=volume",
     "source=tax-navigator-next,target=/workspace/.next,type=volume"
   ],
-  "postCreateCommand": "npm ci",
+  "postCreateCommand": "npm ci && git config core.hooksPath .githooks",
   "containerEnv": {
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
     "WATCHPACK_POLLING": "true",
