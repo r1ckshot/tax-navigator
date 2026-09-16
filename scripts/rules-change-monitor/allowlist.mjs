@@ -25,6 +25,17 @@ export function hostOf(url) {
 }
 
 /**
+ * Домен, до якого відноситься URL, для паузи між запитами: запис
+ * `SCRIPTABLE_HOSTS`, якщо хост — він сам або піддомен, інакше сам хост.
+ * `www.zus.pl` і `zus.pl` — один сервер для WAF, і пауза між ними однакова.
+ */
+export function domainOf(url) {
+  const host = hostOf(url);
+  if (host === null) return null;
+  return SCRIPTABLE_HOSTS.find((allowed) => host === allowed || host.endsWith(`.${allowed}`)) ?? host;
+}
+
+/**
  * true, якщо хост URL дорівнює одному з `SCRIPTABLE_HOSTS` або є його
  * піддоменом, і протокол https. Звіряємо через `endsWith('.' + host)`, а не
  * `includes`, щоб `zus.pl.evil.com` (де `zus.pl` — префікс іншого домену,
