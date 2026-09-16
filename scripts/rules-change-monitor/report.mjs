@@ -89,11 +89,28 @@ function renderUnconfirmedSection(checks) {
       parts.push('Немає.\n');
       continue;
     }
-    const lines = inState.map((c) => `- ${c.rule_id}: ${fmt(c.failure_reason)}`);
+    const lines = inState.map((c) => (state === STATES.NEEDS_CONFIRMATION ? renderVetoLine(c) : `- ${c.rule_id}: ${fmt(c.failure_reason)}`));
     parts.push(`${lines.join('\n')}\n`);
   }
 
   return parts.join('\n');
+}
+
+/**
+ * Ветована цифра вимагає рішення людини так само, як розбіжність, тож несе ті
+ * самі поля: без них Хранитель пішов би збирати дані заново (AC-06). Плюс
+ * звідки відомо про veto — інакше «потребує підтвердження» нічим не доведене.
+ */
+function renderVetoLine(c) {
+  return [
+    `- ${c.rule_id}: ${fmt(c.failure_reason)}`,
+    `  - матриця: ${fmt(c.matrix_value)}`,
+    `  - джерело: ${fmt(c.fetched_value)}`,
+    `  - veto задокументовано: ${fmt(c.veto?.source)}`,
+    `  - взято зі сторінки: ${fmt(c.fetched_from)}`,
+    `  - source_url матриці: ${fmt(c.source_url)}`,
+    `  - verified_at матриці: ${fmt(c.verified_at)}`,
+  ].join('\n');
 }
 
 function renderConfirmedLine(checks) {

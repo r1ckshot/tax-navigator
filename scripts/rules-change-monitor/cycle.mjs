@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 // Точка входу місячного циклу звірки: allowlist → фетч → нормалізація → diff →
-// стан → звіт. Модулі роблять по одному кроку, тут лише порядок і те, що
+// veto → стан → звіт. Модулі роблять по одному кроку, тут лише порядок і те, що
 // кожне правило матриці мусить вийти звідси рівно з одним станом (AC-03).
 //
 // Використання:
 //   node scripts/rules-change-monitor/cycle.mjs            # живий прогін
 //   node scripts/rules-change-monitor/cycle.mjs --dry-run  # без мережі й без запису
 //
+// Живий прогін лишає два артефакти: запис в `data/cycle-history.json` і
+// markdown-звіт `data/reports/YYYY-MM.md` — той самий текст, що в stdout.
+//
 // Помилка тут — `throw` + `process.exit(1)` на верхньому рівні, як у
 // `scripts/fetch-zus-benchmark.mjs` (`sad.md` §8), а не тихий exit 0.
 
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,9 +24,12 @@ import { EXTRACTORS, fetchSource, noExtractorCheck } from "./sources.mjs";
 import { renderReport, summaryLine } from "./report.mjs";
 import { appendCycle, readHistory, writeHistory } from "./state.mjs";
 import { STATES, isState } from "./states.mjs";
+import { applyVeto, readVetoRegistry } from "./veto.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_HISTORY_PATH = join(HERE, "data", "cycle-history.json");
+export const DEFAULT_REPORTS_DIR = join(HERE, "data", "reports");
+export const VETO_REGISTRY_PATH = join(HERE, "veto-registry.json");
 const RULES_PATH = resolve(HERE, "../../app/lib/rules/rules.2026.json");
 
 /** `YYYY-MM` того дня, коли цикл запущено. Місяць — ключ унікальності циклу. */
@@ -81,6 +87,9 @@ export async function runCycle({
   now = new Date(),
   fetchImpl,
   extractors = EXTRACTORS,
+  // Порожній дефолт — лише для тестів і `evals/`, яким veto не предмет.
+  // Живий прогін (`main`) читає реєстр сам і падає, якщо файла немає.
+  vetoes = [],
   // Два діагностичні гачки — тільки для тестів гейта. Без них інваріант
   // неможливо перевірити інакше як тавтологією: сам `runCycle` кидає раніше,
   // ніж хтось побачить поганий запис.
@@ -134,7 +143,9 @@ export async function runCycle({
     if (screened.truncated && check.state === STATES.UNAVAILABLE) {
       check.failure_reason = `${check.failure_reason} (сторінку обрізано за стелею ${MAX_INPUT_CHARS} символів)`;
     }
-    checks.push(check);
+    // Veto після diff, а не замість нього: гілка перекриває вже порахований
+    // стан, і тільки там, де джерело справді віддало число (`veto.mjs`).
+    checks.push(applyVeto(check, vetoes));
   }
 
   const finalChecks = drop ? checks.slice(0, -1) : mutate ? checks.map(mutate) : checks;
@@ -164,6 +175,21 @@ export async function runCycle({
 }
 
 /**
+ * Пише звіт місяця файлом. Атомарно, як історія (`state.mjs`): повторний
+ * прогін того самого місяця заміщає звіт, і обірваний запис не лишає половини.
+ *
+ * @returns {string} шлях до записаного файла
+ */
+export function writeReport(dir, cycle) {
+  mkdirSync(dir, { recursive: true });
+  const path = join(dir, `${cycle.month}.md`);
+  const tmpPath = `${path}.tmp`;
+  writeFileSync(tmpPath, `${renderReport(cycle)}\n${summaryLine(cycle)}\n`, "utf8");
+  renameSync(tmpPath, path);
+  return path;
+}
+
+/**
  * Код виходу циклу. «Заблоковано» ≠ «впало», і код мусить це нести: 1 означає,
  * що скрипт зламався (баг, битий JSON) — його ставить `catch` нижче; 2 — що
  * скрипт відпрацював правильно і відхилив вхід. Планувальник реагує на них
@@ -181,9 +207,11 @@ async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes("--dry-run");
   const { rules } = JSON.parse(readFileSync(RULES_PATH, "utf8"));
+  const vetoes = readVetoRegistry(VETO_REGISTRY_PATH);
 
   const cycle = await runCycle({
     rules,
+    vetoes,
     fetchImpl: dryRun
       ? async () => {
           throw new Error("--dry-run: мережа свідомо вимкнена");
@@ -195,12 +223,13 @@ async function main() {
   console.log(summaryLine(cycle));
 
   if (dryRun) {
-    console.log("--dry-run: історія не записана");
+    console.log("--dry-run: історія і звіт не записані");
     return;
   }
   const history = readHistory(DEFAULT_HISTORY_PATH);
   writeHistory(DEFAULT_HISTORY_PATH, appendCycle(history, cycle));
   console.log(`історія оновлена: ${DEFAULT_HISTORY_PATH}`);
+  console.log(`звіт записано: ${writeReport(DEFAULT_REPORTS_DIR, cycle)}`);
 
   if (cycle.status === "blocked") {
     console.error("цикл відхилив щонайменше одне джерело — дивись розділ «Заблоковані входи»");
