@@ -12,6 +12,10 @@ services:
   tg-collector:
     build:
       context: .
+      # rules-матриця живе в app/, поза контекстом воркера. Окремий контекст
+      # замість копії файла: образ завжди везе ту матрицю, що в цьому коміті (S-3).
+      additional_contexts:
+        rules: ../../app/lib/rules
     image: tax-navigator/tg-collector:${RELEASE_SHA:-local}
     restart: unless-stopped
     # Секрети живуть у файлі на сервері, поза репо і поза робочою текою runner-а.

@@ -13,6 +13,8 @@ export interface WorkerConfig {
   /** Нормалізовані ключі чатів: username у нижньому регістрі або числовий id діалогу. */
   chats: string[];
   statePath: string;
+  /** rules.2026.json, проти якої розмічаються питання (S-3). */
+  rulesPath: string;
   windowWeeks: number;
   schedule: WeeklySchedule;
   maxFloodWaitSeconds: number;
@@ -64,6 +66,8 @@ export function parseConfig(env: Record<string, string | undefined>): WorkerConf
     session: env.TG_SESSION as string,
     chats,
     statePath: env.STATE_PATH || '/data/state.json',
+    // Дефолт — шлях в образі (Dockerfile). Поза образом задається явно.
+    rulesPath: env.RULES_PATH || '/app/rules/rules.2026.json',
     // PRD §8: дефолт вікна backfill — відкрите питання, зараз 4 тижні (S-1 Step 4).
     windowWeeks: intInRange(env, 'WINDOW_WEEKS', 4, 1, 52),
     schedule: {

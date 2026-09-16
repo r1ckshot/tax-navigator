@@ -28,6 +28,8 @@ on:
     branches: [master]
     paths:
       - 'research/tg-assistant/**'
+      # Матриця їде в образ (S-3): нова редакція правил мусить дістатись розмітки.
+      - 'app/lib/rules/rules.2026.json'
       - '.github/workflows/deploy-tg-collector.yml'
   workflow_dispatch:
     inputs:

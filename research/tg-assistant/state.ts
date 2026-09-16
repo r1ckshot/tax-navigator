@@ -11,6 +11,7 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { RejectReason } from './filter.ts';
+import type { QuestionLabel } from './labeler.ts';
 
 /**
  * Маркер catch-up на чат (AC-09): з якого моменту читати наступного разу.
@@ -40,6 +41,8 @@ export interface CycleReport {
    * решту. Немає у звітах, записаних до S-2: ті цикли питань не рахували.
    */
   filter?: { organic: number; rejected: Record<RejectReason, number> };
+  /** Підсумок розмітки S-3 для органічних питань цього циклу. Немає у звітах до S-3. */
+  labels?: { covered: number; whiteSpot: number; matrixVerifiedAt: string };
 }
 
 export interface CycleState {
@@ -47,6 +50,11 @@ export interface CycleState {
   seenMessages: Record<string, true>;
   chats?: Record<string, ChatMarker>;
   reports?: Record<string, CycleReport>;
+  /**
+   * Мітки S-3 за ключем `chat_id:telegram_message_id`, по одній на питання.
+   * Пишуться один раз і не оновлюються (AC-06). Текст питання сюди не йде.
+   */
+  labels?: Record<string, QuestionLabel>;
 }
 
 export function defaultState(): CycleState {

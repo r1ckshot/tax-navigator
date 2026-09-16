@@ -83,9 +83,9 @@ const ADVERT_WORDS = ['пропоную', 'пропонуємо', 'предла�
 const LONG_POST_CHARS = 400;
 const CONTACT = /(https?:\/\/|t\.me\/|(^|\s)@[a-z0-9_]{4,}|\+?\d[\d\s()-]{8,}\d)/giu;
 
-const normalize = (text: string) => text.toLocaleLowerCase('uk').replace(/ё/g, 'е');
+export const normalize = (text: string) => text.toLocaleLowerCase('uk').replace(/ё/g, 'е');
 
-function hasWord(text: string, word: string): boolean {
+export function hasWord(text: string, word: string): boolean {
   // \b не працює з кирилицею навіть із прапорцем u — межа слова через \p{L}.
   const escaped = word.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
   return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u').test(text);

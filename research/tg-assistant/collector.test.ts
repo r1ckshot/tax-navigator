@@ -8,11 +8,21 @@ import {
   type RunCycleInput,
   type TelegramPort,
 } from './collector';
+import type { Matrix } from './labeler';
 import { defaultState, type CycleState } from './state';
 
 const MIN = 60 * 1000;
 const DAY = 24 * 60 * MIN;
 const WEEK = 7 * DAY;
+
+/** Два правила, щоб зміну матриці між циклами було видно (S-3, AC-06). */
+const MATRIX: Matrix = {
+  verified_at: '2026-07-24',
+  rules: [
+    { rule_id: 'residency.days_threshold', source_url: 'https://example.test/183', verified_at: '2026-07-24' },
+    { rule_id: 'jdg.zus.stages', source_url: 'https://example.test/zus', verified_at: '2026-07-24' },
+  ],
+};
 
 // Понеділок 2026-W38, 06:00 UTC — момент циклу за дефолтним розкладом.
 const W38 = Date.parse('2026-09-14T06:00:00Z');
@@ -71,6 +81,7 @@ function harness(startMs: number) {
       },
       windowWeeks: 4,
       maxFloodWaitSeconds: 600,
+      matrix: MATRIX,
     }),
   };
 }
@@ -395,5 +406,51 @@ describe('runCycle — S-2 фільтр у циклі (AC-03, AC-04)', () => {
     const result = await run(h.base(port, defaultState(), ['alpha_chat']));
 
     expect(result.report.filter?.organic).toBe(0);
+  });
+});
+
+describe('runCycle — S-3 розмітка в циклі (AC-05, AC-06)', () => {
+  const ZUS_QUESTION = 'Підкажіть, чи платити ZUS на JDG?';
+  const IP_BOX_QUESTION = 'Хтось знає, чи можна на JDG взяти IP Box?';
+
+  it('AC-05: кожне органічне питання має мітку; «покрито» цитує rule_id, пляма — скільки правил перевірено', async () => {
+    const h = harness(W38);
+    const port = fakePort({
+      clock: h.clock,
+      chats: [chat('-1001', 'alpha_chat')],
+      messages: { '-1001': [msg(1, W38 - DAY, { text: ZUS_QUESTION }), msg(2, W38 - DAY, { text: IP_BOX_QUESTION }), msg(3, W38 - DAY, { text: 'Хто на футбол?' })] },
+    });
+
+    const result = await run(h.base(port, defaultState(), ['alpha_chat']));
+
+    // Шум (msg 3) не розмічається: мітки лише в органічних питань.
+    expect(result.state.labels).toEqual({
+      '-1001:1': { weekOf: '2026-W38', label: 'covered', ruleIds: ['jdg.zus.stages'], matrixVerifiedAt: '2026-07-24', labeledAt: iso(W38) },
+      '-1001:2': { weekOf: '2026-W38', label: 'white_spot', rulesChecked: 2, matrixVerifiedAt: '2026-07-24', labeledAt: iso(W38) },
+    });
+    expect(result.report.labels).toEqual({ covered: 1, whiteSpot: 1, matrixVerifiedAt: '2026-07-24' });
+    expect(JSON.stringify(result.state)).not.toContain('IP Box');
+  });
+
+  it('AC-06: матриця змінилась між циклами — мітки попереднього тижня лишаються як були', async () => {
+    const h = harness(W38);
+    const old = msg(1, W38 - DAY, { text: ZUS_QUESTION });
+    const port = fakePort({ clock: h.clock, chats: [chat('-1001', 'alpha_chat')], messages: { '-1001': [old] } });
+    const first = await run(h.base(port, defaultState(), ['alpha_chat']));
+    const labelW38 = first.state.labels?.['-1001:1'];
+
+    // Тиждень потому правило ZUS зникло з матриці. Старе питання приходить знову
+    // (перетин вікна читання), нове питання про те саме — вперше.
+    h.clock.t = W38 + WEEK;
+    port.reads.length = 0;
+    const withoutZus: Matrix = { verified_at: '2026-09-20', rules: MATRIX.rules.filter((r) => r.rule_id !== 'jdg.zus.stages') };
+    const messages = [{ ...old, postedAt: iso(W38 + DAY) }, msg(2, W38 + DAY, { text: ZUS_QUESTION })];
+    const port2 = fakePort({ clock: h.clock, chats: [chat('-1001', 'alpha_chat')], messages: { '-1001': messages } });
+    const second = await run({ ...h.base(port2, first.state, ['alpha_chat']), matrix: withoutZus });
+
+    expect(second.state.labels?.['-1001:1']).toEqual(labelW38);
+    expect(second.state.labels?.['-1001:2']).toMatchObject({ weekOf: '2026-W39', label: 'white_spot', rulesChecked: 1, matrixVerifiedAt: '2026-09-20' });
+    // Звіт тижня рахує лише свої нові мітки, а не весь накопичений стан.
+    expect(second.report.labels).toEqual({ covered: 0, whiteSpot: 1, matrixVerifiedAt: '2026-09-20' });
   });
 });
