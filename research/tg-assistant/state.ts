@@ -10,6 +10,7 @@
 
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import type { RejectReason } from './filter.ts';
 
 /**
  * Маркер catch-up на чат (AC-09): з якого моменту читати наступного разу.
@@ -34,6 +35,11 @@ export interface CycleReport {
   finishedAt: string;
   chats: Array<{ ref: string; title: string; newMessages: number; windowStartAt: string | null }>;
   failures: Array<{ ref: string; title: string | null; reason: string }>;
+  /**
+   * Підсумок фільтра S-2: скільки органічних питань і за якою причиною відсіяно
+   * решту. Немає у звітах, записаних до S-2: ті цикли питань не рахували.
+   */
+  filter?: { organic: number; rejected: Record<RejectReason, number> };
 }
 
 export interface CycleState {

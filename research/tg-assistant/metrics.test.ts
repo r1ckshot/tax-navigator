@@ -78,6 +78,17 @@ describe('CollectorMetrics', () => {
     expect(value(text, 'tg_collector_last_cycle_timestamp_seconds')).toBe(1789365850);
   });
 
+  it('органічні питання останнього циклу — з підсумку фільтра', () => {
+    const report = { ...w38(), filter: { organic: 4, rejected: { own_post: 0, repost: 3, channel_post: 0, advert: 2, off_topic: 40, not_question: 4, not_own: 0 } } };
+    const text = new CollectorMetrics(START).render({ health: healthy, telegramConnected: true, lastReport: report });
+    expect(value(text, 'tg_collector_last_cycle_organic_questions')).toBe(4);
+  });
+
+  it('цикл до S-2 серії питань не має: нуль читався б як «питань не було»', () => {
+    const text = new CollectorMetrics(START).render({ health: healthy, telegramConnected: true, lastReport: w38() });
+    expect(text).not.toContain('tg_collector_last_cycle_organic_questions');
+  });
+
   it('після рестарту лічильники нульові, а числа останнього циклу беруться зі стану', () => {
     const text = new CollectorMetrics(START).render({ health: healthy, telegramConnected: true, lastReport: w38() });
     expect(value(text, 'tg_collector_cycles_total{status="partial"}')).toBe(0);

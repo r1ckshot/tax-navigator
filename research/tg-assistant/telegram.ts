@@ -83,6 +83,9 @@ export class GramjsPort implements TelegramPort {
           telegramMessageId: message.id,
           postedAt: new Date(message.date * 1000).toISOString(),
           text: message.message,
+          outgoing: message.out === true,
+          forwarded: message.fwdFrom != null,
+          channelPost: message.post === true,
         });
       }
     } catch (err) {

@@ -138,9 +138,16 @@ export class CollectorMetrics {
       ...block('tg_collector_last_cycle_chats_failed', 'gauge', 'Chats unread in the latest cycle.', [
         `tg_collector_last_cycle_chats_failed ${last ? last.failures.length : 0}`,
       ]),
-      ...block('tg_collector_last_cycle_new_messages', 'gauge', 'New messages in the latest cycle. Messages, not questions: S-2 filter does not exist yet.', [
+      ...block('tg_collector_last_cycle_new_messages', 'gauge', 'New messages in the latest cycle. Messages, not questions.', [
         `tg_collector_last_cycle_new_messages ${last ? newMessagesOf(last) : 0}`,
       ]),
+      // Без звіту фільтра серії немає зовсім: нуль читався б як «питань не було»,
+      // а цикл до S-2 питань просто не рахував.
+      ...(last?.filter
+        ? block('tg_collector_last_cycle_organic_questions', 'gauge', 'Organic questions in the latest cycle after the S-2 filter.', [
+            `tg_collector_last_cycle_organic_questions ${last.filter.organic}`,
+          ])
+        : []),
     ];
     return `${out.join('\n')}\n`;
   }

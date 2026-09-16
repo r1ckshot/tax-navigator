@@ -5,11 +5,13 @@
  * telegram.ts, ADR-0001), а час і сон — через ін'єкцію. Тому весь цикл, разом
  * із чергою FLOOD_WAIT, перевіряється тестом без живого акаунта.
  *
- * Текст повідомлень живе лише в пам'яті (`messages` у результаті) і далі йде
- * фільтру S-2. На диск через стан потрапляють id, маркери і звіт.
+ * Текст повідомлень живе лише в пам'яті (`messages` і `organic` у результаті).
+ * Фільтр S-2 проходить по партії тут же, тож у звіт потрапляють лише його
+ * лічильники. На диск через стан потрапляють id, маркери і звіт.
  */
 
 import { filterKnownChats } from './chatFilter.ts';
+import { filterBatch } from './filter.ts';
 import { decideChatRetry, type FloodWaitAttempt } from './retryQueue.ts';
 import { isoWeek } from './schedule.ts';
 import {
@@ -37,6 +39,10 @@ export interface RawMessage {
   telegramMessageId: number;
   postedAt: string;
   text: string;
+  /** Структурні ознаки для фільтра S-2: власний пост, репост, пост каналу. */
+  outgoing: boolean;
+  forwarded: boolean;
+  channelPost: boolean;
 }
 
 export type ReadFailure =
@@ -81,7 +87,15 @@ export interface RunCycleInput {
 
 export type RunCycleResult =
   | { skipped: true; weekOf: string }
-  | { skipped: false; weekOf: string; state: CycleState; report: CycleReport; messages: CollectedMessage[] };
+  | {
+      skipped: false;
+      weekOf: string;
+      state: CycleState;
+      report: CycleReport;
+      messages: CollectedMessage[];
+      /** Органічні питання (AC-03), кожне рівно раз (AC-04) — вхід розмітки S-3. */
+      organic: CollectedMessage[];
+    };
 
 interface QueueEntry {
   key: string;
@@ -205,6 +219,7 @@ export async function runCycle(input: RunCycleInput): Promise<RunCycleResult> {
     chats.push({ ref: entry.key, title: entry.chat.title, newMessages: dedup.newIds.length, windowStartAt });
   }
 
+  const filtered = filterBatch(messages);
   const report: CycleReport = {
     weekOf,
     status: reportStatus(chats.length, failures.length),
@@ -212,9 +227,10 @@ export async function runCycle(input: RunCycleInput): Promise<RunCycleResult> {
     finishedAt: input.now().toISOString(),
     chats,
     failures,
+    filter: { organic: filtered.organic.length, rejected: filtered.rejected },
   };
   state = recordCycleRun({ ...state, chats: markers }, weekOf);
   state = { ...state, reports: { ...(state.reports ?? {}), [weekOf]: report } };
 
-  return { skipped: false, weekOf, state, report, messages };
+  return { skipped: false, weekOf, state, report, messages, organic: filtered.organic };
 }
