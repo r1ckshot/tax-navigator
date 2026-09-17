@@ -330,9 +330,9 @@
     "- `app/lib/i18n/uk.ts` лежить у `lib/`, але за роллю це presentation. Ядром не",
     "практичного ефекту. Лишаємо розбіжність назви, не поведінки."
   ],
-  "app/layout.tsx:9-12": [
-    "title: t(\"app.title\"),",
-    ""
+  "app/layout.tsx:11-26": [
+    "export const metadata: Metadata = {",
+    "};"
   ],
   "ARCHITECTURE.md:35-39": [
     "- Браузерні API (`window`, `document`, `sessionStorage`) — лише в `storage.ts`,",
