@@ -49,9 +49,9 @@
   "next.config.mjs:7": [
     "distDir: process.env.NEXT_DIST_DIR || '.next',"
   ],
-  "SPEC.md:21-22": [
+  "SPEC.md:21-23": [
     "3. **Не бекенд.** Розрахунок детермінований і клієнтський; сервера, БД і",
-    "авторизації в цьому зрізі немає."
+    "форма за посиланням, без даних анкети (DECISIONS 2026-09-17)."
   ],
   "storage.ts:2": [
     "import { quantizeRevenue } from '@/lib/calc/quantize';"
@@ -324,7 +324,7 @@
     "| **presentation** | `app/components/`, `app/**/page.tsx`, `app/layout.tsx`, `app/lib/i18n/` | React, CSS Modules, українські тексти | усе нижче |"
   ],
   ".dependency-cruiser.cjs:16": [
-    "const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources)\\\\.ts$|^app/lib/(questions|i18n)/';"
+    "const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources|waitlist)\\\\.ts$|^app/lib/(questions|i18n)/';"
   ],
   "ARCHITECTURE.md:76-85": [
     "- `app/lib/i18n/uk.ts` лежить у `lib/`, але за роллю це presentation. Ядром не",
