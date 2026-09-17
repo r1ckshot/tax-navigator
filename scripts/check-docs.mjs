@@ -104,8 +104,12 @@ function extractBacktickTokens(text) {
   const r = spawnSync("git", ["ls-files", "*.md"], { encoding: "utf8" });
   const files = r.stdout.trim().split("\n").filter(Boolean);
   const LINK_RE = /\[[^\]]*\]\(([^)#]+)(#[^)]*)?\)/g;
+  // Ціль у .gitignore (docs/capstones/) лежить лише на машині автора. У свіжому
+  // клоні її немає за визначенням, і FAIL там блокував би кожен коміт новачка.
+  const isIgnored = (p) => spawnSync("git", ["check-ignore", "-q", p]).status === 0;
   let checked = 0;
   let broken = 0;
+  let localOnly = 0;
   for (const file of files) {
     const src = readFileSync(file, "utf8");
     // Приклади синтаксису всередині inline-коду (напр. `[<назва>](<url>)` як
@@ -118,12 +122,14 @@ function extractBacktickTokens(text) {
       const resolved = resolve(dirname(file), target);
       checked++;
       if (!existsSync(resolved)) {
+        if (isIgnored(resolved)) { localOnly++; continue; }
         const line = src.slice(0, m.index).split("\n").length;
         fail(`${file}:${line} — посилання на "${target}" не існує (${resolved.replace(process.cwd() + "/", "")})`);
         broken++;
       }
     }
   }
+  if (localOnly) console.log(`SKIP: ${localOnly} посилань у git-ігноровані теки, яких у цьому клоні немає`);
   if (broken === 0) ok(`перехресні посилання: ${checked} перевірено в ${files.length} файлах, усі живі`);
 }
 
