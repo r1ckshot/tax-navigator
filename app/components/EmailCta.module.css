@@ -28,3 +28,24 @@
   font-weight: 600;
   color: var(--accent);
 }
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--space-4);
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.action:hover {
+  background: var(--accent-hover);
+}
+
+.cta .note {
+  font-size: var(--text-xs);
+}
