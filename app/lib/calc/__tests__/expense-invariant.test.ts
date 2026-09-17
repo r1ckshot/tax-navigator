@@ -108,21 +108,34 @@ describe('Nierejestrowana: той самий інваріант на друго�
 });
 
 /**
- * Зворотний бік інваріанта. Ці три сценарії `expenseShare` не читають взагалі,
+ * Інкубатор: закрито рішенням Mike 2026-09-17 (issue #95). До того сценарій
+ * витрат не читав і при витратах 40% показував більше за JDG на тисячі злотих.
+ * Податок тут рахується з нормативної KUP 20/50%, тож витрати його не
+ * зменшують — і різниця «на руки» дорівнює різниці витрат рівно, як у ричалті.
+ */
+describe('Інкубатор: витрати доходять до кишені, але не до податку', () => {
+  for (const id of ['kup20', 'kup50'] as const) {
+    it(`${id}: різниця «на руки» дорівнює різниці витрат (15,000 zł × 35% = 5,250)`, () => {
+      const at = (share: ExpenseShare) => {
+        const found = calcIncubator(withAnswers({ expenseShare: share })).subforms?.find((s) => s.id === id);
+        if (!found?.rangeMonthly) throw new Error(`підформа ${id} без смуги — профіль тесту застарів`);
+        return exact(found.rangeMonthly);
+      };
+      expect(at('lt10') - at('gt30')).toBeCloseTo(expenseGap(baseAnswers.monthlyRevenue, 'lt10', 'gt30'), 2);
+      expect(at('lt10') - at('gt30')).toBeCloseTo(5250, 2);
+    });
+  }
+});
+
+/**
+ * Зворотний бік інваріанта. Ці два сценарії `expenseShare` не читають взагалі,
  * і це навмисно: UoP і zlecenie — не власна діяльність, там витрат людини в
  * моделі немає, а KUP 20/50% — нормативна ставка, не фактичні витрати.
- *
- * Інкубатор рахується з оцінних ефективних ставок PIT і абонплати, тож фактичні
- * витрати в ньому теж не з'являються. Чи має він їх віднімати, як JDG, —
- * ВІДКРИТЕ продуктове питання, а не мовчазний баг: відповідь зсуває показане
- * число, тож іде через `docs/EVIDENCE.md` і рішення Mike, не через правку тесту.
- * Тест замикає поточний контракт: зміна тут має бути свідомою і пройти EVIDENCE.
  */
 describe('Сценарії, що витрат не читають — рівно, і причина названа', () => {
   const flat: [string, (a: Answers) => Range | null][] = [
     ['uop', (a) => calcUop(a, 'employerCost').rangeMonthly],
     ['zlecenie', (a) => calcZlecenie(a).rangeMonthly],
-    ['incubator', (a) => calcIncubator(a).rangeMonthly],
   ];
 
   for (const [name, calc] of flat) {

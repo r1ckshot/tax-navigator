@@ -1,7 +1,7 @@
 import { getParams, sourcesOf } from '@/lib/rules/types';
 import { toRange, round2, UNCERTAINTY } from '../range';
 import type { Answers, ScenarioResult, SubformResult } from '../types';
-import { spanOf } from './shared';
+import { expenseRate, spanOf } from './shared';
 
 interface IncubatorParams {
   kupCopyright: number;
@@ -16,16 +16,21 @@ interface IncubatorParams {
  * Інкубатор. EVIDENCE §6 прямо називає еф. ставки ОЦІНКОЮ (залежать від структури
  * договору), тому смуга ширша й картка маркується як оцінка. ZUS немає взагалі —
  * це не «вигода», а відсутність пенсії й лікарняних, і так і підписуємо.
+ *
+ * Фактичні витрати віднімаються від кишені, але не від податку: база тут
+ * нормативна KUP 20/50%, а «на руки» — гроші після всіх реальних відпливів
+ * (DECISIONS 2026-08-05, для інкубатора закрито 2026-09-17).
  */
 export function calcIncubator(answers: Answers): ScenarioResult {
   const p = getParams<IncubatorParams>('incubator.kup');
   const sources = sourcesOf('incubator.kup');
   const subscription = (p.subscriptionMonthlyMin + p.subscriptionMonthlyMax) / 2;
+  const expenses = answers.monthlyRevenue * expenseRate(answers.expenseShare);
 
   const kup20: SubformResult = {
     id: 'kup20',
     rangeMonthly: toRange(
-      round2(answers.monthlyRevenue * (1 - p.effectivePitStandardEstimate) - subscription),
+      round2(answers.monthlyRevenue * (1 - p.effectivePitStandardEstimate) - subscription - expenses),
       UNCERTAINTY.ESTIMATE
     ),
     available: true,
@@ -39,7 +44,7 @@ export function calcIncubator(answers: Answers): ScenarioResult {
     ? {
         id: 'kup50',
         rangeMonthly: toRange(
-          round2(answers.monthlyRevenue * (1 - p.effectivePitCopyrightEstimate) - subscription),
+          round2(answers.monthlyRevenue * (1 - p.effectivePitCopyrightEstimate) - subscription - expenses),
           UNCERTAINTY.ESTIMATE
         ),
         available: true,
