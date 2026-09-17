@@ -3,6 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 import { encodeAnswers } from '../app/lib/share';
 import { baseAnswers } from '../app/lib/calc/__tests__/fixtures';
 import { parseTokens } from '../app/lib/tokens';
+import { visibleScreens, type Draft } from '../app/lib/questions/schema';
+import { t } from '../app/lib/i18n/uk';
 
 /**
  * Екран результату досягається шеринг-лінком, а не клікам по анкеті: анкета —
@@ -97,3 +99,61 @@ test('джерела цифр', async ({ page }) => {
 
   await expect(page).toHaveScreenshot('sources.png', { fullPage: true });
 });
+
+/**
+ * Екран анкети відкривається чернеткою в sessionStorage, а не кліками: сторінка
+ * при старті відновлює прогрес (`loadDraft` → `resumeIndex`), тож досить покласти
+ * відповіді попередніх екранів і номер кроку. Відповіді беруться з того самого
+ * `baseAnswers`, що й результат, тож усі екрани показують один профіль.
+ *
+ * `answered` вирішує, чи заповнений сам цільовий екран: вибраний стан і
+ * активна кнопка «Далі» теж верстка, і без нього їх не знімає жодна сцена.
+ */
+async function openQuestion(page: Page, id: string, answered: boolean) {
+  const draft: Draft = {};
+  for (const screen of visibleScreens(baseAnswers)) {
+    if (screen.id === id && !answered) break;
+    for (const field of screen.fields) (draft as Record<string, unknown>)[field.name] = baseAnswers[field.name];
+    if (screen.id === id) break;
+  }
+  const step = visibleScreens(draft).findIndex((s) => s.id === id);
+  expect(step, `екран ${id} не видно для цього профілю`).toBeGreaterThanOrEqual(0);
+
+  await page.addInitScript(
+    ([value]) => window.sessionStorage.setItem('tax-navigator:draft', value),
+    [JSON.stringify({ answers: draft, step })],
+  );
+  await page.goto('/questionnaire');
+
+  const screen = visibleScreens(draft)[step];
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(t(screen.titleKey));
+}
+
+test('анкета, перший крок з вибраною відповіддю', async ({ page }) => {
+  await openQuestion(page, 'days', true);
+
+  await expect(page.getByLabel(t('q.days.gte183'))).toBeChecked();
+  await expect(page.getByRole('button', { name: t('nav.next') })).toBeEnabled();
+  await expectNoHorizontalOverflow(page);
+
+  await expect(page).toHaveScreenshot('question-days.png', { fullPage: true });
+});
+
+test('анкета, два питання на одному екрані', async ({ page }) => {
+  await openQuestion(page, 'centers', false);
+
+  await expect(page.getByRole('group')).toHaveCount(2);
+  await expectNoHorizontalOverflow(page);
+
+  await expect(page).toHaveScreenshot('question-centers.png', { fullPage: true });
+});
+
+test('анкета, повзунок виручки', async ({ page }) => {
+  await openQuestion(page, 'revenue', true);
+
+  await expect(page.getByRole('slider')).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  await expect(page).toHaveScreenshot('question-revenue.png', { fullPage: true });
+});
+
