@@ -45,7 +45,3 @@
 .action:hover {
   background: var(--accent-hover);
 }
-
-.cta .note {
-  font-size: var(--text-xs);
-}

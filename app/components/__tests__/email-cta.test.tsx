@@ -13,15 +13,16 @@ describe('EmailCta', () => {
     render(<EmailCta href={null} />);
     expect(screen.getByText(t('cta.soon'))).toBeTruthy();
     expect(screen.queryByRole('link')).toBeNull();
+    expect(screen.queryByText(t('cta.invite'))).toBeNull();
   });
 
-  it('з формою веде на неї в новій вкладці й називає, куди йде email', () => {
+  it('з формою веде на неї в новій вкладці й кличе залишити email', () => {
     render(<EmailCta href="https://tally.so/r/abc123" />);
     const link = screen.getByRole('link', { name: t('cta.action') });
     expect(link.getAttribute('href')).toBe('https://tally.so/r/abc123');
     expect(link.getAttribute('target')).toBe('_blank');
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
-    expect(screen.getByText(t('cta.note'))).toBeTruthy();
+    expect(screen.getByText(t('cta.invite'))).toBeTruthy();
     expect(screen.queryByText(t('cta.soon'))).toBeNull();
   });
 });

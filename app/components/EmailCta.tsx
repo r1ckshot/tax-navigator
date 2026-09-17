@@ -14,10 +14,10 @@ export function EmailCta({ href = waitlistHref() }: { href?: string | null }) {
       <p>{t('cta.body')}</p>
       {href ? (
         <>
+          <p>{t('cta.invite')}</p>
           <a className={styles.action} href={href} target="_blank" rel="noopener noreferrer">
             {t('cta.action')}
           </a>
-          <p className={styles.note}>{t('cta.note')}</p>
         </>
       ) : (
         <p className={styles.soon}>{t('cta.soon')}</p>
