@@ -5,9 +5,9 @@
  * хостована форма, а сюди потрапляє лише її адреса. Відповіді анкети туди не
  * передаються: у лінку немає query-параметрів, і це тримає `waitlistHref`.
  *
- * Поки форми немає, `WAITLIST_URL` порожній і CTA чесно каже «Скоро».
+ * Без форми `WAITLIST_URL` порожній, і CTA чесно каже «Скоро».
  */
-export const WAITLIST_URL: string | null = null;
+export const WAITLIST_URL: string | null = 'https://tally.so/r/D4LpLj';
 
 /** Єдиний дозволений хост. Інший домен означає іншого обробника даних і нове рішення. */
 export const WAITLIST_HOST = 'tally.so';
