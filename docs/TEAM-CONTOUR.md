@@ -134,7 +134,7 @@ git config core.hooksPath .githooks
 | Managed: канал доставки | ❌ немає | `/etc/claude-code/` не існує; розкладки політики на машини немає, бо машина одна |
 | Managed: `disableBypassPermissionsMode` | ⚠️ кандидат готовий, не встановлений | `.claude/managed-settings.example.json`; установка потребує root |
 | Managed: `strictKnownMarketplaces` | ❌ немає | ключа немає в жодному шарі |
-| `extraKnownMarketplaces` / `enabledPlugins` у project-шарі | ❌ немає | обох ключів у `.claude/settings.json` немає; плагін `tax-navigator-toolkit/` живе в репо і ставиться вручну |
+| `extraKnownMarketplaces` / `enabledPlugins` у project-шарі | ➖ свідомо | обох ключів немає: три хуки `tax-navigator-toolkit/` уже стоять у `.claude/settings.json`, плагін запускав би їх удруге. Для інших репо ставиться вручну |
 | Spend limits: org | ❌ незастосовно | підписка особиста, організації немає — вимикача не існує |
 | Spend limits: user | ❌ немає | ліміту не виставлено |
 | Spend limits: рев'ю витрат | ⚠️ разове, не процес | заміряно один раз у M10 (`scripts/agent-token-cost.mjs`), регулярної звірки немає |
