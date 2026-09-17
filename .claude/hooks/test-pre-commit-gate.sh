@@ -268,7 +268,11 @@ chunk_case() {
   local out verdict
   out=$(printf '{"tool_name":"Bash","tool_input":{"command":%s}}' "$command" \
     | (cd "$CHUNK" && node "$HOOK") 2>/dev/null)
-  if printf '%s' "$out" | grep -q 'щойно поїхали в master'; then verdict=deny; else verdict=pass; fi
+  # Маркер — текст саме цього чека: коміт у пісочниці падає на `npm test` іншим
+  # deny, і рахувати будь-який deny означало б тестувати не цей чек.
+  if printf '%s' "$out" | grep -q 'Перетин із щойно злитим PR'; then
+    if printf '%s' "$out" | grep -q '"permissionDecision"'; then verdict=deny; else verdict=warn; fi
+  else verdict=pass; fi
   if [ "$verdict" = "$expected" ]; then
     printf '  OK    %-52s %s\n' "$name" "$verdict"
   else
@@ -291,7 +295,7 @@ K merge -q --no-ff feat/chunk-one -m "Merge pull request #1 from feat/chunk-one"
 K checkout -q -b docs/forgot-a-bit master
 printf 'more\n' >> "$CHUNK/app/a.ts"
 K add -A >/dev/null && K commit -qm "fix: forgot a bit"
-chunk_case "same file as a merge minutes ago"       deny "$PR"
+chunk_case "same file as a merge minutes ago"       warn "$PR"
 
 # 2. Інший файл — справді новий шматок, чек мовчить.
 K checkout -q -b feat/chunk-two master
@@ -366,7 +370,7 @@ K add -A >/dev/null && K commit -qm "feat: pause"
 chunk_case "overlap only on the monitor entry point" pass "$PR"
 printf 'pause test\n' >> "$CHUNK/scripts/rules-change-monitor/cycle.test.mjs"
 K add -A >/dev/null && K commit -qm "test: pause"
-chunk_case "monitor entry point test is still overlap" deny "$PR"
+chunk_case "monitor entry point test is still overlap" warn "$PR"
 
 # 8. Коміт цей чек не чіпає — він стоїть тільки на gh pr create.
 chunk_case "plain git commit is not this gate"      pass '"git commit -m \"feat: x\""'
