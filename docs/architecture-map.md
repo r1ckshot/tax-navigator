@@ -47,8 +47,9 @@ C4Container
     Rel(calc, rules, "getParams, sourcesOf")
 ```
 
-Сервера, БД і авторизації немає: нуль route handlers, нуль server actions
-(`SPEC.md:21-22`, [ADR-0002](adr/0002-client-side-computation.md)).
+Сервера, БД і авторизації немає: нуль route handlers, нуль server actions; email
+листу очікування йде у зовнішню форму звичайним посиланням (`app/lib/waitlist.ts`)
+(`SPEC.md:21-23`, [ADR-0002](adr/0002-client-side-computation.md)).
 
 ## Інвентар модулів
 
