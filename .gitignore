@@ -48,6 +48,7 @@ docs/course/
 # Приватне: нотатки, чернетки здачі, tg-mining pipeline (дані + протокол)
 docs/notes/
 docs/capstones/
+docs/presentation/
 research/tg-mining/
 
 # Кеш вердиктів TaskCompleted-гейта: вердикт живе рівно один прогін команди.

@@ -26,6 +26,12 @@ Release notes for a person who uses the site and has never seen the code.
 - If nothing in the range is user-visible, say so in one honest line instead of
   padding.
 
+Link what you name. The live product is https://tax-navigator-red.vercel.app —
+its pages are `/sources` (every rule with its source and check date) and
+`/tokens` (typography and colours). When a note mentions a page a reader can
+open, make the page name a markdown link to it. One link per note is enough; do
+not turn the text into a list of links.
+
 Start the file with `# Tax Navigator <VERSION>` and keep it under roughly 40
 lines.
 
