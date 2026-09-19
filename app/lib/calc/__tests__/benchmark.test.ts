@@ -82,9 +82,15 @@ describe('benchmark — UoP', () => {
 describe('benchmark — інкубатор', () => {
   const inc = calcIncubator(baseAnswers);
 
-  it('KUP 20%: 15000 × (1 − 13.6%) − 324.5 абонемент = 12635.50', () => {
+  // Витрати базового профілю <10% → 5% приходу, 15000 × 5% = 750 (з 2026-09-17, issue #95).
+  it('KUP 20%: 15000 × (1 − 13.6%) − 324.5 абонемент − 750 витрат = 11885.50', () => {
     const kup20 = inc.subforms!.find((s) => s.id === 'kup20')!;
-    expect(exact(kup20.rangeMonthly!)).toBeCloseTo(12635.5, 2);
+    expect(exact(kup20.rangeMonthly!)).toBeCloseTo(11885.5, 2);
+  });
+
+  it('KUP 50%: 15000 × (1 − 6%) − 324.5 абонемент − 750 витрат = 13025.50', () => {
+    const kup50 = inc.subforms!.find((s) => s.id === 'kup50')!;
+    expect(exact(kup50.rangeMonthly!)).toBeCloseTo(13025.5, 2);
   });
 
   it('маркується як оцінка і як «без ZUS»', () => {
