@@ -4,7 +4,8 @@
  *   node main.ts run    — довгоживучий процес: розклад, цикл, /health, /metrics
  *   node main.ts chats  — список груп і каналів акаунта, щоб заповнити TG_CHATS
  *   node main.ts report [2026-W39] — тижневий звіт зі стану (S-4); без тижня — останній цикл
- *   node main.ts sample [2026-W39] [--seed N] — вибірка для розмітки фільтра (sample.ts), JSON у stdout
+ *   node main.ts sample [2026-W39] [--seed N] [--chat REF] [--near-miss N] [--other N]
+ *                          — вибірка для розмітки фільтра (sample.ts), JSON у stdout
  *
  * Лог — JSON-рядки у stdout. У лог не йде ні текст повідомлень, ні значення
  * змінних середовища: лише події, лічильники і службові коди.
@@ -17,12 +18,14 @@ import { evaluateHealth } from './health.ts';
 import { loadMatrix } from './labeler.ts';
 import { CollectorMetrics } from './metrics.ts';
 import { buildWeeklyReport, renderWeeklyReport } from './reporter.ts';
-import { drawSample, planSample, SampleError, type SampleMessage } from './sample.ts';
+import { DEFAULT_LIMITS, drawSample, planFailedChat, planSample, SampleError, type SampleMessage } from './sample.ts';
 import { isCycleDue, isoWeek } from './schedule.ts';
 import { hasCycleRun, latestReport, loadState, messageKey, saveState, type CycleState } from './state.ts';
 import { createClient, GramjsPort } from './telegram.ts';
 
 const TICK_MS = 60 * 1000;
+/** `sample` читає без черги, тож коротку паузу Telegram просто перечікує. */
+const SAMPLE_FLOOD_SLEEP_SECONDS = 120;
 /** Після збою до першого чату (мережа, авторизація) — не долбити Telegram щохвилини. */
 const RETRY_AFTER_ERROR_MS = 15 * 60 * 1000;
 
@@ -48,8 +51,8 @@ function readMatrix(path: string) {
   }
 }
 
-async function connect(apiId: number, apiHash: string, session: string) {
-  const client = createClient(apiId, apiHash, session);
+async function connect(apiId: number, apiHash: string, session: string, floodSleepThreshold?: number) {
+  const client = createClient(apiId, apiHash, session, floodSleepThreshold);
   await client.connect();
   if (!(await client.checkAuthorization())) {
     log('session_not_authorized', { hint: 'run "node login.ts" and put the result into TG_SESSION' });
@@ -196,18 +199,25 @@ function printReport(weekOf: string | undefined): void {
  * воркером ризикує AUTH_KEY_DUPLICATED, тому запускати, коли воркер зупинено.
  */
 async function printSample(args: string[]): Promise<void> {
-  const seedAt = args.indexOf('--seed');
-  const seed = seedAt === -1 ? 1 : Number(args[seedAt + 1]);
-  if (!Number.isInteger(seed)) throw new ConfigError(`--seed must be an integer, got "${args[seedAt + 1]}"`);
-  const weekOf = args.find((a, i) => /^\d{4}-W\d{2}$/.test(a) && args[i - 1] !== '--seed');
+  const valueOf = (flag: string) => (args.includes(flag) ? args[args.indexOf(flag) + 1] : undefined);
+  const intFlag = (flag: string, fallback: number) => {
+    const raw = valueOf(flag);
+    const value = raw === undefined ? fallback : Number(raw);
+    if (!Number.isInteger(value) || value < 0) throw new ConfigError(`${flag} must be a non-negative integer, got "${raw}"`);
+    return value;
+  };
+  const seed = intFlag('--seed', 1);
+  const limits = { nearMiss: intFlag('--near-miss', DEFAULT_LIMITS.nearMiss), other: intFlag('--other', DEFAULT_LIMITS.other) };
+  const chatRef = valueOf('--chat');
+  const weekOf = args.find((a, i) => /^\d{4}-W\d{2}$/.test(a) && !args[i - 1]?.startsWith('--'));
 
   const state = loadState(process.env.STATE_PATH || '/data/state.json');
-  const plan = planSample(state, weekOf);
+  const plan = chatRef ? planFailedChat(state, chatRef, weekOf) : planSample(state, weekOf);
   const { TG_API_ID, TG_API_HASH, TG_SESSION } = process.env;
   if (!TG_API_ID || !TG_API_HASH || !TG_SESSION) {
     throw new ConfigError('missing environment variables: TG_API_ID, TG_API_HASH, TG_SESSION');
   }
-  const client = await connect(Number(TG_API_ID), TG_API_HASH, TG_SESSION);
+  const client = await connect(Number(TG_API_ID), TG_API_HASH, TG_SESSION, SAMPLE_FLOOD_SLEEP_SECONDS);
   const port = new GramjsPort(client);
   await port.listJoinedChats();
 
@@ -215,7 +225,7 @@ async function printSample(args: string[]): Promise<void> {
   try {
     for (const chat of plan.chats) {
       const read = (await port.readMessagesSince(chat.chatId, chat.since)).filter(
-        (m) => m.postedAt < plan.until && messageKey(chat.chatId, m.telegramMessageId) in state.seenMessages
+        (m) => m.postedAt < plan.until && (!chat.onlySeen || messageKey(chat.chatId, m.telegramMessageId) in state.seenMessages)
       );
       // Розбіжність — не причина зупинятись (повідомлення могли видалити), але
       // її видно в stderr: stdout — це файл вибірки.
@@ -225,7 +235,7 @@ async function printSample(args: string[]): Promise<void> {
   } finally {
     await client.destroy();
   }
-  process.stdout.write(`${JSON.stringify(drawSample(plan.weekOf, messages, seed), null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify(drawSample(plan.weekOf, messages, seed, limits), null, 2)}\n`);
 }
 
 const command = process.argv[2];
@@ -235,7 +245,7 @@ try {
   else if (command === 'report') printReport(process.argv[3]);
   else if (command === 'sample') await printSample(process.argv.slice(3));
   else {
-    process.stderr.write('usage: node main.ts run | chats | report [week] | sample [week] [--seed N]\n');
+    process.stderr.write('usage: node main.ts run | chats | report [week] | sample [week] [--seed N] [--chat REF] [--near-miss N] [--other N]\n');
     process.exit(2);
   }
 } catch (err) {
