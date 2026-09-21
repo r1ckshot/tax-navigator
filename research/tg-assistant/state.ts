@@ -106,7 +106,7 @@ export function recordCycleRun(state: CycleState, weekOf: string): CycleState {
   };
 }
 
-function messageKey(chatId: string, telegramMessageId: number): string {
+export function messageKey(chatId: string, telegramMessageId: number): string {
   return `${chatId}:${telegramMessageId}`;
 }
 
