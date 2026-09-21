@@ -8,7 +8,7 @@
  */
 
 import { Api, errors, TelegramClient } from 'telegram';
-import { LogLevel } from 'telegram/extensions/Logger.js';
+import { Logger, LogLevel } from 'telegram/extensions/Logger.js';
 import { StringSession } from 'telegram/sessions/index.js';
 import { TelegramReadError, type JoinedChat, type RawMessage, type TelegramPort } from './collector.ts';
 
@@ -27,8 +27,10 @@ export function createClient(apiId: number, apiHash: string, session: string): T
     // 0 — бібліотека не спить на FLOOD_WAIT сама. Паузу вирішує черга циклу
     // (ADR-0002), інакше один чат мовчки тримав би всіх інших.
     floodSleepThreshold: 0,
+    // Рівень — у конструктор, не setLogLevel після: банер версії друкується ще
+    // в конструкторі, у stdout, і так потрапив у файл вибірки (`main.ts sample`).
+    baseLogger: new Logger(LogLevel.ERROR),
   });
-  client.setLogLevel(LogLevel.ERROR);
   return client;
 }
 
