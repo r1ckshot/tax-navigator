@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawSample, planSample, SampleError, scoreSample, type SampleFile, type SampleMessage, type SampleRecord, type Stratum } from './sample.ts';
+import { drawSample, planFailedChat, planSample, SampleError, scoreSample, type SampleFile, type SampleMessage, type SampleRecord, type Stratum } from './sample.ts';
 import type { CycleReport, CycleState } from './state.ts';
 
 // Фікстури синтетичні: сирий текст реальних чатів у git не йде (PRD §6.1).
@@ -33,8 +33,8 @@ describe('planSample', () => {
       weekOf: '2026-W39',
       until: '2026-09-21T06:00:00.000Z',
       chats: [
-        { chatId: '-1001', ref: 'old_chat', title: 'Old', since: '2026-09-14T06:00:00.000Z', expected: 12 },
-        { chatId: '-1002', ref: 'new_chat', title: 'New', since: '2026-08-24T06:00:00.000Z', expected: 3 },
+        { chatId: '-1001', ref: 'old_chat', title: 'Old', since: '2026-09-14T06:00:00.000Z', expected: 12, onlySeen: true },
+        { chatId: '-1002', ref: 'new_chat', title: 'New', since: '2026-08-24T06:00:00.000Z', expected: 3, onlySeen: true },
       ],
     });
   });
@@ -59,6 +59,35 @@ describe('planSample', () => {
 
   it('відомий чат без попереднього циклу — помилка, а не читання з початку чату', () => {
     expect(() => planSample(state({ reports: { '2026-W39': W39 } }))).toThrow('chat old_chat: no window start and no earlier cycle to read from');
+  });
+});
+
+describe('planFailedChat', () => {
+  // Великий чат упав на FLOOD_WAIT: у звіті він лише у failures, маркер лишився
+  // на останньому успішному читанні (2026-09-14), бо при збої цикл його не зсуває.
+  const W39_PARTIAL: CycleReport = { ...W39, status: 'partial', failures: [{ ref: 'big_chat', title: 'Big', reason: 'FLOOD_WAIT' }] };
+  const withFailure = () =>
+    state({
+      chats: { ...state().chats, '-1003': { ref: 'big_chat', title: 'Big', firstReadAt: W38.startedAt, lastReadAt: '2026-09-14T06:00:00.000Z' } },
+      reports: { '2026-W38': W38, '2026-W39': W39_PARTIAL },
+    });
+
+  it('читає від маркера до старту циклу, без обмеження дедупом', () => {
+    expect(planFailedChat(withFailure(), 'big_chat')).toEqual({
+      weekOf: '2026-W39',
+      until: '2026-09-21T06:00:00.000Z',
+      chats: [{ chatId: '-1003', ref: 'big_chat', title: 'Big', since: '2026-09-14T06:00:00.000Z', expected: null, onlySeen: false }],
+    });
+  });
+
+  it('чат, який цикл прочитав, — помилка: для нього є звичайна вибірка', () => {
+    expect(() => planFailedChat(withFailure(), 'old_chat')).toThrow('chat old_chat did not fail in 2026-W39: sample it without --chat');
+  });
+
+  it('чат без маркера — помилка: невідомо, звідки читати', () => {
+    const s = withFailure();
+    delete s.chats?.['-1003'];
+    expect(() => planFailedChat(s, 'big_chat')).toThrow('chat big_chat has no marker in state');
   });
 });
 

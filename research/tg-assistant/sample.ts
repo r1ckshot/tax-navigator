@@ -24,8 +24,10 @@ export interface SampleChat {
   ref: string;
   title: string;
   since: string;
-  /** Скільки нових повідомлень цей чат дав циклу: звірка, що перечитано те саме. */
-  expected: number;
+  /** Скільки нових повідомлень цей чат дав циклу: звірка, що перечитано те саме. Null — чат цикл не прочитав. */
+  expected: number | null;
+  /** Брати лише повідомлення, які дедуп циклу вже бачив. Для непрочитаного чату таких немає. */
+  onlySeen: boolean;
 }
 
 export interface SamplePlan {
@@ -78,9 +80,29 @@ export function planSample(state: CycleState, weekOf?: string): SamplePlan {
     // Перше читання чату починалось з межі вікна, решта — з попереднього циклу.
     const since = chat.windowStartAt ?? previous?.startedAt;
     if (!since) throw new SampleError(`chat ${chat.ref}: no window start and no earlier cycle to read from`);
-    return { chatId, ref: chat.ref, title: chat.title, since, expected: chat.newMessages };
+    return { chatId, ref: chat.ref, title: chat.title, since, expected: chat.newMessages, onlySeen: true };
   });
   return { weekOf: report.weekOf, until: report.startedAt, chats };
+}
+
+/**
+ * Чат, який цикл не дочитав (FLOOD_WAIT, збій). Маркер при збої не зсувається,
+ * тож `lastReadAt` — рівно те місце, звідки цикл мав читати; межа — старт циклу.
+ * Дедуп цих повідомлень не бачив, тож фільтр вибірки за ним не застосовується.
+ */
+export function planFailedChat(state: CycleState, ref: string, weekOf?: string): SamplePlan {
+  const report = weekOf ? state.reports?.[weekOf] : latestReport(state);
+  if (!report) throw new SampleError(weekOf ? `no cycle report for ${weekOf}` : 'no cycle report in state');
+  const failure = report.failures.find((f) => f.ref === ref);
+  if (!failure) throw new SampleError(`chat ${ref} did not fail in ${report.weekOf}: sample it without --chat`);
+  const entry = Object.entries(state.chats ?? {}).find(([, marker]) => marker.ref === ref);
+  if (!entry) throw new SampleError(`chat ${ref} has no marker in state`);
+  const [chatId, marker] = entry;
+  return {
+    weekOf: report.weekOf,
+    until: report.startedAt,
+    chats: [{ chatId, ref, title: marker.title, since: marker.lastReadAt, expected: null, onlySeen: false }],
+  };
 }
 
 /** Детермінований генератор: те саме зерно — та сама вибірка, її можна відтворити. */

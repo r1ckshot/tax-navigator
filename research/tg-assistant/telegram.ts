@@ -21,12 +21,13 @@ const ACCESS_LOST = new Set([
   'CHANNEL_PUBLIC_GROUP_NA',
 ]);
 
-export function createClient(apiId: number, apiHash: string, session: string): TelegramClient {
+export function createClient(apiId: number, apiHash: string, session: string, floodSleepThreshold = 0): TelegramClient {
   const client = new TelegramClient(new StringSession(session), apiId, apiHash, {
     connectionRetries: 5,
     // 0 — бібліотека не спить на FLOOD_WAIT сама. Паузу вирішує черга циклу
-    // (ADR-0002), інакше один чат мовчки тримав би всіх інших.
-    floodSleepThreshold: 0,
+    // (ADR-0002), інакше один чат мовчки тримав би всіх інших. Команда `sample`
+    // читає по одному чату і черги не має, тож їй дозволено чекати.
+    floodSleepThreshold,
     // Рівень — у конструктор, не setLogLevel після: банер версії друкується ще
     // в конструкторі, у stdout, і так потрапив у файл вибірки (`main.ts sample`).
     baseLogger: new Logger(LogLevel.ERROR),
