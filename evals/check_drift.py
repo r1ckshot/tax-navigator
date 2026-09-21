@@ -17,6 +17,7 @@
   python3 evals/check_drift.py           # звичайний прогін
   BREAK=1 python3 evals/check_drift.py   # зламана версія агента → має почервоніти
 """
+import json
 import os
 import re
 import shutil
@@ -76,6 +77,14 @@ SANDBOX_EXTRA = [
 
 
 def main() -> int:
+    matrix = json.loads((REPO / "app/lib/rules/rules.2026.json").read_text(encoding="utf-8"))
+    drift = fixture_drift.clean_row_drift(matrix)
+    if drift:
+        print("FAIL: чистий рядок фікстури розійшовся з матрицею, агента не запускаю:")
+        for problem in drift:
+            print(f"  {problem}")
+        return 1
+
     sb.build(SANDBOX, extra=SANDBOX_EXTRA)
     report = fixture_drift.plant(SANDBOX)
     print(f"звіт підкладено: {report.relative_to(SANDBOX)}")

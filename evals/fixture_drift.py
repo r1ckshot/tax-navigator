@@ -25,7 +25,7 @@ REPORT_NAME = "cycle-history.json"
 D1_RULE = "common.minimum_wage"
 D2_RULE = "jdg.zdrowotna.ryczalt"
 D3_RULE = "uop.pit"
-CLEAN_RULE = "nierejestrowana.limit"
+CLEAN_RULE = "common.projected_average_wage"
 
 HISTORY = {
     "cycles": [
@@ -73,23 +73,59 @@ HISTORY = {
                 },
                 {
                     # Чистий рядок: справжня розбіжність, оформлена правильно.
+                    # Значення, `source_url` і `verified_at` — рівно ті, що в
+                    # rules.2026.json, а хост у SCRIPTABLE_HOSTS: інакше монітор
+                    # такого запису видати не міг би, і уважний рецензент мав би
+                    # право назвати рядок знахідкою. 2026-09-21 так і сталось із
+                    # `nierejestrowana.limit`: у матриці його джерело на
+                    # biznes.gov.pl, а фікстура підставляла zus.pl.
+                    # diff_percent як у diff.mjs: (9500 - 9420) / 9420 · 100 = 0.85.
                     "rule_id": CLEAN_RULE,
                     "state": "divergence",
-                    "matrix_value": 10813.5,
-                    "fetched_value": 11000.0,
-                    "diff_percent": 1.72,
+                    "matrix_value": 9420,
+                    "fetched_value": 9500,
+                    "diff_percent": 0.85,
                     "failure_reason": None,
-                    "fetched_from": "https://www.zus.pl/baza-wiedzy/nierejestrowana",
-                    # Джерело в SCRIPTABLE_HOSTS: запис із доменом поза allowlist
-                    # код видати не може, і уважний рецензент назвав би це
-                    # знахідкою — тобто чистий рядок перестав би бути чистим.
-                    "source_url": "https://www.zus.pl/baza-wiedzy/nierejestrowana",
-                    "verified_at": "2026-08-03",
+                    "fetched_from": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
+                    "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
+                    "verified_at": "2026-07-24",
                 },
             ],
         }
     ]
 }
+
+
+def clean_row_drift(matrix: dict) -> list[str]:
+    """Чим чистий рядок розходиться з матрицею. Порожній список — він чистий.
+
+    Звіряється до прогону агента: фікстура, що розійшлась із правилами, валить
+    ворота на рецензенті, який якраз помітив розбіжність.
+    """
+    rules = {}
+
+    def walk(node):
+        if isinstance(node, list):
+            for item in node:
+                walk(item)
+        elif isinstance(node, dict):
+            if "rule_id" in node and "source_url" in node:
+                rules[node["rule_id"]] = node
+            for value in node.values():
+                walk(value)
+
+    walk(matrix)
+    row = next(c for c in HISTORY["cycles"][0]["checks"] if c["rule_id"] == CLEAN_RULE)
+    rule = rules.get(CLEAN_RULE)
+    if rule is None:
+        return [f"{CLEAN_RULE} немає в матриці"]
+    problems = []
+    for field in ("source_url", "verified_at"):
+        if row[field] != rule[field]:
+            problems.append(f"{field}: у фікстурі {row[field]!r}, у матриці {rule[field]!r}")
+    if row["matrix_value"] not in (rule.get("params") or {}).values():
+        problems.append(f"matrix_value {row['matrix_value']} немає серед params правила")
+    return problems
 
 
 def plant(sandbox: Path) -> Path:

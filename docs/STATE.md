@@ -47,6 +47,31 @@ S-2, S-3 і S-4 закрито 2026-09-16: пайплайн збору до зв
 далі 14 і 15. Далі 16 — точність фільтра на даних циклу
 пн 2026-09-21, і аж тоді 17 — вердикт G1 ~2026-10-26.**
 
+У роботі 2026-09-21 (**сесія 16: точність фільтра на свіжих даних**):
+- [x] Знахідка: цикл тексту на диск не пише, тож розмічати з VPS нема чого.
+  Команда `node main.ts sample` ([sample.ts](../research/tg-assistant/sample.ts))
+  перечитує вікно останнього циклу, лише повідомлення з його дедупу, стан не чіпає.
+  Вибірка стратифікована за причиною відсіву (органічні всі, «тонкі» страти до 100,
+  решта до 20), вердикти окремо від текстів; `evalSample.ts` рахує precision і recall
+  з вагою страти. 220 тестів `tg-assistant` зелені, мутація ваги страти ловиться
+- [ ] Merge → деплой, потім вибірка з сервера (термінал Mike, воркер на час прогону
+  зупинено: друга сесія поруч ризикує `AUTH_KEY_DUPLICATED`; том змонтовано `:ro`):
+  ```
+  ssh <vps> 'id=$(docker ps -q --filter label=com.docker.compose.project=tax-navigator --filter label=com.docker.compose.service=tg-collector);
+    image=$(docker inspect -f "{{.Config.Image}}" $id); docker stop $id >&2;
+    docker run --rm --env-file /home/deploy/secrets/tg-collector.env -v tax-navigator-tg-collector-data:/data:ro $image node main.ts sample;
+    docker start $id >&2' > research/tg-mining/data/sample-2026-W39.json
+  ```
+- [ ] Розмітка `label` у кожному записі (Mike), потім
+  `node research/tg-assistant/evalSample.ts research/tg-mining/data/sample-2026-W39.json` → число сюди
+- [x] Нічний `agent-evals` 2026-09-21 червоний: ворота drift-reviewer 0/3 на «чистому»
+  рядку `nierejestrowana.limit`. Рядок не був чистим: `source_url` на zus.pl, а в матриці
+  biznes.gov.pl, якого монітор і не скриптує. Чистий рядок тепер `common.projected_average_wage`,
+  звіряється з матрицею до запуску агента; локально PASS. Сигнал мовчав через відсутню
+  мітку `agent-evals`: заведено, workflow створює її сам
+- [ ] Скрін тижневого звіту (`node main.ts report`) для слайда «Що далі»; живий прогін
+  `node scripts/rules-change-monitor/cycle.mjs`
+
 Зроблено 2026-09-19 (**прибирання перед показом**):
 - [x] Гілок було 27 віддалених і 9 локальних, лишилось 5 і 4 — злиті видалені,
   незлиті (`exp/tdd-single-*`, `add-claude-github-actions-*`) чекають рішення Mike
