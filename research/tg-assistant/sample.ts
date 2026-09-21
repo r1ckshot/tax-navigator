@@ -20,7 +20,8 @@ import { filterBatch, type FilterInput, type RejectReason } from './filter.ts';
 import { latestReport, type CycleReport, type CycleState } from './state.ts';
 
 export interface SampleChat {
-  chatId: string;
+  /** Null — чат ще жодного разу не прочитано: id шукається серед діалогів за `ref`. */
+  chatId: string | null;
   ref: string;
   title: string;
   since: string;
@@ -58,6 +59,8 @@ export interface SampleFile {
 
 export class SampleError extends Error {}
 
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 /** Причини, де фільтр найімовірніше помиляється: тема вже є, рішення тонке. */
 const NEAR_MISS: readonly RejectReason[] = ['advert', 'not_question', 'not_own'];
 
@@ -88,7 +91,9 @@ export function planSample(state: CycleState, weekOf?: string): SamplePlan {
 /**
  * Чат, який цикл не дочитав (FLOOD_WAIT, збій). Маркер при збої не зсувається,
  * тож `lastReadAt` — рівно те місце, звідки цикл мав читати; межа — старт циклу.
- * Дедуп цих повідомлень не бачив, тож фільтр вибірки за ним не застосовується.
+ * Чат без маркера ще не читався жодного разу: тоді береться тиждень до старту
+ * циклу, а id шукається серед діалогів. Дедуп цих повідомлень не бачив, тож
+ * фільтр вибірки за ним не застосовується.
  */
 export function planFailedChat(state: CycleState, ref: string, weekOf?: string): SamplePlan {
   const report = weekOf ? state.reports?.[weekOf] : latestReport(state);
@@ -96,12 +101,11 @@ export function planFailedChat(state: CycleState, ref: string, weekOf?: string):
   const failure = report.failures.find((f) => f.ref === ref);
   if (!failure) throw new SampleError(`chat ${ref} did not fail in ${report.weekOf}: sample it without --chat`);
   const entry = Object.entries(state.chats ?? {}).find(([, marker]) => marker.ref === ref);
-  if (!entry) throw new SampleError(`chat ${ref} has no marker in state`);
-  const [chatId, marker] = entry;
+  const since = entry ? entry[1].lastReadAt : new Date(Date.parse(report.startedAt) - WEEK_MS).toISOString();
   return {
     weekOf: report.weekOf,
     until: report.startedAt,
-    chats: [{ chatId, ref, title: marker.title, since: marker.lastReadAt, expected: null, onlySeen: false }],
+    chats: [{ chatId: entry?.[0] ?? null, ref, title: entry?.[1].title ?? failure.title ?? ref, since, expected: null, onlySeen: false }],
   };
 }
 

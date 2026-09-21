@@ -72,9 +72,9 @@ async function run(config: WorkerConfig): Promise<void> {
   // Матриця теж до першого циклу: без неї тиждень питань став би білими плямами.
   const matrix = readMatrix(config.rulesPath);
 
-  const client = await connect(config.apiId, config.apiHash, config.session);
+  const client = await connect(config.apiId, config.apiHash, config.session, config.floodSleepSeconds);
   const port = new GramjsPort(client);
-  log('worker_started', { chats: config.chats.length, schedule: config.schedule, windowWeeks: config.windowWeeks, rules: matrix.rules.length, rulesVerifiedAt: matrix.verified_at });
+  log('worker_started', { chats: config.chats.length, schedule: config.schedule, windowWeeks: config.windowWeeks, floodSleepSeconds: config.floodSleepSeconds, rules: matrix.rules.length, rulesVerifiedAt: matrix.verified_at });
 
   const server = createServer((req, res) => {
     if (req.url !== '/health' && req.url !== '/metrics') {
@@ -219,18 +219,22 @@ async function printSample(args: string[]): Promise<void> {
   }
   const client = await connect(Number(TG_API_ID), TG_API_HASH, TG_SESSION, SAMPLE_FLOOD_SLEEP_SECONDS);
   const port = new GramjsPort(client);
-  await port.listJoinedChats();
+  const joined = await port.listJoinedChats();
 
   const messages: SampleMessage[] = [];
   try {
-    for (const chat of plan.chats) {
-      const read = (await port.readMessagesSince(chat.chatId, chat.since)).filter(
-        (m) => m.postedAt < plan.until && (!chat.onlySeen || messageKey(chat.chatId, m.telegramMessageId) in state.seenMessages)
+    for (const planned of plan.chats) {
+      const found = joined.find((c) => c.id === planned.ref || c.username?.toLowerCase() === planned.ref);
+      const chatId = planned.chatId ?? found?.id;
+      if (!chatId) throw new SampleError(`chat ${planned.ref} is not among the account's dialogs`);
+      const chat = { ...planned, chatId, title: found?.title ?? planned.title };
+      const read = (await port.readMessagesSince(chatId, chat.since)).filter(
+        (m) => m.postedAt < plan.until && (!chat.onlySeen || messageKey(chatId, m.telegramMessageId) in state.seenMessages)
       );
       // Розбіжність — не причина зупинятись (повідомлення могли видалити), але
       // її видно в stderr: stdout — це файл вибірки.
       process.stderr.write(`${JSON.stringify({ event: 'sample_chat', ref: chat.ref, expected: chat.expected, read: read.length })}\n`);
-      for (const m of read) messages.push({ ...m, chatId: chat.chatId, chatTitle: chat.title });
+      for (const m of read) messages.push({ ...m, chatId, chatTitle: chat.title });
     }
   } finally {
     await client.destroy();
