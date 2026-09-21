@@ -64,6 +64,11 @@ S-2, S-3 і S-4 закрито 2026-09-16: пайплайн збору до зв
   ```
 - [ ] Розмітка `label` у кожному записі (Mike), потім
   `node research/tg-assistant/evalSample.ts research/tg-mining/data/sample-2026-W39.json` → число сюди
+- [x] Нічний `agent-evals` 2026-09-21 червоний: ворота drift-reviewer 0/3 на «чистому»
+  рядку `nierejestrowana.limit`. Рядок не був чистим: `source_url` на zus.pl, а в матриці
+  biznes.gov.pl, якого монітор і не скриптує. Чистий рядок тепер `common.projected_average_wage`,
+  звіряється з матрицею до запуску агента; локально PASS. Сигнал мовчав через відсутню
+  мітку `agent-evals`: заведено, workflow створює її сам
 - [ ] Скрін тижневого звіту (`node main.ts report`) для слайда «Що далі»; живий прогін
   `node scripts/rules-change-monitor/cycle.mjs`
 

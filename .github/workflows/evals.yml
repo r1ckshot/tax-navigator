@@ -165,6 +165,10 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           PASSRATE: ${{ needs.evals.outputs.passrate }}
         run: |
+          # Без мітки `gh issue create` падає, і червоний прогін лишається без
+          # сигналу: так мовчав перший червоний нічний прогін 2026-09-21.
+          gh label create agent-evals --repo "${{ github.repository }}" \
+            --description "Nightly agent-evals signal" --color D93F0B 2>/dev/null || true
           gh issue create \
             --repo "${{ github.repository }}" \
             --title "agent-evals: нічний прогін червоний ($(date +%Y-%m-%d))" \
