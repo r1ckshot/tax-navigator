@@ -31,6 +31,7 @@ describe('parseConfig', () => {
     // Шлях матриці в образі (Dockerfile COPY --from=rules).
     expect(config.rulesPath).toBe('/app/rules/rules.2026.json');
     expect(config.windowWeeks).toBe(4);
+    expect(config.floodSleepSeconds).toBe(60);
     expect(config.schedule).toEqual({ weekday: 1, hourUtc: 6 });
     expect(config.apiId).toBe(12345);
   });

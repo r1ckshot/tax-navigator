@@ -84,10 +84,13 @@ describe('planFailedChat', () => {
     expect(() => planFailedChat(withFailure(), 'old_chat')).toThrow('chat old_chat did not fail in 2026-W39: sample it without --chat');
   });
 
-  it('чат без маркера — помилка: невідомо, звідки читати', () => {
+  // 2026-09-21: `itwarsawcommunity` не прочитався жодного разу, маркера в нього немає.
+  it('чат без маркера — тиждень до старту циклу, id шукатимуть серед діалогів', () => {
     const s = withFailure();
     delete s.chats?.['-1003'];
-    expect(() => planFailedChat(s, 'big_chat')).toThrow('chat big_chat has no marker in state');
+    expect(planFailedChat(s, 'big_chat').chats).toEqual([
+      { chatId: null, ref: 'big_chat', title: 'Big', since: '2026-09-14T06:00:00.000Z', expected: null, onlySeen: false },
+    ]);
   });
 });
 

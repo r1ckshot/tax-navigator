@@ -18,6 +18,11 @@ export interface WorkerConfig {
   windowWeeks: number;
   schedule: WeeklySchedule;
   maxFloodWaitSeconds: number;
+  /**
+   * FLOOD_WAIT до цього порогу gramJS перечікує на місці й читає далі з тієї ж
+   * сторінки; довший іде в чергу ADR-0002. Нуль повертає стару поведінку.
+   */
+  floodSleepSeconds: number;
   healthPort: number;
 }
 
@@ -75,6 +80,10 @@ export function parseConfig(env: Record<string, string | undefined>): WorkerConf
       hourUtc: intInRange(env, 'CYCLE_HOUR_UTC', 6, 0, 23),
     },
     maxFloodWaitSeconds: intInRange(env, 'MAX_FLOOD_WAIT_SECONDS', 600, 1, 86_400),
+    // Дефолт не нуль: з нулем кожна повторна спроба читала великий чат з початку
+    // і впиралась у ліміт знову — `itwarsawcommunity` так не прочитався жодного разу
+    // (2026-W39: три FLOOD_WAIT по 24 с, dead letter). DECISIONS 2026-09-21.
+    floodSleepSeconds: intInRange(env, 'FLOOD_SLEEP_SECONDS', 60, 0, 300),
     healthPort: intInRange(env, 'HEALTH_PORT', 8080, 1, 65_535),
   };
 }
