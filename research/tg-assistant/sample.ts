@@ -45,6 +45,8 @@ export interface SampleRecord {
   postedAt: string;
   /** Ставить людина: true — органічне питання про власну ситуацію, false — ні. */
   label: boolean | null;
+  /** Питання справжнє, але продукт на нього не відповідає — біла пляма (клавіша `w`). */
+  gap?: boolean;
   text: string;
 }
 
@@ -192,18 +194,26 @@ export interface SampleScore {
   fnEstimated: number;
   precision: number | null;
   recall: number | null;
+  /** Справжніх питань, підтверджених людиною у вибірці: лічильник G1 знизу. */
+  confirmed: number;
+  /** З них ті, на які продукт не відповідає. */
+  gaps: number;
 }
 
 export function scoreSample(file: SampleFile): SampleScore {
   let tp = 0;
   let fp = 0;
   let unlabelled = 0;
+  let confirmed = 0;
+  let gaps = 0;
   const fnSampled: Record<string, number> = {};
   for (const record of file.records) {
     if (record.label === null) {
       unlabelled += 1;
       continue;
     }
+    if (record.label) confirmed += 1;
+    if (record.label && record.gap) gaps += 1;
     const verdict = file.verdicts[record.id];
     if (verdict === undefined) throw new SampleError(`record ${record.id} has no verdict`);
     if (verdict === 'organic') {
@@ -217,5 +227,5 @@ export function scoreSample(file: SampleFile): SampleScore {
     fnEstimated += (fn * total) / sampled;
   }
   const ratio = (a: number, b: number) => (b === 0 ? null : a / b);
-  return { unlabelled, tp, fp, fnSampled, fnEstimated, precision: ratio(tp, tp + fp), recall: ratio(tp, tp + fnEstimated) };
+  return { unlabelled, tp, fp, fnSampled, fnEstimated, precision: ratio(tp, tp + fp), recall: ratio(tp, tp + fnEstimated), confirmed, gaps };
 }

@@ -4,7 +4,9 @@
  *   node research/tg-assistant/labelSample.ts <файл>          — з першого нерозміченого
  *   node research/tg-assistant/labelSample.ts <файл> --redo   — усі з початку, поточна мітка видна
  *
- * y — людина питає про власну податкову ситуацію; n — ні; s — пропустити;
+ * y — людина питає про власну податкову чи бізнес-ситуацію, і продукт на це
+ * відповідає; w — питає, але продукт не відповідає (біла пляма); n — не власне
+ * питання (відповідь іншому, реклама, вакансія, болтовня); s — пропустити;
  * b — назад; q — вийти. Мітка пишеться у файл після кожної відповіді, тож
  * вийти можна будь-коли і продовжити з першого нерозміченого запису.
  * Вердикт фільтра не показується: мітка мусить бути незалежною від нього.
@@ -36,16 +38,18 @@ async function main(): Promise<void> {
   while (i < file.records.length) {
     const r = file.records[i];
     const done = file.records.filter((x) => x.label !== null).length;
-    console.log(`\n──── ${i + 1}/${file.records.length}  (розмічено ${done})  ${r.chat}  ${r.postedAt.slice(0, 10)}${r.label === null ? '' : `  зараз: ${r.label ? 'y' : 'n'}`}`);
+    console.log(`\n──── ${i + 1}/${file.records.length}  (розмічено ${done})  ${r.chat}  ${r.postedAt.slice(0, 10)}${r.label === null ? '' : `  зараз: ${r.label ? (r.gap ? 'w' : 'y') : 'n'}`}`);
     console.log(r.text);
-    const answer = (await ask('власне податкове питання? [y/n/s/b/q] ')).trim().toLowerCase();
+    const answer = (await ask('питання про свою ситуацію? y — так / w — так, але продукт не відповідає / n — ні [y/w/n/s/b/q] ')).trim().toLowerCase();
     if (answer === 'q') break;
     if (answer === 'b') {
       i = Math.max(0, i - 1);
       continue;
     }
-    if (answer === 'y' || answer === 'n') {
-      r.label = answer === 'y';
+    if (answer === 'y' || answer === 'w' || answer === 'n') {
+      r.label = answer !== 'n';
+      if (answer === 'n') delete r.gap;
+      else r.gap = answer === 'w';
       save();
     } else if (answer !== 's') continue;
     i += 1;
