@@ -4,7 +4,7 @@
  *   node main.ts run    — довгоживучий процес: розклад, цикл, /health, /metrics
  *   node main.ts chats  — список груп і каналів акаунта, щоб заповнити TG_CHATS
  *   node main.ts report [2026-W39] — тижневий звіт зі стану (S-4); без тижня — останній цикл
- *   node main.ts sample [2026-W39] [--seed N] [--chat REF] [--near-miss N] [--other N]
+ *   node main.ts sample [2026-W39] [--seed N] [--chat REF [--from DATE --to DATE]] [--near-miss N] [--other N]
  *                          — вибірка для розмітки фільтра (sample.ts), JSON у stdout
  *
  * Лог — JSON-рядки у stdout. У лог не йде ні текст повідомлень, ні значення
@@ -18,7 +18,7 @@ import { evaluateHealth } from './health.ts';
 import { loadMatrix } from './labeler.ts';
 import { CollectorMetrics } from './metrics.ts';
 import { buildWeeklyReport, renderWeeklyReport } from './reporter.ts';
-import { DEFAULT_LIMITS, drawSample, planFailedChat, planSample, SampleError, type SampleMessage } from './sample.ts';
+import { DEFAULT_LIMITS, drawSample, planChatWindow, planFailedChat, planSample, SampleError, type SampleMessage } from './sample.ts';
 import { isCycleDue, isoWeek } from './schedule.ts';
 import { hasCycleRun, latestReport, loadState, messageKey, saveState, type CycleState } from './state.ts';
 import { createClient, GramjsPort } from './telegram.ts';
@@ -212,7 +212,10 @@ async function printSample(args: string[]): Promise<void> {
   const weekOf = args.find((a, i) => /^\d{4}-W\d{2}$/.test(a) && !args[i - 1]?.startsWith('--'));
 
   const state = loadState(process.env.STATE_PATH || '/data/state.json');
-  const plan = chatRef ? planFailedChat(state, chatRef, weekOf) : planSample(state, weekOf);
+  const from = valueOf('--from');
+  const to = valueOf('--to');
+  if ((from || to) && !(chatRef && from && to)) throw new ConfigError('--from and --to go together and need --chat');
+  const plan = chatRef && from && to ? planChatWindow(state, chatRef, from, to) : chatRef ? planFailedChat(state, chatRef, weekOf) : planSample(state, weekOf);
   const { TG_API_ID, TG_API_HASH, TG_SESSION } = process.env;
   if (!TG_API_ID || !TG_API_HASH || !TG_SESSION) {
     throw new ConfigError('missing environment variables: TG_API_ID, TG_API_HASH, TG_SESSION');
@@ -249,7 +252,7 @@ try {
   else if (command === 'report') printReport(process.argv[3]);
   else if (command === 'sample') await printSample(process.argv.slice(3));
   else {
-    process.stderr.write('usage: node main.ts run | chats | report [week] | sample [week] [--seed N] [--chat REF] [--near-miss N] [--other N]\n');
+    process.stderr.write('usage: node main.ts run | chats | report [week] | sample [week] [--seed N] [--chat REF [--from DATE --to DATE]] [--near-miss N] [--other N]\n');
     process.exit(2);
   }
 } catch (err) {

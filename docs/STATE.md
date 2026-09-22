@@ -54,16 +54,22 @@ S-2, S-3 і S-4 закрито 2026-09-16: пайплайн збору до зв
   Вибірка стратифікована за причиною відсіву (органічні всі, «тонкі» страти до 100,
   решта до 20), вердикти окремо від текстів; `evalSample.ts` рахує precision і recall
   з вагою страти. 220 тестів `tg-assistant` зелені, мутація ваги страти ловиться
-- [ ] Merge → деплой, потім вибірка з сервера (термінал Mike, воркер на час прогону
-  зупинено: друга сесія поруч ризикує `AUTH_KEY_DUPLICATED`; том змонтовано `:ro`):
-  ```
-  ssh <vps> 'id=$(docker ps -q --filter label=com.docker.compose.project=tax-navigator --filter label=com.docker.compose.service=tg-collector);
-    image=$(docker inspect -f "{{.Config.Image}}" $id); docker stop $id >&2;
-    docker run --rm --env-file /home/deploy/secrets/tg-collector.env -v tax-navigator-tg-collector-data:/data:ro $image node main.ts sample;
-    docker start $id >&2' > research/tg-mining/data/sample-2026-W39.json
-  ```
-- [ ] Розмітка `label` у кожному записі (Mike), потім
-  `node research/tg-assistant/evalSample.ts research/tg-mining/data/sample-2026-W39.json` → число сюди
+- [x] **Точність фільтра на живому чаті: precision 53,3% (8/15), recall ≈ 32%** (tp 8, fp 7,
+  пропусків у вибірці 12, оцінка на тиждень 16,8). Вибірка: `itwarsawcommunity`, тиждень
+  14.09→21.09, 2397 повідомлень, 68 розмічено (Mike; органічні всі 15, `not_question` 25/35,
+  `off_topic` 10/2304, решта страт цілком або до 10). Проти раунду 2 (92,3% / 100%) різко
+  гірше: 12 із 25 «не питань» — питання без `?` і маркерів. Recall грубий: страта
+  `off_topic` має вагу 230 на запис. Ці 68 записів — тестова вибірка: фільтр
+  правиться на розмітці 4 тижнів до 14.09 (`sample --chat --from --to`), міряється на W39
+- [x] Перша розмітка Mike міряла інше — чи **продукт відповідає** на питання: **0 з 15**
+  органічних. Окремий сигнал для G1, файл `sample-2026-W39-itwarsaw-product.json` поза git
+- [x] Корінь: `itwarsawcommunity` **не прочитався жодного разу** — з `floodSleepThreshold: 0`
+  кожна спроба читала чат з першої сторінки, три `FLOOD_WAIT` по 24 с → dead letter.
+  Короткі паузи тепер перечікуються (`FLOOD_SLEEP_SECONDS=60`, DECISIONS 2026-09-21), PR #106.
+  Перевірка — цикл 28.09: чат має з'явитись у звіті, а не у «Недоступних»
+- [x] Вибірка з VPS: `sample` (#104), банер gramJS поза stdout і `--chat` для непрочитаного
+  чату (#105, #106), `labelSample.ts` — розмітка y/n у терміналі, `evalSample --why` — ознаки без тексту.
+  Цикл W39 сам: 3 чати, 7 повідомлень, 0 органічних — вибірка збіглась із ним 7 = 7
 - [x] Нічний `agent-evals` 2026-09-21 червоний: ворота drift-reviewer 0/3 на «чистому»
   рядку `nierejestrowana.limit`. Рядок не був чистим: `source_url` на zus.pl, а в матриці
   biznes.gov.pl, якого монітор і не скриптує. Чистий рядок тепер `common.projected_average_wage`,
