@@ -14,7 +14,7 @@ ticket: "—"
 
 # 0002 — Per-chat exponential-backoff queue keyed on Telegram's FLOOD_WAIT_X
 
-- **Status:** Accepted
+- **Status:** Accepted; уточнено 2026-09-21 — `FLOOD_WAIT` до `FLOOD_SLEEP_SECONDS` (60 с) перечікується на місці, черга лише для довших ([DECISIONS](../../../DECISIONS.md))
 - **Date:** 2026-08-06
 - **Deciders:** Mike + Claude (architecture-design, Socratic walk)
 
