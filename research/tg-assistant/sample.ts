@@ -109,6 +109,24 @@ export function planFailedChat(state: CycleState, ref: string, weekOf?: string):
   };
 }
 
+/**
+ * Довільний період одного чату — навчальна вибірка для правки фільтра. Звіт
+ * циклу тут не потрібен: тиждень, на якому міряють, і тижні, на яких правлять,
+ * мусять не перетинатись, і межі задає людина.
+ */
+export function planChatWindow(state: CycleState, ref: string, from: string, to: string): SamplePlan {
+  const bounds = [from, to].map((d) => new Date(d));
+  if (bounds.some((d) => Number.isNaN(d.getTime()))) throw new SampleError(`--from/--to must be dates, got "${from}" and "${to}"`);
+  const [since, until] = bounds.map((d) => d.toISOString());
+  if (since >= until) throw new SampleError(`--from ${since} is not before --to ${until}`);
+  const entry = Object.entries(state.chats ?? {}).find(([, marker]) => marker.ref === ref);
+  return {
+    weekOf: `${since.slice(0, 10)}..${until.slice(0, 10)}`,
+    until,
+    chats: [{ chatId: entry?.[0] ?? null, ref, title: entry?.[1].title ?? ref, since, expected: null, onlySeen: false }],
+  };
+}
+
 /** Детермінований генератор: те саме зерно — та сама вибірка, її можна відтворити. */
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;

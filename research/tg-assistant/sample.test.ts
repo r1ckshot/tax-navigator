@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawSample, planFailedChat, planSample, SampleError, scoreSample, type SampleFile, type SampleMessage, type SampleRecord, type Stratum } from './sample.ts';
+import { drawSample, planChatWindow, planFailedChat, planSample, SampleError, scoreSample, type SampleFile, type SampleMessage, type SampleRecord, type Stratum } from './sample.ts';
 import type { CycleReport, CycleState } from './state.ts';
 
 // Фікстури синтетичні: сирий текст реальних чатів у git не йде (PRD §6.1).
@@ -91,6 +91,25 @@ describe('planFailedChat', () => {
     expect(planFailedChat(s, 'big_chat').chats).toEqual([
       { chatId: null, ref: 'big_chat', title: 'Big', since: '2026-09-14T06:00:00.000Z', expected: null, onlySeen: false },
     ]);
+  });
+});
+
+describe('planChatWindow', () => {
+  it('довільний період, чат за маркером; мітка вибірки — самі межі', () => {
+    expect(planChatWindow(state(), 'old_chat', '2026-08-17', '2026-09-14')).toEqual({
+      weekOf: '2026-08-17..2026-09-14',
+      until: '2026-09-14T00:00:00.000Z',
+      chats: [{ chatId: '-1001', ref: 'old_chat', title: 'Old', since: '2026-08-17T00:00:00.000Z', expected: null, onlySeen: false }],
+    });
+  });
+
+  it('чат без маркера — id шукатимуть серед діалогів', () => {
+    expect(planChatWindow(state(), 'big_chat', '2026-08-17', '2026-09-14').chats[0]).toMatchObject({ chatId: null, title: 'big_chat' });
+  });
+
+  it('перевернуті або криві межі — помилка, а не порожня вибірка', () => {
+    expect(() => planChatWindow(state(), 'old_chat', '2026-09-14', '2026-08-17')).toThrow(SampleError);
+    expect(() => planChatWindow(state(), 'old_chat', 'вчора', '2026-08-17')).toThrow('--from/--to must be dates');
   });
 });
 
