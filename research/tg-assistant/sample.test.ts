@@ -200,6 +200,19 @@ describe('scoreSample', () => {
     expect(s.recall).toBeCloseTo(3 / 14, 10);
   });
 
+  it('підтверджені питання й білі плями рахуються незалежно від вердикту фільтра', () => {
+    // Еталон: питання — 2 серед органічних і 1 серед відсіяних = 3; біла пляма — одна.
+    const file = sampleFile({ organic: { total: 3, sampled: 3 }, not_question: { total: 2, sampled: 2 } }, [
+      ['organic', true],
+      ['organic', true],
+      ['organic', false],
+      ['not_question', true],
+      ['not_question', false],
+    ]);
+    file.records[1].gap = true;
+    expect(scoreSample(file)).toMatchObject({ confirmed: 3, gaps: 1 });
+  });
+
   it('нерозмічені записи не рахуються і названі окремо', () => {
     const file = sampleFile({ organic: { total: 2, sampled: 2 } }, [['organic', true], ['organic', null]]);
     expect(scoreSample(file)).toMatchObject({ unlabelled: 1, tp: 1, fp: 0, precision: 1, recall: 1 });
