@@ -102,7 +102,9 @@ function extractBacktickTokens(text) {
 
 {
   const r = spawnSync("git", ["ls-files", "*.md"], { encoding: "utf8" });
-  const files = r.stdout.trim().split("\n").filter(Boolean);
+  // Видалений, але ще не застейджений файл є в індексі й відсутній на диску:
+  // читати треба робоче дерево, як і скрізь у цій перевірці.
+  const files = r.stdout.trim().split("\n").filter(Boolean).filter((f) => existsSync(f));
   const LINK_RE = /\[[^\]]*\]\(([^)#]+)(#[^)]*)?\)/g;
   // Ціль у .gitignore (docs/capstones/) лежить лише на машині автора. У свіжому
   // клоні її немає за визначенням, і FAIL там блокував би кожен коміт новачка.
