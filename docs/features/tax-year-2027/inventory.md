@@ -80,7 +80,7 @@
 | [.claude/commands/scaffold-rule.md:10](../../../.claude/commands/scaffold-rule.md#L10) | виконуваний `grep` по імені файла всередині команди — після перейменування віддасть **порожній список мовчки**, без помилки. Той самий клас: `audit-i18n-safety.md:58`, `.claude/skills/sdlc-audit/SKILL.md:89` і дубль `tax-navigator-toolkit/commands/scaffold-rule.md:10` |
 | [.claude/hooks/layer-boundary.mjs:122](../../../.claude/hooks/layer-boundary.mjs#L122) | ім'я файла в тексті `why` хука межі шарів — той самий «повідомлення бреше», що в `.dependency-cruiser.cjs`, і **продубльований** у `tax-navigator-toolkit/hooks/layer-boundary.mjs:122` |
 | [scripts/check-stale-rules.mjs:15](../../../scripts/check-stale-rules.mjs#L15) | `RULES_FILE` — жорсткий шлях на файл 2026 |
-| [mcp/evidence-guard/src/server.ts:25](../../../mcp/evidence-guard/src/server.ts#L25) | той самий жорсткий шлях + ім'я файла в тексті помилки (`:166`) |
+| `mcp/evidence-guard/src/server.ts:25` | той самий жорсткий шлях + ім'я файла в тексті помилки (`:166`) |
 | [.dependency-cruiser.cjs:54,62](../../../.dependency-cruiser.cjs#L54) | ім'я `rules.2026.json` у текстах правил; заборона нового файла формально не зачепить, але повідомлення бреше |
 
 **Чи витримає структура два роки одночасно:** ні. Сам JSON рік-нейтральний

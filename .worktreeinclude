@@ -17,22 +17,9 @@
 # гілкою коду; тримаємо рядок явно, щоб намір читався з файла, а не з бінарника.
 .claude/settings.local.json
 
-# Курсові нотатки. Тека в .gitignore, але STATE.md і BACKLOG.md на неї
-# посилаються, а `npm run verify` перевіряє перехресні посилання по файловій
-# системі — без цих файлів гейт валить КОЖЕН коміт із worktree (6 FAIL про
-# неіснуючі capstones/*.md). 96 KB тексту, копія дешева.
-docs/capstones/
-
 # --- Свідомо НЕ копіюємо ---
 #
-# mcp/evidence-guard/dist/  — зібраний JS. Копія відв'язана від джерел worktree,
-#   тож сервер тихо віддавав би стару логіку. Краще гучний збій: у worktree
-#   `npm --prefix mcp/evidence-guard run build` перед першим запуском.
-#
-# mcp/evidence-guard/data/  — журнал ack-ів вебхука, робочі дані. Дві копії
-#   аудит-логу неминуче розійдуться; worktree починає з чистого.
-#
-# node_modules/, mcp/evidence-guard/node_modules/ — тисячі файлів на 9p.
+# node_modules/ — тисячі файлів на 9p.
 #   Симлінк через `worktree.symlinkDirectories`, не копія.
 #
 # .next/ — кеш збірки, прив'язаний до дерева. Кожен worktree будує свій.

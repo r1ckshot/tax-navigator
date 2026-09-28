@@ -208,7 +208,7 @@ baseline) → хук `block-env-writes` → плагін `tax-navigator-toolkit/
   `environment-limits.md`.
 
 ## 2026-08-03/04 — M5 capstone: F1 vs F2, і що показав замір
-Повний лог з таймстемпами, промптами й таблицями — [CAPSTONE_LOG.md](../CAPSTONE_LOG.md).
+Повний лог з таймстемпами, промптами й таблицями — `CAPSTONE_LOG.md`.
 Сюди — висновки, яких у ньому немає як окремого тексту:
 
 - **Мутаційна перевірка знецінила «зелені тести».** Еталони сценаріїв звірялись через
@@ -293,7 +293,7 @@ baseline) → хук `block-env-writes` → плагін `tax-navigator-toolkit/
   заради квоти — той самий антипатерн, що «ADR на кожне рішення», проти якого
   застерігає сам курсовий `checklist.md`.
 - **Порівняння `architecture-design` vs власний `sad-forge`** (обидва прогнані на
-  `tg-assistant` §1-§5, [sad-sad-forge.md](features/tg-assistant/sad-sad-forge.md)):
+  `tg-assistant` §1-§5, `sad-sad-forge.md`):
   контент вийшов майже ідентичний — той самий C4Context/C4Container, той самий
   `target_surfaces: [worker]`, ті самі три ADR-стовпи §4. Найпомітніший приріст
   якості — §1 Stakeholders: `sad-forge`-шаблон явно забороняє sign-off-роль, якої
@@ -345,7 +345,7 @@ baseline) → хук `block-env-writes` → плагін `tax-navigator-toolkit/
   просто ім'я фічі в реченні, не заявку про закриття.
 - **Порівняння `generate-data-model` vs власний `migrations-forge`**
   (обидва на `tg-assistant`,
-  [data-model-migrations-forge.md](features/tg-assistant/data-model-migrations-forge.md)):
+  `data-model-migrations-forge.md`):
   сутності, зв'язки й індекси вийшли ІДЕНТИЧНИМИ — обидва скіли читають той
   самий вхід (`sad.md` §6 persist-нотатки), тож розбіжність лише в типах
   колонок (`TEXT`/`INTEGER` проти `UUID`/`TIMESTAMPTZ`/`VARCHAR(N)`/`BOOLEAN`).
@@ -389,7 +389,7 @@ reconcile-демо) — той самий невендорений підхід,
   позначено N/A в `api-sync-report.md` з поясненням, не пропущено тихо.
 - **Порівняння `api-forge` vs власний `contract-forge`** (обидва на
   `rules-change-monitor`,
-  [events-contract-forge.md](features/rules-change-monitor/contracts/events-contract-forge.md)):
+  `events-contract-forge.md`):
   на відміну від `migrations-forge` (де типи розійшлись одразу),
   тут вихід вийшов структурно ІДЕНТИЧНИМ — курсовий `templates/events.md`
   ніколи не мав HTTP-специфічних дефолтів (`BearerAuth`, cursor-пагінація),
