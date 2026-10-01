@@ -64,8 +64,11 @@ export class TelegramReadError extends Error {
 export interface TelegramPort {
   /** Лише діалоги, де акаунт учасник, — чужого чату Telegram сюди не віддасть. */
   listJoinedChats(): Promise<JoinedChat[]>;
-  /** Повідомлення чату, опубліковані не раніше `since` (ISO). */
-  readMessagesSince(chatId: string, since: string): Promise<RawMessage[]>;
+  /**
+   * Повідомлення чату, опубліковані не раніше `since` (ISO). `until` — верхня
+   * межа (виключна): без неї читання минулого періоду йде аж до сьогодні.
+   */
+  readMessagesSince(chatId: string, since: string, until?: string): Promise<RawMessage[]>;
 }
 
 export interface CollectedMessage extends RawMessage {

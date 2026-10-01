@@ -129,6 +129,24 @@ export function planChatWindow(state: CycleState, ref: string, from: string, to:
   };
 }
 
+/**
+ * Усі чати конфігу за довільний період — запит Mike «подивись, про що говорять».
+ * Ні стану, ні звіту циклу не потрібно: циклу більше немає, чат шукається серед
+ * діалогів за `ref`, а дедуп не застосовується.
+ */
+export function planPeriod(refs: readonly string[], from: string, to: string): SamplePlan {
+  if (refs.length === 0) throw new SampleError('no chats to read: TG_CHATS is empty');
+  const bounds = [from, to].map((d) => new Date(d));
+  if (bounds.some((d) => Number.isNaN(d.getTime()))) throw new SampleError(`--from/--to must be dates, got "${from}" and "${to}"`);
+  const [since, until] = bounds.map((d) => d.toISOString());
+  if (since >= until) throw new SampleError(`--from ${since} is not before --to ${until}`);
+  return {
+    weekOf: `${since.slice(0, 10)}..${until.slice(0, 10)}`,
+    until,
+    chats: refs.map((ref) => ({ chatId: null, ref, title: ref, since, expected: null, onlySeen: false })),
+  };
+}
+
 /** Детермінований генератор: те саме зерно — та сама вибірка, її можна відтворити. */
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;

@@ -1,38 +1,47 @@
-# Тижневий лічильник G1 — понеділок після циклу
+# Збір за запитом — «подивись, про що говорять»
 
-Цикл (06:00 UTC) сам читає чати й рахує грубим фільтром. Фільтр за ключовими
-словами на живому чаті хибить приблизно в кожному третьому-четвертому «питанні», тож
-лічильник G1 ставить не він: вибірку розмічає Claude, список питань підтверджує
-Mike (DECISIONS 2026-09-28). Тексти не лягають ні в git, ні на диск сервера.
+Тижневого циклу немає (DECISIONS 2026-10-01): на VPS не крутиться жоден процес
+колектора, розкладу не існує. Mike каже: «подивись, про що говорять за період X» —
+і запускає одну команду. Claude розмічає вибірку за строгим критерієм, пише звіт
+тем, Mike підтверджує. Лише читання, паузи між запитами (`FLOOD_SLEEP_SECONDS`,
+за замовчуванням 60 с), тексти не лягають ні в git, ні на GitHub, ні на диск
+сервера (PRD tg-assistant §6.1).
+
+```
+запит Mike → команда на VPS (stdout → файл) → labeling/pull-<період>.json
+          → розмітка Claude → docs/features/tg-assistant/questions-<період>.md
+          → підтвердження Mike
+```
 
 ## 1. Вибірка — на сервері (`bot`)
 
+`--from` включно, `--to` виключно, UTC. Чати — `TG_CHATS` із файла секретів на
+сервері, усі одразу. Воркера поруч немає, тож зупиняти нічого не треба.
+
 ```
-umask 077; sudo bash -s > ~/sample.json <<'EOF'
+umask 077; sudo bash -s > ~/pull.json <<'EOF'
 set -euo pipefail
-id=$(docker ps -q --filter label=com.docker.compose.project=tax-navigator --filter label=com.docker.compose.service=tg-collector)
-image=$(docker inspect -f '{{.Config.Image}}' "$id")
-env_file=$(mktemp); trap 'rm -f "$env_file"; docker start "$id" >&2' EXIT
-docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$id" > "$env_file"
-docker stop "$id" >&2
-docker run --rm --env-file "$env_file" -v tax-navigator-tg-collector-data:/data:ro "$image" node main.ts sample
+image=$(docker images --format '{{.Repository}}:{{.Tag}}' tax-navigator/tg-collector | head -1)
+docker run --rm --env-file /home/deploy/secrets/tg-collector.env "$image" node main.ts pull --from 2026-09-28 --to 2026-10-05
 EOF
 ```
 
-Воркер на хвилину зупиняється (друга сесія Telegram поруч ризикує
-`AUTH_KEY_DUPLICATED`) і стартує сам. Не запускати у 20-хвилинне вікно
-`watch` після деплою: нагляд прочитає зупинку як аварію.
+stderr показує рядок на чат (`pull_chat`, скільки прочитано). Чат, що не
+прочитався (FLOOD_WAIT довший за паузу, чат зник із діалогів), друкується як
+`pull_chat_failed`, і команда завершується кодом **3** — файл при цьому повний
+для решти чатів. Не приймати код 3 за успіх: сказати Claude, які чати випали.
 
-Чат, що в циклі впав (`report` → «Недоступні чати»), береться окремо:
-`node main.ts sample --chat <ref>`.
+Образ збирає деплой (`deploy-tg-collector`) після кожного мержу в
+`research/tg-assistant/**`; `docker images` бере найновіший. Образу немає —
+`gh workflow run deploy-tg-collector.yml --ref master`.
 
 ## 2. Забрати вибірку — PowerShell, корінь репо
 
 ```
-scp -i C:\Users\kapus\.ssh\turtle_bot_vps bot@turtle-bot-mike.duckdns.org:sample.json research\tg-mining\labeling\sample-<тиждень>.json
+scp -i C:\Users\kapus\.ssh\turtle_bot_vps bot@turtle-bot-mike.duckdns.org:pull.json research\tg-mining\labeling\pull-<період>.json
 ```
 
-І одразу на сервері: `shred -u ~/sample.json`. **`scp` — рівно один раз:** повтор
+І одразу на сервері: `shred -u ~/pull.json`. **`scp` — рівно один раз:** повтор
 перезапише локальний файл нерозміченою копією, і розмітка пропаде.
 
 Тека `labeling/` — поза git і поза `deny` на `research/tg-mining/data/**`: у ній
@@ -40,9 +49,10 @@ scp -i C:\Users\kapus\.ssh\turtle_bot_vps bot@turtle-bot-mike.duckdns.org:sample
 
 ## 3. Розмітка
 
-Claude розмічає файл сам і показує список питань за темами; Mike підтверджує або
-називає номери, які міняє. Вручну — той самий файл:
-`node research\tg-assistant\labelSample.ts research\tg-mining\labeling\sample-<тиждень>.json`
+Claude розмічає файл сам, пише звіт тем у `docs/features/tg-assistant/questions-<період>.md`
+(**лише теми й лічильники, без цитат** — файл іде в git) і показує список питань
+за темами; Mike підтверджує або називає номери, які міняє. Вручну — той самий файл:
+`node research\tg-assistant\labelSample.ts research\tg-mining\labeling\pull-<період>.json`
 (після `q` продовжує з першого нерозміченого).
 
 | Клавіша | Коли |
@@ -58,11 +68,18 @@ Claude розмічає файл сам і показує список пита�
 ## 4. Числа
 
 ```
-node research\tg-assistant\evalSample.ts research\tg-mining\labeling\sample-<тиждень>.json
+node research\tg-assistant\evalSample.ts research\tg-mining\labeling\pull-<період>.json
 ```
 
-- `questions: confirmed` — лічильник G1 за тиждень (`y + w`), іде в STATE;
+- `questions: confirmed` — скільки справжніх питань у періоді (`y + w`);
 - `white spots` — кандидати в беклог продукту;
 - `precision` / `recall` — як тримається сам фільтр.
 
-Поріг G1: менше 5 питань сумарно за 6 циклів — півот (idea-brief §13).
+G1 зараховано 2026-10-01, поріг більше не діє. Нова вибірка — розвідка тем для
+сторінок і гайдів, а не лічильник воріт.
+
+## Старі команди
+
+`main.ts run` (цикл), `sample` (вибірка за звітом циклу зі стану) і `report`
+лишились у коді, але на VPS не запускаються: циклу немає, стан у томі
+`tax-navigator-tg-collector-data` — історія до 2026-10-01.

@@ -2,8 +2,11 @@
  * Точка входу воркера (sad.md §5 `cycle.ts`).
  *
  *   node main.ts run    — довгоживучий процес: розклад, цикл, /health, /metrics
+ *                         (з 2026-10-01 на VPS не стартує: збір іде командою pull)
  *   node main.ts chats  — список груп і каналів акаунта, щоб заповнити TG_CHATS
  *   node main.ts report [2026-W39] — тижневий звіт зі стану (S-4); без тижня — останній цикл
+ *   node main.ts pull --from DATE --to DATE [--seed N] [--near-miss N] [--other N]
+ *                          — за запитом: усі чати з TG_CHATS за період, JSON у stdout
  *   node main.ts sample [2026-W39] [--seed N] [--chat REF [--from DATE --to DATE]] [--near-miss N] [--other N]
  *                          — вибірка для розмітки фільтра (sample.ts), JSON у stdout
  *
@@ -12,13 +15,13 @@
  */
 
 import { createServer } from 'node:http';
-import { runCycle } from './collector.ts';
+import { runCycle, TelegramReadError } from './collector.ts';
 import { ConfigError, parseConfig, type WorkerConfig } from './config.ts';
 import { evaluateHealth } from './health.ts';
 import { loadMatrix } from './labeler.ts';
 import { CollectorMetrics } from './metrics.ts';
 import { buildWeeklyReport, renderWeeklyReport } from './reporter.ts';
-import { DEFAULT_LIMITS, drawSample, planChatWindow, planFailedChat, planSample, SampleError, type SampleMessage } from './sample.ts';
+import { DEFAULT_LIMITS, drawSample, planChatWindow, planFailedChat, planPeriod, planSample, SampleError, type SampleMessage } from './sample.ts';
 import { isCycleDue, isoWeek } from './schedule.ts';
 import { hasCycleRun, latestReport, loadState, messageKey, saveState, type CycleState } from './state.ts';
 import { createClient, GramjsPort } from './telegram.ts';
@@ -245,14 +248,69 @@ async function printSample(args: string[]): Promise<void> {
   process.stdout.write(`${JSON.stringify(drawSample(plan.weekOf, messages, seed, limits), null, 2)}\n`);
 }
 
+/**
+ * Збір за запитом: усі чати з TG_CHATS за довільний період, текст — лише в
+ * stdout (на диск сервера не лягає, PRD §6.1). Стану не читає і не пише; воркера
+ * поруч немає, тож друга сесія не ризикує AUTH_KEY_DUPLICATED. Лише читання.
+ * Пауза між запитами — `FLOOD_SLEEP_SECONDS`: коротку Telegram перечікується
+ * на місці, довша кидає чат у `failed`, а решта читається далі.
+ * Чат, що не прочитався, не ховається: перелік іде в stderr, а код виходу — 3.
+ */
+async function pullPeriod(args: string[]): Promise<void> {
+  const valueOf = (flag: string) => (args.includes(flag) ? args[args.indexOf(flag) + 1] : undefined);
+  const intFlag = (flag: string, fallback: number) => {
+    const raw = valueOf(flag);
+    const value = raw === undefined ? fallback : Number(raw);
+    if (!Number.isInteger(value) || value < 0) throw new ConfigError(`${flag} must be a non-negative integer, got "${raw}"`);
+    return value;
+  };
+  const from = valueOf('--from');
+  const to = valueOf('--to');
+  if (!from || !to) throw new ConfigError('pull needs --from and --to');
+  const config = parseConfig(process.env);
+  const plan = planPeriod(config.chats, from, to);
+  const limits = { nearMiss: intFlag('--near-miss', DEFAULT_LIMITS.nearMiss), other: intFlag('--other', DEFAULT_LIMITS.other) };
+
+  const client = await connect(config.apiId, config.apiHash, config.session, config.floodSleepSeconds);
+  const port = new GramjsPort(client);
+  const joined = await port.listJoinedChats();
+
+  const messages: SampleMessage[] = [];
+  const failed: string[] = [];
+  try {
+    for (const planned of plan.chats) {
+      const found = joined.find((c) => c.id === planned.ref || c.username?.toLowerCase() === planned.ref);
+      if (!found) {
+        failed.push(planned.ref);
+        process.stderr.write(`${JSON.stringify({ event: 'pull_chat_failed', ref: planned.ref, reason: 'NOT_IN_DIALOGS' })}\n`);
+        continue;
+      }
+      try {
+        const read = await port.readMessagesSince(found.id, planned.since, plan.until);
+        process.stderr.write(`${JSON.stringify({ event: 'pull_chat', ref: planned.ref, read: read.length })}\n`);
+        for (const m of read) messages.push({ ...m, chatId: found.id, chatTitle: found.title });
+      } catch (err) {
+        if (!(err instanceof TelegramReadError)) throw err;
+        failed.push(planned.ref);
+        process.stderr.write(`${JSON.stringify({ event: 'pull_chat_failed', ref: planned.ref, reason: err.message })}\n`);
+      }
+    }
+  } finally {
+    await client.destroy();
+  }
+  process.stdout.write(`${JSON.stringify(drawSample(plan.weekOf, messages, intFlag('--seed', 1), limits), null, 2)}\n`);
+  if (failed.length > 0) process.exit(3);
+}
+
 const command = process.argv[2];
 try {
   if (command === 'run') await run(parseConfig(process.env));
   else if (command === 'chats') await listChats();
   else if (command === 'report') printReport(process.argv[3]);
   else if (command === 'sample') await printSample(process.argv.slice(3));
+  else if (command === 'pull') await pullPeriod(process.argv.slice(3));
   else {
-    process.stderr.write('usage: node main.ts run | chats | report [week] | sample [week] [--seed N] [--chat REF [--from DATE --to DATE]] [--near-miss N] [--other N]\n');
+    process.stderr.write('usage: node main.ts run | chats | pull --from DATE --to DATE | report [week] | sample [week] [--seed N] [--chat REF [--from DATE --to DATE]] [--near-miss N] [--other N]\n');
     process.exit(2);
   }
 } catch (err) {
