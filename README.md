@@ -51,11 +51,12 @@
 [0.2.0](https://github.com/r1ckshot/tax-navigator/releases/tag/v0.2.0),
 зміни по версіях у [CHANGELOG.md](CHANGELOG.md).
 
-Курс Agentic Engineering пройдено повністю (M1–M11). Зараз проєкт міряє попит:
-збір питань крутиться сам, вердикт за критерієм із
-[docs/PROJECT.md](docs/PROJECT.md) — наприкінці жовтня 2026.
+Курс Agentic Engineering пройдено повністю (M1–M11). Попит підтверджено
+2026-10-01: 51 органічне питання за чотири тижні в одному чаті. Що далі — по черзі
+у [docs/ROADMAP.md](docs/ROADMAP.md): автозвірка всіх правил, право працювати,
+новий вигляд, сторінки-відповіді, платні гайди, власний домен, Європа.
 
-Живий стан: [docs/STATE.md](docs/STATE.md) · черга: [docs/BACKLOG.md](docs/BACKLOG.md)
+Живий стан: [docs/STATE.md](docs/STATE.md) · план: [docs/ROADMAP.md](docs/ROADMAP.md) · черга: [docs/BACKLOG.md](docs/BACKLOG.md)
 · рішення й ціна кожного: [docs/DECISIONS.md](docs/DECISIONS.md)
 
 ## Стек
