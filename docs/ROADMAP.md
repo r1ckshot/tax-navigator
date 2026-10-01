@@ -75,7 +75,7 @@ Mike пише «Begin». Сесія:
 
 | # | Сесія | Модель · effort | Стан |
 |---|---|---|---|
-| 02 | [Спосіб звірки на кожне правило, сторінки](sessions/02-verify-pages.md) | Opus · high | [ ] |
+| 02 | [Спосіб звірки на кожне правило, сторінки](sessions/02-verify-pages.md) | Opus · high | [x] |
 | 03 | [Закони, редакції, витяг моделлю](sessions/03-verify-acts-llm.md) | Opus · high | [ ] |
 | 04 | [Розклад і що бачить Mike](sessions/04-verify-schedule.md) | Opus · high | [ ] |
 
