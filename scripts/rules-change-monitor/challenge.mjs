@@ -7,15 +7,19 @@
 // «значенням джерела».
 //
 // Сигнатури — лише з живих відповідей, знятих 2026-09-16 (фікстури
-// `__fixtures__/waf-*.html`). Вендорів, чиїх сторінок ми не бачили, тут немає:
-// вигадана сигнатура або мовчить завжди, або ловить справжній контент.
+// `__fixtures__/waf-*.html`), звужені 2026-10-01 справжньою сторінкою
+// podatki.gov.pl. Вендорів, чиїх сторінок ми не бачили, тут немає: вигадана
+// сигнатура або мовчить завжди, або ловить справжній контент.
 
 /**
  * @type {ReadonlyArray<{ vendor: string, pattern: RegExp }>}
  */
 export const CHALLENGE_SIGNATURES = Object.freeze([
-  // Скрипт і iframe challenge ведуть на цей шлях; текст iframe дублює назву.
-  { vendor: "incapsula", pattern: /_Incapsula_Resource|Incapsula incident ID/i },
+  // Ловимо iframe challenge (`SWUDNSAI`) і його текст, а НЕ сам шлях
+  // `_Incapsula_Resource`. З 2026-10-01 podatki.gov.pl вшиває скрипт
+  // `_Incapsula_Resource?SWJIYLWA=…` у кожну справжню сторінку зі ставками, і
+  // сигнатура за шляхом позначала б усі правила podatki як «заблоковано».
+  { vendor: "incapsula", pattern: /_Incapsula_Resource\?SWUDNSAI|Incapsula incident ID/i },
   // Сторінка відмови Akamai посилається на свій сервіс помилок, і посилання
   // закодоване HTML-сутностями (`errors&#46;edgesuite&#46;net`). Шукаємо обидві
   // форми, бо звичайна крапка на такій сторінці не трапляється зовсім.

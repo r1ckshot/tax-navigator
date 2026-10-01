@@ -33,6 +33,17 @@ describe('detectChallenge на живих відповідях WAF (знято 2
     }
   });
 
+  /**
+   * З 2026-10-01 podatki.gov.pl вшиває скрипт `_Incapsula_Resource?SWJIYLWA=…`
+   * у кожну справжню сторінку. Сигнатура за самим шляхом робила б усі правила
+   * podatki «заблокованими» щомісяця — тобто вимикала б їхню звірку мовчки.
+   */
+  it('справжня сторінка podatki.gov.pl зі скриптом Incapsula — не challenge', () => {
+    const page = readFileSync(join(FIXTURES, 'pages', 'stawki.html'), 'utf8');
+    expect(page).toContain('_Incapsula_Resource?SWJIYLWA=');
+    expect(detectChallenge(page)).toBeNull();
+  });
+
   it('порожнє і не-рядок — null', () => {
     expect(detectChallenge('')).toBeNull();
     expect(detectChallenge(null)).toBeNull();
@@ -73,7 +84,7 @@ describe('challenge у циклі', () => {
   it('challenge із сумою поруч з маркером — unavailable, не match, і нічого зі сторінки у звіті', async () => {
     const page = fixture('waf-incapsula-challenge.html').replace(
       '</iframe>',
-      '</iframe><p>kwota 4 806 zł (100% minimalnego wynagrodzenia)</p>',
+      '</iframe><p>Od 1 stycznia do grudnia 2026 r. minimalne wynagrodzenie za pracę wynosi 4806 zł.</p>',
     );
     const cycle = await runCycle({ rules: [rule], now: new Date('2026-09-16T08:00:00Z'), fetchImpl: respond(200, page) });
 
