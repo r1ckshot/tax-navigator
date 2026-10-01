@@ -73,16 +73,19 @@ export class GramjsPort implements TelegramPort {
     return chats;
   }
 
-  async readMessagesSince(chatId: string, since: string): Promise<RawMessage[]> {
+  async readMessagesSince(chatId: string, since: string, until?: string): Promise<RawMessage[]> {
     const entity = this.entities.get(chatId);
     if (!entity) throw new TelegramReadError({ kind: 'access_lost', code: 'NOT_IN_DIALOGS' });
     const sinceSec = Math.floor(Date.parse(since) / 1000);
+    const untilSec = until === undefined ? Infinity : Math.floor(Date.parse(until) / 1000);
     const messages: RawMessage[] = [];
     try {
       // reverse: від старих до нових; offsetDate тоді — нижня межа, але
       // виключна, тому на секунду раніше, а точна межа — фільтром нижче.
       for await (const message of this.client.iterMessages(entity, { reverse: true, offsetDate: sinceSec - 1 })) {
-        if (!(message instanceof Api.Message) || !message.message || message.date < sinceSec) continue;
+        if (!(message instanceof Api.Message)) continue;
+        if (message.date >= untilSec) break;
+        if (!message.message || message.date < sinceSec) continue;
         messages.push({
           telegramMessageId: message.id,
           postedAt: new Date(message.date * 1000).toISOString(),

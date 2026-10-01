@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawSample, planChatWindow, planFailedChat, planSample, SampleError, scoreSample, type SampleFile, type SampleMessage, type SampleRecord, type Stratum } from './sample.ts';
+import { drawSample, planChatWindow, planFailedChat, planPeriod, planSample, SampleError, scoreSample, type SampleFile, type SampleMessage, type SampleRecord, type Stratum } from './sample.ts';
 import type { CycleReport, CycleState } from './state.ts';
 
 // Фікстури синтетичні: сирий текст реальних чатів у git не йде (PRD §6.1).
@@ -227,5 +227,27 @@ describe('scoreSample', () => {
     const file = sampleFile({ organic: { total: 1, sampled: 1 } }, [['organic', true]]);
     file.verdicts = {};
     expect(() => scoreSample(file)).toThrow('record -1001:1 has no verdict');
+  });
+});
+
+describe('planPeriod', () => {
+  it('усі чати конфігу за одне вікно, без стану й дедупу', () => {
+    expect(planPeriod(['old_chat', '-1002'], '2026-09-14', '2026-09-21')).toEqual({
+      weekOf: '2026-09-14..2026-09-21',
+      until: '2026-09-21T00:00:00.000Z',
+      chats: [
+        { chatId: null, ref: 'old_chat', title: 'old_chat', since: '2026-09-14T00:00:00.000Z', expected: null, onlySeen: false },
+        { chatId: null, ref: '-1002', title: '-1002', since: '2026-09-14T00:00:00.000Z', expected: null, onlySeen: false },
+      ],
+    });
+  });
+
+  it('порожній перелік чатів — помилка, а не порожня вибірка', () => {
+    expect(() => planPeriod([], '2026-09-14', '2026-09-21')).toThrow('TG_CHATS is empty');
+  });
+
+  it('межі: не дати й обернений період — помилка з назвою прапорців', () => {
+    expect(() => planPeriod(['a_chat'], 'вчора', '2026-09-21')).toThrow('--from/--to must be dates');
+    expect(() => planPeriod(['a_chat'], '2026-09-21', '2026-09-14')).toThrow('is not before --to');
   });
 });
