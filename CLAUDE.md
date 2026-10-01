@@ -54,7 +54,7 @@ app/components/, app/**/page.tsx, i18n/    presentation; без арифмети
 
 ## Git
 - Гілка на фічу (`feat/*`, `fix/*`); у `master` напряму не пушимо і не комітимо, тільки merge-коміт через PR (`gh pr merge --merge`) після підтвердження Mike. Коміт ловить `pre-commit-gate`, push — `block-force-push-master` (force, звичайний і видалення однаково), а на GitHub стоїть ruleset на `master` — прозою це правило вже протікало.
-- Conventional Commits: `type(scope): description`, **англійською** (subject і тіло, включно з "чому"). Один логічний крок = один коміт.
+- Conventional Commits: `type(scope): description`, **англійською** (subject і тіло, включно з "чому"). Назви теж перекладаються, а не цитуються: `ryczałt` → `lump-sum tax`, `ЄСВ` → `single social contribution`. Будь-яку не-ASCII літеру в повідомленні блокує `pre-commit-gate`. Один логічний крок = один коміт.
 - Subject короткий (imperative); тіло коміта — тільки "чому", коли неочевидно з diff (не переказ what).
 - Docs-only коміти (STATE.md/DECISIONS.md/README) — тіло практично ніколи не потрібне: сам diff вже проза.
 - У тілі fix-коміта — лише root-cause/insight, без речень, що починаються з переказу "що змінилось".
