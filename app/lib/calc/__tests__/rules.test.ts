@@ -79,13 +79,12 @@ describe('verify-first числа не дрейфнули', () => {
     expect(skala.taxFreeAmount).toBeCloseTo(skala.kwotaZmniejszajacaAnnual / skala.lowerRate, 6);
   });
 
-  // Тримає `derived`-лист монітора (`laws.mjs`, incubator.kup): ефективна ставка
-  // при авторських KUP виводиться з двох уже звірених цифр, тож зсув будь-якої
-  // з них валить цей тест, а не чекає ручної перевірки.
-  it('внутрішня звірка: ефективний PIT інкубатора з авторськими KUP 6% = 12% × (1 − 50%)', () => {
-    const skala = getParams<{ lowerRate: number }>('jdg.skala');
-    const kup = getParams<{ kupCopyright: number; effectivePitCopyrightEstimate: number }>('incubator.kup');
-    expect(kup.effectivePitCopyrightEstimate).toBeCloseTo(skala.lowerRate * (1 - kup.kupCopyright), 6);
+  // Анти-регрес: «ефективні ставки» інкубатора (13,6% і 6%) прибрано 2026-10-01 —
+  // перша була ставкою шкали до 2022 року (17% × 0,8). PIT інкубатора рахує
+  // `skalaAnnualTax` зі звірених ставок, тож збережена оцінка не має повернутись.
+  it('інкубатор не несе збереженої «ефективної ставки» PIT', () => {
+    const params = getParams<Record<string, unknown>>('incubator.kup');
+    expect(Object.keys(params).filter((k) => /effectivePit/i.test(k))).toEqual([]);
   });
 
   it('внутрішня звірка: 30-krotność = 30 × прогнозована середня, що дає базу duży ZUS', () => {

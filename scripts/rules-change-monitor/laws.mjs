@@ -99,8 +99,6 @@ export const RULE_LAWS = Object.freeze({
     except: {
       subscriptionMonthlyMin: { method: "manual", why: "тимчасово: ціна зі сторінок самих інкубаторів, їхні домени поза allowlist; page/llm — сесія 04" },
       subscriptionMonthlyMax: { method: "manual", why: "тимчасово: ціна зі сторінок самих інкубаторів, їхні домени поза allowlist; page/llm — сесія 04" },
-      effectivePitStandardEstimate: { method: "manual", why: "тимчасово: інваріант 12% × (1 − 20%) = 9,6% падає на нинішніх 13,6%; спершу виправлення числа (BACKLOG), потім derived" },
-      effectivePitCopyrightEstimate: { method: "derived", why: "6% = 12% (jdg.skala.lowerRate) × (1 − 50% KUP); тримає тест інваріанта в rules.test.ts" },
       isEstimate: { method: "derived", why: "позначка продукту: правило — оцінка" },
     },
   },

@@ -1,21 +1,32 @@
 import { getParams, sourcesOf } from '@/lib/rules/types';
 import { toRange, round2, UNCERTAINTY } from '../range';
 import type { Answers, ScenarioResult, SubformResult } from '../types';
-import { expenseRate, spanOf } from './shared';
+import { expenseRate, skalaAnnualTax, spanOf } from './shared';
 
 interface IncubatorParams {
+  kupStandard: number;
   kupCopyright: number;
   copyrightAnnualCap: number;
-  effectivePitStandardEstimate: number;
-  effectivePitCopyrightEstimate: number;
   subscriptionMonthlyMin: number;
   subscriptionMonthlyMax: number;
 }
+interface SkalaParams {
+  lowerRate: number;
+  upperRate: number;
+  bracketThreshold: number;
+  kwotaZmniejszajacaAnnual: number;
+}
 
 /**
- * Інкубатор. EVIDENCE §6 прямо називає еф. ставки ОЦІНКОЮ (залежать від структури
- * договору), тому смуга ширша й картка маркується як оцінка. ZUS немає взагалі —
- * це не «вигода», а відсутність пенсії й лікарняних, і так і підписуємо.
+ * Інкубатор: виплата за umową o dzieło — без ZUS і zdrowotnej, PIT за скалею від
+ * приходу мінус нормативні KUP 20% або 50% (ліміт 120 000 на самі KUP). Податок
+ * рахується тією ж `skalaAnnualTax`, що й у zlecenie, зі звірених ставок; до
+ * 2026-10-01 тут стояли «ефективні ставки» 13,6% і 6%, і перша з них була ставкою
+ * шкали до 2022 року (17% × 0,8) — EVIDENCE, сценарій E.
+ *
+ * Смуга лишається ширшою (оцінка): абонемент і структура договору залежать від
+ * інкубатора. ZUS немає взагалі — це не «вигода», а відсутність пенсії й
+ * лікарняних, і так і підписуємо.
  *
  * Фактичні витрати віднімаються від кишені, але не від податку: база тут
  * нормативна KUP 20/50%, а «на руки» — гроші після всіх реальних відпливів
@@ -23,30 +34,30 @@ interface IncubatorParams {
  */
 export function calcIncubator(answers: Answers): ScenarioResult {
   const p = getParams<IncubatorParams>('incubator.kup');
-  const sources = sourcesOf('incubator.kup');
+  const skala = getParams<SkalaParams>('jdg.skala');
+  const sources = sourcesOf('incubator.kup', 'jdg.skala');
   const subscription = (p.subscriptionMonthlyMin + p.subscriptionMonthlyMax) / 2;
   const expenses = answers.monthlyRevenue * expenseRate(answers.expenseShare);
+  const annualGross = answers.monthlyRevenue * 12;
+
+  /** На руки за місяць: прихід − PIT за скалею (від приходу мінус KUP) − абонемент − витрати. */
+  const takeHomeMonthly = (annualKup: number) =>
+    round2(answers.monthlyRevenue - skalaAnnualTax(annualGross - annualKup, skala) / 12 - subscription - expenses);
 
   const kup20: SubformResult = {
     id: 'kup20',
-    rangeMonthly: toRange(
-      round2(answers.monthlyRevenue * (1 - p.effectivePitStandardEstimate) - subscription - expenses),
-      UNCERTAINTY.ESTIMATE
-    ),
+    rangeMonthly: toRange(takeHomeMonthly(annualGross * p.kupStandard), UNCERTAINTY.ESTIMATE),
     available: true,
     sources,
   };
 
   // 50% KUP вимагає утвору + клаузули передачі прав; ліміт 120k/рік на самі KUP.
   const copyrightAvailable = answers.workKind !== 'nonIt';
-  const annualKup = answers.monthlyRevenue * 12 * p.kupCopyright;
+  const annualKup = annualGross * p.kupCopyright;
   const kup50: SubformResult = copyrightAvailable
     ? {
         id: 'kup50',
-        rangeMonthly: toRange(
-          round2(answers.monthlyRevenue * (1 - p.effectivePitCopyrightEstimate) - subscription - expenses),
-          UNCERTAINTY.ESTIMATE
-        ),
+        rangeMonthly: toRange(takeHomeMonthly(Math.min(annualKup, p.copyrightAnnualCap)), UNCERTAINTY.ESTIMATE),
         available: true,
         sources,
       }
