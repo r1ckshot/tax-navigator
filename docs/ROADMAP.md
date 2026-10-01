@@ -68,7 +68,7 @@ Mike пише «Begin». Сесія:
 
 | # | Сесія | Модель · effort | Стан |
 |---|---|---|---|
-| 01 | [Колектор за запитом](sessions/01-collector-on-demand.md) | Sonnet · medium | [ ] |
+| 01 | [Колектор за запитом](sessions/01-collector-on-demand.md) | Sonnet · medium | [x] |
 
 ### Тема 1.2 — Автозвірка всіх правил
 Розмір S (розширення готової фічі `rules-change-monitor`) · гілка `feat/rules-auto-verify` · версія: без змін
