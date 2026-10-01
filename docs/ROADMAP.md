@@ -72,7 +72,7 @@ Mike пише «Begin». Сесія:
 | 01 | [Колектор за запитом](sessions/01-collector-on-demand.md) | Sonnet · medium | [x] |
 
 ### Тема 1.2 — Автозвірка всіх правил
-Розмір S (розширення готової фічі `rules-change-monitor`) · гілка `feat/rules-auto-verify` · версія: без змін
+Розмір S (розширення готової фічі `rules-change-monitor`) · гілка `feat/rules-auto-verify` · версія: patch (смуги інкубатора змінились у сесії 03)
 
 | # | Сесія | Модель · effort | Стан |
 |---|---|---|---|
