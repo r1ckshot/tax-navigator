@@ -97,6 +97,9 @@ ALLOWED_DOMAINS=(
   "www.gov.pl"
   "gov.pl"
   "isap.sejm.gov.pl"
+  # ELI API Сейму: дата зміни акта і чинна редакція для автозвірки (тема 1.2).
+  # Один статичний IP, не Imperva-периметр isap/orka - машинний вхід до тих самих актів.
+  "api.sejm.gov.pl"
   "stat.gov.pl"
   "eureka.mf.gov.pl"
   # Українські першоджерела. zakon.rada.gov.ua - один статичний IP, тримається надійно.
