@@ -4,6 +4,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { isScriptable } from './allowlist.mjs';
+import { ACTS, EDITIONS, RULE_LAWS, lawUrl } from './laws.mjs';
 import { DERIVED, METHODS, VERIFICATION, leafPaths, valueAt } from './methods.mjs';
 import { PAGES } from './pages.mjs';
 
@@ -101,6 +102,75 @@ describe('guard: спосіб page покриває кожен лист прав
         if (field.kind === 'number') expect(typeof value, `${rule.rule_id}.${param}`).toBe('number');
       }
     }
+  });
+});
+
+/**
+ * Спосіб `act`/`edition` без опису законів мовчки ставав би `out_of_scope`, а
+ * посилання на неіснуючий акт — недоступним щоциклу. Guard ловить обидва ще в
+ * `npm test`, не в живому прогоні.
+ */
+describe('guard: act і edition мають закони, llm — питання', () => {
+  const rules = allRules();
+  const LAW_METHODS = [METHODS.ACT, METHODS.EDITION];
+  const validLaw = (law) =>
+    LAW_METHODS.includes(law?.method) && (law.method === METHODS.ACT ? ACTS : EDITIONS)[law.key] !== undefined && law.where?.trim().length > 3;
+
+  it('правило на act/edition має закони в RULE_LAWS, а RULE_LAWS — лише такі правила', () => {
+    const lawRules = rules.filter(({ rule }) => LAW_METHODS.includes(VERIFICATION[rule.rule_id]?.method)).map(({ rule }) => rule.rule_id);
+    expect(lawRules.filter((id) => !RULE_LAWS[id]), 'додай закони в laws.mjs').toEqual([]);
+    expect(Object.keys(RULE_LAWS).filter((id) => !lawRules.includes(id))).toEqual([]);
+  });
+
+  it('кожне посилання — на відомий акт, з місцем у ньому, на хості, який цикл має право відкривати', () => {
+    const laws = [
+      ...Object.entries(RULE_LAWS).flatMap(([id, entry]) => entry.laws.map((law) => [id, law])),
+      ...Object.entries(PAGES).flatMap(([id, page]) =>
+        Object.entries(page.elsewhere ?? {})
+          .filter(([, e]) => e.method === METHODS.ACT || e.method === METHODS.EDITION)
+          .map(([param, e]) => [`${id}.${param}`, e.law]),
+      ),
+    ];
+    expect(laws.length).toBeGreaterThan(10);
+    for (const [where, law] of laws) {
+      expect(validLaw(law), `${where}: ${JSON.stringify(law)}`).toBe(true);
+      expect(isScriptable(lawUrl(law)), where).toBe(true);
+    }
+  });
+
+  it('виняток except — справжній лист правила, manual або derived, з причиною', () => {
+    const byId = Object.fromEntries(rules.map(({ rule }) => [rule.rule_id, rule]));
+    for (const [id, entry] of Object.entries(RULE_LAWS)) {
+      for (const [param, e] of Object.entries(entry.except ?? {})) {
+        expect(leafPaths(byId[id].params), `${id}.${param}`).toContain(param);
+        expect([METHODS.MANUAL, DERIVED], `${id}.${param}`).toContain(e.method);
+        expect(e.why?.trim().length, `${id}.${param}: why`).toBeGreaterThan(10);
+      }
+    }
+  });
+
+  it('llm-лист несе питання й тип відповіді', () => {
+    for (const [id, page] of Object.entries(PAGES)) {
+      for (const [param, e] of Object.entries(page.elsewhere ?? {})) {
+        if (e.method !== METHODS.LLM) continue;
+        expect(['boolean', 'number'], `${id}.${param}`).toContain(e.ask?.type);
+        expect(e.ask?.question?.trim().length, `${id}.${param}: question`).toBeGreaterThan(10);
+      }
+    }
+  });
+
+  /**
+   * «Готово коли» сесії 03: кожен manual має причину і запис у DECISIONS.
+   * Запис шукається за повним шляхом листа — так його і названо там.
+   */
+  it('кожен manual-лист записаний у DECISIONS.md', () => {
+    const decisions = readFileSync(join(RULES_DIR, '../../../docs/DECISIONS.md'), 'utf8');
+    const manual = Object.entries(RULE_LAWS).flatMap(([id, entry]) =>
+      Object.entries(entry.except ?? {})
+        .filter(([, e]) => e.method === METHODS.MANUAL)
+        .map(([param]) => `${id}.${param}`),
+    );
+    expect(manual.filter((path) => !decisions.includes(`\`${path}\``))).toEqual([]);
   });
 });
 

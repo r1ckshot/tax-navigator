@@ -27,8 +27,8 @@ export const METHODS = Object.freeze({
 /** Позначка листа, який не звіряється з джерелом, бо виводиться з інших (`pages.mjs`). */
 export const DERIVED = "derived";
 
-/** Способи, які цикл уже виконує. Решта — `out_of_scope` з назвою способу (сесія 03). */
-export const IMPLEMENTED = Object.freeze([METHODS.PAGE]);
+/** Способи, які цикл виконує. `manual` — ні: його суть у тому, що звіряє людина. */
+export const IMPLEMENTED = Object.freeze([METHODS.PAGE, METHODS.ACT, METHODS.EDITION, METHODS.LLM]);
 
 const page = (why) => ({ method: METHODS.PAGE, why });
 
@@ -40,7 +40,7 @@ export const VERIFICATION = Object.freeze({
   },
   "residency.special_norm_52zr": {
     method: METHODS.ACT,
-    why: "строк дії art. 52zr — у specustawie ukraińskiej; source_url веде на druk Сейму (orka, за Imperva), а продовження строку — це нова зміна акта",
+    why: "строк дії — art. 52zr ustawy o PIT (оновлено ustawą z 23.01.2026); source_url веде на druk Сейму (orka, за Imperva), а продовження строку — це нова зміна ustawy o PIT",
   },
   "residency.treaty_tiebreakers": {
     method: METHODS.ACT,
@@ -48,18 +48,18 @@ export const VERIFICATION = Object.freeze({
   },
   "common.minimum_wage": page("zus.pl, таблиця складок 2026"),
   "common.projected_average_wage": page("zus.pl, розділ про ліміт річної бази"),
-  "jdg.ryczalt.rate": page("podatki.gov.pl/stawki-i-limity: ставки 12% і 8,5% та ліміт 8 517 200 zł; sip.lex.pl із source_url — комерційна база, свідомо не відкрита"),
+  "jdg.ryczalt.rate": page("podatki.gov.pl/stawki-i-limity: ставки 12% і 8,5% та ліміт 8 517 200 zł"),
   "jdg.zdrowotna.ryczalt": page("zus.pl: база 9 228,64 і три ставки по порогах; stat.gov.pl із source_url тепер редіректить на new.stat.gov.pl поза allowlist"),
   "jdg.liniowy": page("ставка 19% — podatki.gov.pl/stawki-i-limity, мінімальна zdrowotna — zus.pl; ставка 4,9% і ліміт 14 100 — act"),
   "jdg.skala": page("шкала 12/32%, поріг 120 000 і kwota zmniejszająca — podatki.gov.pl/stawki-i-limity"),
   "jdg.zus.stages": page("zus.pl: бази й суми preferencyjnego та dużego ZUS; строки 6/24/60 місяців — act"),
   "jdg.byly_pracodawca": {
     method: METHODS.ACT,
-    why: "заборона ryczałtu для послуг колишньому роботодавцю — art. 8 ust. 1 pkt 6 ustawy o ryczałcie; source_url — sip.lex.pl (комерційна база)",
+    why: "втрата ryczałtu при послугах колишньому роботодавцю — art. 8 ust. 2 ustawy o ryczałcie (ust. 1 pkt 6 uchylony); пільги ZUS — art. 18 Prawa przedsiębiorców і art. 18a ustawy o sus",
   },
   "incubator.kup": {
     method: METHODS.ACT,
-    why: "KUP 20/50% і ліміт 120 000 — art. 22 ust. 9 і 9a ustawy o PIT; ціни абонементу інкубаторів — ринкові, не норма, і акт їх не підтверджує (сесія 03)",
+    why: "KUP 20/50% і ліміт 120 000 — art. 22 ust. 9 і 9a ustawy o PIT; ціни абонементу й оцінки ставок — manual-листи з причиною (laws.mjs)",
   },
   "uop.employer_contributions": page("biznes.gov.pl/00274: таблиця розподілу складок 2026"),
   "uop.employee_contributions": page("biznes.gov.pl/00274: таблиця розподілу складок 2026"),
@@ -76,11 +76,11 @@ export const VERIFICATION = Object.freeze({
   "zlecenie.contributions": page("biznes.gov.pl/0098: приклад розрахунку складок із ставками"),
   "zlecenie.kup": page("podatki.gov.pl: KUP 20% і база після складок; 50% і 120 000 — act"),
   "zlecenie.zbieg_z_etatem": page("biznes.gov.pl/001785: мінімалка 4806 і дві опорні фрази"),
-  "zlecenie.przekwalifikowanie": page("gov.pl: дата набрання чинності реформи PIP"),
+  "zlecenie.przekwalifikowanie": page("gov.pl: дата набрання чинності реформи PIP і фраза про стосунок праці за фактами"),
   "nierejestrowana.limit": page("biznes.gov.pl/00115: ліміт, частка мінімалки, строки й опорна фраза про przychody należne"),
-  "nierejestrowana.zus": page("biznes.gov.pl/00115: дві опорні фрази; решта тверджень — llm"),
-  "nierejestrowana.pit": page("podatki.gov.pl: три опорні фрази; решта тверджень — llm"),
-  "nierejestrowana.cudzoziemcy": page("biznes.gov.pl/00115: дата обмеження і вимога tytułu pobytowego"),
+  "nierejestrowana.zus": page("biznes.gov.pl/00115: три опорні фрази; поріг мінімалки й zdrowotna — фрази biznes.gov.pl/001785"),
+  "nierejestrowana.pit": page("podatki.gov.pl: три опорні фрази; ryczałtowe KUP і zaliczki — act"),
+  "nierejestrowana.cudzoziemcy": page("biznes.gov.pl/00115: дата обмеження, вимога tytułu pobytowego і фраза про PESEL зі статусом UKR"),
 });
 
 /**

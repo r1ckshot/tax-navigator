@@ -105,10 +105,14 @@ export function aggregateFields(rule, fieldChecks) {
   const deciding = [...fieldChecks].sort((a, b) => SEVERITY.indexOf(a.state) - SEVERITY.indexOf(b.state))[0];
   const same = fieldChecks.filter((f) => f.state === deciding.state).length;
   const reason = deciding.failure_reason === null ? null : `${deciding.param}: ${deciding.failure_reason}${same > 1 ? ` (і ще полів у цьому стані: ${same - 1})` : ""}`;
+  // Відхилений вхід на будь-якому полі робить відхиленим правило, навіть коли
+  // стан визначило інше поле: інакше статус циклу `blocked` його б не побачив.
+  const blocked = fieldChecks.some((f) => f.blocked === true);
   return {
     ...deciding,
     rule_id: rule.rule_id,
     failure_reason: reason,
+    ...(blocked ? { blocked: true } : {}),
     fields: fieldChecks,
   };
 }

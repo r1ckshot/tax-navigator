@@ -252,18 +252,19 @@ describe('summaryLine', () => {
 });
 
 describe('renderReport: часткове підтвердження', () => {
-  it('правило з листами на іншому способі названо поіменно, а не сховано в лічильнику', () => {
+  it('правило з manual-листами названо поіменно, а не сховано в лічильнику', () => {
     const report = renderReport({
       month: '2026-10',
       status: 'completed',
       checks: [
-        { rule_id: 'jdg.liniowy', state: STATES.COSMETIC, pending: ['zdrowotnaRate', 'zdrowotnaAnnualDeductionCap'] },
+        { rule_id: 'incubator.kup', state: STATES.MATCH, manual: ['subscriptionMonthlyMin', 'subscriptionMonthlyMax'] },
         { rule_id: 'common.minimum_wage', state: STATES.COSMETIC },
       ],
     });
     expect(report).toContain('2 правил збігаються');
     expect(report).toContain('З них 1 — лише в частині');
-    expect(report).toContain('- jdg.liniowy: zdrowotnaRate, zdrowotnaAnnualDeductionCap');
+    expect(report).toContain('звіряє людина (manual)');
+    expect(report).toContain('- incubator.kup: subscriptionMonthlyMin, subscriptionMonthlyMax');
     expect(report).not.toContain('- common.minimum_wage:');
   });
 
@@ -271,9 +272,9 @@ describe('renderReport: часткове підтвердження', () => {
     const report = renderReport({
       month: '2026-10',
       status: 'completed',
-      checks: [{ rule_id: 'jdg.skala', state: STATES.COSMETIC, pending: ['zdrowotnaRate'], derived: ['taxFreeAmount'] }],
+      checks: [{ rule_id: 'jdg.skala', state: STATES.COSMETIC, derived: ['taxFreeAmount'] }],
     });
-    expect(report).toContain('Виведено, не звірено зі сторінки');
+    expect(report).toContain('Виведено, не звірено з джерела');
     expect(report).toContain('- jdg.skala: taxFreeAmount');
   });
 });

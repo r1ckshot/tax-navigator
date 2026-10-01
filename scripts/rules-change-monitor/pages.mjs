@@ -13,6 +13,7 @@
 // Маркери — фрагменти тексту, знятого 2026-10-01 (фікстури `__fixtures__/pages/`).
 
 import { AMOUNT, INTEGER, PERCENT, PL_DATE } from "./extract.mjs";
+import { act } from "./laws.mjs";
 
 export const URLS = Object.freeze({
   zus: "https://www.zus.pl/baza-wiedzy/skladki-wskazniki-odsetki/skladki/wysokosc-skladek-na-ubezpieczenia-spoleczne",
@@ -38,6 +39,10 @@ export const URLS = Object.freeze({
  *     твердження треба перечитати очима, а не вважати підтвердженим.
  *
  * `elsewhere[лист] = { method, why }` — лист, якого на цій сторінці немає.
+ * `act` несе `law` (акт і місце в ньому, `laws.mjs`); `llm` несе
+ * `ask: { type: "boolean"|"number", question }` — питання до тексту сторінки
+ * правила, відповідь перевіряє `llm.mjs`. На 2026-10-01 `llm`-листів немає: усі
+ * три твердження, для яких модель знайшла фразу, стали `quote`.
  * `derived` — не спосіб звірки, а позначка похідного числа: його тримає тест
  * інваріанта в `app/lib/**` (evidence-numbers: похідні звіряти між собою).
  */
@@ -46,10 +51,12 @@ const pct = (spec) => ({ kind: "number", value: PERCENT, scale: 100, ...spec });
 const int = (spec) => ({ kind: "number", value: INTEGER, ...spec });
 const date = (spec) => ({ kind: "date", value: PL_DATE, ...spec });
 const quote = (re) => ({ kind: "quote", quote: re });
-const via = (method, why) => ({ method, why });
+const via = (method, why, extra = {}) => ({ method, why, ...extra });
+/** Лист на акті: `law` — який акт і яке місце перечитати, якщо акт змінився (`laws.mjs`). */
+const onAct = (why, law) => via("act", why, { law });
 
-const ZDROWOTNA_RATE_ACT = via("act", "ставка zdrowotnej — art. 79 ustawy o świadczeniach opieki zdrowotnej; сторінки з самою ставкою по цій формі немає");
-const NOT_FROM_TAX_ACT = via("act", "відрахування zdrowotnej від податку скасоване з 2022 (uchylony art. 27b ustawy o PIT) — це відсутність норми, на сторінці її не процитуєш");
+const ZDROWOTNA_RATE_ACT = onAct("ставка zdrowotnej — art. 79 ustawy o świadczeniach opieki zdrowotnej; сторінки з самою ставкою по цій формі немає", act("swiadczenia", "art. 79"));
+const NOT_FROM_TAX_ACT = onAct("відрахування zdrowotnej від податку скасоване з 2022 (uchylony art. 27b ustawy o PIT) — це відсутність норми, на сторінці її не процитуєш", act("pit", "art. 27b (uchylony)"));
 /** Мінімальна zdrowotna стоїть перед періодом, до якого відноситься; поруч — ставка за січень. */
 const ZDROWOTNA_MIN = num({ url: URLS.zus, before: /\(za miesiące od lutego 2026 r\. do stycznia 2027 r\./, within: 14 });
 const PREF_TABLE = /Rodzaj ubezpieczenia: Emerytalne Rentowe Wypadkowe Chorobowe Podstawa wymiaru/;
@@ -92,9 +99,9 @@ export const PAGES = Object.freeze({
       duzyMonthly: num({ after: [/Emerytalne Rentowe Wypadkowe Chorobowe FP i FS Podstawa wymiaru/, /Suma składek do zapłaty/], within: 20 }),
     },
     elsewhere: {
-      ulgaNaStartMonths: via("act", "6 місяців — art. 18 ustawy Prawo przedsiębiorców; на сторінці складок строку немає"),
-      preferencyjnyMonths: via("act", "24 місяці — art. 18a ustawy o systemie ubezpieczeń społecznych"),
-      priorBusinessLookbackMonths: via("act", "60 місяців — art. 18 Prawa przedsiębiorców і art. 18a ustawy o sus"),
+      ulgaNaStartMonths: onAct("6 місяців — art. 18 ustawy Prawo przedsiębiorców; на сторінці складок строку немає", act("prawoPrzedsiebiorcow", "art. 18 ust. 1")),
+      preferencyjnyMonths: onAct("24 місяці — art. 18a ustawy o systemie ubezpieczeń społecznych", act("sus", "art. 18a ust. 1")),
+      priorBusinessLookbackMonths: onAct("60 місяців — art. 18 Prawa przedsiębiorców і art. 18a ustawy o sus", act("sus", "art. 18a ust. 2 pkt 1")),
     },
   },
 
@@ -110,7 +117,7 @@ export const PAGES = Object.freeze({
     },
     elsewhere: {
       "tiers.2.annualRevenueUpTo": via("derived", "null — у верхнього порогу немає межі; це форма таблиці, а не число з джерела"),
-      deductibleShareOfRevenue: via("act", "50% сплаченої zdrowotnej від przychodu — art. 11 ust. 1c ustawy o zryczałtowanym podatku"),
+      deductibleShareOfRevenue: onAct("50% сплаченої zdrowotnej від przychodu — art. 11 ust. 1c ustawy o zryczałtowanym podatku", act("ryczalt", "art. 11 ust. 1c")),
     },
   },
 
@@ -121,8 +128,8 @@ export const PAGES = Object.freeze({
       zdrowotnaMinMonthly: ZDROWOTNA_MIN,
     },
     elsewhere: {
-      zdrowotnaRate: via("act", "4,9% — art. 79 ust. 6 ustawy o świadczeniach; на сторінках zus.pl і podatki.gov.pl ставки liniowej zdrowotnej немає"),
-      zdrowotnaAnnualDeductionCap: via("act", "14 100 zł — art. 30c ust. 2 ustawy o PIT, ліміт на 2026 рік оголошує komunikat MF"),
+      zdrowotnaRate: onAct("4,9% — art. 79 ust. 6 ustawy o świadczeniach; на сторінках zus.pl і podatki.gov.pl ставки liniowej zdrowotnej немає", act("swiadczenia", "art. 79 ust. 6")),
+      zdrowotnaAnnualDeductionCap: onAct("14 100 zł — art. 30c ust. 2 ustawy o PIT, ліміт на 2026 рік оголошує komunikat MF", act("pit", "art. 30c ust. 2")),
     },
   },
 
@@ -215,8 +222,8 @@ export const PAGES = Object.freeze({
       appliedAfterSocialContributions: quote(/Oblicza się je od przychodu pomniejszonego o składki na ubezpieczenia społeczne/),
     },
     elsewhere: {
-      kupCopyright: via("act", "50% — art. 22 ust. 9 pkt 3 ustawy o PIT; сторінка podatki про zlecenie авторських KUP не називає"),
-      copyrightAnnualCap: via("act", "120 000 zł — art. 22 ust. 9a ustawy o PIT"),
+      kupCopyright: onAct("50% — art. 22 ust. 9 pkt 3 ustawy o PIT; сторінка podatki про zlecenie авторських KUP не називає", act("pit", "art. 22 ust. 9 pkt 3")),
+      copyrightAnnualCap: onAct("120 000 zł — art. 22 ust. 9a ustawy o PIT", act("pit", "art. 22 ust. 9a")),
     },
   },
 
@@ -233,11 +240,12 @@ export const PAGES = Object.freeze({
     url: URLS.pip,
     fields: {
       pipDecisionPowerFrom: date({ after: [/Nowe przepisy obowiązują od/], within: 20 }),
-    },
-    elsewhere: {
-      testIsFactsNotContractName: via("llm", "що вирішують факти, а не назва umowy, сторінка каже описом процедури, а не одним реченням — потрібен витяг із тексту ustawy o PIP"),
+      // Фразу знайшла модель (сесія 03, спосіб `llm`), але вона стоїть дослівно,
+      // тож звіряється без моделі: дешевше і без судження в циклі.
+      testIsFactsNotContractName: quote(/nie wolno zastępować umów o pracę umowami cywilnoprawnymi, jeżeli pomiędzy pracodawcą i pracownikiem zachodzi stosunek pracy/),
     },
   },
+
 
   "nierejestrowana.limit": {
     url: URLS.nierej,
@@ -256,13 +264,16 @@ export const PAGES = Object.freeze({
     fields: {
       servicesAreZlecenieTitle: quote(/zawierane umowy o świadczenie usług stanowią umowy zlecenia/),
       payerIsClient: quote(/Od tych umów twój zleceniodawca odprowadza za ciebie składki do ZUS/),
-    },
-    elsewhere: {
-      goodsSaleIsNoTitle: via("llm", "що продаж товарів не дає титулу до ZUS, сторінка не каже одним реченням — висновок з art. 6 ustawy o sus"),
-      socialWaivedWhenUopAtLeastMinimumWage: via("llm", "звільнення при etacie ≥ мінімалки — у розділі про zlecenie сторінки описом, без опорної фрази"),
-      zdrowotnaAlwaysDue: via("llm", "zdrowotna з кожного zlecenia — у сторінці лише непрямо"),
+      goodsSaleIsNoTitle: quote(/Nie będziesz mieć obowiązku opłacania składek na ubezpieczenia społeczne ani ubezpieczenie zdrowotne, jeśli w ramach działalności nierejestrowanej sprzedajesz towary/),
+      // Сторінка 00115 описує звільнення через «pełny wymiar czasu pracy», а не
+      // через мінімалку, і модель на ній чесно дала «ні». Поріг мінімалки
+      // дослівно стоїть на сторінці про zbieg — тією ж фразою, що й у
+      // `zlecenie.zbieg_z_etatem`.
+      socialWaivedWhenUopAtLeastMinimumWage: { ...quote(/W takiej sytuacji pracownik może dobrowolnie przystąpić do ubezpieczenia społecznego z tytułu umowy-zlecenia/), url: URLS.zbieg },
+      zdrowotnaAlwaysDue: { ...quote(/Niezależnie od wysokości wynagrodzenia, które otrzymujesz z tytułu pracy na etacie, składki na ubezpieczenie zdrowotne płacisz/), url: URLS.zbieg },
     },
   },
+
 
   "nierejestrowana.pit": {
     url: URLS.nierejPit,
@@ -272,8 +283,10 @@ export const PAGES = Object.freeze({
       cashBasis: quote(/Koszty uzyskania przychodów rozpoznajesz kasowo/),
     },
     elsewhere: {
-      lumpSumKupAvailable: via("llm", "відсутність ryczałtowych KUP — сторінка не заперечує прямо, висновок з art. 22 ustawy o PIT"),
-      monthlyAdvancesRequired: via("llm", "без zaliczek — art. 44 ust. 1 pkt 1 ustawy o PIT; сторінка podatki цього не формулює"),
+      // Модель на сторінці цього не знайшла (сесія 03): сторінка мовчить, а
+      // мовчання не цитується. Обидва твердження — з тексту ustawy.
+      lumpSumKupAvailable: onAct("ryczałtowe KUP — лише для титулів з art. 22 ust. 9; działalności nierejestrowanej серед них немає", act("pit", "art. 22 ust. 9")),
+      monthlyAdvancesRequired: onAct("zaliczki — лише з джерел, перелічених в art. 44 ust. 1; dochód z działalności nierejestrowanej — «inne źródła»", act("pit", "art. 44 ust. 1")),
     },
   },
 
@@ -282,9 +295,7 @@ export const PAGES = Object.freeze({
     fields: {
       restrictedFrom: date({ after: [/Cudzoziemcy Od/], within: 20 }),
       residencePermitRequired: quote(/posiada tytuł pobytowy umożliwiający rejestrację tej działalności/),
-    },
-    elsewhere: {
-      ukrPeselEligible: via("llm", "статус UKR як підстава — у сторінці загально («objęci ochroną czasową»); точне формулювання в ustawie o pomocy obywatelom Ukrainy"),
+      ukrPeselEligible: quote(/obywatele Ukrainy, którzy przebywają w Polsce legalnie i posiadają numer PESEL ze statusem UKR/),
     },
   },
 });

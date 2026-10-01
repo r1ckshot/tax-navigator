@@ -20,10 +20,12 @@ import { fileURLToPath } from "node:url";
 import { classifyScope, domainOf, notVerifiedScope } from "./allowlist.mjs";
 import { pageText } from "./extract.mjs";
 import { aggregateFields, checkField } from "./fields.mjs";
-import { DERIVED, IMPLEMENTED, VERIFICATION } from "./methods.mjs";
+import { checkAct, checkDocument, checkEdition, ELI_API, isDocument, lawLabel, lawUrl, RULE_LAWS } from "./laws.mjs";
+import { checkLlmField, claudeAsk } from "./llm.mjs";
+import { DERIVED, IMPLEMENTED, METHODS, VERIFICATION, valueAt } from "./methods.mjs";
 import { PAGES } from "./pages.mjs";
 import { screenSource, MAX_INPUT_CHARS } from "./screen.mjs";
-import { fetchSource } from "./sources.mjs";
+import { fetchDigest, fetchSource } from "./sources.mjs";
 import { renderReport, summaryLine } from "./report.mjs";
 import { appendCycle, readHistory, writeHistory } from "./state.mjs";
 import { STATES, isState } from "./states.mjs";
@@ -112,17 +114,31 @@ function scopeCheck(rule, { state, failure_reason }) {
 }
 
 /**
- * Правило, чий спосіб звірки цикл ще не виконує (`act`, `edition`, `llm` —
- * сесія 03) або не має. `out_of_scope`, а не `unavailable`: джерело не падало,
- * цикл просто не звіряє це правило цим способом, і причина це називає.
+ * Правило, чий спосіб звірки цикл не виконує (`manual`), не має або для якого
+ * немає опису (сторінки в `pages.mjs`, законів у `laws.mjs`). `out_of_scope`, а
+ * не `unavailable`: джерело не падало, цикл просто не звіряє це правило, і
+ * причина це називає.
  */
 function methodCheck(rule, method) {
   return scopeCheck(rule, {
     state: STATES.OUT_OF_SCOPE,
-    failure_reason: method
-      ? `спосіб звірки «${method}» цикл ще не виконує`
-      : "у реєстрі methods.mjs немає способу звірки для цього правила",
+    failure_reason: !method
+      ? "у реєстрі methods.mjs немає способу звірки для цього правила"
+      : IMPLEMENTED.includes(method)
+        ? `для способу «${method}» немає опису джерела (pages.mjs / laws.mjs)`
+        : `спосіб звірки «${method}» цикл не виконує`,
   });
+}
+
+/**
+ * Листи, які цикл не звіряє, а лише називає: `manual` (звіряє людина) і
+ * `derived` (виводиться з інших листів). Без них «збігається» читалось би як
+ * підтвердження всього правила.
+ */
+function namedLeaves(entries) {
+  const manual = entries.filter(([, e]) => e.method === METHODS.MANUAL).map(([param]) => param);
+  const derived = entries.filter(([, e]) => e.method === DERIVED).map(([param]) => param);
+  return { ...(manual.length ? { manual } : {}), ...(derived.length ? { derived } : {}) };
 }
 
 /**
@@ -143,6 +159,10 @@ export async function runCycle({
   // Порожній дефолт — лише для тестів і `evals/`, яким veto не предмет.
   // Живий прогін (`main`) читає реєстр сам і падає, якщо файла немає.
   vetoes = [],
+  laws = RULE_LAWS,
+  // Модель для способу `llm`. Без неї `llm`-листи — `unavailable` з причиною;
+  // живий прогін (`main`) підставляє `claudeAsk`.
+  ask = null,
   pauseMs = SAME_DOMAIN_PAUSE_MS,
   sleep = realSleep,
   clock = Date.now,
@@ -153,6 +173,7 @@ export async function runCycle({
   drop = false,
 } = {}) {
   const started_at = now.toISOString();
+  const today = started_at.slice(0, 10);
   const checks = [];
   const pacer = createPacer({ pauseMs, sleep, clock });
   const loaded = new Map();
@@ -170,10 +191,52 @@ export async function runCycle({
         failure_reason,
         blocked: screened.blocked ? screened.failure_reason : null,
         truncated: screened.truncated,
+        raw: screened.html,
         text: screened.html === null ? null : pageText(screened.html),
       });
     }
     return loaded.get(url);
+  }
+
+  /** JSON з ELI. Відповідь, що не розбирається, — причина, а не порожні метадані. */
+  async function loadJson(url) {
+    const source = await load(url);
+    const failure = source.blocked ?? source.failure_reason;
+    if (failure) return { meta: null, failure_reason: failure };
+    try {
+      return { meta: JSON.parse(source.raw), failure_reason: null };
+    } catch {
+      return { meta: null, failure_reason: "ELI віддав не JSON" };
+    }
+  }
+
+  /** Метадані зміни акта; не віддались — дата публікації невідома, і `laws.mjs` рахує зміну. */
+  async function amendment(id) {
+    const { meta } = await loadJson(`${ELI_API}/${id}`);
+    return { promulgation: typeof meta?.promulgation === "string" ? meta.promulgation : null, title: meta?.title ?? null };
+  }
+
+  /** Звірка одного закону для правила чи листа (`act` / `edition`). */
+  async function checkLaw(rule, law, param) {
+    const url = lawUrl(law);
+    const closed = classifyScope(rule, url);
+    if (closed) return { ...scopeCheck(rule, closed), param, method: law.method, law: lawLabel(law) };
+    if (isDocument(law)) {
+      await pacer.wait(url);
+      const digest = await fetchDigest(url, { fetchImpl });
+      pacer.done(url);
+      return checkDocument({ rule, law, param, sha256: digest.sha256, failure_reason: digest.failure_reason });
+    }
+    const result =
+      law.method === METHODS.ACT
+        ? await checkAct({ rule, law, param, act: await loadJson(url), amendment, today })
+        : await (async () => {
+            const source = await load(url);
+            return checkEdition({ rule, law, param, text: source.text, failure_reason: source.blocked ?? source.failure_reason });
+          })();
+    // Відхилений вхід має дійти до статусу циклу (`blocked`), а не загубитись
+    // серед звичайних `unavailable`.
+    return (await load(url)).blocked ? { ...result, blocked: true } : result;
   }
 
   for (const rule of rules) {
@@ -185,7 +248,15 @@ export async function runCycle({
 
     const method = methods[rule.rule_id]?.method;
     const page = pages[rule.rule_id];
-    if (!IMPLEMENTED.includes(method) || !page) {
+    const ruleLaws = laws[rule.rule_id];
+
+    if ((method === METHODS.ACT || method === METHODS.EDITION) && ruleLaws) {
+      const results = [];
+      for (const law of ruleLaws.laws) results.push(await checkLaw(rule, law, lawLabel(law)));
+      checks.push({ ...aggregateFields(rule, results), method, ...namedLeaves(Object.entries(ruleLaws.except ?? {})) });
+      continue;
+    }
+    if (method !== METHODS.PAGE || !page) {
       checks.push(methodCheck(rule, method));
       continue;
     }
@@ -221,24 +292,36 @@ export async function runCycle({
       if (source.truncated && check.state === STATES.UNAVAILABLE) {
         check.failure_reason = `${check.failure_reason} (сторінку обрізано за стелею ${MAX_INPUT_CHARS} символів)`;
       }
-      results.push(check);
+      results.push({ ...check, method: METHODS.PAGE });
     }
-    if (blocked) checks.push(blockedCheck(rule, blocked.url, blocked.reason));
-    else if (failed) checks.push({ ...scopeCheck(rule, { state: STATES.UNAVAILABLE, failure_reason: failed.reason }), fetched_from: failed.url });
+    if (!blocked && !failed) {
+      // Листи на іншому способі звіряються тут же: стан правила — найгірший з
+      // усіх його листів, а не лише з тих, що на сторінці.
+      for (const [param, entry] of Object.entries(page.elsewhere ?? {})) {
+        if (entry.method === METHODS.ACT) results.push(await checkLaw(rule, entry.law, param));
+        if (entry.method === METHODS.LLM) {
+          const source = await load(page.url);
+          results.push(
+            await checkLlmField({
+              rule,
+              param,
+              spec: entry.ask,
+              url: page.url,
+              text: source.text,
+              failure_reason: source.blocked ?? source.failure_reason,
+              ask,
+              matrix: valueAt(rule.params, param),
+            }),
+          );
+        }
+      }
+    }
+    if (blocked) checks.push({ ...blockedCheck(rule, blocked.url, blocked.reason), method });
+    else if (failed) checks.push({ ...scopeCheck(rule, { state: STATES.UNAVAILABLE, failure_reason: failed.reason }), fetched_from: failed.url, method });
     else {
-      // Листи, яких сторінка не підтверджує і які чекають іншого способу. Без
-      // них «збігається» на правилі з однією звіреною цифрою з трьох читалось
-      // би як підтвердження всього правила.
-      const elsewhere = Object.entries(page.elsewhere ?? {});
-      const pending = elsewhere.filter(([, e]) => e.method !== DERIVED).map(([param]) => param);
-      // Похідні листи теж називаються: сторінка їх не підтвердила, і мовчання
-      // про них читалось би як підтвердження (рев'ю звіту 2026-10).
-      const derived = elsewhere.filter(([, e]) => e.method === DERIVED).map(([param]) => param);
-      checks.push({
-        ...aggregateFields(rule, results),
-        ...(pending.length ? { pending } : {}),
-        ...(derived.length ? { derived } : {}),
-      });
+      // Похідні й ручні листи називаються: цикл їх не звіряв, і мовчання про
+      // них читалось би як підтвердження (рев'ю звіту 2026-10).
+      checks.push({ ...aggregateFields(rule, results), method, ...namedLeaves(Object.entries(page.elsewhere ?? {})) });
     }
   }
 
@@ -306,6 +389,7 @@ async function main() {
   const cycle = await runCycle({
     rules,
     vetoes,
+    ask: dryRun ? null : claudeAsk,
     fetchImpl: dryRun
       ? async () => {
           throw new Error("--dry-run: мережа свідомо вимкнена");

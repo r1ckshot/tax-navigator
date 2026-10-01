@@ -17,8 +17,12 @@ import { STATES } from './states.mjs';
  * справжній контент (`200`, без challenge). Для gov.pl записано саме `www.gov.pl`,
  * а не apex: збіг іде за суфіксом, і `gov.pl` відкрив би кожен піддомен держави,
  * включно з `isap.sejm.gov.pl` за WAF.
+ *
+ * `api.sejm.gov.pl` (ELI API) і `zakon.rada.gov.ua` додані 2026-10-01 для
+ * способів `act` і `edition` (`laws.mjs`): ELI віддає JSON без WAF, а rada —
+ * сторінку з датою редакції. Обидва — точні хости, не суфікси держдоменів.
  */
-export const SCRIPTABLE_HOSTS = Object.freeze(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl']);
+export const SCRIPTABLE_HOSTS = Object.freeze(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl', 'api.sejm.gov.pl', 'zakon.rada.gov.ua']);
 
 /** Хост із URL, або null, якщо URL невалідний. */
 export function hostOf(url) {

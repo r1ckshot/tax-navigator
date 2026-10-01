@@ -10,7 +10,11 @@
 /** @typedef {'match'|'cosmetic'|'divergence'|'unavailable'|'out_of_scope'|'not_verified'|'needs_confirmation'} CheckState */
 
 export const STATES = Object.freeze({
-  /** Джерело віддало те саме число, що в матриці. */
+  /**
+   * Джерело віддало те саме число, що в матриці. Для способів `act` і
+   * `edition` (`laws.mjs`) — закон не змінювався після `verified_at`; такий
+   * запис несе `compared: false`, бо число не порівнювалось.
+   */
   MATCH: "match",
   /** Різниця тільки у форматі: 4 806,00 проти 4806. Число те саме (AC-04). */
   COSMETIC: "cosmetic",
@@ -23,9 +27,10 @@ export const STATES = Object.freeze({
   /** У матриці немає `verified_at` — звіряти нема з чим, спершу верифікація. */
   NOT_VERIFIED: "not_verified",
   /**
-   * Цифру колись ветовано, і джерело пропонує її знову. Присвоює лише
-   * `veto.mjs` поверх уже порахованого diff (S-4), за реєстром
-   * `veto-registry.json`.
+   * Рішення людини потрібне, хоча розбіжності чисел немає. Дві причини:
+   * цифру колись ветовано, і джерело пропонує її знову (`veto.mjs` поверх
+   * diff, S-4, реєстр `veto-registry.json`); або закон змінився після
+   * `verified_at` (`laws.mjs`, способи `act` і `edition`).
    */
   NEEDS_CONFIRMATION: "needs_confirmation",
 });
@@ -33,7 +38,7 @@ export const STATES = Object.freeze({
 /** Усі сім значень у стабільному порядку. */
 export const ALL_STATES = Object.freeze(Object.values(STATES));
 
-/** Стани, які присвоює `diff`/`allowlist`/`sources`. `needs_confirmation` — лише `veto.mjs`. */
+/** Стани, які присвоює `diff`/`allowlist`/`sources`. `needs_confirmation` — `veto.mjs` і `laws.mjs`. */
 export const STATES_IN_SCOPE = Object.freeze(ALL_STATES.filter((s) => s !== STATES.NEEDS_CONFIRMATION));
 
 export function isState(value) {
@@ -67,6 +72,9 @@ export const UNCONFIRMED_STATES = Object.freeze([
  *                                       стан при цьому `unavailable` — цифру не перевірено,
  *                                       але причина інша, ніж мовчання джерела
  * @property {string|null} fetched_from   сторінка, з якої реально взято `fetched_value`
+ * @property {string} [method]           спосіб правила з `methods.mjs`; спосіб, що визначив
+ *                                       стан, — у `fields[].method`
+ * @property {false} [compared]          `act`/`edition`: число не порівнювалось
  * @property {string|null} source_url    джерело, записане в матриці
  * @property {string|null} verified_at   дата останньої ручної звірки з матриці
  */

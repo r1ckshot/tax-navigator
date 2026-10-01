@@ -36,8 +36,8 @@ describe('isScriptable', () => {
     expect(isScriptable('точно не url')).toBe(false);
   });
 
-  it('SCRIPTABLE_HOSTS — чотири перевірені хости, і список заморожений', () => {
-    expect(SCRIPTABLE_HOSTS).toEqual(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl']);
+  it('SCRIPTABLE_HOSTS — шість перевірених хостів, і список заморожений', () => {
+    expect(SCRIPTABLE_HOSTS).toEqual(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl', 'api.sejm.gov.pl', 'zakon.rada.gov.ua']);
     expect(Object.isFrozen(SCRIPTABLE_HOSTS)).toBe(true);
   });
 
@@ -48,8 +48,10 @@ describe('isScriptable', () => {
   it('www.gov.pl не відкриває решту gov.pl', () => {
     expect(isScriptable('https://www.gov.pl/web/rodzina/x')).toBe(true);
     expect(isScriptable('https://isap.sejm.gov.pl/isap.nsf/x')).toBe(false);
-    expect(isScriptable('https://api.sejm.gov.pl/eli/acts')).toBe(false);
     expect(isScriptable('https://gov.pl/web/x')).toBe(false);
+    // ELI API відкрито точним хостом: сусідній піддомен Сейму за ним не відкривається.
+    expect(isScriptable('https://api.sejm.gov.pl/eli/acts')).toBe(true);
+    expect(isScriptable('https://orka.sejm.gov.pl/proc10.nsf/x')).toBe(false);
   });
 });
 
