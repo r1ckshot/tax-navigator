@@ -39,10 +39,12 @@ describe('buildSourceCatalog: поточний файл правил', () => {
     expect(catalog.staleCount).toBe(0);
   });
 
-  // 12 правил звірено 2026-07-18: 91-ша доба для них настає 2026-10-17.
-  it('на 2026-10-17 давніми стають рівно 12 правил від 2026-07-18', () => {
+  // 12 правил звірено 2026-07-18; два з них (`jdg.ryczalt.rate`,
+  // `jdg.byly_pracodawca`) перезвірено 2026-10-01, коли sip.lex.pl замінили
+  // державними джерелами. Лишається 10, і 91-ша доба для них настає 2026-10-17.
+  it('на 2026-10-17 давніми стають рівно 10 правил від 2026-07-18', () => {
     const later = buildSourceCatalog(new Date('2026-10-17T12:00:00Z'));
-    expect(later.staleCount).toBe(12);
+    expect(later.staleCount).toBe(10);
     const staleDates = new Set(later.groups.flatMap((g) => g.entries.filter((e) => e.stale).map((e) => e.verifiedAt)));
     expect([...staleDates]).toEqual(['2026-07-18']);
   });

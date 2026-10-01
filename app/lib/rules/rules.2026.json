@@ -38,8 +38,8 @@
     {
       "rule_id": "jdg.ryczalt.rate",
       "params": { "rateProgramming": 0.12, "rateNarrowSupport": 0.085, "annualLimit": 8517200 },
-      "source_url": "https://sip.lex.pl/akty-prawne/dzu-dziennik-ustaw/zryczaltowany-podatek-dochodowy-od-niektorych-przychodow-16832090/art-8",
-      "verified_at": "2026-07-18"
+      "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
+      "verified_at": "2026-10-01"
     },
     {
       "rule_id": "jdg.zdrowotna.ryczalt",
@@ -96,8 +96,8 @@
         "ryczaltRequiresIdenticalServices": true,
         "zusReliefLostOnPartialOverlap": true
       },
-      "source_url": "https://sip.lex.pl/akty-prawne/dzu-dziennik-ustaw/zryczaltowany-podatek-dochodowy-od-niektorych-przychodow-16832090/art-8",
-      "verified_at": "2026-07-18"
+      "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19981440930",
+      "verified_at": "2026-10-01"
     },
 
     {

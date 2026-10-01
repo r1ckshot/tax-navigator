@@ -14,6 +14,16 @@ describe('rules-as-data — дисципліна джерел', () => {
     }
   });
 
+  // Анти-регрес: sip.lex.pl — комерційна база за пейволом, і посилання на неї
+  // тримало два правила ryczałtu на art. 8 ust. 1 pkt 6, який уже uchylony
+  // (перезвірка 2026-10-01, EVIDENCE). Джерело для людини — державне: сторінка
+  // podatki/zus/biznes.gov.pl або текст закону в ISAP/ELI.
+  it('жодне правило не посилається на комерційну базу', () => {
+    for (const rule of RULES.rules) {
+      expect(new URL(rule.source_url).hostname, rule.rule_id).not.toMatch(/(^|\.)lex\.pl$/);
+    }
+  });
+
   it('rule_id унікальні', () => {
     const ids = RULES.rules.map((r) => r.rule_id);
     expect(new Set(ids).size).toBe(ids.length);
@@ -67,6 +77,15 @@ describe('verify-first числа не дрейфнули', () => {
   it('внутрішня звірка: kwota wolna 30 000 = kwota zmniejszająca 3 600 / нижча ставка 12%', () => {
     const skala = getParams<{ lowerRate: number; taxFreeAmount: number; kwotaZmniejszajacaAnnual: number }>('jdg.skala');
     expect(skala.taxFreeAmount).toBeCloseTo(skala.kwotaZmniejszajacaAnnual / skala.lowerRate, 6);
+  });
+
+  // Тримає `derived`-лист монітора (`laws.mjs`, incubator.kup): ефективна ставка
+  // при авторських KUP виводиться з двох уже звірених цифр, тож зсув будь-якої
+  // з них валить цей тест, а не чекає ручної перевірки.
+  it('внутрішня звірка: ефективний PIT інкубатора з авторськими KUP 6% = 12% × (1 − 50%)', () => {
+    const skala = getParams<{ lowerRate: number }>('jdg.skala');
+    const kup = getParams<{ kupCopyright: number; effectivePitCopyrightEstimate: number }>('incubator.kup');
+    expect(kup.effectivePitCopyrightEstimate).toBeCloseTo(skala.lowerRate * (1 - kup.kupCopyright), 6);
   });
 
   it('внутрішня звірка: 30-krotność = 30 × прогнозована середня, що дає базу duży ZUS', () => {

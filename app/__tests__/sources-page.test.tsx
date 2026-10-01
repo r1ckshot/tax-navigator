@@ -46,11 +46,12 @@ describe('/sources', () => {
     expect(screen.queryAllByText('давно не звірялось')).toHaveLength(0);
   });
 
-  it('на 2026-10-17 з\'являються 12 давніх: і рядок, і позначка з формою ▲', () => {
+  // 12 правил від 2026-07-18 мінус два, перезвірені 2026-10-01 (sources.test.ts).
+  it('на 2026-10-17 з\'являються 10 давніх: і рядок, і позначка з формою ▲', () => {
     renderOn('2026-10-17');
-    expect(screen.getByText('12 правил давно не звірялись')).toBeDefined();
+    expect(screen.getByText('10 правил давно не звірялись')).toBeDefined();
     const labels = screen.getAllByText('давно не звірялось');
-    expect(labels).toHaveLength(12);
+    expect(labels).toHaveLength(10);
     // Колір значення сам не несе: поруч із підписом стоїть гліф.
     expect(labels[0].previousElementSibling?.textContent).toBe('▲');
   });
