@@ -61,11 +61,18 @@ function renderDivergenceSection(checks) {
   }
 
   const lines = divergent.map((c) => {
+    // Правило з полями (`pages.mjs`) може розійтись у кількох місцях одразу;
+    // показати лише перше означало б, що решту людина знайде вже після рішення.
+    const fields = (c.fields ?? [c]).filter((f) => f.state === STATES.DIVERGENCE);
+    const values = fields.flatMap((f) => [
+      ...(f.param ? [`- параметр: ${f.param}${f.scale ? ` (на сторінці ×${f.scale})` : ''}`] : []),
+      `- матриця: ${fmt(f.matrix_value)}`,
+      `- джерело: ${fmt(f.fetched_value)}`,
+      `- різниця: ${fmt(f.diff_percent)}%`,
+    ]);
     return [
       `### ${c.rule_id}`,
-      `- матриця: ${fmt(c.matrix_value)}`,
-      `- джерело: ${fmt(c.fetched_value)}`,
-      `- різниця: ${fmt(c.diff_percent)}%`,
+      ...values,
       // Дві різні речі, і плутати їх не можна: `fetched_from` — сторінка, яку
       // читав скрипт цього циклу, `source_url` — посилання, записане в
       // матриці при ручній звірці. Друкувати число лише під другим означало б
@@ -113,9 +120,26 @@ function renderVetoLine(c) {
   ].join('\n');
 }
 
+/**
+ * Підтверджене правило з листами на іншому способі звірки (`pending`) — не те
+ * саме, що підтверджене цілком. Список стоїть тут же, щоб «збігається» не
+ * читалось ширше, ніж його довела сторінка.
+ */
 function renderConfirmedLine(checks) {
-  const confirmed = checks.filter((c) => c.state === STATES.MATCH || c.state === STATES.COSMETIC).length;
-  return `## Підтверджено\n\n${confirmed} правил збігаються з джерелом (match/cosmetic).\n`;
+  const confirmed = checks.filter((c) => c.state === STATES.MATCH || c.state === STATES.COSMETIC);
+  const partial = confirmed.filter((c) => Array.isArray(c.pending) && c.pending.length > 0);
+  const head = `## Підтверджено\n\n${confirmed.length} правил збігаються з джерелом (match/cosmetic).\n`;
+  const derived = confirmed.filter((c) => Array.isArray(c.derived) && c.derived.length > 0);
+  const parts = [head];
+  if (partial.length > 0) {
+    const lines = partial.map((c) => `- ${c.rule_id}: ${c.pending.join(', ')}`);
+    parts.push(`З них ${partial.length} — лише в частині, яку несе сторінка; ці листи ще чекають іншого способу звірки:\n\n${lines.join('\n')}\n`);
+  }
+  if (derived.length > 0) {
+    const lines = derived.map((c) => `- ${c.rule_id}: ${c.derived.join(', ')}`);
+    parts.push(`Виведено, не звірено зі сторінки (тримає тест інваріанта або форма таблиці):\n\n${lines.join('\n')}\n`);
+  }
+  return parts.join('\n');
 }
 
 /**
@@ -165,5 +189,8 @@ export function summaryLine(cycle) {
   const divergences = checks.filter((c) => c.state === STATES.DIVERGENCE).length;
   const unconfirmed = checks.filter((c) => UNCONFIRMED_STATES.includes(c.state)).length;
 
-  return `${fmt(cycle.month)}: перевірено ${checks.length}, розбіжностей ${divergences}, непідтверджених ${unconfirmed}`;
+  // «Записів», а не «перевірено»: записи `out_of_scope` ніхто не звіряв, і
+  // дієслово на всі N завищувало б покриття (рев'ю звіту 2026-10).
+  const compared = checks.filter((c) => [STATES.MATCH, STATES.COSMETIC, STATES.DIVERGENCE, STATES.NEEDS_CONFIRMATION].includes(c.state)).length;
+  return `${fmt(cycle.month)}: записів ${checks.length}, звірено з джерелом ${compared}, розбіжностей ${divergences}, непідтверджених ${unconfirmed}`;
 }

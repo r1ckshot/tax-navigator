@@ -62,6 +62,13 @@ describe('verify-first числа не дрейфнули', () => {
     expect(getParams<{ validTo: string }>('residency.special_norm_52zr').validTo).toBe('2026-12-31');
   });
 
+  // Kwota wolna не стоїть на жодній сторінці автозвірки дослівно: її тримає ця
+  // звірка, а не сторінка (`scripts/rules-change-monitor/pages.mjs`, `derived`).
+  it('внутрішня звірка: kwota wolna 30 000 = kwota zmniejszająca 3 600 / нижча ставка 12%', () => {
+    const skala = getParams<{ lowerRate: number; taxFreeAmount: number; kwotaZmniejszajacaAnnual: number }>('jdg.skala');
+    expect(skala.taxFreeAmount).toBeCloseTo(skala.kwotaZmniejszajacaAnnual / skala.lowerRate, 6);
+  });
+
   it('внутрішня звірка: 30-krotność = 30 × прогнозована середня, що дає базу duży ZUS', () => {
     const avg = getParams<{ monthly: number }>('common.projected_average_wage').monthly;
     const cap = getParams<{ annualBaseCap: number }>('uop.annual_contribution_cap').annualBaseCap;

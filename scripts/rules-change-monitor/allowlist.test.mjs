@@ -36,9 +36,20 @@ describe('isScriptable', () => {
     expect(isScriptable('точно не url')).toBe(false);
   });
 
-  it('SCRIPTABLE_HOSTS — рівно zus.pl і podatki.gov.pl, і список заморожений', () => {
-    expect(SCRIPTABLE_HOSTS).toEqual(['zus.pl', 'podatki.gov.pl']);
+  it('SCRIPTABLE_HOSTS — чотири перевірені хости, і список заморожений', () => {
+    expect(SCRIPTABLE_HOSTS).toEqual(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl']);
     expect(Object.isFrozen(SCRIPTABLE_HOSTS)).toBe(true);
+  });
+
+  /**
+   * `www.gov.pl`, а не `gov.pl`: збіг іде за суфіксом, і apex відкрив би кожен
+   * державний піддомен, включно з тими, що за WAF.
+   */
+  it('www.gov.pl не відкриває решту gov.pl', () => {
+    expect(isScriptable('https://www.gov.pl/web/rodzina/x')).toBe(true);
+    expect(isScriptable('https://isap.sejm.gov.pl/isap.nsf/x')).toBe(false);
+    expect(isScriptable('https://api.sejm.gov.pl/eli/acts')).toBe(false);
+    expect(isScriptable('https://gov.pl/web/x')).toBe(false);
   });
 });
 
@@ -103,6 +114,13 @@ describe('classifyScope — на реальних правилах з rules.2026
       state: STATES.OUT_OF_SCOPE,
       failure_reason: expect.any(String),
     });
+  });
+
+  it('сторінка, яку відкриє цикл, важить більше за source_url', () => {
+    const rule = ruleSet.rules.find((r) => r.rule_id === 'jdg.zdrowotna.ryczalt');
+
+    expect(classifyScope(rule).state).toBe(STATES.OUT_OF_SCOPE);
+    expect(classifyScope(rule, 'https://www.zus.pl/baza-wiedzy/x')).toBeNull();
   });
 
   it('common.minimum_wage (zus.pl, верифіковане) — у скоупі, null', () => {

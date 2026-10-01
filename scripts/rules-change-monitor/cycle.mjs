@@ -17,10 +17,13 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { classifyScope, domainOf } from "./allowlist.mjs";
-import { compareValues } from "./diff.mjs";
+import { classifyScope, domainOf, notVerifiedScope } from "./allowlist.mjs";
+import { pageText } from "./extract.mjs";
+import { aggregateFields, checkField } from "./fields.mjs";
+import { DERIVED, IMPLEMENTED, VERIFICATION } from "./methods.mjs";
+import { PAGES } from "./pages.mjs";
 import { screenSource, MAX_INPUT_CHARS } from "./screen.mjs";
-import { EXTRACTORS, fetchSource, noExtractorCheck } from "./sources.mjs";
+import { fetchSource } from "./sources.mjs";
 import { renderReport, summaryLine } from "./report.mjs";
 import { appendCycle, readHistory, writeHistory } from "./state.mjs";
 import { STATES, isState } from "./states.mjs";
@@ -109,15 +112,34 @@ function scopeCheck(rule, { state, failure_reason }) {
 }
 
 /**
+ * Правило, чий спосіб звірки цикл ще не виконує (`act`, `edition`, `llm` —
+ * сесія 03) або не має. `out_of_scope`, а не `unavailable`: джерело не падало,
+ * цикл просто не звіряє це правило цим способом, і причина це називає.
+ */
+function methodCheck(rule, method) {
+  return scopeCheck(rule, {
+    state: STATES.OUT_OF_SCOPE,
+    failure_reason: method
+      ? `спосіб звірки «${method}» цикл ще не виконує`
+      : "у реєстрі methods.mjs немає способу звірки для цього правила",
+  });
+}
+
+/**
  * Один прогін звірки над переданими правилами. Мережа інжектується, тому цикл
  * тестується цілком без неї — і саме тому тест бачить порядок кроків, а не
  * лише окремі модулі.
+ *
+ * Сторінка тягнеться раз на цикл, скільки б правил із неї не читали: zus.pl
+ * обслуговує вісім правил, і вісім однакових запитів поспіль — це та сама
+ * поведінка бота, від якої стоїть пауза між запитами.
  */
 export async function runCycle({
   rules,
   now = new Date(),
   fetchImpl,
-  extractors = EXTRACTORS,
+  methods = VERIFICATION,
+  pages = PAGES,
   // Порожній дефолт — лише для тестів і `evals/`, яким veto не предмет.
   // Живий прогін (`main`) читає реєстр сам і падає, якщо файла немає.
   vetoes = [],
@@ -133,56 +155,91 @@ export async function runCycle({
   const started_at = now.toISOString();
   const checks = [];
   const pacer = createPacer({ pauseMs, sleep, clock });
+  const loaded = new Map();
+
+  async function load(url) {
+    if (!loaded.has(url)) {
+      await pacer.wait(url);
+      const { html, failure_reason } = await fetchSource(url, { fetchImpl });
+      pacer.done(url);
+      // Перевірка стоїть МІЖ фетчем і витягом, а не після нього: після витягу
+      // числа чужий текст уже пройшов через регулярки й міг потрапити в
+      // `fetched_value`, тобто в звіт, тобто до моделі.
+      const screened = screenSource(html);
+      loaded.set(url, {
+        failure_reason,
+        blocked: screened.blocked ? screened.failure_reason : null,
+        truncated: screened.truncated,
+        text: screened.html === null ? null : pageText(screened.html),
+      });
+    }
+    return loaded.get(url);
+  }
 
   for (const rule of rules) {
-    const scope = classifyScope(rule);
-    if (scope) {
-      checks.push(scopeCheck(rule, scope));
+    const notVerified = notVerifiedScope(rule);
+    if (notVerified) {
+      checks.push(scopeCheck(rule, notVerified));
       continue;
     }
 
-    const extractor = extractors[rule.rule_id];
-    if (!extractor) {
-      checks.push(noExtractorCheck(rule));
+    const method = methods[rule.rule_id]?.method;
+    const page = pages[rule.rule_id];
+    if (!IMPLEMENTED.includes(method) || !page) {
+      checks.push(methodCheck(rule, method));
       continue;
     }
 
-    const matrix_value = extractor.matrixValue(rule.params);
-    await pacer.wait(extractor.url);
-    const { html, failure_reason } = await fetchSource(extractor.url, { fetchImpl });
-    pacer.done(extractor.url);
-
-    // Перевірка стоїть МІЖ фетчем і екстрактором, а не після нього: після
-    // витягу числа чужий текст уже пройшов через регулярки й міг потрапити в
-    // `fetched_value`, тобто в звіт, тобто до моделі.
-    const screened = screenSource(html);
-    if (screened.blocked) {
-      checks.push(blockedCheck(rule, extractor.url, screened.failure_reason));
+    const fields = Object.entries(page.fields).map(([param, field]) => ({ param, field, url: field.url ?? page.url }));
+    // AC-02 перевіряється по сторінці, яку цикл реально відкриє, а не по
+    // `source_url`: посилання для людини може вести куди завгодно, а запит іде
+    // лише на хост зі SCRIPTABLE_HOSTS.
+    const closed = fields.map((f) => classifyScope(rule, f.url)).find(Boolean);
+    if (closed) {
+      checks.push(scopeCheck(rule, closed));
       continue;
     }
 
-    const check = compareValues({
-        rule_id: rule.rule_id,
-        matrix_value,
-        fetched_raw: screened.html === null ? null : extractor.extract(screened.html),
-        // Сторінка, з якої реально взято число. У матриці `source_url` часто
-        // інший (людське посилання на роз'яснення), і друкувати число під ним
-        // означало б атрибутувати його джерелу, якого скрипт не читав.
-        fetched_from: extractor.url,
-        source_url: rule.source_url ?? null,
-        verified_at: rule.verified_at ?? null,
-        failure_reason,
-    });
-
-    // Обрізаний вхід не має губитись. Зріз може відсікти маркер, і тоді запис
-    // виходить `unavailable` — з причиною «порожньо», яка читається як
-    // «джерело мовчало». Причина інша, і людина має бачити саме її.
-    if (screened.truncated && check.state === STATES.UNAVAILABLE) {
-      check.failure_reason = `${check.failure_reason} (сторінку обрізано за стелею ${MAX_INPUT_CHARS} символів)`;
+    const results = [];
+    let blocked = null;
+    let failed = null;
+    for (const { param, field, url } of fields) {
+      const source = await load(url);
+      if (source.blocked) {
+        blocked = { url, reason: source.blocked };
+        break;
+      }
+      // Сторінка не відповіла — причина спільна для всіх її полів, і розкладка
+      // по полях лише повторила б її N разів.
+      if (source.failure_reason) {
+        failed = { url, reason: source.failure_reason };
+        break;
+      }
+      const check = checkField({ rule, param, field, url, text: source.text, failure_reason: null, vetoes });
+      // Обрізаний вхід не має губитись. Зріз може відсікти маркер, і тоді поле
+      // виходить `unavailable` з причиною, яка читається як «джерело мовчало».
+      if (source.truncated && check.state === STATES.UNAVAILABLE) {
+        check.failure_reason = `${check.failure_reason} (сторінку обрізано за стелею ${MAX_INPUT_CHARS} символів)`;
+      }
+      results.push(check);
     }
-    // Veto після diff, а не замість нього: гілка перекриває вже порахований
-    // стан, і тільки там, де джерело справді віддало число (`veto.mjs`).
-    checks.push(applyVeto(check, vetoes));
+    if (blocked) checks.push(blockedCheck(rule, blocked.url, blocked.reason));
+    else if (failed) checks.push({ ...scopeCheck(rule, { state: STATES.UNAVAILABLE, failure_reason: failed.reason }), fetched_from: failed.url });
+    else {
+      // Листи, яких сторінка не підтверджує і які чекають іншого способу. Без
+      // них «збігається» на правилі з однією звіреною цифрою з трьох читалось
+      // би як підтвердження всього правила.
+      const elsewhere = Object.entries(page.elsewhere ?? {});
+      const pending = elsewhere.filter(([, e]) => e.method !== DERIVED).map(([param]) => param);
+      // Похідні листи теж називаються: сторінка їх не підтвердила, і мовчання
+      // про них читалось би як підтвердження (рев'ю звіту 2026-10).
+      const derived = elsewhere.filter(([, e]) => e.method === DERIVED).map(([param]) => param);
+      checks.push({
+        ...aggregateFields(rule, results),
+        ...(pending.length ? { pending } : {}),
+        ...(derived.length ? { derived } : {}),
+      });
+    }
   }
 
   const finalChecks = drop ? checks.slice(0, -1) : mutate ? checks.map(mutate) : checks;

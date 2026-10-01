@@ -31,19 +31,25 @@ const neverVerified = {
   source_url: 'https://www.zus.pl/baza-wiedzy/x',
   verified_at: '',
 };
-const noExtractor = {
+const closedHost = {
   rule_id: 'jdg.liniowy',
   params: { rate: 0.19 },
   source_url: 'https://www.podatki.gov.pl/x',
   verified_at: '2026-07-18',
 };
 
-const extractors = {
-  'common.minimum_wage': {
-    url: 'https://example.test/page',
-    matrixValue: (params) => params.monthly,
-    extract: (html) => html,
-  },
+const PAGE = { method: 'page', why: 'тестова сторінка' };
+const methods = {
+  'common.minimum_wage': PAGE,
+  'residency.treaty_tiebreakers': { method: 'act', why: 'тестовий акт' },
+  'jdg.liniowy': PAGE,
+};
+/** Сторінка-рядок: `kwota: <значення>`. Сирий рядок береться як є, без валюти. */
+const KWOTA = { kind: 'number', after: [/kwota:/], value: /\d[\d ,.]*(?:zł)?/, within: 40 };
+const pages = {
+  'common.minimum_wage': { url: 'https://www.zus.pl/test', fields: { monthly: KWOTA } },
+  // Сторінка на хості поза SCRIPTABLE_HOSTS: AC-02 перевіряє URL, який цикл відкрив би.
+  'jdg.liniowy': { url: 'https://isap.sejm.gov.pl/x', fields: { rate: KWOTA } },
 };
 
 const okFetch = (body) => async () => ({ ok: true, status: 200, text: async () => body });
@@ -51,10 +57,11 @@ const okFetch = (body) => async () => ({ ok: true, status: 200, text: async () =
 describe('runCycle: кожне правило виходить рівно з одним станом', () => {
   it('чотири правила — чотири записи, усі стани валідні', async () => {
     const cycle = await runCycle({
-      rules: [inScope, wafSource, neverVerified, noExtractor],
+      rules: [inScope, wafSource, neverVerified, closedHost],
       now: NOW,
-      fetchImpl: okFetch('4806'),
-      extractors,
+      fetchImpl: okFetch('kwota: 4806'),
+      pages,
+      methods,
     });
     expect(cycle.checks).toHaveLength(4);
     expect(cycle.checks.map((c) => c.state)).toEqual([
@@ -65,12 +72,49 @@ describe('runCycle: кожне правило виходить рівно з о�
     ]);
   });
 
+  it('спосіб, який цикл ще не виконує, названо в причині, а не схованим «поза скоупом»', async () => {
+    const cycle = await runCycle({ rules: [wafSource], now: NOW, fetchImpl: okFetch(''), pages, methods });
+    expect(cycle.checks[0].state).toBe(STATES.OUT_OF_SCOPE);
+    expect(cycle.checks[0].failure_reason).toBe('спосіб звірки «act» цикл ще не виконує');
+  });
+
+  it('правило без запису в реєстрі способів не зникає, а отримує стан із причиною', async () => {
+    const cycle = await runCycle({ rules: [inScope], now: NOW, fetchImpl: okFetch('kwota: 4806'), pages, methods: {} });
+    expect(cycle.checks[0].state).toBe(STATES.OUT_OF_SCOPE);
+    expect(cycle.checks[0].failure_reason).toMatch(/немає способу звірки/);
+  });
+
+  /**
+   * zus.pl обслуговує вісім правил. Вісім однакових запитів поспіль — та сама
+   * поведінка бота, від якої стоїть пауза між запитами.
+   */
+  it('одна сторінка на кілька правил тягнеться раз за цикл', async () => {
+    const shared = {
+      'common.minimum_wage': { url: 'https://www.zus.pl/test', fields: { monthly: KWOTA } },
+      'jdg.liniowy': { url: 'https://www.zus.pl/test', fields: { rate: { ...KWOTA, after: [/stawka:/] } } },
+    };
+    let calls = 0;
+    const cycle = await runCycle({
+      rules: [inScope, closedHost],
+      now: NOW,
+      pages: shared,
+      methods,
+      fetchImpl: async () => {
+        calls += 1;
+        return { ok: true, status: 200, text: async () => 'kwota: 4806 stawka: 0.19' };
+      },
+    });
+    expect(calls).toBe(1);
+    expect(cycle.checks.map((c) => c.state)).toEqual([STATES.MATCH, STATES.MATCH]);
+  });
+
   it('косметика не читається як розбіжність', async () => {
     const cycle = await runCycle({
       rules: [inScope],
       now: NOW,
-      fetchImpl: okFetch('4 806,00 zł'),
-      extractors,
+      fetchImpl: okFetch('kwota: 4 806,00 zł'),
+      pages,
+      methods,
     });
     expect(cycle.checks[0].state).toBe(STATES.COSMETIC);
     expect(cycle.status).toBe('completed');
@@ -80,8 +124,9 @@ describe('runCycle: кожне правило виходить рівно з о�
     const cycle = await runCycle({
       rules: [inScope],
       now: NOW,
-      fetchImpl: okFetch('5 000,00 zł'),
-      extractors,
+      fetchImpl: okFetch('kwota: 5 000,00 zł'),
+      pages,
+      methods,
     });
     expect(cycle.checks[0].state).toBe(STATES.DIVERGENCE);
     expect(cycle.checks[0].diff_percent).toBeCloseTo(4.04, 2);
@@ -98,7 +143,8 @@ describe('runCycle: кожне правило виходить рівно з о�
       fetchImpl: async () => {
         throw new Error('ECONNRESET');
       },
-      extractors,
+      pages,
+      methods,
     });
     expect(cycle.checks[0].state).toBe(STATES.UNAVAILABLE);
     expect(cycle.checks[0].fetched_value).toBeNull();
@@ -110,7 +156,8 @@ describe('runCycle: кожне правило виходить рівно з о�
       rules: [inScope],
       now: NOW,
       fetchImpl: async () => ({ ok: false, status: 403, text: async () => '' }),
-      extractors,
+      pages,
+      methods,
     });
     expect(cycle.checks[0].state).toBe(STATES.UNAVAILABLE);
     expect(cycle.checks[0].failure_reason).toContain('403');
@@ -127,19 +174,13 @@ describe('runCycle: кожне правило виходить рівно з о�
    * рев'ю з чистим контекстом; тут замість неї — доказ, що гейт спрацьовує.
    */
   it('стан поза переліком семи валить цикл, а не їде у звіт', async () => {
-    const brokenExtractor = {
-      'common.minimum_wage': {
-        url: 'https://example.test/page',
-        matrixValue: () => 4806,
-        extract: () => '4806',
-      },
-    };
     await expect(
       runCycle({
         rules: [inScope],
         now: NOW,
-        fetchImpl: okFetch('4806'),
-        extractors: brokenExtractor,
+        fetchImpl: okFetch('kwota: 4806'),
+        pages,
+        methods,
         // діагностичний гачок: підміняє стан уже після diff, як зробила б
         // регресія в будь-якому з трьох модулів, що присвоюють стани
         mutate: (check) => ({ ...check, state: 'ok' }),
@@ -149,7 +190,7 @@ describe('runCycle: кожне правило виходить рівно з о�
 
   /**
    * Пара входів як постійна перевірка (урок 11.1). Обидва прогони йдуть через
-   * СПРАВЖНІЙ екстрактор `EXTRACTORS`, а не через підставний: перевірка стоїть
+   * СПРАВЖНІЙ реєстр `PAGES`, а не через підставний: перевірка стоїть
    * між фетчем і витягом, і підмінений екстрактор не довів би, що вона там.
    */
   it('шкідливий вхід: сторінка з прихованою інструкцією не доїжджає до витягу', async () => {
@@ -190,10 +231,19 @@ describe('runCycle: кожне правило виходить рівно з о�
    * джерело і відхилений вхід вимагають різної реакції людини.
    */
   it('заблокований вхід переважує недоступне джерело у статусі циклу', async () => {
+    // Дві різні сторінки: одна й та сама тягнулась би раз на цикл, і другий
+    // запис просто повторив би перший.
+    const twoPages = {
+      'common.minimum_wage': { url: 'https://www.zus.pl/one', fields: { monthly: KWOTA } },
+      'jdg.liniowy': { url: 'https://www.zus.pl/two', fields: { rate: KWOTA } },
+    };
     let call = 0;
     const cycle = await runCycle({
-      rules: [inScope, inScope],
+      rules: [inScope, closedHost],
       now: NOW,
+      pages: twoPages,
+      methods,
+      pauseMs: 0,
       fetchImpl: async () => {
         call += 1;
         if (call === 1) throw new Error('ECONNRESET');
@@ -223,8 +273,9 @@ describe('runCycle: кожне правило виходить рівно з о�
       runCycle({
         rules: [inScope, wafSource],
         now: NOW,
-        fetchImpl: okFetch('4806'),
-        extractors,
+        fetchImpl: okFetch('kwota: 4806'),
+        pages,
+        methods,
         drop: true,
       })
     ).rejects.toThrow(/жоден не має зникнути/);
@@ -234,13 +285,13 @@ describe('runCycle: кожне правило виходить рівно з о�
 describe('writeReport: місячний звіт лишається файлом', () => {
   it('пише data/reports/YYYY-MM.md з тим самим текстом, що в stdout, і заміщає при повторі', async () => {
     const dir = join(mkdtempSync(join(tmpdir(), 'monitor-')), 'reports');
-    const first = await runCycle({ rules: [inScope], now: NOW, fetchImpl: okFetch('5 000,00 zł'), extractors });
+    const first = await runCycle({ rules: [inScope], now: NOW, fetchImpl: okFetch('kwota: 5 000,00 zł'), pages, methods });
     const path = writeReport(dir, first);
 
     expect(path).toBe(join(dir, '2026-09.md'));
     expect(readFileSync(path, 'utf8')).toBe(`${renderReport(first)}\n${summaryLine(first)}\n`);
 
-    const second = await runCycle({ rules: [inScope], now: NOW, fetchImpl: okFetch('4806'), extractors });
+    const second = await runCycle({ rules: [inScope], now: NOW, fetchImpl: okFetch('kwota: 4806'), pages, methods });
     writeReport(dir, second);
     const text = readFileSync(path, 'utf8');
     expect(text).toContain('розбіжностей 0');

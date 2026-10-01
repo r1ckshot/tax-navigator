@@ -22,6 +22,10 @@ describe("normalizeNumber", () => {
     expect(normalizeNumber("9,00%")).toBe(9);
   });
 
+  it("парсить польське 'proc.': '2,45 proc.' → 2.45, а не відкидає через крапку", () => {
+    expect(normalizeNumber("2,45 proc.")).toBe(2.45);
+  });
+
   it("парсить '1 620,00'", () => {
     expect(normalizeNumber("1 620,00")).toBe(1620);
   });
