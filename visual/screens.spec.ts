@@ -86,9 +86,13 @@ test('словник дизайну', async ({ page }) => {
 
 /**
  * Єдина сцена, чий вигляд залежить від дати: стан свіжості рахується від
- * `verified_at` до сьогодні. 2026-10-17 перші 10 правил стануть давніми, і
- * еталон розійдеться. Це не шум, а той самий сигнал, що дає SessionStart-хук:
- * правила пора звірити знову. Оновлювати еталон після звірки, а не замість неї.
+ * `verified_at` до сьогодні. Правило, що стало давнім, змінює еталон — це не шум,
+ * а сигнал звірити правила знову; оновлювати еталон після звірки, а не замість неї.
+ *
+ * Самі дати замасковано (сесія 04 теми 1.2): бот автозвірки щомісяця піднімає
+ * `verified_at`, і без маски кожен його PR валив би цей тест, хоча верстка та
+ * сама. Рядок `YYYY-MM-DD` завжди однакової ширини, тож маска нічого не ховає з
+ * розкладки; позначку свіжості не замасковано — її зміна і є сигналом.
  */
 test('джерела цифр', async ({ page }) => {
   await page.goto('/sources');
@@ -97,7 +101,9 @@ test('джерела цифр', async ({ page }) => {
   await expect(page.getByRole('listitem')).toHaveCount(26);
   await expectNoHorizontalOverflow(page);
 
-  await expect(page).toHaveScreenshot('sources.png', { fullPage: true });
+  const dates = page.locator('li span[class*="date"]');
+  await expect(dates).toHaveCount(26);
+  await expect(page).toHaveScreenshot('sources.png', { fullPage: true, mask: [dates] });
 });
 
 /**

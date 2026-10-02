@@ -1,0 +1,46 @@
+# Типи й тести на CI. До сесії 04 теми 1.2 їх ганяв лише `pre-commit-gate` локально,
+# тож коміт, зроблений не в сесії Claude, не перевіряв ніхто. Перший такий автор —
+# бот автозвірки (`rules-verify.yml`).
+#
+# PR, відкритий GITHUB_TOKEN-ом, не запускає `pull_request`-workflow (захист GitHub
+# від рекурсії), але `workflow_dispatch` від того самого токена — запускає. Тому бот
+# після пушу сам викликає цей файл на своїй гілці; прогін висить на коміті гілки й
+# видно його в чеках PR. PAT чи GitHub App для цього не потрібні (DECISIONS 2026-10-02).
+
+name: checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Node tests and import graph
+        run: npm test
+
+      - name: UI tests (jsdom)
+        run: npm run test:ui
