@@ -7,13 +7,13 @@
       "rule_id": "residency.days_threshold",
       "params": { "days": 183, "partialDayCountsAsFull": true },
       "source_url": "https://www.gov.pl/web/finanse/objasnienia-podatkowe-z-29-kwietnia-2021-r-ws-rezydencji-podatkowej-oraz-zakresu-obowiazku-podatkowego-osob-fizycznych-w-polsce",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "residency.special_norm_52zr",
       "params": { "validFrom": "2024-01-01", "validTo": "2026-12-31" },
       "source_url": "https://orka.sejm.gov.pl/proc10.nsf/ustawy/2172_u.htm",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "residency.treaty_tiebreakers",
@@ -53,13 +53,13 @@
         "deductibleShareOfRevenue": 0.5
       },
       "source_url": "https://stat.gov.pl/",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "jdg.liniowy",
       "params": { "rate": 0.19, "zdrowotnaRate": 0.049, "zdrowotnaMinMonthly": 432.54, "zdrowotnaAnnualDeductionCap": 14100 },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "jdg.skala",
@@ -73,7 +73,7 @@
         "zdrowotnaMinMonthly": 432.54
       },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "jdg.zus.stages",
@@ -137,7 +137,7 @@
         "zdrowotnaDeductibleFromTax": false
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00274",
-      "verified_at": "2026-07-24"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "uop.pit",
@@ -199,7 +199,7 @@
         "choroboweVoluntary": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/0098",
-      "verified_at": "2026-08-03"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "zlecenie.kup",
@@ -210,7 +210,7 @@
         "appliedAfterSocialContributions": true
       },
       "source_url": "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-umowy-zlecenia-lub-o-dzielo",
-      "verified_at": "2026-08-03"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "zlecenie.zbieg_z_etatem",
@@ -267,7 +267,7 @@
         "cashBasis": true
       },
       "source_url": "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-dzialalnosci-nierejestrowanej",
-      "verified_at": "2026-08-03"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "nierejestrowana.cudzoziemcy",
