@@ -276,10 +276,22 @@ export function radaIds(checks) {
 }
 
 /**
- * Повний текст чинної редакції: `show/<id>.txt` віддає весь закон однією
- * сторінкою (ПКУ — ~10 МБ HTML, ~4 млн символів тексту), а `show/<id>` — лише
- * шапку. Розмітку прибираємо: агент шукає в тексті Grep-ом.
+ * Повний текст чинної редакції. `show/<id>` — лише шапка; `show/<id>.txt` віддає
+ * весь закон лише IP із «звичайних» мереж, а раннерам GitHub і VPS — ту саму
+ * шапку на 9 КБ (пробник 2026-10-02). `show/<id>/print` віддає повний текст усім
+ * (ПКУ — 1,25 МБ gzip, ~4 млн символів тексту); `fetch` розпаковує сам.
  */
+export const radaPrintUrl = (id) => `https://zakon.rada.gov.ua/laws/show/${id}/print`;
+
+/**
+ * Справжній текст закону, а не шапка: є дата редакції і є статті. Шапка теж
+ * несе «Редакція від …», і перевірка лише дати 2026-10-02 пропустила її як успіх.
+ */
+export function isFullLawText(text) {
+  return /Редакція\s+від \d\d\.\d\d\.\d{4}/.test(text) && /Стаття \d+[\d-]*\./.test(text);
+}
+
+/** Розмітку прибираємо: агент шукає в тексті Grep-ом. */
 export function radaText(html) {
   return html
     .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
@@ -375,7 +387,7 @@ async function main() {
     // в лозі — без нього «fetch failed» нічого не каже.
     let laws = 0;
     for (const id of radaIds(checks)) {
-      const url = `https://zakon.rada.gov.ua/laws/show/${id}.txt`;
+      const url = radaPrintUrl(id);
       let reason = null;
       for (const pause of RADA_PAUSES_MS) {
         await new Promise((r) => setTimeout(r, pause));
@@ -383,7 +395,7 @@ async function main() {
           const response = await fetch(url, { signal: AbortSignal.timeout(180_000) });
           // Між «Редакція» і «від» стоїть &nbsp;: шукаємо по очищеному тексту, не по HTML.
           const text = radaText(await response.text());
-          reason = response.ok && /Редакція\s+від \d\d\.\d\d\.\d{4}/.test(text) ? null : `zakon.rada відповів ${response.status} без тексту редакції`;
+          reason = response.ok && isFullLawText(text) ? null : `zakon.rada відповів ${response.status} без тексту статей (${text.length} символів)`;
           if (!reason) writeFileSync(join(dir, `rada-${id}.txt`), text, "utf8");
         } catch (error) {
           const code = error?.cause?.code ?? error?.name ?? null;
