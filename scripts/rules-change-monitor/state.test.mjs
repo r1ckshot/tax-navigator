@@ -103,6 +103,13 @@ describe('writeHistory', () => {
     expect(readHistory(path)).toEqual(history);
   });
 
+  // Перший живий прогін на раннері CI впав саме тут: `data/` у .gitignore.
+  it('створює теку, якої ще немає (чистий чекаут)', () => {
+    const path = join(tmpFile('fresh'), 'data', 'cycle-history.json');
+    writeHistory(path, { cycles: [] });
+    expect(readHistory(path)).toEqual({ cycles: [] });
+  });
+
   it('не лишає тимчасовий .tmp файл після успішного запису', () => {
     const path = tmpFile('no-tmp-leftover.json');
     writeHistory(path, { cycles: [] });

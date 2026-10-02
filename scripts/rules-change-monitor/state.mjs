@@ -5,7 +5,8 @@
 // дедуп-ключ циклу — `month`, повторний запуск того самого місяця замінює
 // запис, а не додає другий.
 
-import { readFileSync, writeFileSync, renameSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, renameSync, existsSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 /**
  * Читає історію циклів з JSON-файлу.
@@ -72,6 +73,8 @@ export function appendCycle(history, cycle) {
  * @param {{ cycles: Array<object> }} history
  */
 export function writeHistory(path, history) {
+  // Тека `data/` у .gitignore: на чистому чекауті (раннер CI) її немає взагалі.
+  mkdirSync(dirname(path), { recursive: true });
   const tmpPath = `${path}.tmp`;
   writeFileSync(tmpPath, JSON.stringify(history, null, 2), 'utf8');
   renameSync(tmpPath, path);
