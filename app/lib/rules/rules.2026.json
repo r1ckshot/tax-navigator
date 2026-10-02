@@ -24,9 +24,9 @@
 
     {
       "rule_id": "common.minimum_wage",
-      "params": { "monthly": 4806 },
+      "params": { "monthly": 4950 },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "common.projected_average_wage",
