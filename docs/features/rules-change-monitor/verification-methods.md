@@ -21,12 +21,12 @@
 | `llm` | модель дістає значення з тексту, скрипт перевіряє цитату дослівно, а число — у цитаті | значення з дослівною цитатою, цитата у звіті |
 | `manual` | лише з причиною й записом у DECISIONS | цикл не звіряє |
 
-**Підсумок правил:** `page` — 19, `act` — 6, `edition` — 1, `llm` — 0, `manual` — 0.
+**Підсумок правил:** `page` — 20, `act` — 5, `edition` — 1, `llm` — 0, `manual` — 0.
 Усі 26 виходять із циклу з автоматичним станом (`cycle.test.mjs`, прогін на фікстурах).
 
-**Листи, які цикл не звіряє:** `derived` (тримає тест інваріанта або форма таблиці) і
-два тимчасові `manual` в `incubator.kup` — ціни абонементу; їх звіряють сторінки
-інкубаторів (домени відкрито в сесії 03, звірка — сесія 04). «Ефективних ставок»
+**Листи, які цикл не звіряє:** лише `derived` (тримає тест інваріанта або форма
+таблиці). `manual`-листів нуль із сесії 04: ціни абонементу `incubator.kup` звіряються
+сторінками самих інкубаторів — єдиними недержавними джерелами циклу. «Ефективних ставок»
 PIT інкубатора більше немає: 13,6% виявилось ставкою до 2022 року, і податок тепер
 рахує движок (DECISIONS 2026-10-01). Звіт називає `manual`-листи поіменно.
 
@@ -100,7 +100,7 @@ biznes.gov.pl/001785. Тож `llm`-листів зараз нуль.
 | `jdg.skala` | `page` | podatki.gov.pl/stawki-i-limity + zus.pl/wysokosc-skladek-na-ubezpieczenia-spoleczne | 5 | taxFreeAmount (derived), zdrowotnaRate (act: art. 79) | шкала 12/32%, поріг 120 000 і kwota zmniejszająca — podatki.gov.pl/stawki-i-limity |
 | `jdg.zus.stages` | `page` | zus.pl/wysokosc-skladek-na-ubezpieczenia-spoleczne | 5 | ulgaNaStartMonths (act: art. 18 ust. 1), preferencyjnyMonths (act: art. 18a ust. 1), priorBusinessLookbackMonths (act: art. 18a ust. 2 pkt 1) | zus.pl: бази й суми preferencyjnego та dużego ZUS; строки 6/24/60 місяців — act |
 | `jdg.byly_pracodawca` | `act` | ustawa o zryczałtowanym podatku dochodowym, art. 8 ust. 2; Prawo przedsiębiorców, art. 18 ust. 1; ustawa o systemie ubezpieczeń społecznych, art. 18a ust. 2 pkt 2 | — | — | втрата ryczałtu при послугах колишньому роботодавцю — art. 8 ust. 2 ustawy o ryczałcie (ust. 1 pkt 6 uchylony); пільги ZUS — art. 18 Prawa przedsiębiorców і art. 18a ustawy o sus |
-| `incubator.kup` | `act` | ustawa o podatku dochodowym od osób fizycznych, art. 22 ust. 9 pkt 3–4 і ust. 9a; ustawa o systemie ubezpieczeń społecznych, art. 6 ust. 1 (umowa o dzieło не тytuł) | — | subscriptionMonthlyMin (manual), subscriptionMonthlyMax (manual), isEstimate (derived) | KUP 20/50% і ліміт 120 000 — art. 22 ust. 9 і 9a ustawy o PIT; ціни абонементу й оцінки ставок — manual-листи з причиною (laws.mjs) |
+| `incubator.kup` | `page` | bizky.ai/cennik-bizky-prime + fba.ink/en | 2 | kupStandard (act: art. 22 ust. 9 pkt 4), kupCopyright (act: art. 22 ust. 9 pkt 3), copyrightAnnualCap (act: art. 22 ust. 9a), hasZus (act: art. 6 ust. 1 (umowa o dzieło не тytuł)), isEstimate (derived) | ціни абонементу — сторінки самих інкубаторів (Bizky Prime — нижня межа, FBA.ink — верхня); KUP 20/50%, ліміт 120 000 і відсутність ZUS — act |
 | `uop.employer_contributions` | `page` | biznes.gov.pl/00274 | 5 | — | biznes.gov.pl/00274: таблиця розподілу складок 2026 |
 | `uop.employee_contributions` | `page` | biznes.gov.pl/00274 | 4 | zdrowotnaDeductibleFromTax (act: art. 27b (uchylony)) | biznes.gov.pl/00274: таблиця розподілу складок 2026 |
 | `uop.pit` | `page` | podatki.gov.pl/koszty-uzyskania-przychodow + podatki.gov.pl/stawki-i-limity | 2 | — | podatki.gov.pl: KUP 250 zł/міс; kwota zmniejszająca 300 = 3 600 / 12 зі stawki-i-limity |
@@ -142,5 +142,5 @@ biznes.gov.pl/001785. Тож `llm`-листів зараз нуль.
 - Сигнал `act` на рівні статті: можливий через текст змінювального акта (у ньому
   стоїть «w art. 22 ust. 9…»), але це розбір прози — робити, лише якщо шум акта
   заважатиме (сесія 04 бачить його першою).
-- Ціни абонементу інкубаторів: FBA.ink на 2026-10 бере 500 zł, а матриця тримає
-  300–349 — перша ж звірка сторінок дасть розбіжність (сесія 04, через `/scaffold-rule`).
+- ~~Ціни абонементу інкубаторів~~ — закрито в сесії 04: смуга 349–500 (Bizky Prime і
+  FBA.ink), обидві межі звіряє `page`.

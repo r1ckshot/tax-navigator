@@ -163,6 +163,24 @@ describe('guard: act і edition мають закони, llm — питання'
    * «Готово коли» сесії 03: кожен manual має причину і запис у DECISIONS.
    * Запис шукається за повним шляхом листа — так його і названо там.
    */
+  /**
+   * «Готово коли» сесії 04: ручних листів нуль — ні правилом, ні листом закону, ні
+   * листом сторінки. Новий `manual` можливий, але свідомо: разом із рядком у
+   * DECISIONS і правкою цього тесту, а не тихо.
+   */
+  it('manual-листів нуль', () => {
+    const manual = [
+      ...Object.entries(VERIFICATION).filter(([, v]) => v.method === METHODS.MANUAL).map(([id]) => id),
+      ...Object.entries(RULE_LAWS).flatMap(([id, entry]) =>
+        Object.entries(entry.except ?? {}).filter(([, e]) => e.method === METHODS.MANUAL).map(([p]) => `${id}.${p}`),
+      ),
+      ...Object.entries(PAGES).flatMap(([id, page]) =>
+        Object.entries(page.elsewhere ?? {}).filter(([, e]) => e.method === METHODS.MANUAL).map(([p]) => `${id}.${p}`),
+      ),
+    ];
+    expect(manual).toEqual([]);
+  });
+
   it('кожен manual-лист записаний у DECISIONS.md', () => {
     const decisions = readFileSync(join(RULES_DIR, '../../../docs/DECISIONS.md'), 'utf8');
     const manual = Object.entries(RULE_LAWS).flatMap(([id, entry]) =>

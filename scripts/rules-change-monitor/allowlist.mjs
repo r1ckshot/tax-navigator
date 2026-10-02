@@ -21,8 +21,12 @@ import { STATES } from './states.mjs';
  * `api.sejm.gov.pl` (ELI API) і `zakon.rada.gov.ua` додані 2026-10-01 для
  * способів `act` і `edition` (`laws.mjs`): ELI віддає JSON без WAF, а rada —
  * сторінку з датою редакції. Обидва — точні хости, не суфікси держдоменів.
+ *
+ * `bizky.ai` і `fba.ink` (сесія 04) — єдині недержавні хости: ціну абонементу
+ * інкубатора називає лише сам інкубатор. Їхній текст — чужий вхід так само, як
+ * держсторінки, і проходить ту саму перевірку `screen.mjs` перед витягом.
  */
-export const SCRIPTABLE_HOSTS = Object.freeze(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl', 'api.sejm.gov.pl', 'zakon.rada.gov.ua']);
+export const SCRIPTABLE_HOSTS = Object.freeze(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl', 'api.sejm.gov.pl', 'zakon.rada.gov.ua', 'bizky.ai', 'fba.ink']);
 
 /** Хост із URL, або null, якщо URL невалідний. */
 export function hostOf(url) {

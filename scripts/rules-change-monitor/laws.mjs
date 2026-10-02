@@ -94,14 +94,6 @@ export const RULE_LAWS = Object.freeze({
       act("sus", "art. 18a ust. 2 pkt 2"),
     ],
   },
-  "incubator.kup": {
-    laws: [act("pit", "art. 22 ust. 9 pkt 3–4 і ust. 9a"), act("sus", "art. 6 ust. 1 (umowa o dzieło не тytuł)")],
-    except: {
-      subscriptionMonthlyMin: { method: "manual", why: "тимчасово: ціна зі сторінок самих інкубаторів, їхні домени поза allowlist; page/llm — сесія 04" },
-      subscriptionMonthlyMax: { method: "manual", why: "тимчасово: ціна зі сторінок самих інкубаторів, їхні домени поза allowlist; page/llm — сесія 04" },
-      isEstimate: { method: "derived", why: "позначка продукту: правило — оцінка" },
-    },
-  },
   "fop.zaklad_in_pl": {
     laws: [
       act("umowaPlUa", "art. 5, 7 і 24"),

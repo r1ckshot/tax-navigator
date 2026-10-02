@@ -26,6 +26,9 @@ export const URLS = Object.freeze({
   zbieg: "https://www.biznes.gov.pl/pl/portal/001785",
   nierej: "https://www.biznes.gov.pl/pl/portal/00115",
   pip: "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
+  // Ціну абонементу називає лише сам інкубатор — держджерела в неї немає.
+  bizkyPrime: "https://bizky.ai/cennik-bizky-prime/",
+  fbaInk: "https://fba.ink/en/",
 });
 
 /**
@@ -224,6 +227,24 @@ export const PAGES = Object.freeze({
     elsewhere: {
       kupCopyright: onAct("50% — art. 22 ust. 9 pkt 3 ustawy o PIT; сторінка podatki про zlecenie авторських KUP не називає", act("pit", "art. 22 ust. 9 pkt 3")),
       copyrightAnnualCap: onAct("120 000 zł — art. 22 ust. 9a ustawy o PIT", act("pit", "art. 22 ust. 9a")),
+    },
+  },
+
+  // Смуга абонементу — від найдешевшого до найдорожчого з названих інкубаторів
+  // (EVIDENCE, сценарій E). Стартова акція FBA («Instead of 500 zł only 350 zł»)
+  // стоїть на тій самій сторінці, тож маркер — речення з FAQ про постійну ціну.
+  "incubator.kup": {
+    url: URLS.bizkyPrime,
+    fields: {
+      subscriptionMonthlyMin: int({ after: [/Miesięczny Koszt Podstawowy/], within: 12 }),
+      subscriptionMonthlyMax: int({ url: URLS.fbaInk, after: [/The cost of incubator services is/], within: 12 }),
+    },
+    elsewhere: {
+      kupStandard: onAct("20% — art. 22 ust. 9 pkt 4 ustawy o PIT; сторінки інкубаторів норми не цитують", act("pit", "art. 22 ust. 9 pkt 4")),
+      kupCopyright: onAct("50% — art. 22 ust. 9 pkt 3 ustawy o PIT", act("pit", "art. 22 ust. 9 pkt 3")),
+      copyrightAnnualCap: onAct("120 000 zł — art. 22 ust. 9a ustawy o PIT", act("pit", "art. 22 ust. 9a")),
+      hasZus: onAct("umowa o dzieło не є тytułem do ubezpieczeń — art. 6 ust. 1 ustawy o sus; це відсутність норми, на сторінці її не процитуєш", act("sus", "art. 6 ust. 1 (umowa o dzieło не тytuł)")),
+      isEstimate: via("derived", "позначка продукту: правило — оцінка"),
     },
   },
 

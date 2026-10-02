@@ -57,10 +57,7 @@ export const VERIFICATION = Object.freeze({
     method: METHODS.ACT,
     why: "втрата ryczałtu при послугах колишньому роботодавцю — art. 8 ust. 2 ustawy o ryczałcie (ust. 1 pkt 6 uchylony); пільги ZUS — art. 18 Prawa przedsiębiorców і art. 18a ustawy o sus",
   },
-  "incubator.kup": {
-    method: METHODS.ACT,
-    why: "KUP 20/50% і ліміт 120 000 — art. 22 ust. 9 і 9a ustawy o PIT; ціни абонементу й оцінки ставок — manual-листи з причиною (laws.mjs)",
-  },
+  "incubator.kup": page("ціни абонементу — сторінки самих інкубаторів (Bizky Prime — нижня межа, FBA.ink — верхня); KUP 20/50%, ліміт 120 000 і відсутність ZUS — act"),
   "uop.employer_contributions": page("biznes.gov.pl/00274: таблиця розподілу складок 2026"),
   "uop.employee_contributions": page("biznes.gov.pl/00274: таблиця розподілу складок 2026"),
   "uop.pit": page("podatki.gov.pl: KUP 250 zł/міс; kwota zmniejszająca 300 = 3 600 / 12 зі stawki-i-limity"),

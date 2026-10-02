@@ -36,8 +36,8 @@ describe('isScriptable', () => {
     expect(isScriptable('точно не url')).toBe(false);
   });
 
-  it('SCRIPTABLE_HOSTS — шість перевірених хостів, і список заморожений', () => {
-    expect(SCRIPTABLE_HOSTS).toEqual(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl', 'api.sejm.gov.pl', 'zakon.rada.gov.ua']);
+  it('SCRIPTABLE_HOSTS — вісім перевірених хостів, і список заморожений', () => {
+    expect(SCRIPTABLE_HOSTS).toEqual(['zus.pl', 'podatki.gov.pl', 'biznes.gov.pl', 'www.gov.pl', 'api.sejm.gov.pl', 'zakon.rada.gov.ua', 'bizky.ai', 'fba.ink']);
     expect(Object.isFrozen(SCRIPTABLE_HOSTS)).toBe(true);
   });
 
