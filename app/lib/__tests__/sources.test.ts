@@ -39,14 +39,19 @@ describe('buildSourceCatalog: поточний файл правил', () => {
     expect(catalog.staleCount).toBe(0);
   });
 
-  // 12 правил звірено 2026-07-18; два з них (`jdg.ryczalt.rate`,
-  // `jdg.byly_pracodawca`) перезвірено 2026-10-01, коли sip.lex.pl замінили
-  // державними джерелами. Лишається 10, і 91-ша доба для них настає 2026-10-17.
-  it('на 2026-10-17 давніми стають рівно 10 правил від 2026-07-18', () => {
-    const later = buildSourceCatalog(new Date('2026-10-17T12:00:00Z'));
-    expect(later.staleCount).toBe(10);
+  // Еталон виводиться з матриці, а не записаний числом: бот автозвірки щомісяця
+  // рухає verified_at, і записане «10 правил від 2026-07-18» падало б на кожному
+  // його PR. На 91-шу добу після найстарішої дати давніми стають рівно правила з
+  // цією датою — решта звірена пізніше. Саму межу 90/91 тримає freshness.test.ts.
+  it('на 91-шу добу після найстарішої звірки давніми стають рівно правила з тією датою', () => {
+    const oldest = RULES.rules.map((r) => r.verified_at).sort()[0];
+    const withOldest = RULES.rules.filter((r) => r.verified_at === oldest).length;
+    const day91 = new Date(Date.parse(`${oldest}T12:00:00Z`) + 91 * 86_400_000);
+    const later = buildSourceCatalog(day91);
+    expect(withOldest).toBeGreaterThan(0);
+    expect(later.staleCount).toBe(withOldest);
     const staleDates = new Set(later.groups.flatMap((g) => g.entries.filter((e) => e.stale).map((e) => e.verifiedAt)));
-    expect([...staleDates]).toEqual(['2026-07-18']);
+    expect([...staleDates]).toEqual([oldest]);
   });
 });
 
