@@ -78,7 +78,7 @@ Mike пише «Begin». Сесія:
 |---|---|---|---|
 | 02 | [Спосіб звірки на кожне правило, сторінки](sessions/02-verify-pages.md) | Opus · high | [x] |
 | 03 | [Закони, редакції, витяг моделлю](sessions/03-verify-acts-llm.md) | Opus · high | [x] |
-| 04 | [Розклад і що бачить Mike](sessions/04-verify-schedule.md) | Opus · high | [ ] |
+| 04 | [Розклад і що бачить Mike](sessions/04-verify-schedule.md) | Opus · high | [x] |
 
 ### Тема 1.3 — Право працювати і ризик B2B
 Розмір S · гілка `feat/legal-basis` · версія: minor (`0.3.0`)
