@@ -41,7 +41,7 @@ on:
   # раннер — з повідомлення коміту: `[drill]`, `[vps]`.
   push:
     branches: [feat/rules-auto-verify]
-    paths: ['.github/workflows/rules-verify.yml']
+    paths: ['.github/workflows/rules-verify.yml', 'scripts/rules-change-monitor/**']
 
 permissions: {}
 
