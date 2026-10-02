@@ -19,27 +19,27 @@
       "rule_id": "residency.treaty_tiebreakers",
       "params": { "order": ["permanentHome", "centerOfInterests", "habitualAbode", "citizenship"] },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19940630269",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
 
     {
       "rule_id": "common.minimum_wage",
       "params": { "monthly": 4806 },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "common.projected_average_wage",
       "params": { "monthly": 9420 },
       "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
-      "verified_at": "2026-07-24"
+      "verified_at": "2026-10-02"
     },
 
     {
       "rule_id": "jdg.ryczalt.rate",
       "params": { "rateProgramming": 0.12, "rateNarrowSupport": 0.085, "annualLimit": 8517200 },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
-      "verified_at": "2026-10-01"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "jdg.zdrowotna.ryczalt",
@@ -88,7 +88,7 @@
         "priorBusinessLookbackMonths": 60
       },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
-      "verified_at": "2026-07-18"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "jdg.byly_pracodawca",
@@ -97,7 +97,7 @@
         "zusReliefLostOnPartialOverlap": true
       },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19981440930",
-      "verified_at": "2026-10-01"
+      "verified_at": "2026-10-02"
     },
 
     {
@@ -125,7 +125,7 @@
         "fgsp": 0.001
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00274",
-      "verified_at": "2026-07-24"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "uop.employee_contributions",
@@ -146,13 +146,13 @@
         "kwotaZmniejszajacaMonthly": 300
       },
       "source_url": "https://www.podatki.gov.pl/twoj-e-pit/pytania-i-odpowiedzi/koszty-uzyskania-przychodow",
-      "verified_at": "2026-07-24"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "uop.annual_contribution_cap",
       "params": { "annualBaseCap": 282600, "appliesTo": ["emerytalne", "rentowe"] },
       "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
-      "verified_at": "2026-07-24"
+      "verified_at": "2026-10-02"
     },
 
     {
@@ -220,7 +220,7 @@
         "zdrowotnaAlwaysDue": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/001785",
-      "verified_at": "2026-08-03"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "zlecenie.przekwalifikowanie",
@@ -229,7 +229,7 @@
         "testIsFactsNotContractName": true
       },
       "source_url": "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
-      "verified_at": "2026-08-03"
+      "verified_at": "2026-10-02"
     },
 
     {
@@ -243,7 +243,7 @@
         "countsAccruedNotReceived": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
-      "verified_at": "2026-08-03"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "nierejestrowana.zus",
@@ -255,7 +255,7 @@
         "zdrowotnaAlwaysDue": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
-      "verified_at": "2026-08-03"
+      "verified_at": "2026-10-02"
     },
     {
       "rule_id": "nierejestrowana.pit",
@@ -277,7 +277,7 @@
         "ukrPeselEligible": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
-      "verified_at": "2026-08-03"
+      "verified_at": "2026-10-02"
     }
   ]
 }
