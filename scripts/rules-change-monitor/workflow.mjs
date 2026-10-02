@@ -292,6 +292,9 @@ export function radaText(html) {
     .replace(/\n\s*\n+/g, "\n");
 }
 
+/** Паузи перед спробами завантажити закон з zakon.rada: перша — після запитів циклу й PDF. */
+export const RADA_PAUSES_MS = Object.freeze([5_000, 20_000, 60_000, 120_000]);
+
 /** Стеля на PDF змін: агент читає їх цілком, і велика пачка з'їла б бюджет. */
 export const MAX_EVIDENCE_FILES = 12;
 
@@ -366,26 +369,30 @@ async function main() {
       }
       saved += 1;
     }
-    // zakon.rada: антиDDoS на запити поспіль і зрідка TCP, що не встигає (environment-limits.md).
+    // zakon.rada: антиDDoS на запити поспіль, і ~10 МБ відповідь на раннері CI
+    // обірвалась (`fetch failed`, 2026-10-02) через хвилину після того, як цикл
+    // відкрив той самий хост. Тому кілька спроб із наростаючою паузою і код причини
+    // в лозі — без нього «fetch failed» нічого не каже.
     let laws = 0;
     for (const id of radaIds(checks)) {
       const url = `https://zakon.rada.gov.ua/laws/show/${id}.txt`;
       let reason = null;
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        if (attempt > 0 || laws > 0) await new Promise((r) => setTimeout(r, 5_000));
+      for (const pause of RADA_PAUSES_MS) {
+        await new Promise((r) => setTimeout(r, pause));
         try {
-          const response = await fetch(url, { signal: AbortSignal.timeout(120_000) });
+          const response = await fetch(url, { signal: AbortSignal.timeout(180_000) });
           // Між «Редакція» і «від» стоїть &nbsp;: шукаємо по очищеному тексту, не по HTML.
           const text = radaText(await response.text());
           reason = response.ok && /Редакція\s+від \d\d\.\d\d\.\d{4}/.test(text) ? null : `zakon.rada відповів ${response.status} без тексту редакції`;
           if (!reason) writeFileSync(join(dir, `rada-${id}.txt`), text, "utf8");
         } catch (error) {
-          reason = `запит не вдався: ${error?.message ?? error}`;
+          const code = error?.cause?.code ?? error?.name ?? null;
+          reason = `запит не вдався: ${error?.message ?? error}${code ? ` (${code})` : ""}`;
         }
         if (!reason) break;
+        console.error(`evidence: rada ${id}: ${reason}`);
       }
-      if (reason) console.error(`evidence: rada ${id}: ${reason}`);
-      else laws += 1;
+      if (!reason) laws += 1;
     }
     emit({ amendments: ids.length, saved, laws });
     return;

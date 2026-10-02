@@ -48,6 +48,13 @@ test('лендинг', async ({ page }) => {
   await expect(page).toHaveScreenshot('landing.png', { fullPage: true });
 });
 
+/**
+ * «— звірено YYYY-MM-DD» під кожним джерелом результату. Маска з тієї ж причини,
+ * що на `/sources`: бот автозвірки рухає дати щомісяця, і перший його PR
+ * (2026-10-02, #124) повалив обидві сцени результату на 69 пікселях дати.
+ */
+const sourceDates = (page: Page) => page.locator('a[target="_blank"] + span[class*="meta"]');
+
 test('екран результату, картки згорнуті', async ({ page }) => {
   await page.goto(RESULT_URL);
 
@@ -58,7 +65,7 @@ test('екран результату, картки згорнуті', async ({ 
   await expect(cards.first()).not.toHaveAttribute('open', '');
   await expectNoHorizontalOverflow(page);
 
-  await expect(page).toHaveScreenshot('result-collapsed.png', { fullPage: true });
+  await expect(page).toHaveScreenshot('result-collapsed.png', { fullPage: true, mask: [sourceDates(page)] });
 });
 
 test('екран результату, перша картка розкрита', async ({ page }) => {
@@ -69,7 +76,7 @@ test('екран результату, перша картка розкрита'
   await expect(first).toHaveAttribute('open', '');
   await expectNoHorizontalOverflow(page);
 
-  await expect(page).toHaveScreenshot('result-expanded.png', { fullPage: true });
+  await expect(page).toHaveScreenshot('result-expanded.png', { fullPage: true, mask: [sourceDates(page)] });
 });
 
 test('словник дизайну', async ({ page }) => {
