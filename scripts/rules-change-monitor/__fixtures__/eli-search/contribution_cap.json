@@ -1,0 +1,116 @@
+{
+ "count": 10,
+ "items": [
+  {
+   "ELI": "MP/2025/1206",
+   "publisher": "MP",
+   "year": 2025,
+   "pos": 1206,
+   "title": "Obwieszczenie Ministra Rodziny, Pracy i Polityki Społecznej z dnia 19 listopada 2025 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2026 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2025-11-19",
+   "promulgation": "2025-11-25"
+  },
+  {
+   "ELI": "MP/2024/1051",
+   "publisher": "MP",
+   "year": 2024,
+   "pos": 1051,
+   "title": "Obwieszczenie Ministra Rodziny, Pracy i Polityki Społecznej z dnia 10 grudnia 2024 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2025 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2024-12-10",
+   "promulgation": "2024-12-11"
+  },
+  {
+   "ELI": "MP/2023/1342",
+   "publisher": "MP",
+   "year": 2023,
+   "pos": 1342,
+   "title": "Obwieszczenie Ministra Rodziny i Polityki Społecznej z dnia 4 grudnia 2023 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2024 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2023-12-04",
+   "promulgation": "2023-12-06"
+  },
+  {
+   "ELI": "MP/2022/1014",
+   "publisher": "MP",
+   "year": 2022,
+   "pos": 1014,
+   "title": "Obwieszczenie Ministra Rodziny i Polityki Społecznej z dnia 13 października 2022 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2023 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2022-10-13",
+   "promulgation": "2022-10-27"
+  },
+  {
+   "ELI": "MP/2021/1056",
+   "publisher": "MP",
+   "year": 2021,
+   "pos": 1056,
+   "title": "Obwieszczenie Ministra Rodziny i Polityki Społecznej z dnia 4 listopada 2021 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2022 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2021-11-04",
+   "promulgation": "2021-11-18"
+  },
+  {
+   "ELI": "MP/2020/1061",
+   "publisher": "MP",
+   "year": 2020,
+   "pos": 1061,
+   "title": "Obwieszczenie Ministra Rodziny i Polityki Społecznej z dnia 18 listopada 2020 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2021 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2020-11-18",
+   "promulgation": "2020-11-20"
+  },
+  {
+   "ELI": "MP/2019/1147",
+   "publisher": "MP",
+   "year": 2019,
+   "pos": 1147,
+   "title": "Obwieszczenie Ministra Rodziny, Pracy i Polityki Społecznej z dnia 28 listopada 2019 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2020 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2019-11-28",
+   "promulgation": "2019-12-04"
+  },
+  {
+   "ELI": "MP/2018/1185",
+   "publisher": "MP",
+   "year": 2018,
+   "pos": 1185,
+   "title": "Obwieszczenie Ministra Rodziny, Pracy i Polityki Społecznej z dnia 23 listopada 2018 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2019 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2018-11-23",
+   "promulgation": "2018-12-04"
+  },
+  {
+   "ELI": "MP/2017/1174",
+   "publisher": "MP",
+   "year": 2017,
+   "pos": 1174,
+   "title": "Obwieszczenie Ministra Rodziny, Pracy i Polityki Społecznej z dnia 8 grudnia 2017 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2018 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2017-12-08",
+   "promulgation": "2017-12-14"
+  },
+  {
+   "ELI": "MP/2016/1188",
+   "publisher": "MP",
+   "year": 2016,
+   "pos": 1188,
+   "title": "Obwieszczenie Ministra Rodziny, Pracy i Polityki Społecznej z dnia 30 listopada 2016 r. w sprawie kwoty ograniczenia rocznej podstawy wymiaru składek na ubezpieczenia emerytalne i rentowe w roku 2017 oraz przyjętej do jej ustalenia kwoty prognozowanego przeciętnego wynagrodzenia",
+   "announcementDate": "2016-11-30",
+   "promulgation": "2016-12-13"
+  }
+ ],
+ "offset": 0,
+ "totalCount": 28,
+ "searchQuery": {
+  "comparator": {
+   "column": "publisher",
+   "dir": "asc"
+  },
+  "dateEffectType": "NONE",
+  "dateType": "NONE",
+  "exile": false,
+  "keyword": [],
+  "position": -1,
+  "pubDateType": "NONE",
+  "publisher": "MP",
+  "publisherName": "Monitor Polski",
+  "statusInForce": false,
+  "title": "ograniczenia rocznej podstawy wymiaru",
+  "type": [],
+  "volume": -1,
+  "year": -1
+ }
+}

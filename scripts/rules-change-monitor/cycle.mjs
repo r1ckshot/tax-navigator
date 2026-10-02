@@ -6,6 +6,9 @@
 // Використання:
 //   node scripts/rules-change-monitor/cycle.mjs            # живий прогін
 //   node scripts/rules-change-monitor/cycle.mjs --dry-run  # без мережі й без запису
+//   ... --out <file>    # ще й JSON циклу для workflow (rules-verify.yml)
+//   ... --laws-only     # легкий прогін: лише закони (act/edition), сторінки не відкриваються
+//   ... --drill         # навчання: на живій сторінці zus.pl мінімалка підмінена (DRILL)
 //
 // Живий прогін лишає два артефакти: запис в `data/cycle-history.json` і
 // markdown-звіт `data/reports/YYYY-MM.md` — той самий текст, що в stdout.
@@ -23,7 +26,7 @@ import { aggregateFields, checkField } from "./fields.mjs";
 import { checkAct, checkDocument, checkEdition, ELI_API, isDocument, lawLabel, lawUrl, RULE_LAWS } from "./laws.mjs";
 import { checkLlmField, claudeAsk } from "./llm.mjs";
 import { DERIVED, IMPLEMENTED, METHODS, VERIFICATION, valueAt } from "./methods.mjs";
-import { PAGES } from "./pages.mjs";
+import { PAGES, URLS } from "./pages.mjs";
 import { screenSource, MAX_INPUT_CHARS } from "./screen.mjs";
 import { fetchDigest, fetchSource } from "./sources.mjs";
 import { renderReport, summaryLine } from "./report.mjs";
@@ -67,6 +70,29 @@ function createPacer({ pauseMs, sleep, clock }) {
 }
 
 const realSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Навчальна розбіжність (сесія 04): одне речення живої сторінки zus.pl з іншою
+ * мінімалкою. Решта сторінки й усі інші джерела — справжні, тож навчання
+ * проходить увесь шлях (issue → investigate → чернетка PR) на реальному вході.
+ * Значення взяте з `__fixtures__/zus-skladki-raised.html`.
+ */
+export const DRILL = Object.freeze({
+  url: URLS.zus,
+  rule_id: "common.minimum_wage",
+  pattern: /(minimalne wynagrodzenie za pracę(?:\s|<[^>]+>)*wynosi\s*)4806/g,
+  replacement: (_, lead) => `${lead}4950`,
+});
+
+/** `fetch`, що віддає сторінку DRILL з підміною; решта запитів — як є. */
+export function drillFetch(fetchImpl = fetch) {
+  return async (url, init) => {
+    const response = await fetchImpl(url, init);
+    if (url !== DRILL.url || !response.ok) return response;
+    const body = (await response.text()).replace(DRILL.pattern, DRILL.replacement);
+    return { ok: response.ok, status: response.status, headers: response.headers, text: async () => body };
+  };
+}
 
 /** `YYYY-MM` того дня, коли цикл запущено. Місяць — ключ унікальності циклу. */
 export function monthOf(date) {
@@ -163,6 +189,11 @@ export async function runCycle({
   // Модель для способу `llm`. Без неї `llm`-листи — `unavailable` з причиною;
   // живий прогін (`main`) підставляє `claudeAsk`.
   ask = null,
+  // Легкий прогін (sad.md §розклад): лише закони. Сторінки не відкриваються, тож
+  // page-правило звіряється тільки своїми act-листами, а без них — out_of_scope.
+  // Такий запис не підстава для нової `verified_at`: workflow бот-PR із легкого
+  // прогону не відкриває.
+  lawsOnly = false,
   pauseMs = SAME_DOMAIN_PAUSE_MS,
   sleep = realSleep,
   clock = Date.now,
@@ -258,6 +289,18 @@ export async function runCycle({
     }
     if (method !== METHODS.PAGE || !page) {
       checks.push(methodCheck(rule, method));
+      continue;
+    }
+
+    if (lawsOnly) {
+      const lawLeaves = Object.entries(page.elsewhere ?? {}).filter(([, e]) => e.method === METHODS.ACT);
+      if (lawLeaves.length === 0) {
+        checks.push({ ...scopeCheck(rule, { state: STATES.OUT_OF_SCOPE, failure_reason: "легкий прогін: сторінки не відкривались, законів у правила немає" }), method });
+        continue;
+      }
+      const results = [];
+      for (const [param, entry] of lawLeaves) results.push(await checkLaw(rule, entry.law, param));
+      checks.push({ ...aggregateFields(rule, results), method, laws_only: true });
       continue;
     }
 
@@ -383,6 +426,10 @@ export function exitCodeFor(cycle) {
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes("--dry-run");
+  const lawsOnly = args.includes("--laws-only");
+  const drill = args.includes("--drill");
+  const outIndex = args.indexOf("--out");
+  const outPath = outIndex === -1 ? null : args[outIndex + 1];
   const { rules } = JSON.parse(readFileSync(RULES_PATH, "utf8"));
   const vetoes = readVetoRegistry(VETO_REGISTRY_PATH);
 
@@ -390,18 +437,26 @@ async function main() {
     rules,
     vetoes,
     ask: dryRun ? null : claudeAsk,
+    lawsOnly,
     fetchImpl: dryRun
       ? async () => {
           throw new Error("--dry-run: мережа свідомо вимкнена");
         }
-      : undefined,
+      : drill
+        ? drillFetch()
+        : undefined,
   });
+  if (drill) cycle.drill = { rule_id: DRILL.rule_id, url: DRILL.url };
+  if (lawsOnly) cycle.mode = "laws-only";
+  if (outPath) writeFileSync(outPath, `${JSON.stringify(cycle, null, 2)}\n`, "utf8");
 
   console.log(renderReport(cycle));
   console.log(summaryLine(cycle));
 
-  if (dryRun) {
-    console.log("--dry-run: історія і звіт не записані");
+  if (dryRun || drill || lawsOnly) {
+    // Навчання й легкий прогін не є циклом місяця: їхній звіт заступив би справжній.
+    console.log(`${dryRun ? "--dry-run" : drill ? "--drill" : "--laws-only"}: історія і звіт місяця не записані`);
+    process.exitCode = dryRun ? 0 : exitCodeFor(cycle);
     return;
   }
   const history = readHistory(DEFAULT_HISTORY_PATH);

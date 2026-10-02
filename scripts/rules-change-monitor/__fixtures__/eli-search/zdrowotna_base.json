@@ -1,0 +1,116 @@
+{
+ "count": 10,
+ "items": [
+  {
+   "ELI": "MP/2026/720",
+   "publisher": "MP",
+   "year": 2026,
+   "pos": 720,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 20 lipca 2026 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw, włącznie z wypłatami z zysku, w drugim kwartale 2026 r.",
+   "announcementDate": "2026-07-20",
+   "promulgation": "2026-07-21"
+  },
+  {
+   "ELI": "MP/2026/406",
+   "publisher": "MP",
+   "year": 2026,
+   "pos": 406,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 21 kwietnia 2026 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw, włącznie z wypłatami z zysku, w pierwszym kwartale 2026 r.",
+   "announcementDate": "2026-04-21",
+   "promulgation": "2026-04-21"
+  },
+  {
+   "ELI": "MP/2026/118",
+   "publisher": "MP",
+   "year": 2026,
+   "pos": 118,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 22 stycznia 2026 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw bez wypłaty nagród z zysku w 2025 r.",
+   "announcementDate": "2026-01-22",
+   "promulgation": "2026-01-26"
+  },
+  {
+   "ELI": "MP/2026/117",
+   "publisher": "MP",
+   "year": 2026,
+   "pos": 117,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 22 stycznia 2026 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw, włącznie z wypłatami z zysku, w czwartym kwartale 2025 r.",
+   "announcementDate": "2026-01-22",
+   "promulgation": "2026-01-26"
+  },
+  {
+   "ELI": "MP/2026/116",
+   "publisher": "MP",
+   "year": 2026,
+   "pos": 116,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 22 stycznia 2026 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw w 2025 r.",
+   "announcementDate": "2026-01-22",
+   "promulgation": "2026-01-26"
+  },
+  {
+   "ELI": "MP/2026/115",
+   "publisher": "MP",
+   "year": 2026,
+   "pos": 115,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 22 stycznia 2026 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw w grudniu 2025 r.",
+   "announcementDate": "2026-01-22",
+   "promulgation": "2026-01-23"
+  },
+  {
+   "ELI": "MP/2025/1118",
+   "publisher": "MP",
+   "year": 2025,
+   "pos": 1118,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 20 października 2025 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw, włącznie z wypłatami z zysku, w trzecim kwartale 2025 r.",
+   "announcementDate": "2025-10-20",
+   "promulgation": "2025-10-23"
+  },
+  {
+   "ELI": "MP/2025/688",
+   "publisher": "MP",
+   "year": 2025,
+   "pos": 688,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 21 lipca 2025 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw, włącznie z wypłatami z zysku, w drugim kwartale 2025 r.",
+   "announcementDate": "2025-07-21",
+   "promulgation": "2025-07-24"
+  },
+  {
+   "ELI": "MP/2025/364",
+   "publisher": "MP",
+   "year": 2025,
+   "pos": 364,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 22 kwietnia 2025 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw, włącznie z wypłatami z zysku, w pierwszym kwartale 2025 r.",
+   "announcementDate": "2025-04-22",
+   "promulgation": "2025-04-24"
+  },
+  {
+   "ELI": "MP/2025/84",
+   "publisher": "MP",
+   "year": 2025,
+   "pos": 84,
+   "title": "Obwieszczenie Prezesa Głównego Urzędu Statystycznego z dnia 22 stycznia 2025 r. w sprawie przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw, włącznie z wypłatami z zysku, w czwartym kwartale 2024 r.",
+   "announcementDate": "2025-01-22",
+   "promulgation": "2025-01-24"
+  }
+ ],
+ "offset": 0,
+ "totalCount": 334,
+ "searchQuery": {
+  "comparator": {
+   "column": "publisher",
+   "dir": "asc"
+  },
+  "dateEffectType": "NONE",
+  "dateType": "NONE",
+  "exile": false,
+  "keyword": [],
+  "position": -1,
+  "pubDateType": "NONE",
+  "publisher": "MP",
+  "publisherName": "Monitor Polski",
+  "statusInForce": false,
+  "title": "przeciętnego miesięcznego wynagrodzenia w sektorze przedsiębiorstw",
+  "type": [],
+  "volume": -1,
+  "year": -1
+ }
+}

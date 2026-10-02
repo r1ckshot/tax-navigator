@@ -1,0 +1,116 @@
+{
+ "count": 10,
+ "items": [
+  {
+   "ELI": "DU/2026/1213",
+   "publisher": "DU",
+   "year": 2026,
+   "pos": 1213,
+   "title": "Rozporządzenie Rady Ministrów z dnia 14 września 2026 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2027 r.",
+   "announcementDate": "2026-09-14",
+   "promulgation": "2026-09-15"
+  },
+  {
+   "ELI": "DU/2025/1242",
+   "publisher": "DU",
+   "year": 2025,
+   "pos": 1242,
+   "title": "Rozporządzenie Rady Ministrów z dnia 11 września 2025 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2026 r.",
+   "announcementDate": "2025-09-11",
+   "promulgation": "2025-09-15"
+  },
+  {
+   "ELI": "DU/2024/1362",
+   "publisher": "DU",
+   "year": 2024,
+   "pos": 1362,
+   "title": "Rozporządzenie Rady Ministrów z dnia 12 września 2024 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2025 r.",
+   "announcementDate": "2024-09-12",
+   "promulgation": "2024-09-13"
+  },
+  {
+   "ELI": "DU/2023/1893",
+   "publisher": "DU",
+   "year": 2023,
+   "pos": 1893,
+   "title": "Rozporządzenie Rady Ministrów z dnia 14 września 2023 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2024 r.",
+   "announcementDate": "2023-09-14",
+   "promulgation": "2023-09-15"
+  },
+  {
+   "ELI": "DU/2022/1952",
+   "publisher": "DU",
+   "year": 2022,
+   "pos": 1952,
+   "title": "Rozporządzenie Rady Ministrów z dnia 13 września 2022 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2023 r.",
+   "announcementDate": "2022-09-13",
+   "promulgation": "2022-09-15"
+  },
+  {
+   "ELI": "DU/2021/1690",
+   "publisher": "DU",
+   "year": 2021,
+   "pos": 1690,
+   "title": "Rozporządzenie Rady Ministrów z dnia 14 września 2021 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2022 r.",
+   "announcementDate": "2021-09-14",
+   "promulgation": "2021-09-15"
+  },
+  {
+   "ELI": "DU/2020/1596",
+   "publisher": "DU",
+   "year": 2020,
+   "pos": 1596,
+   "title": "Rozporządzenie Rady Ministrów z dnia 15 września 2020 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2021 r.",
+   "announcementDate": "2020-09-15",
+   "promulgation": "2020-09-16"
+  },
+  {
+   "ELI": "DU/2019/1778",
+   "publisher": "DU",
+   "year": 2019,
+   "pos": 1778,
+   "title": "Rozporządzenie Rady Ministrów z dnia 10 września 2019 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2020 r.",
+   "announcementDate": "2019-09-10",
+   "promulgation": "2019-09-18"
+  },
+  {
+   "ELI": "DU/2018/1794",
+   "publisher": "DU",
+   "year": 2018,
+   "pos": 1794,
+   "title": "Rozporządzenie Rady Ministrów z dnia 11 września 2018 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2019 r.",
+   "announcementDate": "2018-09-11",
+   "promulgation": "2018-09-19"
+  },
+  {
+   "ELI": "DU/2017/1747",
+   "publisher": "DU",
+   "year": 2017,
+   "pos": 1747,
+   "title": "Rozporządzenie Rady Ministrów z dnia 12 września 2017 r. w sprawie wysokości minimalnego wynagrodzenia za pracę oraz wysokości minimalnej stawki godzinowej w 2018 r.",
+   "announcementDate": "2017-09-12",
+   "promulgation": "2017-09-15"
+  }
+ ],
+ "offset": 0,
+ "totalCount": 22,
+ "searchQuery": {
+  "comparator": {
+   "column": "publisher",
+   "dir": "asc"
+  },
+  "dateEffectType": "NONE",
+  "dateType": "NONE",
+  "exile": false,
+  "keyword": [],
+  "position": -1,
+  "pubDateType": "NONE",
+  "publisher": "DU",
+  "publisherName": "Dziennik Ustaw",
+  "statusInForce": false,
+  "title": "minimalnego wynagrodzenia za pracę",
+  "type": [],
+  "volume": -1,
+  "year": -1
+ }
+}

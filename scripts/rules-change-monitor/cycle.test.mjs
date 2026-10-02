@@ -376,6 +376,65 @@ describe('runCycle: 26 з 26 на фікстурах 2026-10-01', async () => {
     );
   });
 
+  /**
+   * Сесія 04: що з цього циклу зробить workflow. Бот-PR отримують рівно ті 14,
+   * що збіглись (з них 9 — косметично); 12 правил зі зміненими законами — людині, жодне не в повторі.
+   * Чинні з 2027 зміни (OKI, żłobki) — сигнал теми «Правила 2027».
+   */
+  it('розкладка для workflow: 14 у бот-PR, 12 людині, 0 у повтор', async () => {
+    const { classifyOutcome } = await import('./outcome.mjs');
+    const { futureAmendments } = await import('./year-ahead.mjs');
+    const out = classifyOutcome(cycle);
+    // 14 = 5 match + 9 cosmetic: косметична відмінність — те саме число (AC-04).
+    expect(out.reverify.sort()).toEqual([...byState(STATES.MATCH), ...byState(STATES.COSMETIC)].sort());
+    expect(out.reverify).toHaveLength(14);
+    expect(out.attention.map((c) => c.rule_id).sort()).toEqual(byState(STATES.NEEDS_CONFIRMATION));
+    expect(out.unavailable).toEqual([]);
+    expect(futureAmendments(cycle, 2026).map((a) => a.id)).toEqual(expect.arrayContaining(['DU/2026/1098', 'DU/2026/1123']));
+  });
+
+  /**
+   * Навчання сесії 04: підмінене одне речення zus.pl. Розбіжність мусить бути
+   * рівно на мінімалці й з навчальним числом — інакше навчання перевіряє не той шлях.
+   */
+  it('--drill: мінімалка розходиться з 4950, решта zus.pl — як без навчання', async () => {
+    const { drillFetch, DRILL } = await import('./cycle.mjs');
+    const drilled = await runCycle({ rules, now: new Date('2026-10-01T12:00:00Z'), fetchImpl: drillFetch(async (url) => fixtureFetch(url)), pauseMs: 0 });
+    const diverged = drilled.checks.filter((c) => c.state === STATES.DIVERGENCE);
+    expect(diverged.map((c) => [c.rule_id, c.fetched_value])).toEqual([[DRILL.rule_id, 4950]]);
+    const others = (cy) => cy.checks.filter((c) => c.rule_id !== DRILL.rule_id).map((c) => [c.rule_id, c.state]);
+    expect(others(drilled)).toEqual(others(cycle));
+  });
+
+  /**
+   * Легкий прогін: жодної сторінки, лише закони. Жодне page-правило з нього не
+   * отримує нової дати — «збіг» там про закон, не про число.
+   */
+  it('--laws-only: сторінки не відкриваються, page-правилам дати немає, змінені закони ті самі', async () => {
+    const { classifyOutcome } = await import('./outcome.mjs');
+    const pageUrls = new Set(Object.values(URLS));
+    const opened = [];
+    const light = await runCycle({
+      rules,
+      now: new Date('2026-10-01T12:00:00Z'),
+      fetchImpl: async (url) => (opened.push(url), fixtureFetch(url)),
+      pauseMs: 0,
+      lawsOnly: true,
+    });
+    expect(opened.filter((u) => pageUrls.has(u))).toEqual([]);
+    expect(light.checks).toHaveLength(26);
+    // Правила на законах звіряються в легкому прогоні так само повно, як у повному;
+    // page-правило — лише своїми act-листами, тож дати воно звідси не отримує.
+    const { VERIFICATION } = await import('./methods.mjs');
+    expect(classifyOutcome(light).reverify.filter((id) => VERIFICATION[id].method === 'page')).toEqual([]);
+    expect(classifyOutcome(light).reverify.sort()).toEqual(classifyOutcome(cycle).reverify.filter((id) => VERIFICATION[id].method !== 'page').sort());
+    const changed = light.checks.filter((c) => c.state === STATES.NEEDS_CONFIRMATION).map((c) => c.rule_id).sort();
+    expect(changed).toEqual(byState(STATES.NEEDS_CONFIRMATION));
+    // На цьому стоїть ескалація: легкий прогін порівнює відбиток законів із тим, що лишив повний.
+    const { lawsFingerprint } = await import('./workflow.mjs');
+    expect(lawsFingerprint(light)).toBe(lawsFingerprint(cycle));
+  });
+
   it('звіт називає зміни поіменно і розкладає «збігається» за способом', () => {
     const report = renderReport(cycle);
     expect(report).toContain('зміна DU/2026/1079: опубліковано 2026-08-10');
@@ -386,8 +445,8 @@ describe('runCycle: 26 з 26 на фікстурах 2026-10-01', async () => {
     // jdg.byly_pracodawca перезвірено 2026-10-01, у день циклу: це ручна звірка, не «акт без змін».
     expect(report).toContain('звірено вручну в день циклу — 1');
     expect(report).toContain('- incubator.kup:');
-    // Акт не покриває ціни абонементу: перед перечитанням закону людина має це знати.
-    expect(report).toContain('не звіряються циклом (manual): subscriptionMonthlyMin');
+    // Ціни абонементу з сесії 04 звіряє сторінка, а не людина: manual-листів у звіті нуль.
+    expect(report).not.toContain('(manual)');
   });
 
   /**
