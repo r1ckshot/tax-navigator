@@ -81,6 +81,44 @@ const TABLE_HEAD = [
 
 export const marker = (fp) => `<!-- rules-verify fingerprint: ${fp} -->`;
 
+/**
+ * Запис для агента: лише те, на чому стоїть рішення. Повний запис циклу на 10
+ * правил — ~1500 рядків (зміни акта повторюються в кожному листі), і перший живий
+ * прогін дочитав його до 1167-го.
+ */
+export function compactCheck(check) {
+  const leaf = (f) => ({
+    param: f.param ?? null,
+    state: f.state,
+    ...(f.law ? { law: f.law } : {}),
+    matrix_value: f.matrix_value ?? null,
+    fetched_value: f.fetched_value ?? null,
+    fetched_from: f.fetched_from ?? null,
+    ...(f.amended?.length ? { amended: f.amended.map((a) => a.id) } : {}),
+    ...(f.failure_reason ? { failure_reason: f.failure_reason } : {}),
+  });
+  const leaves = (check.fields ?? []).filter((f) => f.state !== STATES.MATCH && f.state !== STATES.COSMETIC);
+  return {
+    rule_id: check.rule_id,
+    state: check.state,
+    verified_at: check.verified_at ?? null,
+    source_url: check.source_url ?? null,
+    ...(check.blocked ? { blocked: true } : {}),
+    fields: (leaves.length ? leaves : [check]).map(leaf),
+  };
+}
+
+/** Зміни актів раз на всі записи: id → назва й дата чинності. */
+export function amendmentIndex(checks) {
+  const index = {};
+  const visit = (c) => {
+    for (const a of c.amended ?? []) index[a.id] = { title: a.title ?? null, effective: a.effective ?? null, promulgation: a.promulgation ?? null };
+    for (const f of c.fields ?? []) visit(f);
+  };
+  checks.forEach(visit);
+  return index;
+}
+
 /** Тіло issue «потребує людини». Відбиток — у прихованому маркері для дедуплікації. */
 export function attentionIssue({ checks, date, runUrl, drill }) {
   const fp = fingerprint(checks);
@@ -158,7 +196,9 @@ export function writeOutcome({ cycle, yearAhead, stateIn = {}, date, taxYear, ru
   if (attention.length > 0) {
     const issue = attentionIssue({ checks: attention, date, runUrl, drill });
     writeFileSync(join(dir, "attention.md"), issue.body, "utf8");
-    writeFileSync(join(dir, "attention.json"), JSON.stringify(attention, null, 2), "utf8");
+    // Повний запис — для `evidence` (там зміни з назвами), стислий — для агента.
+    writeFileSync(join(dir, "attention-full.json"), JSON.stringify(attention, null, 2), "utf8");
+    writeFileSync(join(dir, "attention.json"), JSON.stringify({ rules: attention.map(compactCheck), amendments: amendmentIndex(attention) }, null, 2), "utf8");
     writeFileSync(join(dir, "attention-title.txt"), issue.title, "utf8");
     out.attention_fp = issue.fingerprint;
   }

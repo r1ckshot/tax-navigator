@@ -176,7 +176,7 @@ jobs:
 
       - name: Amendment texts for the investigator (no model)
         if: steps.final.outputs.attention != '' && steps.final.outputs.attention != '0'
-        run: node "$MONITOR/workflow.mjs" evidence --attention "$RV/attention.json" --dir "$RV/evidence"
+        run: node "$MONITOR/workflow.mjs" evidence --attention "$RV/attention-full.json" --dir "$RV/evidence"
 
       - name: Keep state for the next run
         if: steps.plan.outputs.mode != 'skip'
@@ -422,6 +422,16 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # `Read` по PDF вимагає pdftoppm, і перший живий прогін через це не прочитав
+      # жодної зміни. Текст витягуємо тут, без моделі; агент шукає в ньому Grep-ом.
+      - name: Amendment PDFs to text
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          shopt -s nullglob
+          for pdf in "$RV"/evidence/*.pdf; do pdftotext -layout "$pdf" "${pdf%.pdf}.txt"; done
+          ls -la "$RV/evidence" || echo "no evidence files"
 
       - name: Install Claude Code
         run: |

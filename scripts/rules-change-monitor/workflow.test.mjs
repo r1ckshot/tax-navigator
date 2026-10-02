@@ -96,7 +96,15 @@ describe('writeOutcome — файли для workflow', () => {
     const { out, read, has } = run({ checks: [match, div, act, down] });
     expect(read('reverify.txt')).toBe('uop.pit\n');
     expect(out).toMatchObject({ reverify: '1', attention: '2', overdue: '0', pending_retries: '1', next_year: '0' });
-    expect(JSON.parse(read('attention.json')).map((c) => c.rule_id)).toEqual(['common.minimum_wage', 'jdg.skala']);
+    expect(JSON.parse(read('attention-full.json')).map((c) => c.rule_id)).toEqual(['common.minimum_wage', 'jdg.skala']);
+    // Агенту — стислий запис: лише листи, що не збіглись, і зміни актів раз на всіх.
+    const forAgent = JSON.parse(read('attention.json'));
+    expect(forAgent.rules.map((r) => [r.rule_id, r.fields.map((f) => f.param)])).toEqual([
+      ['common.minimum_wage', ['monthly']],
+      ['jdg.skala', ['zdrowotnaRate']],
+    ]);
+    expect(forAgent.rules[1].fields[0].amended).toEqual(['DU/2026/1']);
+    expect(forAgent.amendments['DU/2026/1']).toMatchObject({ effective: '2026-09-01' });
     expect(has('overdue.md')).toBe(false);
   });
 
