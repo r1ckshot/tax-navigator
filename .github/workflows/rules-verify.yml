@@ -1,0 +1,582 @@
+# Автозвірка правил матриці з першоджерелами за розкладом (тема 1.2 ROADMAP, сесія 04).
+# Логіка — у scripts/rules-change-monitor/workflow.mjs з тестами; тут лише порядок і права.
+#
+# Джоби розрізані за правами (DECISIONS 2026-09-15: агент і право запису ніколи в одному job):
+#   verify       — цикл звірки, без моделі й без запису. Вирішує, що робити.
+#   reverify-pr  — усе збіглось: бот-PR лише з `verified_at` на master. Запис, без моделі;
+#                  охорона `reverify.mjs guard` не пускає в PR нічого, крім дат.
+#   issues       — розбіжність / змінений закон / три дні мовчання / правила наступного
+#                  року: issue з таблицею. Однакові знахідки вдруге не будять (відбиток).
+#   investigate  — модель, лише читання (`contents: read`, без git-кредів, без мережі
+#                  крім API моделі): перечитує PDF змін і пише notes.md + можливу правку.
+#   open-draft   — запис, без моделі: ворота з чистого чекауту, тоді чернетка PR.
+#
+# Мердж будь-якого PR звідси — лише людиною: Claude запускає `gh pr merge`, Mike
+# підтверджує промпт (DECISIONS 2026-10-01). Тут не мерджиться нічого.
+#
+# Репо публічне, тож `pull_request` сюди не додається ніколи: self-hosted runner на
+# VPS не має виконувати код із форка.
+
+name: rules-verify
+
+on:
+  schedule:
+    # Щодня; чи буде прогін і який — вирішує `workflow.mjs plan` (1-ше число — повний,
+    # понеділок — легкий або повний у гарячі місяці, повтор недоступних джерел).
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'auto = за розкладом; drill = навчальна розбіжність мінімалки'
+        type: choice
+        options: [auto, full, laws-only, drill]
+        default: full
+      runner:
+        description: 'де звіряти джерела'
+        type: choice
+        options: [ubuntu-latest, vps]
+        default: ubuntu-latest
+
+permissions: {}
+
+concurrency:
+  group: rules-verify
+  cancel-in-progress: false
+
+env:
+  TAX_YEAR: '2026'
+  RULES: app/lib/rules/rules.2026.json
+  MONITOR: scripts/rules-change-monitor
+  BOT_BRANCH: bot/rules-reverify
+
+jobs:
+  verify:
+    # ubuntu відкрив 26 джерел із 26, VPS — 24 (заміряно 2026-10-02, sad.md §7).
+    runs-on: ${{ inputs.runner == 'vps' && fromJSON('["self-hosted","linux","x64","tax-navigator-vps"]') || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.plan.outputs.mode }}
+      date: ${{ steps.date.outputs.date }}
+      reverify: ${{ steps.final.outputs.reverify }}
+      attention: ${{ steps.final.outputs.attention }}
+      attention_fp: ${{ steps.final.outputs.attention_fp }}
+      overdue: ${{ steps.final.outputs.overdue }}
+      overdue_fp: ${{ steps.final.outputs.overdue_fp }}
+      next_year: ${{ steps.final.outputs.next_year }}
+      next_year_fp: ${{ steps.final.outputs.next_year_fp }}
+    steps:
+      # `runner.temp` недоступний у `jobs.<id>.env`: такий вираз валить увесь файл.
+      - name: Working directory
+        run: echo "RV=$RUNNER_TEMP/rv" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Модулі монітора без npm-залежностей: `npm ci` тут не потрібен.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - id: date
+        run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
+      # Стан між прогонами: дні мовчання джерел і відбиток змін законів. Ключ на
+      # кожен прогін новий, відновлюється останній за префіксом.
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/rv-state
+          key: rules-verify-state-${{ github.run_id }}
+          restore-keys: rules-verify-state-
+
+      - name: Plan
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.mode || 'auto' }}
+          DATE: ${{ steps.date.outputs.date }}
+        run: |
+          mkdir -p "$RV" "$RUNNER_TEMP/rv-state"
+          node "$MONITOR/workflow.mjs" plan --date "$DATE" --event "$EVENT" --requested "$REQUESTED" \
+            --state "$RUNNER_TEMP/rv-state/state.json" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Cycle
+        id: cycle
+        if: steps.plan.outputs.mode != 'skip'
+        env:
+          MODE: ${{ steps.plan.outputs.mode }}
+        run: |
+          flag=""
+          [ "$MODE" = laws-only ] && flag="--laws-only"
+          [ "$MODE" = drill ] && flag="--drill"
+          set +e
+          node "$MONITOR/cycle.mjs" $flag --out "$RV/cycle.json" > "$RV/report.md"
+          code=$?
+          set -e
+          cat "$RV/report.md"
+          # 2 — цикл відхилив вхід (cycle.mjs): це знахідка для людини, не поломка.
+          [ "$code" = 0 ] || [ "$code" = 2 ] || exit "$code"
+
+      - name: Next-year announcements (ELI)
+        if: steps.plan.outputs.mode == 'full'
+        run: node "$MONITOR/workflow.mjs" year-ahead --tax-year "$TAX_YEAR" --dir "$RV"
+
+      - name: Outcome
+        id: outcome
+        if: steps.plan.outputs.mode != 'skip'
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node "$MONITOR/workflow.mjs" outcome --cycle "$RV/cycle.json" --year-ahead "$RV/year-ahead.json" \
+            --state "$RUNNER_TEMP/rv-state/state.json" --date "$DATE" --tax-year "$TAX_YEAR" \
+            --run-url "$RUN_URL" --dir "$RV" | tee -a "$GITHUB_OUTPUT"
+
+      # Легкий прогін побачив нові зміни законів — той самий день, повний прогін.
+      - name: Escalate to a full run
+        id: escalate
+        if: steps.outcome.outputs.escalate == 'true'
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          echo "laws changed since the last run: escalating to a full run"
+          set +e
+          node "$MONITOR/cycle.mjs" --out "$RV/cycle.json" > "$RV/report.md"
+          code=$?
+          set -e
+          cat "$RV/report.md"
+          [ "$code" = 0 ] || [ "$code" = 2 ] || exit "$code"
+          node "$MONITOR/workflow.mjs" year-ahead --tax-year "$TAX_YEAR" --dir "$RV"
+          node "$MONITOR/workflow.mjs" outcome --cycle "$RV/cycle.json" --year-ahead "$RV/year-ahead.json" \
+            --state "$RUNNER_TEMP/rv-state/state.json" --date "$DATE" --tax-year "$TAX_YEAR" \
+            --run-url "$RUN_URL" --dir "$RV" | tee -a "$GITHUB_OUTPUT"
+
+      # Один набір виходів незалежно від того, чи була ескалація.
+      - name: Final outcome
+        id: final
+        if: steps.plan.outputs.mode != 'skip'
+        env:
+          A: ${{ toJSON(steps.outcome.outputs) }}
+          B: ${{ toJSON(steps.escalate.outputs) }}
+        run: |
+          node -e '
+            const a = JSON.parse(process.env.A || "{}"), b = JSON.parse(process.env.B || "{}");
+            const o = Object.keys(b).length ? b : a;
+            for (const k of ["reverify","attention","attention_fp","overdue","overdue_fp","next_year","next_year_fp"]) console.log(`${k}=${o[k] ?? ""}`);
+          ' | tee -a "$GITHUB_OUTPUT"
+
+      - name: Amendment texts for the investigator (no model)
+        if: steps.final.outputs.attention != '' && steps.final.outputs.attention != '0'
+        run: node "$MONITOR/workflow.mjs" evidence --attention "$RV/attention-full.json" --dir "$RV/evidence"
+
+      - name: Keep state for the next run
+        if: steps.plan.outputs.mode != 'skip'
+        run: cp "$RV/state.json" "$RUNNER_TEMP/rv-state/state.json"
+
+      - name: Save state
+        if: steps.plan.outputs.mode != 'skip'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/rv-state
+          key: rules-verify-state-${{ github.run_id }}
+
+      - name: Summary
+        if: steps.plan.outputs.mode != 'skip'
+        run: |
+          {
+            echo "### rules-verify: ${{ steps.plan.outputs.mode }} (${{ steps.plan.outputs.reason }})"
+            echo "- re-verify: ${{ steps.final.outputs.reverify }}, to a human: ${{ steps.final.outputs.attention }}, silent 3 days: ${{ steps.final.outputs.overdue }}, next year: ${{ steps.final.outputs.next_year }}"
+            echo; tail -n 1 "$RV/report.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.plan.outputs.mode != 'skip'
+        with:
+          name: rules-verify
+          path: ${{ runner.temp }}/rv
+          retention-days: 30
+          if-no-files-found: ignore
+
+  reverify-pr:
+    needs: verify
+    if: needs.verify.outputs.reverify != '' && needs.verify.outputs.reverify != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DATE: ${{ needs.verify.outputs.date }}
+    steps:
+      - run: echo "RV=$RUNNER_TEMP/rv" >> "$GITHUB_ENV"
+
+      # Скрипти — з коміту, що звіряв; матриця, куди йде PR, — з master.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: rules-verify
+          path: ${{ runner.temp }}/rv
+
+      - name: New dates on master's matrix, then the guard
+        id: apply
+        run: |
+          mkdir -p "$RUNNER_TEMP/guard"
+          cp "$MONITOR/reverify.mjs" "$MONITOR/outcome.mjs" "$MONITOR/methods.mjs" "$MONITOR/states.mjs" "$RUNNER_TEMP/guard/"
+          git show origin/master:"$RULES" > "$RV/base.json"
+          cp "$RV/base.json" "$RV/head.json"
+          node "$RUNNER_TEMP/guard/reverify.mjs" apply --cycle "$RV/cycle.json" --rules "$RV/head.json" \
+            --checked "$RULES" --date "$DATE" | tee "$RV/bumped.txt"
+          node "$RUNNER_TEMP/guard/reverify.mjs" guard --base "$RV/base.json" --head "$RV/head.json" --today "$DATE"
+          echo "count=$(grep -c . "$RV/bumped.txt" || true)" >> "$GITHUB_OUTPUT"
+
+      - name: Bot branch from master
+        if: steps.apply.outputs.count != '0'
+        run: |
+          git checkout -B "$BOT_BRANCH" origin/master
+          cp "$RV/head.json" "$RULES"
+          test "$(git diff --name-only)" = "$RULES" || { echo "unexpected files changed"; git diff --name-only; exit 1; }
+
+      # Тести до пушу: бот не відкриває PR, який сам не пройшов би `pre-commit-gate`.
+      - name: Typecheck and tests on the bot change
+        if: steps.apply.outputs.count != '0'
+        run: |
+          npm ci
+          npx tsc --noEmit
+          npm test
+
+      - name: Commit and push the bot branch
+        if: steps.apply.outputs.count != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$RULES"
+          {
+            echo "chore(rules): re-verify $(grep -c . "$RV/bumped.txt") rules against primary sources"
+            echo
+            echo "Automated: every listed rule matched its primary source on $DATE; only verified_at changes."
+            echo
+            sed 's/^/- /' "$RV/bumped.txt"
+          } > "$RUNNER_TEMP/msg.txt"
+          git commit -F "$RUNNER_TEMP/msg.txt"
+          # Гілка належить боту і щоразу будується від master заново.
+          git push --force origin "$BOT_BRANCH"
+
+      - name: Open or update the re-verify PR
+        if: steps.apply.outputs.count != '0'
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          n=$(grep -c . "$RV/bumped.txt")
+          {
+            echo '## Why'; echo
+            echo "Rule re-verification on $DATE: these rules matched their primary source (page value, unchanged act or edition). Only \`verified_at\` moves; \`params\` are guarded."; echo
+            echo '## What'; echo
+            sed 's/^/- `/; s/$/`: verified_at → '"$DATE"'/' "$RV/bumped.txt"; echo
+            echo '## Verification'; echo
+            echo '- `reverify.mjs guard`: only verified_at changed, forward, not past today'
+            echo '- `tsc --noEmit` and `npm test` passed in the bot job before push; `checks` and `visual` are dispatched on this branch'
+            echo "- cycle report: $RUN_URL (artifact \`rules-verify\`, \`report.md\`)"; echo
+            echo '## Risk / rollback'; echo
+            echo 'Dates only. Close the PR to discard; the next run opens it again.'; echo
+            echo '## Screenshots'; echo
+            echo 'N/A — dates on /sources are masked in the visual test'; echo
+            echo '## Task'; echo
+            echo "Run: $RUN_URL"
+          } > "$RUNNER_TEMP/body.md"
+          title="chore(rules): re-verify $n rules against primary sources"
+          pr=$(gh pr list --head "$BOT_BRANCH" --state open --json number -q '.[0].number')
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --base master --head "$BOT_BRANCH" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          fi
+
+      # PR від GITHUB_TOKEN не запускає `pull_request`-workflow; dispatch — запускає.
+      - name: Run checks on the bot branch
+        if: steps.apply.outputs.count != '0'
+        run: |
+          gh workflow run checks.yml --ref "$BOT_BRANCH"
+          gh workflow run visual.yml --ref "$BOT_BRANCH"
+
+  issues:
+    needs: verify
+    if: needs.verify.outputs.mode != 'skip' && (needs.verify.outputs.attention != '0' || needs.verify.outputs.overdue != '0' || needs.verify.outputs.next_year != '0')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      investigate: ${{ steps.attention.outputs.changed }}
+      issue: ${{ steps.attention.outputs.number }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - run: echo "RV=$RUNNER_TEMP/rv" >> "$GITHUB_ENV"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: rules-verify
+          path: ${{ runner.temp }}/rv
+
+      # Один відкритий issue на мітку. Той самий відбиток — нічого не робимо: людина
+      # це вже бачила. Інший — оновлюємо тіло й лишаємо коментар, щоб прийшло сповіщення.
+      - name: Issue helper
+        run: |
+          cat > "$RUNNER_TEMP/upsert.sh" <<'SH'
+          label="$1"; title_file="$2"; body_file="$3"; fp="$4"
+          gh label create "$label" --color FBCA04 --force >/dev/null
+          num=$(gh issue list --label "$label" --state open --json number -q '.[0].number')
+          if [ -n "$num" ] && gh issue view "$num" --json body -q .body | head -n 1 | grep -qF "fingerprint: $fp"; then
+            echo "number=$num"; echo "changed=false"; exit 0
+          fi
+          if [ -n "$num" ]; then
+            gh issue edit "$num" --title "$(cat "$title_file")" --body-file "$body_file" >/dev/null
+            gh issue comment "$num" --body "Знахідки змінились: $RUN_URL" >/dev/null
+          else
+            url=$(gh issue create --label "$label" --title "$(cat "$title_file")" --body-file "$body_file")
+            num="${url##*/}"
+          fi
+          echo "number=$num"; echo "changed=true"
+          SH
+          chmod +x "$RUNNER_TEMP/upsert.sh"
+
+      - name: Rules that need a human
+        id: attention
+        if: needs.verify.outputs.attention != '0'
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          LABEL: ${{ needs.verify.outputs.mode == 'drill' && 'rules-verify-drill' || 'rules-verify' }}
+        run: |
+          "$RUNNER_TEMP/upsert.sh" "$LABEL" "$RV/attention-title.txt" "$RV/attention.md" "${{ needs.verify.outputs.attention_fp }}" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Sources silent for three days
+        if: needs.verify.outputs.overdue != '0'
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          "$RUNNER_TEMP/upsert.sh" rules-verify-unavailable "$RV/overdue-title.txt" "$RV/overdue.md" "${{ needs.verify.outputs.overdue_fp }}"
+
+      - name: Next-year rules exist (ROADMAP topic P.1 trigger)
+        if: needs.verify.outputs.next_year != '0'
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          "$RUNNER_TEMP/upsert.sh" "rules-$((TAX_YEAR + 1))" "$RV/next-year-title.txt" "$RV/next-year.md" "${{ needs.verify.outputs.next_year_fp }}"
+
+  investigate:
+    needs: [verify, issues]
+    if: needs.issues.outputs.investigate == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    outputs:
+      proposal: ${{ steps.gate.outputs.proposal }}
+    env:
+      CLAUDE_CODE_VERSION: stable
+    steps:
+      - name: Working directories
+        run: |
+          echo "RV=$RUNNER_TEMP/rv" >> "$GITHUB_ENV"
+          echo "PRISTINE=$RUNNER_TEMP/pristine" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: rules-verify
+          path: ${{ runner.temp }}/rv
+
+      # Ворота й промпт — з копії до агента: він не може переписати те, що його судить.
+      - name: Snapshot the gate before the agent touches the checkout
+        run: |
+          mkdir -p "$PRISTINE"
+          cp "$MONITOR/gate.mjs" "$MONITOR/investigate-prompt.md" package.json "$PRISTINE/"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # `Read` по PDF вимагає pdftoppm, і перший живий прогін через це не прочитав
+      # жодної зміни. Текст витягуємо тут, без моделі; агент шукає в ньому Grep-ом.
+      - name: Amendment PDFs to text
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          shopt -s nullglob
+          for pdf in "$RV"/evidence/*.pdf; do pdftotext -layout "$pdf" "${pdf%.pdf}.txt"; done
+          ls -la "$RV/evidence" || echo "no evidence files"
+
+      - name: Install Claude Code
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s "$CLAUDE_CODE_VERSION"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Без bwrap CLI зі SCRUB=1 не стартує (environment-limits.md, run 34932454892).
+      - name: Install bubblewrap for subprocess isolation
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bubblewrap socat
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          bwrap --ro-bind / / --unshare-all true && echo "bwrap works"
+
+      - name: Investigate (model, read-only token, spend cap)
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
+        run: |
+          prompt=$(sed "s|\$RV_DIR|$RV|g" "$PRISTINE/investigate-prompt.md")
+          prompt="$prompt
+
+          Сьогодні: ${{ needs.verify.outputs.date }}."
+          set +e
+          claude -p "$prompt" \
+            --model sonnet \
+            --add-dir "$RV" \
+            --max-budget-usd 5 \
+            --permission-mode acceptEdits \
+            --allowedTools "Read" "Grep" "Glob" "Edit" "Write" "Bash(npx vitest:*)" \
+            --disallowedTools "Bash(git:*)" "Bash(gh:*)" "Bash(curl:*)" "Bash(wget:*)" "WebFetch" "WebSearch" \
+            > "$RV/claude-output.txt" 2>&1
+          code=$?
+          set -e
+          tail -n 40 "$RV/claude-output.txt"
+          # Агент, що не відпрацював, — червоний прогін (DECISIONS 2026-09-15).
+          exit $code
+
+      - name: Gate (pristine copy, no model)
+        id: gate
+        run: |
+          git diff --name-only > "$RV/changed.txt"
+          git ls-files --others --exclude-standard >> "$RV/changed.txt"
+          set +e
+          node "$PRISTINE/gate.mjs" --notes "$RV/notes.md" --package-base "$PRISTINE/package.json" --package-head package.json \
+            < "$RV/changed.txt" > "$RV/gate.txt"
+          code=$?
+          set -e
+          cat "$RV/gate.txt"
+          { echo '### investigate gate'; cat "$RV/gate.txt"; } >> "$GITHUB_STEP_SUMMARY"
+          grep '^proposal=' "$RV/gate.txt" >> "$GITHUB_OUTPUT"
+          exit $code
+
+      # На навчанні правка міняє число без еталонів — червоний набір очікуваний (промпт).
+      - name: Typecheck and tests on the proposal
+        if: steps.gate.outputs.proposal == 'true' && needs.verify.outputs.mode != 'drill'
+        run: |
+          npx tsc --noEmit
+          npm test
+
+      - name: Package the proposal
+        if: steps.gate.outputs.proposal == 'true'
+        run: |
+          git add -A
+          git diff --cached --binary --no-renames > "$RV/proposal.patch"
+          git diff --cached --stat
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rules-verify-investigation
+          path: |
+            ${{ runner.temp }}/rv/notes.md
+            ${{ runner.temp }}/rv/gate.txt
+            ${{ runner.temp }}/rv/proposal.patch
+            ${{ runner.temp }}/rv/claude-output.txt
+          if-no-files-found: ignore
+          retention-days: 30
+
+  open-draft:
+    needs: [verify, issues, investigate]
+    if: needs.investigate.outputs.proposal == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - run: echo "RV=$RUNNER_TEMP/rv" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: rules-verify-investigation
+          path: ${{ runner.temp }}/rv
+
+      # Ворота з цього чекауту ДО git apply: патч, що правив би gate.mjs, не встигає
+      # підмінити перевірку, яка його оцінює.
+      - name: Re-run the gate on the patch, then apply it
+        run: |
+          if grep -qE '^(rename|copy) (from|to) ' "$RV/proposal.patch"; then
+            echo "patch carries rename/copy headers: not produced by the investigate job, refusing"; exit 1
+          fi
+          cp "$MONITOR/gate.mjs" package.json "$RUNNER_TEMP/"
+          git apply --index "$RV/proposal.patch"
+          git diff --cached --name-only \
+            | node "$RUNNER_TEMP/gate.mjs" --notes "$RV/notes.md" --package-base "$RUNNER_TEMP/package.json" --package-head package.json \
+            | tee "$RV/gate-again.txt"
+          grep -q '^proposal=true$' "$RV/gate-again.txt"
+
+      - name: Open a draft PR (never merge)
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ISSUE: ${{ needs.issues.outputs.issue }}
+          DRILL: ${{ needs.verify.outputs.mode == 'drill' }}
+          BASE: ${{ github.ref_name }}
+        run: |
+          branch="rules-verify/run-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          title="fix(rules): proposal from the rules re-verification run ${GITHUB_RUN_ID}"
+          [ "$DRILL" = true ] && title="test(rules): drill proposal from run ${GITHUB_RUN_ID}"
+          git commit -m "$title"
+          git push origin "$branch"
+          {
+            echo '## Why'; echo
+            [ "$DRILL" = true ] && { echo '**Drill.** The divergence was injected on purpose (`--drill`). Close this PR; red tests here are the expected result.'; echo; }
+            echo "The rules re-verification found rules that need a human (#$ISSUE). This draft is the investigator's proposal; a human decides."; echo
+            echo '## What'; echo
+            git show --stat --format= HEAD | sed 's/^/    /'; echo
+            echo '## Agent notes (untrusted until reviewed)'; echo
+            cat "$RV/notes.md"; echo
+            echo '## Verification'; echo
+            echo '- gate (pristine copy, then again on the applied patch):'; echo '```'; cat "$RV/gate-again.txt"; echo '```'
+            echo '- `checks` and `visual` are dispatched on this branch'; echo
+            echo '## Risk / rollback'; echo
+            echo 'Draft only. Close the PR to discard.'; echo
+            echo '## Screenshots'; echo
+            echo 'N/A — data and docs only'; echo
+            echo '## Task'; echo
+            echo "Refs #$ISSUE · run $RUN_URL"
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --draft --base "$BASE" --head "$branch" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          gh workflow run checks.yml --ref "$branch"

@@ -46,11 +46,15 @@ describe('/sources', () => {
     expect(screen.queryAllByText('давно не звірялось')).toHaveLength(0);
   });
 
-  it('на 2026-10-17 з\'являються 12 давніх: і рядок, і позначка з формою ▲', () => {
-    renderOn('2026-10-17');
-    expect(screen.getByText('12 правил давно не звірялись')).toBeDefined();
+  // Дата й число — з матриці (як у sources.test.ts): бот автозвірки рухає
+  // verified_at, і записане «10 на 2026-10-17» падало б на кожному його PR.
+  it('на 91-шу добу після найстарішої звірки з\'являються давні: і рядок, і позначка з формою ▲', () => {
+    const oldest = RULES.rules.map((r) => r.verified_at).sort()[0];
+    const n = RULES.rules.filter((r) => r.verified_at === oldest).length;
+    renderOn(new Date(Date.parse(`${oldest}T12:00:00Z`) + 91 * 86_400_000).toISOString().slice(0, 10));
+    expect(screen.getByText(new RegExp(`^${n} правил\\S* давно не звірял`))).toBeDefined();
     const labels = screen.getAllByText('давно не звірялось');
-    expect(labels).toHaveLength(12);
+    expect(labels).toHaveLength(n);
     // Колір значення сам не несе: поруч із підписом стоїть гліф.
     expect(labels[0].previousElementSibling?.textContent).toBe('▲');
   });

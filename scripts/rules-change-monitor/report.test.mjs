@@ -187,7 +187,7 @@ describe('renderReport', () => {
 });
 
 describe('summaryLine', () => {
-  it('рахує перевірено/розбіжності/непідтверджені окремо', () => {
+  it('рахує записи, звірені, розбіжності й непідтверджені окремо', () => {
     const cycle = {
       month: '2026-08',
       checks: [
@@ -201,7 +201,9 @@ describe('summaryLine', () => {
     const line = summaryLine(cycle);
 
     expect(line).toContain('2026-08');
-    expect(line).toContain('перевірено 4');
+    // «Звірено» — лише ті, де джерело віддало значення; поза скоупом не рахуються.
+    expect(line).toContain('записів 4');
+    expect(line).toContain('звірено з джерелом 2');
     expect(line).toContain('розбіжностей 1');
     expect(line).toContain('непідтверджених 2');
   });
@@ -246,5 +248,61 @@ describe('summaryLine', () => {
     const out = renderReport(cycle);
     expect(out).toContain('https://www.zus.pl/baza-wiedzy/skladki');
     expect(out).toContain('https://www.zus.pl/en/-/nowe-wysokosci');
+  });
+});
+
+describe('renderReport: часткове підтвердження', () => {
+  it('правило з manual-листами названо поіменно, а не сховано в лічильнику', () => {
+    const report = renderReport({
+      month: '2026-10',
+      status: 'completed',
+      checks: [
+        { rule_id: 'incubator.kup', state: STATES.MATCH, manual: ['subscriptionMonthlyMin', 'subscriptionMonthlyMax'] },
+        { rule_id: 'common.minimum_wage', state: STATES.COSMETIC },
+      ],
+    });
+    expect(report).toContain('2 правил збігаються');
+    expect(report).toContain('З них 1 — лише в частині');
+    expect(report).toContain('звіряє людина (manual)');
+    expect(report).toContain('- incubator.kup: subscriptionMonthlyMin, subscriptionMonthlyMax');
+    expect(report).not.toContain('- common.minimum_wage:');
+  });
+
+  it('похідні листи названо окремим рядком «виведено, не звірено»', () => {
+    const report = renderReport({
+      month: '2026-10',
+      status: 'completed',
+      checks: [{ rule_id: 'jdg.skala', state: STATES.COSMETIC, derived: ['taxFreeAmount'] }],
+    });
+    expect(report).toContain('Виведено, не звірено з джерела');
+    expect(report).toContain('- jdg.skala: taxFreeAmount');
+  });
+});
+
+describe('renderReport: розбіжність по полях', () => {
+  it('кожне розбіжне поле — з параметром і масштабом, збіжні поля не друкуються', () => {
+    const field = (param, state, matrix_value, fetched_value, scale) => ({ param, state, matrix_value, fetched_value, diff_percent: state === STATES.DIVERGENCE ? 1 : null, ...(scale ? { scale } : {}) });
+    const report = renderReport({
+      month: '2026-10',
+      status: 'completed',
+      checks: [
+        {
+          rule_id: 'uop.employer_contributions',
+          state: STATES.DIVERGENCE,
+          fields: [
+            field('emerytalne', STATES.DIVERGENCE, 9.76, 9.86, 100),
+            field('rentowe', STATES.COSMETIC, 6.5, 6.5, 100),
+            field('fgsp', STATES.DIVERGENCE, 0.1, 0.11, 100),
+          ],
+          fetched_from: 'https://www.biznes.gov.pl/pl/portal/00274',
+          source_url: 'https://www.biznes.gov.pl/pl/portal/00274',
+          verified_at: '2026-07-24',
+        },
+      ],
+    });
+    expect(report).toContain('- параметр: emerytalne (на сторінці ×100)');
+    expect(report).toContain('- параметр: fgsp (на сторінці ×100)');
+    expect(report).not.toContain('- параметр: rentowe');
+    expect(report).toContain('- verified_at матриці: 2026-07-24');
   });
 });

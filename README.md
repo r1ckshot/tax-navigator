@@ -64,6 +64,15 @@
 Next.js, TypeScript, mobile-first, українська локалізація. Деплой на Vercel,
 фонові воркери на VPS.
 
+## Два фонові інструменти
+
+- **Автозвірка правил** (`rules-verify`, GitHub Actions за розкладом): кожне з 26 правил
+  звіряється з першоджерелом — сторінкою, змінами акта в ELI Сейму чи редакцією на
+  zakon.rada. Збіг — бот-PR з новою датою звірки; розбіжність чи змінений закон — issue
+  і чернетка PR від агента. Мерджить людина. Розклад — [sad.md §7](docs/features/rules-change-monitor/sad.md).
+- **Колектор питань** (`tg-assistant`): збір із Telegram-чатів лише за запитом,
+  розмітка — Claude ([research/tg-assistant/WEEKLY.md](research/tg-assistant/WEEKLY.md)).
+
 ## Розробка
 
 Правила для AI-сесій — [CLAUDE.md](CLAUDE.md), методологія сесій —

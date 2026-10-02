@@ -97,6 +97,9 @@ ALLOWED_DOMAINS=(
   "www.gov.pl"
   "gov.pl"
   "isap.sejm.gov.pl"
+  # ELI API Сейму: дата зміни акта і чинна редакція для автозвірки (тема 1.2).
+  # Один статичний IP, не Imperva-периметр isap/orka - машинний вхід до тих самих актів.
+  "api.sejm.gov.pl"
   "stat.gov.pl"
   "eureka.mf.gov.pl"
   # Українські першоджерела. zakon.rada.gov.ua - один статичний IP, тримається надійно.
@@ -106,6 +109,14 @@ ALLOWED_DOMAINS=(
   "zakon.rada.gov.ua"
   "tax.gov.ua"
   "www.tax.gov.ua"
+  # Цінники інкубаторів: абонемент в incubator.kup звіряє автозвірка (тема 1.2).
+  # Приватні сайти, не держджерела; кожен - один статичний IP, apex і www на тому ж.
+  "fba.ink"
+  "www.fba.ink"
+  "bizky.ai"
+  "www.bizky.ai"
+  "twojstartup.pl"
+  "www.twojstartup.pl"
   # context7 MCP (npx @upstash/context7-mcp) - реальний endpoint context7.com/api/*.
   # Vercel anycast (76.76.21.21, той самий патерн, що tax-navigator-red.vercel.app) -
   # може відвалитись після ротації IP, лікується Rebuild Container.

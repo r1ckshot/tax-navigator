@@ -7,7 +7,10 @@ const NOW = new Date('2026-09-16T08:00:00Z');
 
 describe('пауза між запитами до одного домену (sad.md §4 стовп 2, QG-4)', () => {
   const rule = (rule_id) => ({ rule_id, params: { monthly: 4806 }, source_url: 'https://www.zus.pl/x', verified_at: '2026-07-18' });
-  const extractorAt = (url) => ({ url, matrixValue: (p) => p.monthly, extract: (html) => html });
+  const KWOTA = { kind: 'number', after: [/kwota:/], value: /\d[\d ,.]*/, within: 20 };
+  const pageAt = (url) => ({ url, fields: { monthly: KWOTA } });
+  const PAGE = { method: 'page', why: 'тестова сторінка' };
+  const methods = { a: PAGE, b: PAGE, c: PAGE };
 
   /**
    * Годинник і сон підставні: тест бачить, скільки цикл ЗБИРАВСЯ чекати, і не
@@ -26,7 +29,7 @@ describe('пауза між запитами до одного домену (sad
       },
       fetchImpl: async () => {
         now += 300;
-        return { ok: true, status: 200, text: async () => '4806' };
+        return { ok: true, status: 200, text: async () => 'kwota: 4806' };
       },
     };
   }
@@ -36,7 +39,8 @@ describe('пауза між запитами до одного домену (sad
     const cycle = await runCycle({
       rules: [rule('a'), rule('b')],
       now: NOW,
-      extractors: { a: extractorAt('https://zus.pl/one'), b: extractorAt('https://www.zus.pl/two') },
+      methods,
+      pages: { a: pageAt('https://zus.pl/one'), b: pageAt('https://www.zus.pl/two') },
       ...h,
     });
     expect(h.slept).toEqual([SAME_DOMAIN_PAUSE_MS]);
@@ -48,7 +52,8 @@ describe('пауза між запитами до одного домену (sad
     await runCycle({
       rules: [rule('a'), rule('b')],
       now: NOW,
-      extractors: { a: extractorAt('https://www.zus.pl/one'), b: extractorAt('https://www.podatki.gov.pl/two') },
+      methods,
+      pages: { a: pageAt('https://www.zus.pl/one'), b: pageAt('https://www.podatki.gov.pl/two') },
       ...h,
     });
     expect(h.slept).toEqual([]);
@@ -62,10 +67,11 @@ describe('пауза між запитами до одного домену (sad
     await runCycle({
       rules: [rule('a'), rule('c'), rule('b')],
       now: NOW,
-      extractors: {
-        a: extractorAt('https://www.zus.pl/one'),
-        c: extractorAt('https://www.podatki.gov.pl/slow'),
-        b: extractorAt('https://www.zus.pl/two'),
+      methods,
+      pages: {
+        a: pageAt('https://www.zus.pl/one'),
+        c: pageAt('https://www.podatki.gov.pl/slow'),
+        b: pageAt('https://www.zus.pl/two'),
       },
       clock: () => now,
       sleep: async (ms) => {
@@ -74,7 +80,7 @@ describe('пауза між запитами до одного домену (sad
       },
       fetchImpl: async (url) => {
         now += url.includes('podatki') ? 1500 : 300;
-        return { ok: true, status: 200, text: async () => '4806' };
+        return { ok: true, status: 200, text: async () => 'kwota: 4806' };
       },
     });
     expect(slept).toEqual([SAME_DOMAIN_PAUSE_MS - 1500]);
@@ -86,7 +92,8 @@ describe('пауза між запитами до одного домену (sad
     await runCycle({
       rules: [rule('a'), rule('b')],
       now: NOW,
-      extractors: { a: extractorAt('https://www.zus.pl/one'), b: extractorAt('https://www.zus.pl/two') },
+      methods,
+      pages: { a: pageAt('https://www.zus.pl/one'), b: pageAt('https://www.zus.pl/two') },
       clock: h.clock,
       sleep: h.sleep,
       fetchImpl: async () => {

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { applyVeto, readVetoRegistry, validateRegistry } from './veto.mjs';
 import { runCycle } from './cycle.mjs';
 import { STATES } from './states.mjs';
+import { AMOUNT } from './extract.mjs';
 
 const REGISTRY = join(dirname(fileURLToPath(import.meta.url)), 'veto-registry.json');
 const NOW = new Date('2026-09-16T08:00:00Z');
@@ -108,14 +109,14 @@ describe('veto у циклі (AC-10 + AC-derived S-4)', () => {
     source_url: 'https://www.zus.pl/baza-wiedzy/x',
     verified_at: '2026-07-18',
   };
-  const extractors = {
+  const methods = { 'jdg.zdrowotna.ryczalt': { method: 'page', why: 'тестова сторінка' } };
+  const pages = {
     'jdg.zdrowotna.ryczalt': {
-      url: 'https://example.test/zdrowotna',
-      matrixValue: (params) => params.tiers[0].monthly,
-      extract: (html) => html,
+      url: 'https://www.zus.pl/zdrowotna',
+      fields: { 'tiers.0.monthly': { kind: 'number', after: [/wynosi/], value: AMOUNT, within: 20 } },
     },
   };
-  const fetchImpl = async () => ({ ok: true, status: 200, text: async () => '376,16 zł' });
+  const fetchImpl = async () => ({ ok: true, status: 200, text: async () => 'Składka wynosi 376,16 zł' });
 
   /**
    * Veto не одноразове: кожен цикл перераховує стан із нуля, і сторінка, що
@@ -128,7 +129,8 @@ describe('veto у циклі (AC-10 + AC-derived S-4)', () => {
         rules: [rule],
         now: new Date(`2026-${String(month).padStart(2, '0')}-16T08:00:00Z`),
         fetchImpl,
-        extractors,
+        pages,
+        methods,
         vetoes,
       });
       expect(cycle.checks[0].state).toBe(STATES.NEEDS_CONFIRMATION);
@@ -137,7 +139,7 @@ describe('veto у циклі (AC-10 + AC-derived S-4)', () => {
   });
 
   it('без реєстру та сама сторінка дає розбіжність — гілку тримає саме veto', async () => {
-    const cycle = await runCycle({ rules: [rule], now: NOW, fetchImpl, extractors });
+    const cycle = await runCycle({ rules: [rule], now: NOW, fetchImpl, pages, methods });
     expect(cycle.checks[0].state).toBe(STATES.DIVERGENCE);
   });
 });

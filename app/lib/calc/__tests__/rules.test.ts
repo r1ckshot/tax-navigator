@@ -14,6 +14,16 @@ describe('rules-as-data — дисципліна джерел', () => {
     }
   });
 
+  // Анти-регрес: sip.lex.pl — комерційна база за пейволом, і посилання на неї
+  // тримало два правила ryczałtu на art. 8 ust. 1 pkt 6, який уже uchylony
+  // (перезвірка 2026-10-01, EVIDENCE). Джерело для людини — державне: сторінка
+  // podatki/zus/biznes.gov.pl або текст закону в ISAP/ELI.
+  it('жодне правило не посилається на комерційну базу', () => {
+    for (const rule of RULES.rules) {
+      expect(new URL(rule.source_url).hostname, rule.rule_id).not.toMatch(/(^|\.)lex\.pl$/);
+    }
+  });
+
   it('rule_id унікальні', () => {
     const ids = RULES.rules.map((r) => r.rule_id);
     expect(new Set(ids).size).toBe(ids.length);
@@ -60,6 +70,31 @@ describe('verify-first числа не дрейфнули', () => {
 
   it('sunset спецнорми art. 52zr — 31.12.2026', () => {
     expect(getParams<{ validTo: string }>('residency.special_norm_52zr').validTo).toBe('2026-12-31');
+  });
+
+  // Kwota wolna не стоїть на жодній сторінці автозвірки дослівно: її тримає ця
+  // звірка, а не сторінка (`scripts/rules-change-monitor/pages.mjs`, `derived`).
+  it('внутрішня звірка: kwota wolna 30 000 = kwota zmniejszająca 3 600 / нижча ставка 12%', () => {
+    const skala = getParams<{ lowerRate: number; taxFreeAmount: number; kwotaZmniejszajacaAnnual: number }>('jdg.skala');
+    expect(skala.taxFreeAmount).toBeCloseTo(skala.kwotaZmniejszajacaAnnual / skala.lowerRate, 6);
+  });
+
+  // Анти-регрес: «ефективні ставки» інкубатора (13,6% і 6%) прибрано 2026-10-01 —
+  // перша була ставкою шкали до 2022 року (17% × 0,8). PIT інкубатора рахує
+  // `skalaAnnualTax` зі звірених ставок, тож збережена оцінка не має повернутись.
+  it('інкубатор не несе збереженої «ефективної ставки» PIT', () => {
+    const params = getParams<Record<string, unknown>>('incubator.kup');
+    expect(Object.keys(params).filter((k) => /effectivePit/i.test(k))).toEqual([]);
+  });
+
+  // Анти-дрейф: межі смуги — ціни самих інкубаторів, звірені 2026-10-01 (EVIDENCE,
+  // сценарій E): нижня — Bizky Prime «Miesięczny Koszt Podstawowy 349 zł», верхня —
+  // FBA.ink «500 PLN per month». Пастка — акція FBA «Instead of 500 zł only 350 zł»
+  // на старт і старе 300 без джерела: жодне з них не межа смуги.
+  it('абонемент інкубатора 349–500 zł/міс: Bizky Prime і FBA.ink, без стартової акції', () => {
+    const p = getParams<{ subscriptionMonthlyMin: number; subscriptionMonthlyMax: number }>('incubator.kup');
+    expect([p.subscriptionMonthlyMin, p.subscriptionMonthlyMax]).toEqual([349, 500]);
+    expect([300, 350]).not.toContain(p.subscriptionMonthlyMin);
   });
 
   it('внутрішня звірка: 30-krotność = 30 × прогнозована середня, що дає базу duży ZUS', () => {

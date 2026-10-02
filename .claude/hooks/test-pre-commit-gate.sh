@@ -69,6 +69,11 @@ check "amend with Cyrillic"                deny '"git commit --amend -m \"тес
 check "commit after another git subcommand" deny '"git log --oneline && git commit -m \"тест\""'
 
 echo
+echo "Polish diacritics in the message — must deny (leaked 2026-10-01: «ryczałt»):"
+check "Polish word in subject"             deny '"git commit -m \"docs: verify ryczałt rates\""'
+check "Polish word in body"                deny '"git commit -m \"fix: x\" -m \"see składka\""'
+
+echo
 echo "Attribution trailer — marker: the reason names Co-Authored-By."
 
 # Той самий приклад, що й у гілкових кейсах: на фіче-гілці хук іде далі й падає на

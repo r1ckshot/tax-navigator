@@ -6,8 +6,9 @@
  * після: стейджинг `.env*` (`git add -f .env` обходив і deny-правила, і
  * `block-env-writes` — той дивиться на запис у файл, не на індекс), гілка
  * (правило "у master напряму не комітимо" протекло 2026-08-04 — вісім файлів
- * були застейджені просто в master), кирилиця в message (правило CLAUDE.md
- * "коміти англійською" протекло в subject 2026-07-31), трейлер атрибуції і
+ * були застейджені просто в master), не-ASCII літери в message (правило CLAUDE.md
+ * "коміти англійською" протекло кирилицею 2026-07-31 і польською діакритикою
+ * 2026-10-01), трейлер атрибуції і
  * `npm test` + `npm run verify` (той самий клас, що й check-docs.mjs, лишень
  * рівнем раніше).
  *
@@ -108,9 +109,18 @@ process.stdin.on('end', () => {
     return;
   }
 
-  const CYRILLIC = /[Ѐ-ӿ]/;
-  if (CYRILLIC.test(command)) {
-    deny('Кирилиця в git commit — коміти строго англійською (CLAUDE.md, розділ Git).');
+  // Будь-яка не-ASCII літера, а не лише кирилиця: 2026-10-01 subject з
+  // «ryczałt» пройшов кириличну перевірку і зупинився лише на очах Mike.
+  // Польські й українські назви перекладаються (ryczałt → lump-sum tax), а не
+  // транслітеруються. Розділові знаки (—, →) не літери й лишаються дозволеними.
+  const NON_ASCII_LETTER = /(?![\x00-\x7F])\p{L}/u;
+  const letter = command.match(NON_ASCII_LETTER);
+  if (letter) {
+    deny(
+      `Не-англійська літера «${letter[0]}» у git commit — коміти строго англійською, ` +
+        'включно з назвами (CLAUDE.md, розділ Git).\n' +
+        'Перекласти назву: ryczałt → lump-sum tax, składka zdrowotna → health contribution, ЄСВ → single social contribution.'
+    );
     return;
   }
 

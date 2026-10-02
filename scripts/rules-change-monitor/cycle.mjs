@@ -6,6 +6,9 @@
 // Використання:
 //   node scripts/rules-change-monitor/cycle.mjs            # живий прогін
 //   node scripts/rules-change-monitor/cycle.mjs --dry-run  # без мережі й без запису
+//   ... --out <file>    # ще й JSON циклу для workflow (rules-verify.yml)
+//   ... --laws-only     # легкий прогін: лише закони (act/edition), сторінки не відкриваються
+//   ... --drill         # навчання: на живій сторінці zus.pl мінімалка підмінена (DRILL)
 //
 // Живий прогін лишає два артефакти: запис в `data/cycle-history.json` і
 // markdown-звіт `data/reports/YYYY-MM.md` — той самий текст, що в stdout.
@@ -17,10 +20,15 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { classifyScope, domainOf } from "./allowlist.mjs";
-import { compareValues } from "./diff.mjs";
+import { classifyScope, domainOf, notVerifiedScope } from "./allowlist.mjs";
+import { pageText } from "./extract.mjs";
+import { aggregateFields, checkField } from "./fields.mjs";
+import { checkAct, checkDocument, checkEdition, ELI_API, isDocument, lawLabel, lawUrl, RULE_LAWS } from "./laws.mjs";
+import { checkLlmField, claudeAsk } from "./llm.mjs";
+import { DERIVED, IMPLEMENTED, METHODS, VERIFICATION, valueAt } from "./methods.mjs";
+import { PAGES, URLS } from "./pages.mjs";
 import { screenSource, MAX_INPUT_CHARS } from "./screen.mjs";
-import { EXTRACTORS, fetchSource, noExtractorCheck } from "./sources.mjs";
+import { fetchDigest, fetchSource } from "./sources.mjs";
 import { renderReport, summaryLine } from "./report.mjs";
 import { appendCycle, readHistory, writeHistory } from "./state.mjs";
 import { STATES, isState } from "./states.mjs";
@@ -62,6 +70,29 @@ function createPacer({ pauseMs, sleep, clock }) {
 }
 
 const realSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Навчальна розбіжність (сесія 04): одне речення живої сторінки zus.pl з іншою
+ * мінімалкою. Решта сторінки й усі інші джерела — справжні, тож навчання
+ * проходить увесь шлях (issue → investigate → чернетка PR) на реальному вході.
+ * Значення взяте з `__fixtures__/zus-skladki-raised.html`.
+ */
+export const DRILL = Object.freeze({
+  url: URLS.zus,
+  rule_id: "common.minimum_wage",
+  pattern: /(minimalne wynagrodzenie za pracę(?:\s|<[^>]+>)*wynosi\s*)4806/g,
+  replacement: (_, lead) => `${lead}4950`,
+});
+
+/** `fetch`, що віддає сторінку DRILL з підміною; решта запитів — як є. */
+export function drillFetch(fetchImpl = fetch) {
+  return async (url, init) => {
+    const response = await fetchImpl(url, init);
+    if (url !== DRILL.url || !response.ok) return response;
+    const body = (await response.text()).replace(DRILL.pattern, DRILL.replacement);
+    return { ok: response.ok, status: response.status, headers: response.headers, text: async () => body };
+  };
+}
 
 /** `YYYY-MM` того дня, коли цикл запущено. Місяць — ключ унікальності циклу. */
 export function monthOf(date) {
@@ -109,18 +140,60 @@ function scopeCheck(rule, { state, failure_reason }) {
 }
 
 /**
+ * Правило, чий спосіб звірки цикл не виконує (`manual`), не має або для якого
+ * немає опису (сторінки в `pages.mjs`, законів у `laws.mjs`). `out_of_scope`, а
+ * не `unavailable`: джерело не падало, цикл просто не звіряє це правило, і
+ * причина це називає.
+ */
+function methodCheck(rule, method) {
+  return scopeCheck(rule, {
+    state: STATES.OUT_OF_SCOPE,
+    failure_reason: !method
+      ? "у реєстрі methods.mjs немає способу звірки для цього правила"
+      : IMPLEMENTED.includes(method)
+        ? `для способу «${method}» немає опису джерела (pages.mjs / laws.mjs)`
+        : `спосіб звірки «${method}» цикл не виконує`,
+  });
+}
+
+/**
+ * Листи, які цикл не звіряє, а лише називає: `manual` (звіряє людина) і
+ * `derived` (виводиться з інших листів). Без них «збігається» читалось би як
+ * підтвердження всього правила.
+ */
+function namedLeaves(entries) {
+  const manual = entries.filter(([, e]) => e.method === METHODS.MANUAL).map(([param]) => param);
+  const derived = entries.filter(([, e]) => e.method === DERIVED).map(([param]) => param);
+  return { ...(manual.length ? { manual } : {}), ...(derived.length ? { derived } : {}) };
+}
+
+/**
  * Один прогін звірки над переданими правилами. Мережа інжектується, тому цикл
  * тестується цілком без неї — і саме тому тест бачить порядок кроків, а не
  * лише окремі модулі.
+ *
+ * Сторінка тягнеться раз на цикл, скільки б правил із неї не читали: zus.pl
+ * обслуговує вісім правил, і вісім однакових запитів поспіль — це та сама
+ * поведінка бота, від якої стоїть пауза між запитами.
  */
 export async function runCycle({
   rules,
   now = new Date(),
   fetchImpl,
-  extractors = EXTRACTORS,
+  methods = VERIFICATION,
+  pages = PAGES,
   // Порожній дефолт — лише для тестів і `evals/`, яким veto не предмет.
   // Живий прогін (`main`) читає реєстр сам і падає, якщо файла немає.
   vetoes = [],
+  laws = RULE_LAWS,
+  // Модель для способу `llm`. Без неї `llm`-листи — `unavailable` з причиною;
+  // живий прогін (`main`) підставляє `claudeAsk`.
+  ask = null,
+  // Легкий прогін (sad.md §розклад): лише закони. Сторінки не відкриваються, тож
+  // page-правило звіряється тільки своїми act-листами, а без них — out_of_scope.
+  // Такий запис не підстава для нової `verified_at`: workflow бот-PR із легкого
+  // прогону не відкриває.
+  lawsOnly = false,
   pauseMs = SAME_DOMAIN_PAUSE_MS,
   sleep = realSleep,
   clock = Date.now,
@@ -131,58 +204,168 @@ export async function runCycle({
   drop = false,
 } = {}) {
   const started_at = now.toISOString();
+  const today = started_at.slice(0, 10);
   const checks = [];
   const pacer = createPacer({ pauseMs, sleep, clock });
+  const loaded = new Map();
+
+  async function load(url) {
+    if (!loaded.has(url)) {
+      await pacer.wait(url);
+      const { html, failure_reason } = await fetchSource(url, { fetchImpl });
+      pacer.done(url);
+      // Перевірка стоїть МІЖ фетчем і витягом, а не після нього: після витягу
+      // числа чужий текст уже пройшов через регулярки й міг потрапити в
+      // `fetched_value`, тобто в звіт, тобто до моделі.
+      const screened = screenSource(html);
+      loaded.set(url, {
+        failure_reason,
+        blocked: screened.blocked ? screened.failure_reason : null,
+        truncated: screened.truncated,
+        raw: screened.html,
+        text: screened.html === null ? null : pageText(screened.html),
+      });
+    }
+    return loaded.get(url);
+  }
+
+  /** JSON з ELI. Відповідь, що не розбирається, — причина, а не порожні метадані. */
+  async function loadJson(url) {
+    const source = await load(url);
+    const failure = source.blocked ?? source.failure_reason;
+    if (failure) return { meta: null, failure_reason: failure };
+    try {
+      return { meta: JSON.parse(source.raw), failure_reason: null };
+    } catch {
+      return { meta: null, failure_reason: "ELI віддав не JSON" };
+    }
+  }
+
+  /** Метадані зміни акта; не віддались — дата публікації невідома, і `laws.mjs` рахує зміну. */
+  async function amendment(id) {
+    const { meta } = await loadJson(`${ELI_API}/${id}`);
+    return { promulgation: typeof meta?.promulgation === "string" ? meta.promulgation : null, title: meta?.title ?? null };
+  }
+
+  /** Звірка одного закону для правила чи листа (`act` / `edition`). */
+  async function checkLaw(rule, law, param) {
+    const url = lawUrl(law);
+    const closed = classifyScope(rule, url);
+    if (closed) return { ...scopeCheck(rule, closed), param, method: law.method, law: lawLabel(law) };
+    if (isDocument(law)) {
+      await pacer.wait(url);
+      const digest = await fetchDigest(url, { fetchImpl });
+      pacer.done(url);
+      return checkDocument({ rule, law, param, sha256: digest.sha256, failure_reason: digest.failure_reason });
+    }
+    const result =
+      law.method === METHODS.ACT
+        ? await checkAct({ rule, law, param, act: await loadJson(url), amendment, today })
+        : await (async () => {
+            const source = await load(url);
+            return checkEdition({ rule, law, param, text: source.text, failure_reason: source.blocked ?? source.failure_reason });
+          })();
+    // Відхилений вхід має дійти до статусу циклу (`blocked`), а не загубитись
+    // серед звичайних `unavailable`.
+    return (await load(url)).blocked ? { ...result, blocked: true } : result;
+  }
 
   for (const rule of rules) {
-    const scope = classifyScope(rule);
-    if (scope) {
-      checks.push(scopeCheck(rule, scope));
+    const notVerified = notVerifiedScope(rule);
+    if (notVerified) {
+      checks.push(scopeCheck(rule, notVerified));
       continue;
     }
 
-    const extractor = extractors[rule.rule_id];
-    if (!extractor) {
-      checks.push(noExtractorCheck(rule));
+    const method = methods[rule.rule_id]?.method;
+    const page = pages[rule.rule_id];
+    const ruleLaws = laws[rule.rule_id];
+
+    if ((method === METHODS.ACT || method === METHODS.EDITION) && ruleLaws) {
+      const results = [];
+      for (const law of ruleLaws.laws) results.push(await checkLaw(rule, law, lawLabel(law)));
+      checks.push({ ...aggregateFields(rule, results), method, ...namedLeaves(Object.entries(ruleLaws.except ?? {})) });
+      continue;
+    }
+    if (method !== METHODS.PAGE || !page) {
+      checks.push(methodCheck(rule, method));
       continue;
     }
 
-    const matrix_value = extractor.matrixValue(rule.params);
-    await pacer.wait(extractor.url);
-    const { html, failure_reason } = await fetchSource(extractor.url, { fetchImpl });
-    pacer.done(extractor.url);
-
-    // Перевірка стоїть МІЖ фетчем і екстрактором, а не після нього: після
-    // витягу числа чужий текст уже пройшов через регулярки й міг потрапити в
-    // `fetched_value`, тобто в звіт, тобто до моделі.
-    const screened = screenSource(html);
-    if (screened.blocked) {
-      checks.push(blockedCheck(rule, extractor.url, screened.failure_reason));
+    if (lawsOnly) {
+      const lawLeaves = Object.entries(page.elsewhere ?? {}).filter(([, e]) => e.method === METHODS.ACT);
+      if (lawLeaves.length === 0) {
+        checks.push({ ...scopeCheck(rule, { state: STATES.OUT_OF_SCOPE, failure_reason: "легкий прогін: сторінки не відкривались, законів у правила немає" }), method });
+        continue;
+      }
+      const results = [];
+      for (const [param, entry] of lawLeaves) results.push(await checkLaw(rule, entry.law, param));
+      checks.push({ ...aggregateFields(rule, results), method, laws_only: true });
       continue;
     }
 
-    const check = compareValues({
-        rule_id: rule.rule_id,
-        matrix_value,
-        fetched_raw: screened.html === null ? null : extractor.extract(screened.html),
-        // Сторінка, з якої реально взято число. У матриці `source_url` часто
-        // інший (людське посилання на роз'яснення), і друкувати число під ним
-        // означало б атрибутувати його джерелу, якого скрипт не читав.
-        fetched_from: extractor.url,
-        source_url: rule.source_url ?? null,
-        verified_at: rule.verified_at ?? null,
-        failure_reason,
-    });
-
-    // Обрізаний вхід не має губитись. Зріз може відсікти маркер, і тоді запис
-    // виходить `unavailable` — з причиною «порожньо», яка читається як
-    // «джерело мовчало». Причина інша, і людина має бачити саме її.
-    if (screened.truncated && check.state === STATES.UNAVAILABLE) {
-      check.failure_reason = `${check.failure_reason} (сторінку обрізано за стелею ${MAX_INPUT_CHARS} символів)`;
+    const fields = Object.entries(page.fields).map(([param, field]) => ({ param, field, url: field.url ?? page.url }));
+    // AC-02 перевіряється по сторінці, яку цикл реально відкриє, а не по
+    // `source_url`: посилання для людини може вести куди завгодно, а запит іде
+    // лише на хост зі SCRIPTABLE_HOSTS.
+    const closed = fields.map((f) => classifyScope(rule, f.url)).find(Boolean);
+    if (closed) {
+      checks.push(scopeCheck(rule, closed));
+      continue;
     }
-    // Veto після diff, а не замість нього: гілка перекриває вже порахований
-    // стан, і тільки там, де джерело справді віддало число (`veto.mjs`).
-    checks.push(applyVeto(check, vetoes));
+
+    const results = [];
+    let blocked = null;
+    let failed = null;
+    for (const { param, field, url } of fields) {
+      const source = await load(url);
+      if (source.blocked) {
+        blocked = { url, reason: source.blocked };
+        break;
+      }
+      // Сторінка не відповіла — причина спільна для всіх її полів, і розкладка
+      // по полях лише повторила б її N разів.
+      if (source.failure_reason) {
+        failed = { url, reason: source.failure_reason };
+        break;
+      }
+      const check = checkField({ rule, param, field, url, text: source.text, failure_reason: null, vetoes });
+      // Обрізаний вхід не має губитись. Зріз може відсікти маркер, і тоді поле
+      // виходить `unavailable` з причиною, яка читається як «джерело мовчало».
+      if (source.truncated && check.state === STATES.UNAVAILABLE) {
+        check.failure_reason = `${check.failure_reason} (сторінку обрізано за стелею ${MAX_INPUT_CHARS} символів)`;
+      }
+      results.push({ ...check, method: METHODS.PAGE });
+    }
+    if (!blocked && !failed) {
+      // Листи на іншому способі звіряються тут же: стан правила — найгірший з
+      // усіх його листів, а не лише з тих, що на сторінці.
+      for (const [param, entry] of Object.entries(page.elsewhere ?? {})) {
+        if (entry.method === METHODS.ACT) results.push(await checkLaw(rule, entry.law, param));
+        if (entry.method === METHODS.LLM) {
+          const source = await load(page.url);
+          results.push(
+            await checkLlmField({
+              rule,
+              param,
+              spec: entry.ask,
+              url: page.url,
+              text: source.text,
+              failure_reason: source.blocked ?? source.failure_reason,
+              ask,
+              matrix: valueAt(rule.params, param),
+            }),
+          );
+        }
+      }
+    }
+    if (blocked) checks.push({ ...blockedCheck(rule, blocked.url, blocked.reason), method });
+    else if (failed) checks.push({ ...scopeCheck(rule, { state: STATES.UNAVAILABLE, failure_reason: failed.reason }), fetched_from: failed.url, method });
+    else {
+      // Похідні й ручні листи називаються: цикл їх не звіряв, і мовчання про
+      // них читалось би як підтвердження (рев'ю звіту 2026-10).
+      checks.push({ ...aggregateFields(rule, results), method, ...namedLeaves(Object.entries(page.elsewhere ?? {})) });
+    }
   }
 
   const finalChecks = drop ? checks.slice(0, -1) : mutate ? checks.map(mutate) : checks;
@@ -243,24 +426,37 @@ export function exitCodeFor(cycle) {
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes("--dry-run");
+  const lawsOnly = args.includes("--laws-only");
+  const drill = args.includes("--drill");
+  const outIndex = args.indexOf("--out");
+  const outPath = outIndex === -1 ? null : args[outIndex + 1];
   const { rules } = JSON.parse(readFileSync(RULES_PATH, "utf8"));
   const vetoes = readVetoRegistry(VETO_REGISTRY_PATH);
 
   const cycle = await runCycle({
     rules,
     vetoes,
+    ask: dryRun ? null : claudeAsk,
+    lawsOnly,
     fetchImpl: dryRun
       ? async () => {
           throw new Error("--dry-run: мережа свідомо вимкнена");
         }
-      : undefined,
+      : drill
+        ? drillFetch()
+        : undefined,
   });
+  if (drill) cycle.drill = { rule_id: DRILL.rule_id, url: DRILL.url };
+  if (lawsOnly) cycle.mode = "laws-only";
+  if (outPath) writeFileSync(outPath, `${JSON.stringify(cycle, null, 2)}\n`, "utf8");
 
   console.log(renderReport(cycle));
   console.log(summaryLine(cycle));
 
-  if (dryRun) {
-    console.log("--dry-run: історія і звіт не записані");
+  if (dryRun || drill || lawsOnly) {
+    // Навчання й легкий прогін не є циклом місяця: їхній звіт заступив би справжній.
+    console.log(`${dryRun ? "--dry-run" : drill ? "--drill" : "--laws-only"}: історія і звіт місяця не записані`);
+    process.exitCode = dryRun ? 0 : exitCodeFor(cycle);
     return;
   }
   const history = readHistory(DEFAULT_HISTORY_PATH);
