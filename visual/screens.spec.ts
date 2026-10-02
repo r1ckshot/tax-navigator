@@ -49,11 +49,14 @@ test('лендинг', async ({ page }) => {
 });
 
 /**
- * «— звірено YYYY-MM-DD» під кожним джерелом результату. Маска з тієї ж причини,
- * що на `/sources`: бот автозвірки рухає дати щомісяця, і перший його PR
- * (2026-10-02, #124) повалив обидві сцени результату на 69 пікселях дати.
+ * «— звірено YYYY-MM-DD» під кожним джерелом результату ховається з тієї ж
+ * причини, що на `/sources`: бот автозвірки рухає дати щомісяця, і перший його
+ * PR (2026-10-02, #124) повалив обидві сцени результату на 69 пікселях дати.
+ * Не `mask`, а `visibility: hidden`: маска малюється й для дат у згорнутих
+ * картках, яких на екрані немає, і лягла прямокутниками на кнопки внизу.
+ * `visibility` лишає місце під текстом, тож верстка не зсувається.
  */
-const sourceDates = (page: Page) => page.locator('a[target="_blank"] + span[class*="meta"]');
+const HIDE_SOURCE_DATES = 'a[target="_blank"] + span[class*="meta"] { visibility: hidden; }';
 
 test('екран результату, картки згорнуті', async ({ page }) => {
   await page.goto(RESULT_URL);
@@ -65,7 +68,8 @@ test('екран результату, картки згорнуті', async ({ 
   await expect(cards.first()).not.toHaveAttribute('open', '');
   await expectNoHorizontalOverflow(page);
 
-  await expect(page).toHaveScreenshot('result-collapsed.png', { fullPage: true, mask: [sourceDates(page)] });
+  await page.addStyleTag({ content: HIDE_SOURCE_DATES });
+  await expect(page).toHaveScreenshot('result-collapsed.png', { fullPage: true });
 });
 
 test('екран результату, перша картка розкрита', async ({ page }) => {
@@ -76,7 +80,8 @@ test('екран результату, перша картка розкрита'
   await expect(first).toHaveAttribute('open', '');
   await expectNoHorizontalOverflow(page);
 
-  await expect(page).toHaveScreenshot('result-expanded.png', { fullPage: true, mask: [sourceDates(page)] });
+  await page.addStyleTag({ content: HIDE_SOURCE_DATES });
+  await expect(page).toHaveScreenshot('result-expanded.png', { fullPage: true });
 });
 
 test('словник дизайну', async ({ page }) => {
