@@ -259,6 +259,39 @@ export function amendmentIds(checks) {
   return [...ids].sort();
 }
 
+/**
+ * Закони України з записів, що йдуть людині (спосіб `edition`): сторінка
+ * zakon.rada.gov.ua/laws/show/<id>. Без тексту чинної редакції агент правило
+ * не перезвірить, а сторінка `show` статей скрипту не віддає.
+ */
+export function radaIds(checks) {
+  const ids = new Set();
+  const visit = (c) => {
+    const id = /^https:\/\/zakon\.rada\.gov\.ua\/laws\/show\/([\w-]+)$/.exec(c.fetched_from ?? "")?.[1];
+    if (id && c.state === STATES.NEEDS_CONFIRMATION) ids.add(id);
+    for (const f of c.fields ?? []) visit(f);
+  };
+  checks.forEach(visit);
+  return [...ids].sort();
+}
+
+/**
+ * Повний текст чинної редакції: `show/<id>.txt` віддає весь закон однією
+ * сторінкою (ПКУ — ~10 МБ HTML, ~4 млн символів тексту), а `show/<id>` — лише
+ * шапку. Розмітку прибираємо: агент шукає в тексті Grep-ом.
+ */
+export function radaText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<(?:br|\/p|\/div|\/h\d|\/li)[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n+/g, "\n");
+}
+
 /** Стеля на PDF змін: агент читає їх цілком, і велика пачка з'їла б бюджет. */
 export const MAX_EVIDENCE_FILES = 12;
 
@@ -333,7 +366,28 @@ async function main() {
       }
       saved += 1;
     }
-    emit({ amendments: ids.length, saved });
+    // zakon.rada: антиDDoS на запити поспіль і зрідка TCP, що не встигає (environment-limits.md).
+    let laws = 0;
+    for (const id of radaIds(checks)) {
+      const url = `https://zakon.rada.gov.ua/laws/show/${id}.txt`;
+      let reason = null;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        if (attempt > 0 || laws > 0) await new Promise((r) => setTimeout(r, 5_000));
+        try {
+          const response = await fetch(url, { signal: AbortSignal.timeout(120_000) });
+          // Між «Редакція» і «від» стоїть &nbsp;: шукаємо по очищеному тексту, не по HTML.
+          const text = radaText(await response.text());
+          reason = response.ok && /Редакція\s+від \d\d\.\d\d\.\d{4}/.test(text) ? null : `zakon.rada відповів ${response.status} без тексту редакції`;
+          if (!reason) writeFileSync(join(dir, `rada-${id}.txt`), text, "utf8");
+        } catch (error) {
+          reason = `запит не вдався: ${error?.message ?? error}`;
+        }
+        if (!reason) break;
+      }
+      if (reason) console.error(`evidence: rada ${id}: ${reason}`);
+      else laws += 1;
+    }
+    emit({ amendments: ids.length, saved, laws });
     return;
   }
   console.error("usage: workflow.mjs plan|year-ahead|outcome|evidence [--dir DIR] …");

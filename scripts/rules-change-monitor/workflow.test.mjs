@@ -5,7 +5,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { ANNOUNCEMENTS } from './year-ahead.mjs';
-import { HOT_MONTHS, amendmentIds, attentionIssue, lawsFingerprint, marker, planRun, writeOutcome } from './workflow.mjs';
+import { HOT_MONTHS, amendmentIds, attentionIssue, lawsFingerprint, marker, planRun, radaIds, radaText, writeOutcome } from './workflow.mjs';
 import { STATES } from './states.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -165,4 +165,25 @@ describe('writeOutcome — файли для workflow', () => {
 
 it('amendmentIds — зміни з правил і з їхніх листів, без повторів', () => {
   expect(amendmentIds([act, { rule_id: 'b', amended: [{ id: 'DU/2026/1' }, { id: 'DU/2026/7' }] }])).toEqual(['DU/2026/1', 'DU/2026/7']);
+});
+
+describe('закони України для агента', () => {
+  const pku = (state) => ({ param: 'pku', state, fetched_from: 'https://zakon.rada.gov.ua/laws/show/2755-17' });
+
+  it('radaIds — лише ті, чия редакція змінилась, без повторів', () => {
+    const checks = [
+      { rule_id: 'fop.esv_vz', fields: [pku(STATES.NEEDS_CONFIRMATION), { param: 'esv', state: STATES.NEEDS_CONFIRMATION, fetched_from: 'https://zakon.rada.gov.ua/laws/show/2464-17' }] },
+      { rule_id: 'fop.zaklad_in_pl', fields: [pku(STATES.NEEDS_CONFIRMATION)] },
+      { rule_id: 'x', fields: [{ ...pku(STATES.MATCH), fetched_from: 'https://zakon.rada.gov.ua/laws/show/4695-20' }] },
+    ];
+    expect(radaIds(checks)).toEqual(['2464-17', '2755-17']);
+  });
+
+  it('radaText — текст статей без розмітки й скриптів', () => {
+    const html = '<html><script>var a=1</script><p>Стаття 293. Ставки&nbsp;єдиного податку</p><div>293.3. <b>5</b> відсотків</div></html>';
+    const text = radaText(html);
+    expect(text).toContain('Стаття 293. Ставки єдиного податку');
+    expect(text).toContain('293.3. 5 відсотків');
+    expect(text).not.toMatch(/var a|<p>/);
+  });
 });
