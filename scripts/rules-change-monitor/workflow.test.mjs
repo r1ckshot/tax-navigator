@@ -5,7 +5,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { ANNOUNCEMENTS } from './year-ahead.mjs';
-import { HOT_MONTHS, amendmentIds, attentionIssue, lawsFingerprint, marker, planRun, radaIds, radaText, writeOutcome } from './workflow.mjs';
+import { HOT_MONTHS, amendmentIds, attentionIssue, lawsFingerprint, marker, planRun, isFullLawText, radaIds, radaText, writeOutcome } from './workflow.mjs';
 import { STATES } from './states.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -177,6 +177,14 @@ describe('закони України для агента', () => {
       { rule_id: 'x', fields: [{ ...pku(STATES.MATCH), fetched_from: 'https://zakon.rada.gov.ua/laws/show/4695-20' }] },
     ];
     expect(radaIds(checks)).toEqual(['2464-17', '2755-17']);
+  });
+
+  // Раннерам zakon.rada віддав шапку з датою редакції й без жодної статті, і
+  // перевірка самої дати пропустила її як текст закону (2026-10-02).
+  it('isFullLawText — шапка з датою редакції не текст закону', () => {
+    expect(isFullLawText('Податковий кодекс України Редакція від 17.09.2026, підстава 4967-IX')).toBe(false);
+    expect(isFullLawText('Редакція від 17.09.2026 … Стаття 293. Ставки єдиного податку')).toBe(true);
+    expect(isFullLawText('Стаття 293. Ставки єдиного податку')).toBe(false);
   });
 
   it('radaText — текст статей без розмітки й скриптів', () => {
