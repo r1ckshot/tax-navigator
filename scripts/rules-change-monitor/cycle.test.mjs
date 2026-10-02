@@ -315,7 +315,9 @@ describe('writeReport: місячний звіт лишається файлом
  */
 describe('runCycle: 26 з 26 на фікстурах 2026-10-01', async () => {
   const { URLS } = await import('./pages.mjs');
-  const { rules } = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../app/lib/rules/rules.2026.json'), 'utf8'));
+  // Матриця на ту саму дату, що й фікстури сторінок: стан «закон змінився»
+  // залежить від verified_at, а бот і агент автозвірки рухають їх у живій матриці.
+  const { rules } = JSON.parse(fixture('rules.2026-10-01.json'));
   const PAGE_FILES = Object.fromEntries(Object.entries(URLS).map(([key, url]) => [url, join('pages', `${key}.html`)]));
 
   const { EDITIONS } = await import('./laws.mjs');

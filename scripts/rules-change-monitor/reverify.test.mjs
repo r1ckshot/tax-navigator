@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 
 import { bumpVerifiedAt, guardRulesChange, sameRuleData } from './reverify.mjs';
 
-const RULES_TEXT = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../app/lib/rules/rules.2026.json'), 'utf8');
+// Знімок матриці на 2026-10-01: дати в живій рухає сам бот, а тести дат — про форму файла.
+const RULES_TEXT = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '__fixtures__', 'rules.2026-10-01.json'), 'utf8');
 const TODAY = '2026-11-02';
 const rule = (text, id) => JSON.parse(text).rules.find((r) => r.rule_id === id);
 
