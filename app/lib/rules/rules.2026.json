@@ -106,8 +106,8 @@
         "kupStandard": 0.2,
         "kupCopyright": 0.5,
         "copyrightAnnualCap": 120000,
-        "subscriptionMonthlyMin": 300,
-        "subscriptionMonthlyMax": 349,
+        "subscriptionMonthlyMin": 349,
+        "subscriptionMonthlyMax": 500,
         "hasZus": false,
         "isEstimate": true
       },

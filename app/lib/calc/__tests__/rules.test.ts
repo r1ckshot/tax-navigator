@@ -87,6 +87,16 @@ describe('verify-first числа не дрейфнули', () => {
     expect(Object.keys(params).filter((k) => /effectivePit/i.test(k))).toEqual([]);
   });
 
+  // Анти-дрейф: межі смуги — ціни самих інкубаторів, звірені 2026-10-01 (EVIDENCE,
+  // сценарій E): нижня — Bizky Prime «Miesięczny Koszt Podstawowy 349 zł», верхня —
+  // FBA.ink «500 PLN per month». Пастка — акція FBA «Instead of 500 zł only 350 zł»
+  // на старт і старе 300 без джерела: жодне з них не межа смуги.
+  it('абонемент інкубатора 349–500 zł/міс: Bizky Prime і FBA.ink, без стартової акції', () => {
+    const p = getParams<{ subscriptionMonthlyMin: number; subscriptionMonthlyMax: number }>('incubator.kup');
+    expect([p.subscriptionMonthlyMin, p.subscriptionMonthlyMax]).toEqual([349, 500]);
+    expect([300, 350]).not.toContain(p.subscriptionMonthlyMin);
+  });
+
   it('внутрішня звірка: 30-krotność = 30 × прогнозована середня, що дає базу duży ZUS', () => {
     const avg = getParams<{ monthly: number }>('common.projected_average_wage').monthly;
     const cap = getParams<{ annualBaseCap: number }>('uop.annual_contribution_cap').annualBaseCap;
