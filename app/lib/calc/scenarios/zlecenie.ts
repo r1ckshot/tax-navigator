@@ -1,5 +1,7 @@
 import { getParams, sourcesOf } from '@/lib/rules/types';
 import { toRange, round2 } from '../range';
+import { assessStatus } from '../status';
+import { protectionNotes, workNotes } from './status-gate';
 import type { Answers, ScenarioResult, SubformResult } from '../types';
 import { skalaAnnualTax, spanOf } from './shared';
 
@@ -108,6 +110,10 @@ export function calcZlecenie(answers: Answers, base: ZlecenieBase = 'employerCos
   }
   if (base === 'employerCost') noteKeys.push('uop.employerCostBasis');
 
+  const status = assessStatus(answers.stayBasis);
+  const work = workNotes('zlecenie', status);
+  const protection = protectionNotes(status);
+  noteKeys.unshift(...work.noteKeys, ...protection.noteKeys);
   const subforms = [kup20, kup50];
 
   return {
@@ -116,7 +122,12 @@ export function calcZlecenie(answers: Answers, base: ZlecenieBase = 'employerCos
     risk: 'yellow',
     riskReasonKey: 'risk.zlecenie.reclassification',
     noteKeys,
+    // Дата з правила, не літерал у тексті: той самий строк, що в JDG (звіряє rules.test).
+    noteVars: {
+      ...protection.noteVars,
+      pipFrom: getParams<{ pipDecisionPowerFrom: string }>('zlecenie.przekwalifikowanie').pipDecisionPowerFrom,
+    },
     subforms,
-    sources: [...sources, ...sourcesOf('zlecenie.przekwalifikowanie')],
+    sources: [...sources, ...sourcesOf('zlecenie.przekwalifikowanie'), ...work.sources, ...protection.sources],
   };
 }

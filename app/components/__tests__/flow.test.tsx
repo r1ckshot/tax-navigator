@@ -20,8 +20,11 @@ async function answerAndAdvance(user: ReturnType<typeof userEvent.setup>, labels
   await user.click(next ?? screen.getByRole('button', { name: t('nav.showResult') }));
 }
 
-/** Медіанний шлях: резидент PL, повний ZUS, програмування, 15,000 zł. */
-async function walkMedianPath(revenue = '15000') {
+/**
+ * Медіанний шлях: резидент PL, повний ZUS, програмування, 15,000 zł, UKR.
+ * `statusKey` міняє підставу; без права на JDG питання про замовників зникає.
+ */
+async function walkMedianPath(revenue = '15000', statusKey = 'q.status.ukr') {
   const user = userEvent.setup();
   render(<QuestionnairePage />);
 
@@ -38,6 +41,8 @@ async function walkMedianPath(revenue = '15000') {
   await answerAndAdvance(user, [t('q.income.plClients')]);
 
   await answerAndAdvance(user, [t('q.uaFop.no')]);
+  // Підстава, з якою дозволені всі шість форм, — той самий профіль, що в baseAnswers.
+  await answerAndAdvance(user, [t(statusKey)]);
 
   // Виручка — слайдер: задаємо значення напряму (квантизується до кроку 2500).
   fireEvent.change(screen.getByLabelText(t('q.revenue.label')), { target: { value: revenue } });
@@ -48,7 +53,8 @@ async function walkMedianPath(revenue = '15000') {
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
   await answerAndAdvance(user, [t('q.parallelUop.no')]);
-  await answerAndAdvance(user, [t('q.formerEmployer.no')]);
+  const clients = screen.queryByLabelText(t('q.clients.several'));
+  await answerAndAdvance(user, clients ? [t('q.formerEmployer.no'), t('q.clients.several')] : [t('q.formerEmployer.no')]);
   await answerAndAdvance(user, [t('q.jdg.gt30')]);
 
   return user;
@@ -62,7 +68,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('анкета — наскрізний прохід', () => {
-  it('десять кроків доводять до результату з вердиктом і шістьма варіантами', async () => {
+  it('одинадцять кроків доводять до результату з вердиктом і шістьма варіантами', async () => {
     await walkMedianPath();
 
     expect(screen.getByText(t('residency.plResident'))).toBeDefined();
@@ -182,6 +188,37 @@ describe('порівняльна таблиця', () => {
     expect(empty.length).toBe(2);
     for (const row of empty) {
       expect(valueCell(row).textContent).not.toBe('');
+    }
+  });
+});
+
+describe('право працювати на екрані результату (сесія 06)', () => {
+  // PRD AC-1: недозволена форма лишається в таблиці й несе причину замість числа.
+  it('карта на роботу: JDG і nierejestrowana в таблиці з причиною, питання про замовників не було', async () => {
+    await walkMedianPath('15000', 'q.status.workPermit');
+
+    const region = screen.getByRole('region', { name: t('scenarios.title') });
+    const rows = within(region).getAllByRole('row').slice(1);
+    expect(rows.length).toBe(6);
+    const rowOf = (id: string) => rows.find((r) => within(r).getByRole('rowheader').textContent === t(`scenario.${id}`))!;
+    for (const id of ['jdg', 'nierejestrowana']) {
+      const cell = within(rowOf(id)).getAllByRole('cell')[0];
+      expect(cell.dataset.empty).toBe('true');
+      expect(cell.textContent).toBe(t('status.business.notAllowed'));
+    }
+    // Найм лишається з числом і приміткою про дозвіл.
+    expect(within(rowOf('uop')).getAllByRole('cell')[0].dataset.empty).toBeUndefined();
+    expect(screen.getAllByText(t('status.work.permitBound')).length).toBe(3);
+  });
+
+  // PRD AC-5: строк захисту доходить до екрана датою з правила, а не плейсхолдером.
+  it('UKR: строк захисту видно датою, без сирого плейсхолдера', async () => {
+    await walkMedianPath('2500');
+    const notes = screen.getAllByText((_, el) => el?.tagName === 'LI' && /Тимчасовий захист діє до/.test(el.textContent ?? ''));
+    expect(notes.length).toBeGreaterThan(0);
+    for (const n of notes) {
+      expect(n.textContent).toMatch(/до \d{2}\.\d{2}\.\d{4}/);
+      expect(n.textContent).not.toContain('{');
     }
   });
 });

@@ -29,6 +29,13 @@ export const ACTS = Object.freeze({
   swiadczenia: { eli: "DU/2004/2135", name: "ustawa o świadczeniach opieki zdrowotnej" },
   prawoPrzedsiebiorcow: { eli: "DU/2018/646", name: "Prawo przedsiębiorców" },
   sus: { eli: "DU/1998/887", name: "ustawa o systemie ubezpieczeń społecznych" },
+  przedsiebiorcyZagraniczni: { eli: "DU/2018/649", name: "ustawa o zasadach uczestnictwa przedsiębiorców zagranicznych" },
+  specustawa: { eli: "DU/2022/583", name: "ustawa o pomocy obywatelom Ukrainy" },
+  wygaszenieSpecustawy: { eli: "DU/2026/203", name: "ustawa z 23.01.2026 o wygaszeniu rozwiązań specustawy" },
+  ochronaCudzoziemcow: { eli: "DU/2003/1176", name: "ustawa o udzielaniu cudzoziemcom ochrony" },
+  pracaCudzoziemcow: { eli: "DU/2025/621", name: "ustawa o warunkach dopuszczalności powierzania pracy cudzoziemcom" },
+  pip: { eli: "DU/2007/589", name: "ustawa o Państwowej Inspekcji Pracy" },
+  reformaPip: { eli: "DU/2026/473", name: "ustawa z 11.03.2026 o zmianie ustawy o PIP" },
 });
 
 /**
@@ -116,6 +123,21 @@ export const RULE_LAWS = Object.freeze({
     except: {
       esvMinMonthlyUah: { method: "derived", why: "1 902,34 = 22% × 8 647; тримає тест інваріанта" },
     },
+  },
+  "status.business_right": {
+    laws: [
+      act("przedsiebiorcyZagraniczni", "art. 4 ust. 1–3 (перелік підстав), ust. 9 (PESEL для CEIDG з 01.11.2026)"),
+      act("prawoPrzedsiebiorcow", "art. 5 ust. 7 (nierejestrowana лише для осіб з art. 4 ust. 1–2)"),
+      act("specustawa", "art. 42w (CUKR — бізнес нарівні з поляками)"),
+      act("wygaszenieSpecustawy", "art. 17 pkt 10 (uchylenie art. 23 specustawy), art. 42 (JDG, вписані до 05.03.2026), art. 54 (чинність з 05.03.2026)"),
+    ],
+  },
+  "status.work_right": {
+    laws: [
+      act("pracaCudzoziemcow", "art. 1 ust. 2 pkt 6, art. 2 pkt 9, art. 3 ust. 1 pkt 12 і 15, ust. 2 pkt 1, ust. 5, art. 5a"),
+      act("specustawa", "art. 42v (CUKR — без дозволу на працю)"),
+      act("wygaszenieSpecustawy", "art. 41 (3 роки для українців без ochrony czasowej), art. 54 (чинність з 05.03.2026)"),
+    ],
   },
 });
 

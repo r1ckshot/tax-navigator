@@ -1,5 +1,6 @@
 import type { Answers } from '@/lib/calc/types';
 import { homeInUaMatters } from '@/lib/calc/residency';
+import { assessStatus } from '@/lib/calc/status';
 import { REVENUE_MAX, REVENUE_MIN, REVENUE_STEP } from '@/lib/calc/quantize';
 
 export type Draft = Partial<Answers>;
@@ -149,6 +150,30 @@ export const SCREENS: Screen[] = [
     ],
   },
   {
+    // Одна відповідь закриває і громадянство, і підставу: від громадянства важить
+    // лише «ЄС чи ні». Питаємо всіх — від неї залежить, чи є число в JDG і
+    // nierejestrowanej, а отже й саме порівняння (PRD OQ-1).
+    id: 'status',
+    titleKey: 'q.status.title',
+    fields: [
+      {
+        name: 'stayBasis',
+        kind: 'choice',
+        labelKey: 'q.status.label',
+        options: [
+          { value: 'ukr', labelKey: 'q.status.ukr' },
+          { value: 'cukr', labelKey: 'q.status.cukr' },
+          { value: 'work_permit', labelKey: 'q.status.workPermit' },
+          { value: 'study', labelKey: 'q.status.study' },
+          { value: 'blue_card', labelKey: 'q.status.blueCard' },
+          { value: 'permanent', labelKey: 'q.status.permanent' },
+          { value: 'eu_citizen', labelKey: 'q.status.euCitizen' },
+          { value: 'other', labelKey: 'q.status.other' },
+        ],
+      },
+    ],
+  },
+  {
     id: 'revenue',
     titleKey: 'q.revenue.title',
     fields: [
@@ -217,6 +242,18 @@ export const SCREENS: Screen[] = [
           { value: 'no', labelKey: 'q.formerEmployer.no' },
           { value: 'identical', labelKey: 'q.formerEmployer.identical' },
           { value: 'partial', labelKey: 'q.formerEmployer.partial' },
+        ],
+      },
+      {
+        // Обидва питання — про замовника, тож один крок, а не два. Кількість
+        // змінює лише ризик JDG; без права на JDG вона нічого не змінює.
+        name: 'clientCount',
+        kind: 'choice',
+        labelKey: 'q.clients.label',
+        showIf: (a) => assessStatus(a.stayBasis).forms.jdg.access === 'allowed',
+        options: [
+          { value: 'one', labelKey: 'q.clients.one' },
+          { value: 'several', labelKey: 'q.clients.several' },
         ],
       },
     ],

@@ -19,24 +19,25 @@ afterEach(() => {
 });
 
 describe('/sources', () => {
-  it('кожне з 26 правил має лінк на свій source_url', () => {
+  it('кожне з 30 правил має лінк на свій source_url', () => {
     renderOn('2026-09-15');
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     for (const rule of RULES.rules) expect(hrefs).toContain(rule.source_url);
-    expect(screen.getAllByRole('listitem')).toHaveLength(26);
+    expect(screen.getAllByRole('listitem')).toHaveLength(30);
   });
 
-  it('вісім груп із лічильником у правильній формі', () => {
+  it('девʼять груп із лічильником у правильній формі', () => {
     renderOn('2026-09-15');
-    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(8);
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(9);
     expect(screen.getByText('1 правило')).toBeDefined();
-    expect(screen.getByText('6 правил')).toBeDefined();
+    expect(screen.getAllByText('3 правила')).toHaveLength(2);
+    expect(screen.getByText('7 правил')).toBeDefined();
     expect(screen.getAllByText('4 правила')).toHaveLength(3);
   });
 
   it('підсумок без розділювачів, поріг у тексті з того самого числа', () => {
     renderOn('2026-09-15');
-    expect(screen.getByText('26 правил у 8 групах')).toBeDefined();
+    expect(screen.getByText('30 правил у 9 групах')).toBeDefined();
     expect(screen.getByText('Через 90 днів без звірки правило позначається як давно не звірене.')).toBeDefined();
   });
 

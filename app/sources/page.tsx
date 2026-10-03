@@ -20,7 +20,7 @@ export const revalidate = 86400;
 
 /** Групи сценаріїв беруть назву з тих самих ключів, що таблиця результату. */
 const groupTitle = (id: GroupId) =>
-  id === 'residency' || id === 'common' ? t(`sources.group.${id}`) : t(`scenario.${id}`);
+  id === 'residency' || id === 'status' || id === 'common' ? t(`sources.group.${id}`) : t(`scenario.${id}`);
 
 const count = (key: string, n: number) => formatCount(n, [t(`${key}.one`), t(`${key}.few`), t(`${key}.many`)]);
 

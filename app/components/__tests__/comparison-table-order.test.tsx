@@ -35,6 +35,9 @@ async function walkToResult() {
   await user.click(screen.getByLabelText(t('q.uaFop.no')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
+  await user.click(screen.getByLabelText(t('q.status.ukr')));
+  await user.click(screen.getByRole('button', { name: t('nav.next') }));
+
   fireEvent.change(screen.getByLabelText(t('q.revenue.label')), { target: { value: '15000' } });
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
@@ -46,6 +49,7 @@ async function walkToResult() {
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
   await user.click(screen.getByLabelText(t('q.formerEmployer.no')));
+  await user.click(screen.getByLabelText(t('q.clients.several')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
   await user.click(screen.getByLabelText(t('q.jdg.gt30')));

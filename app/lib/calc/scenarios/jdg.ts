@@ -1,6 +1,8 @@
 import { getParams, sourcesOf } from '@/lib/rules/types';
 import { toRange, round2 } from '../range';
 import { assessZus } from '../zus';
+import { assessStatus } from '../status';
+import { businessGate, protectionNotes } from './status-gate';
 import type { Answers, ScenarioResult, SubformResult } from '../types';
 import { expenseRate, skalaAnnualTax, spanOf } from './shared';
 
@@ -28,7 +30,32 @@ interface SkalaParams {
   zdrowotnaMinMonthly: number;
 }
 
+interface PrzekwalifikowanieParams {
+  pipDecisionPowerFrom: string;
+}
+
+/**
+ * Ризик B2B з 08.07.2026: PIP може рішенням визнати договір трудовим (art. 11
+ * ust. 1 pkt 7a ustawy o PIP), і B2B названо прямо (art. 13 pkt 1). Критерії —
+ * art. 22 § 1 k.p.: керівництво, місце й час від замовника. Кількості замовників
+ * закон НЕ називає — від неї тут залежить лише колір: з одним замовником питання
+ * виникає, з кількома текст той самий, але ризик низький. Без відповіді (старе
+ * посилання) — обережніше, як з одним.
+ */
+function jdgRisk(answers: Answers): Pick<ScenarioResult, 'risk' | 'riskReasonKey' | 'noteKeys'> {
+  const pipKey = answers.clientCount === 'several' ? 'risk.jdg.standard' : 'risk.jdg.singleClient';
+  if (answers.formerEmployer !== 'no') {
+    // Колишній роботодавець лишається головною причиною, PIP — поруч, а не замість.
+    return { risk: 'yellow', riskReasonKey: `risk.jdg.formerEmployer.${answers.formerEmployer}`, noteKeys: [pipKey] };
+  }
+  return { risk: answers.clientCount === 'several' ? 'green' : 'yellow', riskReasonKey: pipKey, noteKeys: [] };
+}
+
 export function calcJdg(answers: Answers): ScenarioResult {
+  const status = assessStatus(answers.stayBasis);
+  const gate = businessGate('jdg', status);
+  if (gate) return gate;
+
   const zus = assessZus(answers);
   const subforms: SubformResult[] = [
     calcRyczalt(answers, zus.socialMonthly),
@@ -36,17 +63,28 @@ export function calcJdg(answers: Answers): ScenarioResult {
     calcSkala(answers, zus.socialMonthly),
   ];
 
-  const noteKeys: string[] = ['jdg.ipBoxNotIncluded', `zus.stage.${zus.stage}`, ...zus.reasonKeys];
+  const risk = jdgRisk(answers);
+  const protection = protectionNotes(status);
+  const noteKeys: string[] = [
+    ...risk.noteKeys,
+    'jdg.ipBoxNotIncluded',
+    `zus.stage.${zus.stage}`,
+    ...zus.reasonKeys,
+  ];
   if (answers.hasParallelUop) noteKeys.push('jdg.zbiegExplanation');
+  noteKeys.push(...protection.noteKeys);
+
+  const { pipDecisionPowerFrom } = getParams<PrzekwalifikowanieParams>('jdg.przekwalifikowanie');
 
   return {
     id: 'jdg',
     rangeMonthly: spanOf(subforms),
-    risk: answers.formerEmployer === 'no' ? 'green' : 'yellow',
-    riskReasonKey: answers.formerEmployer === 'no' ? 'risk.jdg.standard' : `risk.jdg.formerEmployer.${answers.formerEmployer}`,
+    risk: risk.risk,
+    riskReasonKey: risk.riskReasonKey,
     noteKeys,
+    noteVars: { pipFrom: pipDecisionPowerFrom, ...protection.noteVars },
     subforms,
-    sources: zus.sources,
+    sources: [...zus.sources, ...sourcesOf('jdg.przekwalifikowanie', 'status.business_right'), ...protection.sources],
   };
 }
 

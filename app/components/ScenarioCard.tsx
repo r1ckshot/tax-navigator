@@ -1,6 +1,6 @@
 import { t } from '@/lib/i18n/uk';
 import type { ScenarioResult } from '@/lib/calc/types';
-import { formatMoney, formatRange } from '@/lib/format';
+import { formatMoney, formatRange, formatVars } from '@/lib/format';
 import { RiskBadge } from './RiskBadge';
 import { SourceCitation } from './SourceCitation';
 import styles from './ScenarioCard.module.css';
@@ -23,6 +23,7 @@ function splitTail(name: string): [string, string] {
  */
 export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
   const [nameHead, nameTail] = splitTail(t(`scenario.${scenario.id}`));
+  const vars = formatVars(scenario.noteVars);
 
   return (
     <details className={styles.card}>
@@ -147,9 +148,9 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
                 {t(sub.unavailableReasonKey ?? 'scenario.unavailable')}
               </li>
             ))}
-          <li>{t(scenario.riskReasonKey)}</li>
+          <li>{t(scenario.riskReasonKey, vars)}</li>
           {scenario.noteKeys.map((key) => (
-            <li key={key}>{t(key)}</li>
+            <li key={key}>{t(key, vars)}</li>
           ))}
         </ul>
 

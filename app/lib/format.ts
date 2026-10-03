@@ -1,5 +1,19 @@
 /** Форматування грошей і діапазонів — спільне для таблиці й акордеонів. */
 
+const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** 2028-03-04 → 04.03.2028. Не через Intl: дата з правил без часу й зони, зсуву не має бути. */
+export function formatDate(iso: string): string {
+  const m = ISO_DATE.exec(iso);
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : iso;
+}
+
+/** Змінні тексту з `calc/`: дати ISO стають датами для людини, решта — як є. */
+export function formatVars(vars: Record<string, string> | undefined): Record<string, string> | undefined {
+  if (!vars) return undefined;
+  return Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, formatDate(v)]));
+}
+
 export function formatMoney(value: number): string {
   return new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 0 }).format(Math.round(value));
 }

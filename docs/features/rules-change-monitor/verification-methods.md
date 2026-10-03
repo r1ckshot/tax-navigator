@@ -22,7 +22,7 @@
 | `manual` | лише з причиною й записом у DECISIONS | цикл не звіряє |
 
 **Підсумок правил:** `page` — 20, `act` — 5, `edition` — 1, `llm` — 0, `manual` — 0.
-Усі 26 виходять із циклу з автоматичним станом (`cycle.test.mjs`, прогін на фікстурах).
+Усі 26 виходять із циклу з автоматичним станом (`cycle.test.mjs`, прогін на фікстурах). Чотири правила права на роботу (сесія 05 ROADMAP, 2026-10-03) додано вже після знімка фікстур — їхні сторінки звіряє `pages.test.mjs`, закони — guard `methods.test.mjs`.
 
 **Листи, які цикл не звіряє:** лише `derived` (тримає тест інваріанта або форма
 таблиці). `manual`-листів нуль із сесії 04: ціни абонементу `incubator.kup` звіряються
@@ -115,6 +115,10 @@ biznes.gov.pl/001785. Тож `llm`-листів зараз нуль.
 | `nierejestrowana.zus` | `page` | biznes.gov.pl/00115 + biznes.gov.pl/001785 | 5 | — | biznes.gov.pl/00115: три опорні фрази; поріг мінімалки й zdrowotna — фрази biznes.gov.pl/001785 |
 | `nierejestrowana.pit` | `page` | podatki.gov.pl/dochody-z-dzialalnosci-nierejestrowanej | 3 | lumpSumKupAvailable (act: art. 22 ust. 9), monthlyAdvancesRequired (act: art. 44 ust. 1) | podatki.gov.pl: три опорні фрази; ryczałtowe KUP і zaliczki — act |
 | `nierejestrowana.cudzoziemcy` | `page` | biznes.gov.pl/00115 | 3 | — | biznes.gov.pl/00115: дата обмеження, вимога tytułu pobytowego і фраза про PESEL зі статусом UKR |
+| `status.business_right` | `act` | ustawa o zasadach uczestnictwa przedsiębiorców zagranicznych, art. 4 ust. 1–3 (перелік підстав), ust. 9 (PESEL для CEIDG з 01.11.2026); Prawo przedsiębiorców, art. 5 ust. 7 (nierejestrowana лише для осіб з art. 4 ust. 1–2); ustawa o pomocy obywatelom Ukrainy, art. 42w (CUKR — бізнес нарівні з поляками); ustawa z 23.01.2026 o wygaszeniu rozwiązań specustawy, art. 17 pkt 10 (uchylenie art. 23 specustawy), art. 42 (JDG, вписані до 05.03.2026), art. 54 (чинність з 05.03.2026) | — | — | перелік підстав — art. 4 ust. 1–2 ustawy o przedsiębiorcach zagranicznych, CUKR — art. 42w specustawy; biznes.gov.pl/00806 дає перелік таблицею документів, без фрази на кожну підставу |
+| `status.work_right` | `act` | ustawa o warunkach dopuszczalności powierzania pracy cudzoziemcom, art. 1 ust. 2 pkt 6, art. 2 pkt 9, art. 3 ust. 1 pkt 12 і 15, ust. 2 pkt 1, ust. 5, art. 5a; ustawa o pomocy obywatelom Ukrainy, art. 42v (CUKR — без дозволу на працю); ustawa z 23.01.2026 o wygaszeniu rozwiązań specustawy, art. 41 (3 роки для українців без ochrony czasowej), art. 54 (чинність з 05.03.2026) | — | — | swobodny dostęp і повідомлення — art. 3 і 5a ustawy z 20.03.2025 o powierzaniu pracy cudzoziemcom; державної сторінки з чинним переліком після 05.03.2026 немає |
+| `status.ukr_protection` | `page` | gov.pl/udsc/przedluzenie-ochrony-czasowej-do-4-marca-2028-r | 2 | legalStayFollowsEuDecision (act: art. 106 ust. 1), lostWhenAbroadDaysOver (act: art. 109b ust. 1 pkt 2), lostOnAnyResidencePermit (act: art. 109b ust. 1 pkt 4) | gov.pl/udsc: строк захисту за рішенням Ради ЄС і дата умови військового обліку; втрата статусу — act (art. 106 і 109b ustawy o ochronie) |
+| `jdg.przekwalifikowanie` | `page` | gov.pl/rodzina/reforma-panstwowej-inspekcji-pracy | 4 | appliesToContractsOngoingAtStart (act: art. 14), decisionEffectiveFromIssueDate (act: art. 34 ust. 2f і 2j, art. 33a ust. 6) | gov.pl/rodzina: дата реформи PIP, B2B серед договорів, припис перед рішенням; дія рішення в часі — act (ustawa o PIP і art. 14 ustawy zmieniającej) |
 
 ## Пастки, знайдені на сторінках 2026-10-01
 

@@ -84,6 +84,30 @@ test('екран результату, перша картка розкрита'
   await expect(page).toHaveScreenshot('result-expanded.png', { fullPage: true });
 });
 
+/**
+ * Підстава без права на бізнес: карта на роботу. Профіль — той самий `baseAnswers`,
+ * лише з іншою підставою, а `clientCount` знято: питання про замовників
+ * показується тільки там, де JDG дозволена, тож у посиланні його бути не може.
+ * Друга картка — JDG: у ній видно і причину замість числа, і джерело норми.
+ */
+const NO_RIGHT_URL = `/questionnaire?${encodeAnswers({ ...baseAnswers, stayBasis: 'work_permit', clientCount: undefined })}`;
+
+test('екран результату, форми без права на бізнес', async ({ page }) => {
+  await page.goto(NO_RIGHT_URL);
+
+  const cards = page.locator('details');
+  await expect(cards).toHaveCount(SCENARIO_COUNT);
+  const jdg = cards.nth(1);
+  await jdg.locator('summary').click();
+  await expect(jdg).toHaveAttribute('open', '');
+  // Число замінила причина, а не зникла картка: варіант лишається в порівнянні.
+  await expect(page.getByText(t('status.business.notAllowed')).first()).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  await page.addStyleTag({ content: HIDE_SOURCE_DATES });
+  await expect(page).toHaveScreenshot('result-no-right.png', { fullPage: true });
+});
+
 test('словник дизайну', async ({ page }) => {
   await page.goto('/tokens');
 
@@ -109,12 +133,12 @@ test('словник дизайну', async ({ page }) => {
 test('джерела цифр', async ({ page }) => {
   await page.goto('/sources');
 
-  await expect(page.getByRole('heading', { level: 2 })).toHaveCount(8);
-  await expect(page.getByRole('listitem')).toHaveCount(26);
+  await expect(page.getByRole('heading', { level: 2 })).toHaveCount(9);
+  await expect(page.getByRole('listitem')).toHaveCount(30);
   await expectNoHorizontalOverflow(page);
 
   const dates = page.locator('li span[class*="date"]');
-  await expect(dates).toHaveCount(26);
+  await expect(dates).toHaveCount(30);
   await expect(page).toHaveScreenshot('sources.png', { fullPage: true, mask: [dates] });
 });
 
@@ -155,6 +179,16 @@ test('анкета, перший крок з вибраною відповідд
   await expectNoHorizontalOverflow(page);
 
   await expect(page).toHaveScreenshot('question-days.png', { fullPage: true });
+});
+
+test('анкета, підстава перебування', async ({ page }) => {
+  await openQuestion(page, 'status', true);
+
+  await expect(page.getByLabel(t('q.status.ukr'))).toBeChecked();
+  await expect(page.getByRole('button', { name: t('nav.next') })).toBeEnabled();
+  await expectNoHorizontalOverflow(page);
+
+  await expect(page).toHaveScreenshot('question-status.png', { fullPage: true });
 });
 
 test('анкета, два питання на одному екрані', async ({ page }) => {
