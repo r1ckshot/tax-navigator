@@ -1,0 +1,84 @@
+/*
+ * Напрям C «Мапа» — нічна карта: темна тема за замовчуванням, індиго-нейтральні,
+ * фіолетово-синій акцент, мʼяке сяйво на фоні. Два шари, як у globals.css;
+ * роль тримає обидві теми через light-dark(світла, темна).
+ * Контраст: node scripts/contrast.mjs "app/(technical)/design-lab/c/theme.css"
+ */
+.lab-c {
+  color-scheme: dark;
+
+  /* ── Палітра ── */
+  --dusk-99: #fcfdfe;
+  --dusk-96: #f3f4fc;
+  --dusk-95: #eceef8;
+  --dusk-90: #dee0ed;
+  --dusk-83: #c7c9da;
+  --dusk-80: #bdbfd5;
+  --dusk-72: #a0a3bb;
+  --dusk-49: #5c5f7b;
+  --dusk-40: #434664;
+  --dusk-37: #3d405a;
+  --dusk-31: #2c2e47;
+  --dusk-22: #181930;
+  --dusk-20: #13142b;
+  --dusk-18: #0f1025;
+  --dusk-13: #070717;
+
+  --iris-95: #ecedff;
+  --iris-83: #c1c0ff;
+  --iris-81: #bebdf7;
+  --iris-74: #a6a1fd;
+  --iris-49: #5c42ca;
+  --iris-45: #50459e;
+  --iris-41: #4a2dad;
+  --iris-30: #2d2560;
+  --iris-21: #190f41;
+
+  /* Сяйво — лише декор фону, ніколи не текст і не значення. */
+  --glow-88: #efcaeb;
+  --glow-86: #a4dcea;
+  --glow-70: #0eb1cd;
+  --glow-64: #cf57c8;
+
+  --green-74: #61c568;
+  --green-54: #278733;
+  --amber-84: #fbc044;
+  --amber-79: #f3b01d;
+  --red-70: #ed756e;
+  --red-54: #c52c2a;
+  --white: #ffffff;
+
+  /* ── Ролі ── */
+  --surface: light-dark(var(--dusk-99), var(--dusk-22));
+  --plane: light-dark(var(--dusk-95), var(--dusk-13));
+  --sunken: light-dark(var(--dusk-96), var(--dusk-18));
+  --ink: light-dark(var(--dusk-20), var(--dusk-96));
+  --ink-secondary: light-dark(var(--dusk-40), var(--dusk-80));
+  --ink-muted: light-dark(var(--dusk-49), var(--dusk-72));
+  --hairline: light-dark(var(--dusk-90), var(--dusk-31));
+  --hairline-strong: light-dark(var(--dusk-83), var(--dusk-37));
+
+  --accent: light-dark(var(--iris-49), var(--iris-74));
+  --accent-hover: light-dark(var(--iris-41), var(--iris-83));
+  --accent-ink: light-dark(var(--white), var(--iris-21));
+  --accent-soft: light-dark(var(--iris-95), var(--iris-30));
+  --accent-border: light-dark(var(--iris-81), var(--iris-45));
+
+  --glow-a: light-dark(var(--glow-86), var(--glow-70));
+  --glow-b: light-dark(var(--glow-88), var(--glow-64));
+
+  --risk-green: light-dark(var(--green-54), var(--green-74));
+  --risk-yellow: light-dark(var(--amber-79), var(--amber-84));
+  --risk-red: light-dark(var(--red-54), var(--red-70));
+
+  --shadow-sm: 0 1px 2px light-dark(rgba(19, 20, 43, 0.06), rgba(0, 0, 0, 0.4));
+  --shadow-md: 0 12px 40px light-dark(rgba(19, 20, 43, 0.1), rgba(0, 0, 0, 0.55));
+
+  --font-display: var(--lab-display), system-ui, sans-serif;
+  --font-body: var(--lab-display), system-ui, sans-serif;
+  --font-mono: var(--lab-mono), ui-monospace, monospace;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 22px;
+}

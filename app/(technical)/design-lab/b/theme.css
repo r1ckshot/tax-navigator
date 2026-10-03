@@ -1,0 +1,75 @@
+/*
+ * Напрям B «Прилад» — інженерний: холодний сірий, глибокий бірюзовий акцент
+ * (нащадок нинішнього teal), моноширинні цифри. Два шари, як у globals.css;
+ * роль тримає обидві теми через light-dark(світла, темна).
+ * Контраст: node scripts/contrast.mjs "app/(technical)/design-lab/b/theme.css"
+ */
+.lab-b {
+  color-scheme: light dark;
+
+  /* ── Палітра ── */
+  --slate-99: #fdfeff;
+  --slate-97: #f4f7f9;
+  --slate-95: #eef1f4;
+  --slate-91: #dfe3e7;
+  --slate-83: #c6cbd1;
+  --slate-79: #b9bec4;
+  --slate-69: #999fa6;
+  --slate-49: #5d646c;
+  --slate-40: #444b53;
+  --slate-36: #383e44;
+  --slate-29: #292e35;
+  --slate-21: #151a1f;
+  --slate-18: #0e141b;
+  --slate-14: #070a0e;
+
+  --petrol-95: #e0f7f7;
+  --petrol-88: #8debe5;
+  --petrol-82: #96d1d0;
+  --petrol-79: #59d4cd;
+  --petrol-45: #026565;
+  --petrol-42: #1f5a5a;
+  --petrol-39: #025050;
+  --petrol-29: #0e3231;
+  --petrol-20: #001b1b;
+
+  --green-74: #61c568;
+  --green-54: #278733;
+  --amber-84: #fbc044;
+  --amber-79: #f3b01d;
+  --red-70: #ed756e;
+  --red-54: #c52c2a;
+  --white: #ffffff;
+
+  /* ── Ролі ── */
+  --surface: light-dark(var(--slate-99), var(--slate-21));
+  --plane: light-dark(var(--slate-97), var(--slate-14));
+  --sunken: light-dark(var(--slate-95), var(--slate-18));
+  --ink: light-dark(var(--slate-18), var(--slate-95));
+  --ink-secondary: light-dark(var(--slate-40), var(--slate-79));
+  --ink-muted: light-dark(var(--slate-49), var(--slate-69));
+  --hairline: light-dark(var(--slate-91), var(--slate-29));
+  --hairline-strong: light-dark(var(--slate-83), var(--slate-36));
+
+  --accent: light-dark(var(--petrol-45), var(--petrol-79));
+  --accent-hover: light-dark(var(--petrol-39), var(--petrol-88));
+  --accent-ink: light-dark(var(--white), var(--petrol-20));
+  --accent-soft: light-dark(var(--petrol-95), var(--petrol-29));
+  --accent-border: light-dark(var(--petrol-82), var(--petrol-42));
+
+  --risk-green: light-dark(var(--green-54), var(--green-74));
+  --risk-yellow: light-dark(var(--amber-79), var(--amber-84));
+  --risk-red: light-dark(var(--red-54), var(--red-70));
+
+  /* Прилад не «піднімає» картки — межу дає лінія, тож тіні майже немає. */
+  --shadow-sm: 0 0 0 1px light-dark(rgba(14, 20, 27, 0), rgba(0, 0, 0, 0));
+  --shadow-md: 0 8px 24px light-dark(rgba(14, 20, 27, 0.08), rgba(0, 0, 0, 0.45));
+
+  --font-display: var(--lab-body), system-ui, sans-serif;
+  --font-body: var(--lab-body), system-ui, sans-serif;
+  --font-mono: var(--lab-mono), ui-monospace, monospace;
+
+  --radius-sm: 2px;
+  --radius: 2px;
+  --radius-lg: 4px;
+}

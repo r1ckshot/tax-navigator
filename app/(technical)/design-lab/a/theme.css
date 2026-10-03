@@ -1,0 +1,79 @@
+/*
+ * Напрям A «Реєстр» — редакційний: теплий папір, чорнильно-синій акцент.
+ * Два шари, як у globals.css: палітра (сирий hex, число в імені — OKLCH-
+ * світлота, округлена вниз) і ролі з тими самими іменами, що в продукті.
+ * Роль тримає обидві теми одразу через light-dark(світла, темна).
+ * Контраст: node scripts/contrast.mjs "app/(technical)/design-lab/a/theme.css"
+ */
+.lab-a {
+  color-scheme: light dark;
+
+  /* ── Палітра ── */
+  --paper-99: #fefcf8;
+  --paper-96: #f6f3ed;
+  --paper-95: #f4f1ec;
+  --paper-94: #f0ece3;
+  --paper-90: #e4dfd6;
+  --paper-84: #d0ccc2;
+  --paper-80: #c4c0ba;
+  --paper-70: #a4a19b;
+  --paper-51: #69665e;
+  --paper-42: #534f48;
+  --paper-39: #4a4742;
+  --paper-33: #383530;
+  --paper-23: #201e1a;
+  --paper-21: #1c1914;
+  --paper-20: #191713;
+  --paper-16: #110f0c;
+
+  --navy-95: #ebf2fe;
+  --navy-86: #bed5fe;
+  --navy-83: #b5cbf3;
+  --navy-78: #9bbbf5;
+  --navy-45: #3c5582;
+  --navy-42: #214a9b;
+  --navy-36: #17397b;
+  --navy-29: #1d2d4c;
+  --navy-21: #0a1936;
+
+  --green-74: #61c568;
+  --green-54: #278733;
+  --amber-84: #fbc044;
+  --amber-79: #f3b01d;
+  --red-70: #ed756e;
+  --red-54: #c52c2a;
+  --white: #ffffff;
+
+  /* ── Ролі ── */
+  --surface: light-dark(var(--paper-99), var(--paper-23));
+  --plane: light-dark(var(--paper-94), var(--paper-16));
+  --sunken: light-dark(var(--paper-96), var(--paper-20));
+  --ink: light-dark(var(--paper-21), var(--paper-95));
+  --ink-secondary: light-dark(var(--paper-42), var(--paper-80));
+  --ink-muted: light-dark(var(--paper-51), var(--paper-70));
+  --hairline: light-dark(var(--paper-90), var(--paper-33));
+  --hairline-strong: light-dark(var(--paper-84), var(--paper-39));
+
+  --accent: light-dark(var(--navy-42), var(--navy-78));
+  --accent-hover: light-dark(var(--navy-36), var(--navy-86));
+  --accent-ink: light-dark(var(--white), var(--navy-21));
+  --accent-soft: light-dark(var(--navy-95), var(--navy-29));
+  --accent-border: light-dark(var(--navy-83), var(--navy-45));
+
+  --risk-green: light-dark(var(--green-54), var(--green-74));
+  --risk-yellow: light-dark(var(--amber-79), var(--amber-84));
+  --risk-red: light-dark(var(--red-54), var(--red-70));
+
+  /* Тінь — лише в світлій: на темному папері підняття дає рамка. */
+  --shadow-sm: 0 1px 2px light-dark(rgba(40, 30, 10, 0.06), rgba(0, 0, 0, 0));
+  --shadow-md: 0 1px 2px light-dark(rgba(40, 30, 10, 0.05), rgba(0, 0, 0, 0.3)),
+    0 10px 30px light-dark(rgba(40, 30, 10, 0.08), rgba(0, 0, 0, 0.4));
+
+  /* Шрифти: змінні --lab-* ставить next/font на ту саму обгортку. */
+  --font-display: var(--lab-display), Georgia, 'Times New Roman', serif;
+  --font-body: var(--lab-body), system-ui, sans-serif;
+
+  --radius-sm: 3px;
+  --radius: 4px;
+  --radius-lg: 6px;
+}

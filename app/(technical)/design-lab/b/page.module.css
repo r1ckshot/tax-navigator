@@ -1,0 +1,226 @@
+/* Напрям B «Прилад»: швейцарська сітка, лінії замість тіней, моноширинні
+   підписи й цифри. Кольори — лише ролі з theme.css. */
+
+.root {
+  font-family: var(--font-body);
+}
+
+.root h1,
+.root h2,
+.root h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Цифри в результаті — моноширинні: колонки сум вирівнюються, як на табло. */
+.root table td {
+  font-family: var(--font-mono);
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--hairline-strong);
+  background: var(--surface);
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.nav {
+  display: flex;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nav a {
+  color: var(--ink-secondary);
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: var(--accent);
+}
+
+.main {
+  max-width: 70rem;
+  padding: 0 var(--space-4) var(--space-7);
+}
+
+/* ── Лендінг ── */
+
+/* Міліметрівка під героєм — гасне донизу, щоб не заважала тексту. */
+.hero {
+  position: relative;
+  display: grid;
+  gap: var(--space-5);
+  margin: 0 calc(-1 * var(--space-4));
+  padding: var(--space-7) var(--space-4);
+  border-bottom: 1px solid var(--hairline-strong);
+  isolation: isolate;
+}
+
+/* Окремим шаром: маска на самому .hero гасила б і текст із кнопкою. */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(var(--hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
+  background-size: 2rem 2rem;
+  mask-image: linear-gradient(to bottom, black 40%, transparent);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.eyebrow::before {
+  content: '';
+  width: 1.5rem;
+  height: 2px;
+  background: var(--accent);
+}
+
+.headline {
+  max-width: 20em;
+  margin: 0;
+  font-size: clamp(2rem, 1.3rem + 3vw, 3.6rem);
+  line-height: 1.08;
+}
+
+.intro {
+  max-width: 36rem;
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: var(--text-md);
+}
+
+/* Шість варіантів — матриця комірок, без номерів: номер читався б як місце. */
+.scenarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--hairline-strong);
+  background: var(--hairline-strong);
+  list-style: none;
+}
+
+.scenarios li {
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 120ms ease;
+}
+
+.cta::after {
+  content: '→';
+  font-family: var(--font-mono);
+}
+
+.cta:hover {
+  background: var(--accent-hover);
+}
+
+.secondary {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--ink);
+  text-underline-offset: 4px;
+}
+
+.trust {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+/* ── Секції ── */
+
+.section {
+  padding-top: var(--space-7);
+}
+
+.sectionTitle {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+.sectionNote {
+  max-width: 40rem;
+  margin: 0 0 var(--space-5);
+  color: var(--ink-secondary);
+}
+
+.result {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 46rem;
+}
+
+.motion {
+  padding: var(--space-5);
+  border: 1px solid var(--hairline-strong);
+  background: var(--sunken);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+}

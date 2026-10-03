@@ -1,0 +1,98 @@
+.map {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 40rem;
+  margin: 0 auto;
+  font-family: var(--font-mono);
+}
+
+.dot {
+  fill: var(--hairline-strong);
+}
+
+/* Точкова сітка гасне до країв — карта, а не таблиця. */
+.field {
+  mask: radial-gradient(closest-side, black, transparent);
+}
+
+.trail {
+  fill: none;
+  stroke: var(--hairline-strong);
+  stroke-width: 2;
+  stroke-dasharray: 0.012 0.012;
+}
+
+.route {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: draw 1800ms cubic-bezier(0.65, 0, 0.35, 1) both 200ms;
+}
+
+.from circle {
+  fill: var(--ink-secondary);
+}
+
+.to circle {
+  fill: var(--accent);
+}
+
+.from text,
+.to text {
+  fill: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-anchor: middle;
+}
+
+.to .pulse {
+  fill: var(--accent-soft);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse 2400ms ease-out infinite 2000ms;
+}
+
+.traveller {
+  fill: var(--accent-ink);
+  stroke: var(--accent);
+  stroke-width: 3;
+  offset-distance: 100%;
+  offset-rotate: 0deg;
+  animation: travel 1800ms cubic-bezier(0.65, 0, 0.35, 1) both 200ms;
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes travel {
+  from {
+    offset-distance: 0%;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route,
+  .traveller,
+  .to .pulse {
+    animation: none;
+  }
+}

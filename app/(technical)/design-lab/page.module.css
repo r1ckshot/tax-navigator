@@ -1,0 +1,71 @@
+.main {
+  padding-top: var(--space-7);
+}
+
+.lead {
+  color: var(--ink-secondary);
+  margin: 0 0 var(--space-6);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+
+.card:hover {
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+
+.letter {
+  grid-row: span 3;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.name {
+  font-size: var(--text-lg);
+  font-weight: 650;
+}
+
+.pitch {
+  color: var(--ink-secondary);
+}
+
+.open {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}

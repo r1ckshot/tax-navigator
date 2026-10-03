@@ -1,0 +1,27 @@
+/*
+ * Спільне для трьох напрямів стилю (тема 2.2, тимчасово — сесія 12 видаляє
+ * /design-lab разом із цим файлом).
+ *
+ * Кожен напрям — окремий `theme.css` зі своєю палітрою і тими самими іменами
+ * ролей, що й `globals.css`. Ролі описані через `light-dark()`, тож тема
+ * перемикається однією властивістю `color-scheme`: системна, світла чи темна.
+ * Справжні компоненти результату (`ResidencyVerdict`, `ComparisonTable`) читають
+ * ролі, тому всередині обгортки напряму перефарбовуються самі, без жодної правки.
+ */
+[data-lab] {
+  min-height: 100vh;
+  background: var(--plane);
+  color: var(--ink);
+}
+
+[data-lab][data-scheme='system'] {
+  color-scheme: light dark;
+}
+
+[data-lab][data-scheme='light'] {
+  color-scheme: light;
+}
+
+[data-lab][data-scheme='dark'] {
+  color-scheme: dark;
+}
