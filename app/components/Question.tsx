@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, type CSSProperties } from 'react';
-import { t } from '@/lib/i18n/uk';
+import { useT } from './I18nProvider';
 import type { Answers } from '@/lib/calc/types';
 import { snapToStep } from '@/lib/calc/quantize';
 import type { Draft, Field, Screen, SliderConfig } from '@/lib/questions/schema';
@@ -16,6 +16,7 @@ interface Props {
 }
 
 export function Question({ screen, answers, onChange }: Props) {
+  const t = useT();
   return (
     <section className={styles.screen}>
       {/* Категорія кроку лишається h1 (семантика заголовка), але візуально — дрібний
@@ -29,6 +30,7 @@ export function Question({ screen, answers, onChange }: Props) {
 }
 
 function FieldControl({ field, answers, onChange }: { field: Field } & Omit<Props, 'screen'>) {
+  const t = useT();
   const current = answers[field.name];
 
   if (field.kind === 'slider') {
@@ -79,6 +81,7 @@ function SliderField({
   value: number | undefined;
   onChange: Props['onChange'];
 }) {
+  const t = useT();
   const cfg = field.slider!;
 
   useEffect(() => {

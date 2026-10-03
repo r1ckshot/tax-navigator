@@ -5,6 +5,7 @@ import { baseAnswers } from '../app/lib/calc/__tests__/fixtures';
 import { parseTokens } from '../app/lib/tokens';
 import { visibleScreens, type Draft } from '../app/lib/questions/schema';
 import { t } from '../app/lib/i18n/uk';
+import { countryHref } from '../app/lib/routes';
 
 /**
  * Екран результату досягається шеринг-лінком, а не клікам по анкеті: анкета —
@@ -16,7 +17,7 @@ import { t } from '../app/lib/i18n/uk';
  * розійшлися б мовчки, і еталонні скріншоти показували б інші числа, ніж
  * перевіряють node-тести.
  */
-const RESULT_URL = `/questionnaire?${encodeAnswers(baseAnswers)}`;
+const RESULT_URL = `${countryHref('uk', 'questionnaire')}?${encodeAnswers(baseAnswers)}`;
 
 /** Шість сценаріїв порівняння — стільки ж карток «Деталей» на екрані. */
 const SCENARIO_COUNT = 6;
@@ -38,7 +39,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 test('лендинг', async ({ page }) => {
-  await page.goto('/');
+  await page.goto(countryHref('uk'));
 
   // Структурна перевірка перед скріншотом навмисно: якщо сторінка взагалі не
   // та, тест має сказати це словами, а не діффом пікселів.
@@ -90,7 +91,7 @@ test('екран результату, перша картка розкрита'
  * показується тільки там, де JDG дозволена, тож у посиланні його бути не може.
  * Друга картка — JDG: у ній видно і причину замість числа, і джерело норми.
  */
-const NO_RIGHT_URL = `/questionnaire?${encodeAnswers({ ...baseAnswers, stayBasis: 'work_permit', clientCount: undefined })}`;
+const NO_RIGHT_URL = `${countryHref('uk', 'questionnaire')}?${encodeAnswers({ ...baseAnswers, stayBasis: 'work_permit', clientCount: undefined })}`;
 
 test('екран результату, форми без права на бізнес', async ({ page }) => {
   await page.goto(NO_RIGHT_URL);
@@ -131,7 +132,7 @@ test('словник дизайну', async ({ page }) => {
  * розкладки; позначку свіжості не замасковано — її зміна і є сигналом.
  */
 test('джерела цифр', async ({ page }) => {
-  await page.goto('/sources');
+  await page.goto(countryHref('uk', 'sources'));
 
   await expect(page.getByRole('heading', { level: 2 })).toHaveCount(9);
   await expect(page.getByRole('listitem')).toHaveCount(30);
@@ -165,7 +166,7 @@ async function openQuestion(page: Page, id: string, answered: boolean) {
     ([value]) => window.sessionStorage.setItem('tax-navigator:draft', value),
     [JSON.stringify({ answers: draft, step })],
   );
-  await page.goto('/questionnaire');
+  await page.goto(countryHref('uk', 'questionnaire'));
 
   const screen = visibleScreens(draft)[step];
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(t(screen.titleKey));

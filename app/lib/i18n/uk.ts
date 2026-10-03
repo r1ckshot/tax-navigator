@@ -1,3 +1,5 @@
+import { createT } from './translate';
+
 /** Усі рядки UI — простою українською (правило product-safety). */
 export const uk: Record<string, string> = {
   // --- Загальне ---
@@ -19,6 +21,12 @@ export const uk: Record<string, string> = {
   'app.disclaimer':
     'Це інформаційний калькулятор орієнтовного характеру.\nВін не є податковою консультацією і не подає декларацій.\nКожен висновок супроводжується посиланням на джерело — власну ситуацію варто звірити з фахівцем.',
   'app.sources': 'Джерела',
+  // Не текст для читання, а мітка мови для прев'ю в месенджерах (`og:locale`).
+  // Живе у словнику, щоб нова мова не могла ввімкнутись без своєї мітки.
+  'app.ogLocale': 'uk_UA',
+  'notFound.title': 'Сторінку не знайдено',
+  'notFound.lead': 'Можливо, адреса змінилась. Навігатор — за посиланням нижче.',
+  'notFound.home': 'Перейти до навігатора',
   'app.verifiedAt': 'звірено',
   'nav.back': 'Назад',
   'nav.next': 'Далі',
@@ -334,9 +342,9 @@ export const uk: Record<string, string> = {
   'cta.action': 'Повідомити про запуск',
 };
 
-/** `{name}` у тексті підставляється з `vars`; без значення плейсхолдер лишається видимим. */
-export function t(key: string, vars?: Record<string, string>): string {
-  const text = uk[key] ?? key;
-  if (!vars) return text;
-  return text.replace(/\{(\w+)\}/g, (match, name: string) => vars[name] ?? match);
-}
+/**
+ * Перекладач мови за замовчуванням. Для сторінок за адресою з мовою — `useT()`
+ * або `translator(locale)` (`./index.ts`); прямий імпорт лишається тестам і
+ * технічній `/tokens`, яка мови не має.
+ */
+export const t = createT(uk);

@@ -1,4 +1,6 @@
-import { t } from '@/lib/i18n/uk';
+'use client';
+
+import { useT } from './I18nProvider';
 import type { ScenarioResult } from '@/lib/calc/types';
 import { formatMoney, formatRange, formatVars } from '@/lib/format';
 import { RiskBadge } from './RiskBadge';
@@ -22,6 +24,7 @@ function splitTail(name: string): [string, string] {
  * пунктами (перший пункт — «чому» саме такий ризик), джерела списком.
  */
 export function ScenarioCard({ scenario }: { scenario: ScenarioResult }) {
+  const t = useT();
   const [nameHead, nameTail] = splitTail(t(`scenario.${scenario.id}`));
   const vars = formatVars(scenario.noteVars);
 

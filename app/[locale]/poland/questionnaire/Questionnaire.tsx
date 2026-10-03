@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { t } from '@/lib/i18n/uk';
 import type { Answers } from '@/lib/calc/types';
 import { assessResidency } from '@/lib/calc/residency';
 import { compareScenarios } from '@/lib/calc/scenarios';
 import { visibleScreens, isScreenComplete, resumeIndex, type Draft } from '@/lib/questions/schema';
 import { decodeAnswers, encodeAnswers } from '@/lib/share';
+import { countryHref } from '@/lib/routes';
 import { clearDraft, loadDraft, saveDraft } from '@/lib/storage';
 import { Question } from '@/components/Question';
 import { Progress } from '@/components/Progress';
@@ -16,9 +16,16 @@ import { ComparisonTable } from '@/components/ComparisonTable';
 import Link from 'next/link';
 import { Disclaimer } from '@/components/Disclaimer';
 import { EmailCta } from '@/components/EmailCta';
+import { useLocale, useT } from '@/components/I18nProvider';
 import styles from './page.module.css';
 
-export default function QuestionnairePage() {
+/**
+ * Анкета й результат — клієнтські: відповіді не залишають вкладку (ADR-0002).
+ * Адресу сторінки задає `page.tsx` поруч; шеринг і «Пройти заново» беруть
+ * поточний шлях, тож лінк веде туди, де людина є, з мовою включно.
+ */
+export function Questionnaire() {
+  const t = useT();
   const [answers, setAnswers] = useState<Draft>({});
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
@@ -128,6 +135,8 @@ function Result({
   onShare: () => void;
   shareNote: boolean;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const residency = assessResidency(answers);
   const scenarios = compareScenarios(answers);
 
@@ -147,7 +156,7 @@ function Result({
 
       <Disclaimer />
       <p className={styles.sourcesLink}>
-        <Link href="/sources">{t('sources.link')}</Link>
+        <Link href={countryHref(locale, 'sources')}>{t('sources.link')}</Link>
       </p>
 
       <nav className={styles.nav}>

@@ -4,7 +4,7 @@
 доходом: укр ФОП, B2B-оффер, віддалена українська зарплата.
 
 **Живий продукт:** [tax-navigator-red.vercel.app](https://tax-navigator-red.vercel.app)
-· [джерела чисел](https://tax-navigator-red.vercel.app/sources)
+· [джерела чисел](https://tax-navigator-red.vercel.app/uk/poland/sources)
 · [токени дизайну](https://tax-navigator-red.vercel.app/tokens)
 
 ## Проблема

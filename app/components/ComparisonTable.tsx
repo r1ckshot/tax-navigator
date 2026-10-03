@@ -1,4 +1,6 @@
-import { t } from '@/lib/i18n/uk';
+'use client';
+
+import { useT } from './I18nProvider';
 import type { Risk, ScenarioResult } from '@/lib/calc/types';
 import { formatRange } from '@/lib/format';
 import styles from './ComparisonTable.module.css';
@@ -22,6 +24,7 @@ const RISK_ICON: Record<Risk, string> = { green: '●', yellow: '▲', red: '■
  * `aria-hidden`, бо для читалки звʼязок дає сама шапка.
  */
 export function ComparisonTable({ scenarios }: { scenarios: ScenarioResult[] }) {
+  const t = useT();
   return (
     <section className={styles.card} aria-labelledby="compare-heading">
       <h2 id="compare-heading">{t('scenarios.title')}</h2>

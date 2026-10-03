@@ -4,7 +4,7 @@
 import { describe, expect, it, afterEach, beforeEach } from 'vitest';
 import { render, screen, within, cleanup, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import QuestionnairePage from '@/questionnaire/page';
+import { Questionnaire as QuestionnairePage } from '@/[locale]/poland/questionnaire/Questionnaire';
 import { compareScenarios } from '@/lib/calc/scenarios';
 import { baseAnswers } from '@/lib/calc/__tests__/fixtures';
 import { t } from '@/lib/i18n/uk';
@@ -58,7 +58,7 @@ async function walkToResult() {
 
 beforeEach(() => {
   window.sessionStorage.clear();
-  window.history.replaceState(null, '', '/questionnaire');
+  window.history.replaceState(null, '', '/uk/poland/questionnaire');
 });
 
 afterEach(cleanup);

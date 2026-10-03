@@ -1,9 +1,12 @@
-import { t } from '@/lib/i18n/uk';
+'use client';
+
+import { useT } from './I18nProvider';
 import type { ResidencyResult } from '@/lib/calc/types';
 import { SourceCitation } from './SourceCitation';
 import styles from './ResidencyVerdict.module.css';
 
 export function ResidencyVerdict({ result }: { result: ResidencyResult }) {
+  const t = useT();
   return (
     <section className={styles.card} aria-labelledby="residency-heading">
       <h2 id="residency-heading">{t('residency.title')}</h2>

@@ -4,7 +4,7 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { render, screen, within, cleanup, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import QuestionnairePage from '@/questionnaire/page';
+import { Questionnaire as QuestionnairePage } from '@/[locale]/poland/questionnaire/Questionnaire';
 import { t } from '@/lib/i18n/uk';
 
 /**
@@ -62,7 +62,7 @@ async function walkMedianPath(revenue = '15000', statusKey = 'q.status.ukr') {
 
 beforeEach(() => {
   window.sessionStorage.clear();
-  window.history.replaceState(null, '', '/questionnaire');
+  window.history.replaceState(null, '', '/uk/poland/questionnaire');
 });
 
 afterEach(cleanup);
@@ -85,7 +85,7 @@ describe('анкета — наскрізний прохід', () => {
 
   it('під дисклеймером лінк на повний список джерел', async () => {
     await walkMedianPath();
-    expect(screen.getByRole('link', { name: t('sources.link') }).getAttribute('href')).toBe('/sources');
+    expect(screen.getByRole('link', { name: t('sources.link') }).getAttribute('href')).toBe('/uk/poland/sources');
   });
 
   it('ФОП: злотова колонка без числа з поясненням чому', async () => {
@@ -280,5 +280,33 @@ describe('приватність і прогрес', () => {
     expect(saved).toContain('gte183');
     // Виручка ще не обрана; коли буде — тільки крок 2500, ніколи точна сума.
     expect(saved).not.toContain('17342');
+  });
+});
+
+/**
+ * Share-лінк на новій адресі (ADR-0003): шлях береться з поточної сторінки, тож
+ * лінк веде на `/uk/poland/questionnaire`, а не на стару `/questionnaire`. Хто
+ * його відкриє, бачить той самий результат без жодного кроку анкети.
+ */
+describe('шеринг на адресі з мовою', () => {
+  const tableText = () => screen.getByRole('region', { name: t('scenarios.title') }).textContent;
+
+  it('лінк несе шлях /uk/poland/questionnaire і відкриває той самий результат', async () => {
+    const user = await walkMedianPath('17500');
+    const expected = tableText();
+
+    await user.click(screen.getByRole('button', { name: t('nav.share') }));
+    const link = new URL(await navigator.clipboard.readText());
+    expect(link.pathname).toBe('/uk/poland/questionnaire');
+    expect(link.searchParams.get('r')).toBe('17500');
+
+    // Інша людина: порожня сесія, відкриває лише лінк.
+    cleanup();
+    window.sessionStorage.clear();
+    window.history.replaceState(null, '', `${link.pathname}${link.search}`);
+    render(<QuestionnairePage />);
+
+    expect(await screen.findByText(t('residency.plResident'))).toBeDefined();
+    expect(tableText()).toBe(expected);
   });
 });
