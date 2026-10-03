@@ -87,7 +87,7 @@ Mike пише «Begin». Сесія:
 |---|---|---|---|
 | 05 | [Право працювати: першоджерела](sessions/05-legal-basis-sources.md) | Fable · high | [x] |
 | 06 | [Право працювати: розрахунок і анкета](sessions/06-legal-basis-calc.md) | Opus · high | [x] |
-| 07 | [Право працювати: екрани, рев'ю, реліз](sessions/07-legal-basis-release.md) | Sonnet · high | [ ] |
+| 07 | [Право працювати: екрани, рев'ю, реліз](sessions/07-legal-basis-release.md) | Sonnet · high | [x] |
 
 ## Фаза 2. Платформа
 
