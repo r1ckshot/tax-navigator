@@ -1,4 +1,6 @@
-import { t } from '@/lib/i18n/uk';
+'use client';
+
+import { useT } from './I18nProvider';
 import type { Risk } from '@/lib/calc/types';
 import styles from './RiskBadge.module.css';
 
@@ -16,6 +18,7 @@ import styles from './RiskBadge.module.css';
 const ICON: Record<Risk, string> = { green: '●', yellow: '▲', red: '■' };
 
 export function RiskBadge({ risk, compact = false }: { risk: Risk; compact?: boolean }) {
+  const t = useT();
   const label = t(`risk.${risk}`);
 
   return (

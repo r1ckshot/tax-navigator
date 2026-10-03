@@ -13,9 +13,13 @@
 /** Ядро: детерміновані розрахунки + дані правил. */
 const CORE = '^app/lib/(rules|calc)/';
 /** Адаптери введення/зберігання/лінка + presentation-хелпери. */
-const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources|waitlist)\\.ts$|^app/lib/(questions|i18n)/';
-/** Presentation: компоненти і сторінки App Router. */
-const PRESENTATION = '^app/components/|^app/[^/]*\\.tsx$|^app/.*/page\\.tsx$';
+const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site)\\.ts$|^app/lib/(questions|i18n)/';
+/**
+ * Presentation: усе в `app/` поза `lib/` — компоненти, сторінки, layout-и й
+ * хелпери маршрутів (`app/[locale]/params.ts`). Список за шаблоном імені
+ * (`page.tsx`) пропускав би layout-и й обгортки на кшталт `Questionnaire.tsx`.
+ */
+const PRESENTATION = '^app/(?!lib/|__tests__/)';
 
 module.exports = {
   forbidden: [

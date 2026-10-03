@@ -1,4 +1,6 @@
-import { t } from '@/lib/i18n/uk';
+'use client';
+
+import { useT } from './I18nProvider';
 import styles from './Progress.module.css';
 
 /**
@@ -7,6 +9,7 @@ import styles from './Progress.module.css';
  * (не відкочується назад від зміни кількості екранів).
  */
 export function Progress({ percent }: { percent: number }) {
+  const t = useT();
   return (
     <div className={styles.wrap}>
       <div

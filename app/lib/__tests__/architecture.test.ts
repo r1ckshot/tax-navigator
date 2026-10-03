@@ -96,6 +96,6 @@ describe('мова інтерфейсу: тексти живуть лише в i
   it('скан бачить усі компоненти й сторінки, а не порожній список', () => {
     // Без цього поламаний обхід дав би вічнозелений тест ні на чому.
     expect(tsx.length).toBeGreaterThan(8);
-    expect(tsx).toContain('app/layout.tsx');
+    expect(tsx).toContain('app/[locale]/layout.tsx');
   });
 });

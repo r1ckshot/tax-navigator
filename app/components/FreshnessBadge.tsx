@@ -1,4 +1,6 @@
-import { t } from '@/lib/i18n/uk';
+'use client';
+
+import { useT } from './I18nProvider';
 import styles from './FreshnessBadge.module.css';
 
 /**
@@ -8,6 +10,7 @@ import styles from './FreshnessBadge.module.css';
  * джерел читалась так само, як на екрані результату.
  */
 export function FreshnessBadge({ stale }: { stale: boolean }) {
+  const t = useT();
   return (
     <span className={styles.badge} data-stale={stale ? 'true' : 'false'}>
       <span className={styles.icon} aria-hidden="true">

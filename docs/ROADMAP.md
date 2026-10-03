@@ -96,7 +96,7 @@ Mike пише «Begin». Сесія:
 
 | # | Сесія | Модель · effort | Стан |
 |---|---|---|---|
-| 08 | [Адреси `/uk/poland/` і каркас мов](sessions/08-locale-routing.md) | Opus · high | [ ] |
+| 08 | [Адреси `/uk/poland/` і каркас мов](sessions/08-locale-routing.md) | Opus · high | [x] |
 
 ### Тема 2.2 — Редизайн
 Розмір S · гілка `feat/redesign` · версія: minor

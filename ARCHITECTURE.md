@@ -16,8 +16,8 @@ feature-first усередині шарів. Обґрунтування вибо
 |---|---|---|---|
 | **rules** | `app/lib/rules/` | `rules.2026.json` (кожне правило = params + `source_url` + `verified_at`) і типи доступу до нього | нічого, крім себе |
 | **calc** | `app/lib/calc/` | резидентство, ZUS, 6 сценаріїв, діапазони — чисті функції | `rules/` |
-| **adapters** | `app/lib/questions/`, `storage.ts`, `share.ts`, `format.ts`, `tokens.ts` | схема анкети, чернетка в `sessionStorage`, share-лінк, форматування, розбір словника токенів для `/tokens` | `calc/`, `rules/`, одне одного |
-| **presentation** | `app/components/`, `app/**/page.tsx`, `app/layout.tsx`, `app/lib/i18n/` | React, CSS Modules, українські тексти | усе нижче |
+| **adapters** | `app/lib/questions/`, `storage.ts`, `share.ts`, `format.ts`, `tokens.ts`, `routes.ts`, `site.ts` | схема анкети, чернетка в `sessionStorage`, share-лінк, форматування, розбір словника токенів для `/tokens`, адреси `/{мова}/poland/…` і старі редиректи, базова адреса сайту з env | `calc/`, `rules/`, одне одного |
+| **presentation** | `app/components/`, `app/[locale]/**` (продукт), `app/(technical)/**` (`/tokens`), `app/global-not-found.tsx`, `app/lib/i18n/` | React, CSS Modules, словники мов і їх реєстр | усе нижче |
 
 ## Правило залежностей
 
@@ -49,7 +49,9 @@ presentation → adapters → calc → rules
 | Нову форму оподаткування | `calc/scenarios/` | тестується без DOM, повертає `Range` |
 | Нове питання анкети | `questions/schema.ts` | впливає на висновок, інакше питати не треба |
 | Новий екран / вигляд | `components/` | не містить арифметики, лише показує |
-| Текст користувачу | `i18n/uk.ts` | у компонентах немає рядків-літералів |
+| Текст користувачу | `i18n/uk.ts` (і кожна увімкнена мова) | у компонентах немає рядків-літералів; компонент бере `useT()`, серверна сторінка — `translator(locale)` |
+| Нову сторінку країни | `app/[locale]/poland/<назва>/page.tsx` + `CountryPage` у `routes.ts` | посилання будуються `countryHref()`, не рядком |
+| Нову мову | словник у `i18n/` + рядок у реєстрі `i18n/index.ts` | маршрути не правляться ([ADR-0003](docs/adr/0003-locale-country-routes.md)) |
 
 ## Чим це тримається
 

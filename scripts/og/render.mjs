@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Рендер `app/opengraph-image.png` (1200×630) — прев'ю лінка в месенджерах.
+ * Рендер `app/[locale]/opengraph-image.png` (1200×630) — прев'ю лінка в месенджерах.
  *
  * Статичний PNG, а не `next/og`: той рендерить на Edge зі своїм шрифтом, і
  * кирилицю довелося б тягнути мережею під час збірки. Тут текст береться з
@@ -16,7 +16,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { uk } from '../../app/lib/i18n/uk.ts';
 
-const OUT = fileURLToPath(new URL('../../app/opengraph-image.png', import.meta.url));
+const OUT = fileURLToPath(new URL('../../app/[locale]/opengraph-image.png', import.meta.url));
 
 // Палітра з globals.css (світла тема): --plane, --surface, --ink, --ink-secondary, --accent.
 const PLANE = '#e7e4da';

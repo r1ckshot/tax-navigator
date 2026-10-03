@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const PNG = readFileSync(fileURLToPath(new URL('../opengraph-image.png', import.meta.url)));
+const PNG = readFileSync(fileURLToPath(new URL('../[locale]/opengraph-image.png', import.meta.url)));
 
 describe('opengraph-image.png', () => {
   // Розмір читається з IHDR: ширина й висота — big-endian на байтах 16-23.

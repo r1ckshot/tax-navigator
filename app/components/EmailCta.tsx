@@ -1,4 +1,6 @@
-import { t } from '@/lib/i18n/uk';
+'use client';
+
+import { useT } from './I18nProvider';
 import { waitlistHref } from '@/lib/waitlist';
 import styles from './EmailCta.module.css';
 
@@ -8,6 +10,7 @@ import styles from './EmailCta.module.css';
  * налаштовано, лишається чесне «Скоро» замість неробочої кнопки.
  */
 export function EmailCta({ href = waitlistHref() }: { href?: string | null }) {
+  const t = useT();
   return (
     <section className={styles.cta}>
       <h2>{t('cta.title')}</h2>
