@@ -85,7 +85,7 @@ Mike пише «Begin». Сесія:
 
 | # | Сесія | Модель · effort | Стан |
 |---|---|---|---|
-| 05 | [Право працювати: першоджерела](sessions/05-legal-basis-sources.md) | Fable · high | [ ] |
+| 05 | [Право працювати: першоджерела](sessions/05-legal-basis-sources.md) | Fable · high | [x] |
 | 06 | [Право працювати: розрахунок і анкета](sessions/06-legal-basis-calc.md) | Opus · high | [ ] |
 | 07 | [Право працювати: екрани, рев'ю, реліз](sessions/07-legal-basis-release.md) | Sonnet · high | [ ] |
 
@@ -204,8 +204,8 @@ Mike пересилає питання з чату → Claude пише черн�
 
 | # | Сесія | Модель · effort | Стан |
 |---|---|---|---|
-| П1 | [Ставки й закони 2027: першоджерела](sessions/x1-rules-2027-sources.md) | Fable · high | [ ] |
-| П2 | [Дані 2027, тести, анкета без 52zr](sessions/x2-rules-2027-data.md) | Opus · high | [ ] |
+| П1 | [Ставки й закони 2027: першоджерела](sessions/x1-rules-2027-sources.md) | Fable · high | [x] |
+| П2 | [Дані 2027, тести, анкета без 52zr](sessions/x2-rules-2027-data.md) · Чекає: obwieszczenie MRPiPS про 30-krotność на 2027 і доля друку 3147 у Сеймі | Opus · high | [ ] |
 
 ### Тема П.2 — Зміна статусу українців
 **Тригер:** автозвірка бачить зміну акта про статус UKR / тимчасовий захист або

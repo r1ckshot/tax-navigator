@@ -11,7 +11,8 @@
 
 ## Прочитати
 
-- `docs/features/legal-basis/PRD.md` і новий розділ EVIDENCE (сесія 05)
+- `docs/features/legal-basis/PRD.md` (відкриті питання OQ-1…3) і новий розділ EVIDENCE §6 «Право працювати…» (сесія 05)
+- Правила `status.business_right`, `status.work_right`, `status.ukr_protection`, `jdg.przekwalifikowanie` — коди підстав у їхніх масивах і є варіантами відповіді
 - ARCHITECTURE.md; `app/lib/questions/schema.ts`; `app/lib/calc/scenarios/*.ts` (зразок «причина замість числа» — `nierejestrowana.ts`); `app/lib/share.ts`; `app/lib/i18n/uk.ts`
 - `.claude/rules/product-safety.md`, `.claude/rules/testing.md`
 
@@ -25,7 +26,11 @@
 3. Сценарії: недозволена форма → стан «недоступно» з причиною і джерелом, не
    ховається.
 4. Ризик B2B для JDG з одним клієнтом — жовтий, текст в `uk.ts` за
-   product-safety: інформує, не радить.
+   product-safety: інформує, не радить. Звірено в сесії 05: ні закон про PIP, ні
+   art. 22 § 1 k.p. кількості клієнтів не називають — критерії там kierownictwo,
+   місце й час, визначені замовником (`jdg.przekwalifikowanie`). «Один клієнт» —
+   ознака, через яку питання взагалі виникає, а не підстава рішення; текст не має
+   казати, що один клієнт = перекваліфікація.
 5. Share-лінк несе нові відповіді; round-trip тест.
 6. Тести через `/scenario-tests`:
    - кожна гілка дозволу (активний UKR, карта на навчання, карта на роботу, CUKR, громадянин ЄС);
