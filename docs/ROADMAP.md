@@ -103,7 +103,7 @@ Mike пише «Begin». Сесія:
 
 | # | Сесія | Модель · effort | Стан |
 |---|---|---|---|
-| 09 | [Три напрями стилю на превʼю](sessions/09-redesign-directions.md) | Opus · high | [ ] |
+| 09 | [Три напрями стилю на превʼю](sessions/09-redesign-directions.md) | Opus · high | [x] |
 | 10 | [Айдентика і лендінги](sessions/10-redesign-identity.md) · Чекає: вибір Mike із сесії 09 | Opus · high | [ ] |
 | 11 | [Анкета, результат, анімації](sessions/11-redesign-flow.md) | Opus · high | [ ] |
 | 12 | [Решта екранів, еталони, реліз](sessions/12-redesign-release.md) | Sonnet · high | [ ] |

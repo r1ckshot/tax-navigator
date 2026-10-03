@@ -64,17 +64,18 @@
 перебування, `calc/status.ts` дає доступ до кожної форми з `rule_id`, JDG і
 nierejestrowana без права — з причиною замість числа (DECISIONS 2026-10-03).
 
-Тема 2.1 «Адреси й мови» (гілка `feat/locale-routing`, `0.4.0`): сесія 08 перенесла
-продукт на `/uk/poland`, `/uk/poland/questionnaire`, `/uk/poland/sources` —
-[ADR-0003](adr/0003-locale-country-routes.md): мова — динамічний сегмент `[locale]`,
-країна — статична тека `poland/`, `/tokens` — у `app/(technical)/`. Старі адреси
-редиректяться (`/` → 307, `/questionnaire` і `/sources` → 308 з query), share-лінки
-ведуть на нову адресу. Компоненти беруть текст через `useT()`; `en` вмикається
-рядком у `app/lib/i18n/index.ts` — тест підміняє реєстр і бачить `/en`, `lang="en"` і
-метадані з `en` без правки маршрутів. Canonical + hreflang (`uk`, `x-default`),
-базова адреса — `NEXT_PUBLIC_APP_URL` (тема 5.1 змінює лише її). Редиректи й
-canonical перевіряє `visual/routes.spec.ts` на CI. Карта архітектури оновлена;
-`check-anchors.mjs` тепер бачить якорі в шляхах `[locale]`/`(technical)`.
+Тема 2.1 «Адреси й мови» закрита PR #141 (`0.4.0`): продукт живе на `/uk/poland/…`
+([ADR-0003](adr/0003-locale-country-routes.md)), старі адреси редиректяться.
+
+Тема 2.2 «Редизайн» (гілка `feat/redesign`): сесія 09 зробила три напрями стилю —
+`/design-lab/a` «Реєстр», `/b` «Прилад», `/c` «Мапа» — на тому самому змісті:
+лендінг Польщі, справжні `ResidencyVerdict` + `ComparisonTable` на профілі G2,
+анімація-зразок. Бриф — [design/brief-redesign.md](../design/brief-redesign.md).
+Тема напряму — `theme.css` з тими самими ролями через `light-dark()`, тож
+компоненти результату перефарбовуються без правки. Контраст рахує
+`scripts/contrast.mjs`: у трьох напрямах 0 пар нижче AA; чинний `globals.css` —
+6 пар нижче AA (`--ink-muted` світлої теми, мінімум 2.99), закривається в сесії 10.
+Сторінки тимчасові (`noindex`), сесія 12 видаляє їх разом із ключами `lab.*`.
 
 ## Живі блокери
 
@@ -84,7 +85,7 @@ canonical перевіряє `visual/routes.spec.ts` на CI. Карта арх�
 
 ## Наступне
 
-Тема 2.1 закрита PR #141 (`0.4.0`; Mike відкрив старий share-лінк на превʼю — той
-самий результат на `/uk/poland/questionnaire`). **Mike пише «Begin»** → сесія 09
-«Три напрями стилю на превʼю», тема 2.2 (Opus, effort high). П2 чекає на
-obwieszczenie MRPiPS про 30-krotność на 2027 і долю друку 3147.
+**Крок Mike:** відкрити `/design-lab` на превʼю Vercel гілки `feat/redesign` (телефон і
+десктоп), обрати напрям і сказати, що в ньому змінити. Після відповіді **«Begin»** →
+сесія 10 «Айдентика і лендінги» (Opus, effort high). П2 чекає на obwieszczenie
+MRPiPS про 30-krotność на 2027 і долю друку 3147.

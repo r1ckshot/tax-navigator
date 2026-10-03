@@ -1,0 +1,58 @@
+/* Нейтральна «обвʼязка» лабораторії, однакова в трьох напрямах: специфікація і
+   кнопка повтору. Ідентичність напряму — у його власному page.module.css. */
+
+.replay {
+  margin-top: var(--space-4);
+  min-height: 36px;
+  padding: 0.3rem 0.9rem;
+  font-size: var(--text-sm);
+}
+
+.spec {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.spec dt {
+  color: var(--ink-muted);
+}
+
+.spec dd {
+  margin: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.chip {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 1px solid var(--hairline-strong);
+}
+
+@media (max-width: 30rem) {
+  .spec {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .spec dd + dt {
+    margin-top: var(--space-3);
+  }
+}
