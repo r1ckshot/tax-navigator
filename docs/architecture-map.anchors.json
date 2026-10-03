@@ -46,8 +46,14 @@
   "package.json:8": [
     "\"start\": \"node scripts/worktree-ports.mjs -- next start\","
   ],
-  "next.config.mjs:7": [
+  "next.config.mjs:21": [
     "distDir: process.env.NEXT_DIST_DIR || '.next',"
+  ],
+  "next.config.mjs:30": [
+    "async redirects() {"
+  ],
+  "next.config.mjs:27": [
+    "globalNotFound: true,"
   ],
   "SPEC.md:21-23": [
     "3. **Не бекенд.** Розрахунок детермінований і клієнтський; сервера, БД і",
@@ -59,31 +65,43 @@
   "schema.ts:3": [
     "import { assessStatus } from '@/lib/calc/status';"
   ],
-  "Question.tsx:4": [
-    "import { t } from '@/lib/i18n/uk';"
+  "Question.tsx:6": [
+    "import { snapToStep } from '@/lib/calc/quantize';"
   ],
-  "app/questionnaire/page.tsx:131": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:140": [
     "const residency = assessResidency(answers);"
   ],
   "jdg.ts:39": [
     "* ust. 1 pkt 7a ustawy o PIP), і B2B названо прямо (art. 13 pkt 1). Критерії —"
   ],
-  "app/questionnaire/page.tsx:132": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:141": [
     "const scenarios = compareScenarios(answers);"
   ],
-  "index.ts:17-26": [
+  "scenarios/index.ts:17-26": [
     "export function compareScenarios(answers: Answers): ScenarioResult[] {",
     "}"
   ],
-  "app/questionnaire/page.tsx:49": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:56": [
     "const screens = useMemo(() => visibleScreens(answers), [answers]);"
   ],
-  "app/questionnaire/page.tsx:45-47": [
-    "useEffect(() => {",
-    "}, [answers, index, hydrated, done]);"
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:45": [
+    "const { answers: saved, step } = loadDraft();"
   ],
-  "app/questionnaire/page.tsx:33": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:40": [
     "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));"
+  ],
+  "app/[locale]/poland/sources/page.tsx:53": [
+    "const catalog = buildSourceCatalog(new Date());"
+  ],
+  "translate.ts:8": [
+    "export function createT(dictionary: Dictionary): Translate {"
+  ],
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:146-153": [
+    "<ResidencyVerdict result={residency} />",
+    "<ScenarioCard key={s.id} scenario={s} />"
+  ],
+  "Questionnaire.tsx:27": [
+    "export function Questionnaire() {"
   ],
   "app/lib/rules/rules.2026.json:44-57": [
     "{",
@@ -116,9 +134,9 @@
   "calc/types.ts:52": [
     "clientCount?: ClientCount;"
   ],
-  "i18n/uk.ts:187-192": [
-    "'Увага: спецнорма art. 52zr діє до 31.12.2026.\\nПочинаючи з 2027 року застосовуються загальні правила.',",
-    "// медіазапиті) — на широкому речення стають в один рядок і розрив зайвий."
+  "i18n/uk.ts:210-215": [
+    "'scenario.fop': 'Український ФОП',",
+    "'scenario.uop': 'Трудовий договір (UoP)',"
   ],
   "schema.ts:23": [
     "export interface Field {"
@@ -130,6 +148,9 @@
   "zus.ts:34-47": [
     "stage: 'zbiegOnlyHealth',",
     "stage: 'duzy',"
+  ],
+  "ScenarioCard.tsx:27": [
+    "const t = useT();"
   ],
   "benchmark.test.ts:32-34": [
     "it('ричалт 12%: 15000 − 750 витрат − 1750.17 податку − 830.58 zdrowotnej − 1926.76 ZUS = 9742.49', () => {",
@@ -151,17 +172,20 @@
     "*",
     "tiers: { annualRevenueUpTo: number | null; monthly: number }[];"
   ],
-  "app/page.tsx:44": [
+  "app/[locale]/poland/page.tsx:54": [
     "<button type=\"button\" data-variant=\"primary\">"
   ],
   "globals.css:231": [
     "button[data-variant='primary'] {"
   ],
-  "RiskBadge.tsx:24": [
+  "RiskBadge.tsx:27": [
     "data-risk={risk}"
   ],
-  "ComparisonTable.tsx:54": [
+  "ComparisonTable.tsx:57": [
     "data-empty={s.rangeMonthly ? undefined : 'true'}"
+  ],
+  "app/lib/routes.ts:14": [
+    "export function countryHref(locale: Locale, page: CountryPage = 'home'): string {"
   ],
   "app/lib/storage.ts:25": [
     "window.sessionStorage.setItem(KEY, JSON.stringify({ answers: safe, step } satisfies Stored));"
@@ -170,9 +194,12 @@
     "u: 'hasParallelUop',",
     "if (value === undefined) continue;"
   ],
-  "app/questionnaire/page.tsx:33-37": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:40-41": [
     "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));",
-    "} else {"
+    "if (Object.keys(fromLink).length > 0) {"
+  ],
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:87": [
+    "await navigator.clipboard.writeText(url);"
   ],
   "storage.ts:23": [
     "if (safe.monthlyRevenue !== undefined) safe.monthlyRevenue = quantizeRevenue(safe.monthlyRevenue);"
@@ -188,13 +215,19 @@
     "* падає рівно тоді, коли хтось «оптимізує» приховування на `display: none`",
     "*/"
   ],
-  "app/layout.tsx:2": [
-    "import \"./globals.css\";"
+  "app/[locale]/layout.tsx:2": [
+    "import '../globals.css';"
   ],
-  "RiskBadge.tsx:18": [
+  "app/(technical)/layout.tsx:1": [
+    "import '../globals.css';"
+  ],
+  "app/global-not-found.tsx:2": [
+    "import './globals.css';"
+  ],
+  "RiskBadge.tsx:20": [
     "export function RiskBadge({ risk, compact = false }: { risk: Risk; compact?: boolean }) {"
   ],
-  "SourceCitation.tsx:7": [
+  "SourceCitation.tsx:9": [
     "export function SourceCitation({ sources }: { sources: Source[] }) {"
   ],
   "globals.css:215-246": [
@@ -213,7 +246,7 @@
     ".screen {",
     "padding: var(--space-4) var(--space-5);"
   ],
-  "app/page.module.css:1-12": [
+  "app/[locale]/poland/page.module.css:1-12": [
     ".hero {",
     "}"
   ],
@@ -229,17 +262,17 @@
     "",
     "openEnded?: boolean;"
   ],
-  "Question.tsx:88": [
-    "const shown = value ?? cfg.default;"
+  "Question.tsx:92": [
+    "const atMax = Boolean(cfg.openEnded) && shown >= cfg.max;"
   ],
-  "ScenarioCard.tsx:29": [
+  "ScenarioCard.tsx:32": [
     "<details className={styles.card}>"
   ],
-  "ComparisonTable.tsx:30-83": [
+  "ComparisonTable.tsx:33-86": [
     "<table className={styles.table} role=\"table\">",
     "</table>"
   ],
-  "ScenarioCard.tsx:70-94": [
+  "ScenarioCard.tsx:73-97": [
     "<table className={styles.subforms}>",
     "</table>"
   ],
@@ -250,18 +283,18 @@
   "globals.css:223": [
     "min-height: 44px;"
   ],
-  "app/questionnaire/page.tsx:135": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:144": [
     "<main aria-live=\"polite\" className={styles.result}>"
   ],
-  "app/questionnaire/page.tsx:120-167": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:127-177": [
     "function Result({",
-    ");"
-  ],
-  "app/page.tsx:30-56": [
-    "export default function Home() {",
     "}"
   ],
-  "Question.tsx:18-29": [
+  "app/[locale]/poland/page.tsx:37-66": [
+    "export default async function Home({ params }: { params: LocaleParams }) {",
+    "}"
+  ],
+  "Question.tsx:18-30": [
     "export function Question({ screen, answers, onChange }: Props) {",
     "}"
   ],
@@ -295,13 +328,19 @@
     "export function homeInUaMatters(a: Partial<Answers>): boolean {",
     "}"
   ],
-  "ResidencyVerdict.tsx:6-38": [
+  "app/lib/routes.ts:12": [
+    "export type CountryPage = 'home' | 'questionnaire' | 'sources';"
+  ],
+  "app/lib/i18n/index.ts:12": [
+    "export const DICTIONARIES = { uk } satisfies Record<string, Dictionary>;"
+  ],
+  "ResidencyVerdict.tsx:8-41": [
     "export function ResidencyVerdict({ result }: { result: ResidencyResult }) {",
     "}"
   ],
-  ".dependency-cruiser.cjs:21-31": [
-    "forbidden: [",
-    "{"
+  ".dependency-cruiser.cjs:26-34": [
+    "{",
+    "},"
   ],
   "architecture.test.ts:15": [
     "const LIB = join(process.cwd(), 'app', 'lib');"
@@ -309,9 +348,8 @@
   "jdg.ts:49": [
     "return { risk: 'yellow', riskReasonKey: `risk.jdg.formerEmployer.${answers.formerEmployer}`, noteKeys: [pipKey] };"
   ],
-  "uk.ts:234-237": [
-    "'risk.jdg.formerEmployer.identical':",
-    "'Частковий збіг із колишніми обовʼязками: ричалт лишається, але пільговий ZUS втрачається.',"
+  "translate.ts:10": [
+    "const text = dictionary[key] ?? key;"
   ],
   "fop.ts:31-32": [
     "rangeMonthly: null,",
@@ -321,18 +359,17 @@
     "## Pull requests"
   ],
   "ARCHITECTURE.md:20": [
-    "| **presentation** | `app/components/`, `app/**/page.tsx`, `app/layout.tsx`, `app/lib/i18n/` | React, CSS Modules, українські тексти | усе нижче |"
+    "| **presentation** | `app/components/`, `app/[locale]/**` (продукт), `app/(technical)/**` (`/tokens`), `app/global-not-found.tsx`, `app/lib/i18n/` | React, CSS Modules, словники мов і їх реєстр | усе нижче |"
   ],
   ".dependency-cruiser.cjs:16": [
-    "const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources|waitlist)\\\\.ts$|^app/lib/(questions|i18n)/';"
+    "const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site)\\\\.ts$|^app/lib/(questions|i18n)/';"
   ],
-  "ARCHITECTURE.md:76-85": [
+  "ARCHITECTURE.md:78-87": [
     "- `app/lib/i18n/uk.ts` лежить у `lib/`, але за роллю це presentation. Ядром не",
     "практичного ефекту. Лишаємо розбіжність назви, не поведінки."
   ],
-  "app/layout.tsx:11-26": [
-    "export const metadata: Metadata = {",
-    "};"
+  "app/[locale]/layout.tsx:24": [
+    "export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {"
   ],
   "ARCHITECTURE.md:35-39": [
     "- Браузерні API (`window`, `document`, `sessionStorage`) — лише в `storage.ts`,",
