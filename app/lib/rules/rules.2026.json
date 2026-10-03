@@ -278,6 +278,57 @@
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
       "verified_at": "2026-10-02"
+    },
+    {
+      "rule_id": "status.business_right",
+      "params": {
+        "equalToPolesBases": ["eu_eea_citizen", "temporary_protection", "cukr", "permanent_residence", "eu_long_term_resident", "blue_card", "temp_residence_study", "temp_residence_research", "temp_residence_family_reunification", "temp_residence_spouse_of_polish_citizen", "temp_residence_ceidg_continuation", "refugee_status", "subsidiary_protection", "humanitarian_or_tolerated_stay", "karta_polaka"],
+        "companiesOnlyOtherwise": true,
+        "appliesToNierejestrowanaFrom": "2025-06-01",
+        "ukrAnyLegalStayUntil": "2026-03-04",
+        "ukrCeidgEntryKeptWhileLegalStay": true,
+        "peselRequiredForCeidgFrom": "2026-11-01"
+      },
+      "source_url": "https://www.biznes.gov.pl/pl/portal/00806",
+      "verified_at": "2026-10-03"
+    },
+    {
+      "rule_id": "status.work_right",
+      "params": {
+        "civilContractsCountAsWork": true,
+        "freeAccessBases": ["eu_eea_citizen", "temporary_protection", "cukr", "permanent_residence", "eu_long_term_resident", "temp_residence_study", "temp_residence_research", "temp_residence_family_reunification", "temp_residence_spouse_of_polish_citizen", "refugee_status", "subsidiary_protection", "humanitarian_or_tolerated_stay", "karta_polaka"],
+        "permitBoundBases": ["temp_residence_work", "blue_card", "temp_residence_ceidg_continuation"],
+        "temporaryProtectionNotificationDays": 7,
+        "ukrWithoutProtectionFrom": "2026-03-05",
+        "ukrWithoutProtectionTransitionYears": 3
+      },
+      "source_url": "https://api.sejm.gov.pl/eli/acts/DU/2025/621/text.pdf",
+      "verified_at": "2026-10-03"
+    },
+    {
+      "rule_id": "status.ukr_protection",
+      "params": {
+        "protectionUntil": "2028-03-04",
+        "militaryObligationForNewFrom": "2026-08-05",
+        "legalStayFollowsEuDecision": true,
+        "lostWhenAbroadDaysOver": 30,
+        "lostOnAnyResidencePermit": true
+      },
+      "source_url": "https://www.gov.pl/web/udsc/przedluzenie-ochrony-czasowej-do-4-marca-2028-r",
+      "verified_at": "2026-10-03"
+    },
+    {
+      "rule_id": "jdg.przekwalifikowanie",
+      "params": {
+        "pipDecisionPowerFrom": "2026-07-08",
+        "coversB2b": true,
+        "testIsFactsNotContractName": true,
+        "decisionOnlyAfterUnmetOrder": true,
+        "appliesToContractsOngoingAtStart": true,
+        "decisionEffectiveFromIssueDate": true
+      },
+      "source_url": "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
+      "verified_at": "2026-10-03"
     }
   ]
 }

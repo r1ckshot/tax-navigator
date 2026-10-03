@@ -26,6 +26,7 @@ export const URLS = Object.freeze({
   zbieg: "https://www.biznes.gov.pl/pl/portal/001785",
   nierej: "https://www.biznes.gov.pl/pl/portal/00115",
   pip: "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
+  udsc: "https://www.gov.pl/web/udsc/przedluzenie-ochrony-czasowej-do-4-marca-2028-r",
   // Ціну абонементу називає лише сам інкубатор — держджерела в неї немає.
   bizkyPrime: "https://bizky.ai/cennik-bizky-prime/",
   fbaInk: "https://fba.ink/en/",
@@ -264,6 +265,52 @@ export const PAGES = Object.freeze({
       // Фразу знайшла модель (сесія 03, спосіб `llm`), але вона стоїть дослівно,
       // тож звіряється без моделі: дешевше і без судження в циклі.
       testIsFactsNotContractName: quote(/nie wolno zastępować umów o pracę umowami cywilnoprawnymi, jeżeli pomiędzy pracodawcą i pracownikiem zachodzi stosunek pracy/),
+    },
+  },
+
+  // Та сама сторінка, що для zlecenia: реформа PIP одна, і B2B сторінка називає
+  // поруч зі zleceniem. Дата в обох правилах однакова — тримає тест у rules.test.ts.
+  "jdg.przekwalifikowanie": {
+    url: URLS.pip,
+    fields: {
+      pipDecisionPowerFrom: date({ after: [/Nowe przepisy obowiązują od/], within: 20 }),
+      coversB2b: quote(/ma umowę zlecenia, B2B lub inną/),
+      testIsFactsNotContractName: quote(/nie wolno zastępować umów o pracę umowami cywilnoprawnymi, jeżeli pomiędzy pracodawcą i pracownikiem zachodzi stosunek pracy/),
+      decisionOnlyAfterUnmetOrder: quote(/Dopiero w przypadku, kiedy polecenie nie zostanie wykonane/),
+    },
+    elsewhere: {
+      appliesToContractsOngoingAtStart: onAct(
+        "перехідна норма закону-зміни: нові повноваження діють і для договорів, чинних на 08.07.2026; сторінка про це не пише",
+        act("reformaPip", "art. 14"),
+      ),
+      decisionEffectiveFromIssueDate: onAct(
+        "рішення діє від дня видачі, за минуле — лише позов до суду; сторінка цього не розрізняє",
+        act("pip", "art. 34 ust. 2f і 2j, art. 33a ust. 6"),
+      ),
+    },
+  },
+
+  // Строк захисту ставить рішення Ради ЄС, а не польський закон (art. 106 ust. 1
+  // ustawy o ochronie відсилає до нього) — тож акт ELI продовження не покаже.
+  // Сторінка — новина UdSC з датою в самій адресі: вона підтверджує, що 2028 —
+  // опубліковане значення, але НОВОГО рішення не побачить ніколи (вийде новою
+  // новиною). Постійної сторінки з чинним строком на gov.pl/udsc немає
+  // (перевірено 2026-10-03: `ochrona-czasowa`, `karta-pobytu-cukr` дати не
+  // називають). Сліпу зону закриває не цикл, а тест-розтяжка в rules.test.ts:
+  // за 180 днів до кінця захисту він червоний, доки людина не перезвірить.
+  "status.ukr_protection": {
+    url: URLS.udsc,
+    fields: {
+      protectionUntil: date({ after: [/został przedłużony na okres 1 roku, tj\. do/], within: 20 }),
+      militaryObligationForNewFrom: date({ after: [/Przepis ten ma zastosowanie już od/], within: 20 }),
+    },
+    elsewhere: {
+      legalStayFollowsEuDecision: onAct(
+        "перебування легальне, доки діє рішення Ради ЄС, — art. 106 ust. 1 у редакції закону 2026/203",
+        act("ochronaCudzoziemcow", "art. 106 ust. 1"),
+      ),
+      lostWhenAbroadDaysOver: onAct("підстави втрати захисту — art. 109b ust. 1 pkt 2", act("ochronaCudzoziemcow", "art. 109b ust. 1 pkt 2")),
+      lostOnAnyResidencePermit: onAct("будь-який pobyt czasowy, зокрема CUKR, гасить захист — art. 109b ust. 1 pkt 4", act("ochronaCudzoziemcow", "art. 109b ust. 1 pkt 4")),
     },
   },
 

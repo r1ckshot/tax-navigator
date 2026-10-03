@@ -78,6 +78,16 @@ export const VERIFICATION = Object.freeze({
   "nierejestrowana.zus": page("biznes.gov.pl/00115: три опорні фрази; поріг мінімалки й zdrowotna — фрази biznes.gov.pl/001785"),
   "nierejestrowana.pit": page("podatki.gov.pl: три опорні фрази; ryczałtowe KUP і zaliczki — act"),
   "nierejestrowana.cudzoziemcy": page("biznes.gov.pl/00115: дата обмеження, вимога tytułu pobytowego і фраза про PESEL зі статусом UKR"),
+  "status.business_right": {
+    method: METHODS.ACT,
+    why: "перелік підстав — art. 4 ust. 1–2 ustawy o przedsiębiorcach zagranicznych, CUKR — art. 42w specustawy; biznes.gov.pl/00806 дає перелік таблицею документів, без фрази на кожну підставу",
+  },
+  "status.work_right": {
+    method: METHODS.ACT,
+    why: "swobodny dostęp і повідомлення — art. 3 і 5a ustawy z 20.03.2025 o powierzaniu pracy cudzoziemcom; державної сторінки з чинним переліком після 05.03.2026 немає",
+  },
+  "status.ukr_protection": page("gov.pl/udsc: строк захисту за рішенням Ради ЄС і дата умови військового обліку; втрата статусу — act (art. 106 і 109b ustawy o ochronie)"),
+  "jdg.przekwalifikowanie": page("gov.pl/rodzina: дата реформи PIP, B2B серед договорів, припис перед рішенням; дія рішення в часі — act (ustawa o PIP і art. 14 ustawy zmieniającej)"),
 });
 
 /**

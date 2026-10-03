@@ -67,6 +67,7 @@ export const uk: Record<string, string> = {
   'sources.fresh': 'звірено',
   'sources.stale': 'давно не звірялось',
   'sources.group.residency': 'Податкове резидентство',
+  'sources.group.status': 'Право працювати й підстава перебування',
   'sources.group.common': 'Спільні величини',
   'sources.link': 'Усі джерела цифр',
 
