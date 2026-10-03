@@ -106,6 +106,11 @@ export function calcNierejestrowana(
   // Громадянина ЄС art. 5 ust. 7 не стосується; решта аудиторії — чужинці.
   if (answers.stayBasis !== 'eu_citizen') noteKeys.push('nierejestrowana.foreignersLimited');
   noteKeys.push(...protection.noteKeys);
+  // Дата початку обмеження — з правила, а не літерал у тексті примітки.
+  const noteVars = {
+    ...protection.noteVars,
+    foreignersFrom: getParams<{ restrictedFrom: string }>('nierejestrowana.cudzoziemcy').restrictedFrom,
+  };
   const allSources = [...sources, ...sourcesOf('status.business_right'), ...protection.sources];
 
   const unavailable = (noRangeReasonKey: string): ScenarioResult => ({
@@ -115,7 +120,7 @@ export function calcNierejestrowana(
     risk: 'yellow',
     riskReasonKey: 'risk.nierejestrowana.limitWatch',
     noteKeys,
-    noteVars: protection.noteVars,
+    noteVars,
     sources: allSources,
   });
 
@@ -154,7 +159,7 @@ export function calcNierejestrowana(
     risk: 'yellow',
     riskReasonKey: 'risk.nierejestrowana.limitWatch',
     noteKeys: availableNotes,
-    noteVars: protection.noteVars,
+    noteVars,
     sources: allSources,
   };
 }

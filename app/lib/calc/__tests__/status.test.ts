@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getParams } from '@/lib/rules/types';
 import { uk } from '@/lib/i18n/uk';
 import { assessStatus, BASIS_TO_RULE_CODE, type Access } from '../status';
+import { calcFop } from '../scenarios/fop';
 import { calcJdg } from '../scenarios/jdg';
 import { calcNierejestrowana } from '../scenarios/nierejestrowana';
 import { calcUop } from '../scenarios/uop';
@@ -192,6 +193,24 @@ describe('строк захисту на екрані — з правила, н�
     }
   });
 
+  it('UKR: примітка про строк захисту є на всіх п\'яти формах, де право тримається на захисті', () => {
+    const a = withAnswers({ stayBasis: 'ukr', monthlyRevenue: 3000, jdgStatus: 'none', hadJdgInLast60Months: false });
+    for (const r of [calcUop(a), calcZlecenie(a), calcIncubator(a)]) {
+      expect(r.noteKeys).toContain('status.ukrProtection');
+      expect(r.noteVars?.protectionUntil).toBe(until.protectionUntil);
+      expect(r.sources.map((s) => s.ruleId)).toContain('status.ukr_protection');
+    }
+    // Український ФОП стоїть на праві України, а не на польському захисті.
+    expect(calcFop(a).noteKeys).not.toContain('status.ukrProtection');
+  });
+
+  it('CUKR: ні UoP, ні zlecenie, ні інкубатор примітки про захист не несуть', () => {
+    const a = withAnswers({ stayBasis: 'cukr' });
+    for (const r of [calcUop(a), calcZlecenie(a), calcIncubator(a)]) {
+      expect(r.noteKeys).not.toContain('status.ukrProtection');
+    }
+  });
+
   it('CUKR: примітки про строк захисту немає', () => {
     const a = withAnswers({ stayBasis: 'cukr' });
     expect(calcJdg(a).noteKeys).not.toContain('status.ukrProtection');
@@ -203,6 +222,17 @@ describe('строк захисту на екрані — з правила, н�
       expect(uk[key], key).not.toMatch(/\d{4}/);
     }
     expect(uk['status.ukrProtection']).toContain('{protectionUntil}');
+  });
+
+  it('АНТИ-РЕГРЕС: дати в картках zlecenie і nierejestrowanej йдуть з правил, не з тексту', () => {
+    for (const key of ['risk.zlecenie.reclassification', 'nierejestrowana.foreignersLimited']) {
+      expect(uk[key], key).not.toMatch(/\d{4}/);
+    }
+    const pipFrom = getParams<{ pipDecisionPowerFrom: string }>('zlecenie.przekwalifikowanie').pipDecisionPowerFrom;
+    expect(calcZlecenie(withAnswers({})).noteVars?.pipFrom).toBe(pipFrom);
+    const from = getParams<{ restrictedFrom: string }>('nierejestrowana.cudzoziemcy').restrictedFrom;
+    const n = calcNierejestrowana(withAnswers({ monthlyRevenue: 3000, jdgStatus: 'none', hadJdgInLast60Months: false }));
+    expect(n.noteVars?.foreignersFrom).toBe(from);
     expect(uk['status.ukrProtection']).toContain('{abroadDays}');
   });
 
@@ -254,5 +284,39 @@ describe('ризик B2B для JDG з 08.07.2026 (PRD AC-4)', () => {
     expect(uk['risk.jdg.singleClient']).toMatch(/Кількості замовників закон не називає/);
     expect(uk['risk.jdg.singleClient']).toMatch(/припис/);
     expect(uk['risk.jdg.singleClient']).toMatch(/art\. 22 § 1/);
+  });
+});
+
+describe('числа в прозі збігаються з правилами (evidence-numbers: похідні звіряти тестом)', () => {
+  // Текст лишається прозою, тож змінна не підставляється, але зсув правила без
+  // правки тексту червоніє тут. Пробіли нормалізовано: у `uk.ts` розряди можуть бути нерозривними.
+  const text = (key: string) => uk[key].replace(/\s/g, ' ');
+  const ru = (n: number) => new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 2 }).format(n).replace(/\s/g, ' ');
+  const pct = (x: number) => `${String(+(x * 100).toFixed(2)).replace('.', ',')}%`;
+
+  it('хворобовий внесок — chorobowe з правил zlecenie.contributions', () => {
+    const chorobowe = getParams<{ employee: { chorobowe: number } }>('zlecenie.contributions').employee.chorobowe;
+    for (const key of ['zlecenie.choroboweIncluded', 'zlecenie.choroboweSkipped', 'nierejestrowana.choroboweIncluded', 'nierejestrowana.choroboweSkipped']) {
+      expect(text(key), key).toContain(pct(chorobowe));
+    }
+  });
+
+  it('ліміт KUP 50% — copyrightAnnualCap з правил', () => {
+    const cap = getParams<{ copyrightAnnualCap: number }>('zlecenie.kup').copyrightAnnualCap;
+    expect(getParams<{ copyrightAnnualCap: number }>('incubator.kup').copyrightAnnualCap).toBe(cap);
+    for (const key of ['zlecenie.copyrightCapExceeded', 'incubator.copyrightCapExceeded']) {
+      expect(text(key), key).toContain(`${ru(cap)} zł`);
+    }
+  });
+
+  it('ліміт nierejestrowanej і строк реєстрації — з nierejestrowana.limit і zlecenie.zbieg_z_etatem', () => {
+    const limit = getParams<{ quarterlyLimit: number; shareOfMinimumWage: number; daysToRegisterAfterExceeding: number }>('nierejestrowana.limit');
+    const wage = getParams<{ minimumWageMonthly: number }>('zlecenie.zbieg_z_etatem').minimumWageMonthly;
+    const limitText = text('nierejestrowana.limitIsQuarterly');
+    // Копійки в тексті завжди двома знаками: «10 813,50», а не «10 813,5».
+    expect(limitText).toContain(`${ru(Math.floor(limit.quarterlyLimit))},${limit.quarterlyLimit.toFixed(2).split('.')[1]} zł`);
+    expect(limitText).toContain(`${Math.round(limit.shareOfMinimumWage * 100)}%`);
+    expect(limitText).toContain(`${ru(wage)} zł`);
+    expect(text('risk.nierejestrowana.limitWatch')).toContain(`${limit.daysToRegisterAfterExceeding} днів`);
   });
 });
