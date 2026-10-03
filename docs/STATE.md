@@ -84,8 +84,7 @@ canonical перевіряє `visual/routes.spec.ts` на CI. Карта арх�
 
 ## Наступне
 
-Сесія 08 чекає на крок Mike: на превʼю Vercel відкрити своє старе посилання на
-результат (`…/questionnaire?…`) — має відкритись той самий результат на
-`/uk/poland/questionnaire`. Після цього `gh pr ready` і мердж PR теми 2.1. Далі
-**«Begin»** → сесія 09 «Три напрями стилю на превʼю», тема 2.2 (Opus, effort high).
-П2 чекає на obwieszczenie MRPiPS про 30-krotność на 2027 і долю друку 3147.
+Тема 2.1 закрита PR #141 (`0.4.0`; Mike відкрив старий share-лінк на превʼю — той
+самий результат на `/uk/poland/questionnaire`). **Mike пише «Begin»** → сесія 09
+«Три напрями стилю на превʼю», тема 2.2 (Opus, effort high). П2 чекає на
+obwieszczenie MRPiPS про 30-krotność на 2027 і долю друку 3147.
