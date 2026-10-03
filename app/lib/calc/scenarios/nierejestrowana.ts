@@ -2,6 +2,8 @@ import { getParams, sourcesOf } from '@/lib/rules/types';
 import { toRange, round2 } from '../range';
 import type { Answers, ScenarioResult } from '../types';
 import { expenseRate, skalaAnnualTax } from './shared';
+import { assessStatus } from '../status';
+import { businessGate, protectionNotes } from './status-gate';
 
 interface LimitParams {
   quarterlyLimit: number;
@@ -67,6 +69,15 @@ export function calcNierejestrowana(
     'nierejestrowana.cudzoziemcy'
   );
 
+  // Право — перша умова: art. 5 ust. 7 PP з 01.06.2025 пускає до nierejestrowanej
+  // рівно тих, хто може вести JDG, тож ліміт і 60 місяців без нього нічого не
+  // вирішують. Перелік підстав — `status.business_right`; `nierejestrowana.cudzoziemcy`
+  // лишається джерелом сторінки biznes.gov.pl/00115, що каже те саме словами.
+  const status = assessStatus(answers.stayBasis);
+  const gate = businessGate('nierejestrowana', status, sourcesOf('nierejestrowana.cudzoziemcy'));
+  if (gate) return gate;
+  const protection = protectionNotes(status);
+
   // Zbieg з етатом знімає społeczne так само, як у zleceniu — тоді і замовник не
   // платить своєї частини, тож кошт замовника дорівнює приходу людини.
   const socialWaived = zus.socialWaivedWhenUopAtLeastMinimumWage && answers.hasParallelUop;
@@ -92,7 +103,10 @@ export function calcNierejestrowana(
   // działalność gospodarczą, а трактування ФОП як zakładu (сценарій A) цього
   // питання не вирішує. Кажемо про невизначеність, а не вигадуємо відповідь.
   if (answers.hasActiveUaFop) noteKeys.push('nierejestrowana.uaFopNotVerified');
-  noteKeys.push('nierejestrowana.foreignersLimited');
+  // Громадянина ЄС art. 5 ust. 7 не стосується; решта аудиторії — чужинці.
+  if (answers.stayBasis !== 'eu_citizen') noteKeys.push('nierejestrowana.foreignersLimited');
+  noteKeys.push(...protection.noteKeys);
+  const allSources = [...sources, ...sourcesOf('status.business_right'), ...protection.sources];
 
   const unavailable = (noRangeReasonKey: string): ScenarioResult => ({
     id: 'nierejestrowana',
@@ -101,7 +115,8 @@ export function calcNierejestrowana(
     risk: 'yellow',
     riskReasonKey: 'risk.nierejestrowana.limitWatch',
     noteKeys,
-    sources,
+    noteVars: protection.noteVars,
+    sources: allSources,
   });
 
   if (hadBusinessInLookback) return unavailable('nierejestrowana.priorBusiness');
@@ -139,6 +154,7 @@ export function calcNierejestrowana(
     risk: 'yellow',
     riskReasonKey: 'risk.nierejestrowana.limitWatch',
     noteKeys: availableNotes,
-    sources,
+    noteVars: protection.noteVars,
+    sources: allSources,
   };
 }

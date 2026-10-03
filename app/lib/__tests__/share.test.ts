@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { encodeAnswers, decodeAnswers } from '@/lib/share';
 import { quantizeRevenue } from '@/lib/calc/quantize';
 import { assessResidency } from '../calc/residency';
+import { compareScenarios } from '../calc/scenarios';
 import { baseAnswers, withAnswers } from '../calc/__tests__/fixtures';
 
 describe('шеринг — точний дохід не витікає', () => {
@@ -53,5 +54,25 @@ describe('шеринг — round-trip', () => {
     const answers = withAnswers({ personalCenter: 'UA', economicCenter: 'PL', permanentHomeInUa: true });
     const restored = { ...answers, ...decodeAnswers(encodeAnswers(answers)) };
     expect(assessResidency(restored)).toEqual(assessResidency(answers));
+  });
+});
+
+describe('шеринг — підстава перебування і замовники (сесія 06)', () => {
+  it('підстава і кількість замовників переживають лінк, і порівняння збігається', () => {
+    const answers = withAnswers({ stayBasis: 'work_permit', clientCount: 'one' });
+    const decoded = decodeAnswers(encodeAnswers(answers));
+    expect(decoded.stayBasis).toBe('work_permit');
+    expect(decoded.clientCount).toBe('one');
+    const restored = { ...answers, ...decoded };
+    expect(compareScenarios(restored)).toEqual(compareScenarios(answers));
+  });
+
+  it('старе посилання без підстави не вигадує її: JDG — «невідомо», а не число', () => {
+    const query = encodeAnswers(baseAnswers).replace(/(^|&)b=[^&]*/, '');
+    const decoded = decodeAnswers(query);
+    expect(decoded.stayBasis).toBeUndefined();
+    const jdg = compareScenarios({ ...baseAnswers, ...decoded, stayBasis: undefined }).find((s) => s.id === 'jdg')!;
+    expect(jdg.rangeMonthly).toBeNull();
+    expect(jdg.noRangeReasonKey).toBe('status.business.unknown');
   });
 });

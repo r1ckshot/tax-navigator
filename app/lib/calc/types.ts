@@ -16,8 +16,18 @@ export type ExpenseShare = 'lt10' | 'from10to30' | 'gt30';
 export type JdgStatus = 'none' | 'lt6' | 'from6to30' | 'gt30';
 /** Прапорець *były pracodawca*: два різні тести, тому три стани, а не так/ні. */
 export type FormerEmployer = 'no' | 'identical' | 'partial';
+/**
+ * Підстава перебування — одна відповідь замість двох питань: громадянство важить
+ * лише як «ЄС чи ні», тож ЄС — один із варіантів. Коди закону — у `status.ts`.
+ * `other` чесно означає «висновку немає», а не «можна».
+ */
+export type StayBasis = 'eu_citizen' | 'ukr' | 'cukr' | 'permanent' | 'study' | 'blue_card' | 'work_permit' | 'other';
+/** Скільки замовників у B2B. Закон кількості не називає — від неї залежить лише рівень ризику. */
+export type ClientCount = 'one' | 'several';
 
 export interface Answers {
+  /** Необовʼязкове лише для старих посилань: без нього форми з умовою права — «невідомо». */
+  stayBasis?: StayBasis;
   daysInPl: DaysInPl;
   /** Умовне: показується лише коли daysInPl === 'unsure'. */
   daysInPlApprox?: number;
@@ -38,6 +48,8 @@ export interface Answers {
   /** Умовне: лише коли jdgStatus === 'none' | 'lt6' | 'from6to30'. */
   hadJdgInLast60Months?: boolean;
   voluntarySickness: boolean;
+  /** Умовне: лише коли JDG підставою дозволена. */
+  clientCount?: ClientCount;
 }
 
 // --- Результати ---
@@ -91,6 +103,11 @@ export interface ScenarioResult {
   risk: Risk;
   riskReasonKey: string;
   noteKeys: string[];
+  /**
+   * Значення з правил для `{змінних}` у тексті ризику й нотаток — дата не
+   * дублюється в `uk.ts`, а йде з того самого правила, що й висновок. Дати ISO.
+   */
+  noteVars?: Record<string, string>;
   subforms?: SubformResult[];
   sources: Source[];
 }

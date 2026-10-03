@@ -1,5 +1,7 @@
 import { getParams, sourcesOf } from '@/lib/rules/types';
 import { toRange, round2 } from '../range';
+import { assessStatus } from '../status';
+import { workNotes } from './status-gate';
 import type { Answers, ScenarioResult, SubformResult } from '../types';
 import { skalaAnnualTax, spanOf } from './shared';
 
@@ -108,6 +110,8 @@ export function calcZlecenie(answers: Answers, base: ZlecenieBase = 'employerCos
   }
   if (base === 'employerCost') noteKeys.push('uop.employerCostBasis');
 
+  const work = workNotes('zlecenie', assessStatus(answers.stayBasis));
+  noteKeys.unshift(...work.noteKeys);
   const subforms = [kup20, kup50];
 
   return {
@@ -117,6 +121,6 @@ export function calcZlecenie(answers: Answers, base: ZlecenieBase = 'employerCos
     riskReasonKey: 'risk.zlecenie.reclassification',
     noteKeys,
     subforms,
-    sources: [...sources, ...sourcesOf('zlecenie.przekwalifikowanie')],
+    sources: [...sources, ...sourcesOf('zlecenie.przekwalifikowanie'), ...work.sources],
   };
 }

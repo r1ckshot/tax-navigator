@@ -1,5 +1,7 @@
 import { getParams, sourcesOf } from '@/lib/rules/types';
 import { toRange, round2 } from '../range';
+import { assessStatus } from '../status';
+import { workNotes } from './status-gate';
 import type { Answers, ScenarioResult } from '../types';
 import { skalaAnnualTax } from './shared';
 
@@ -61,18 +63,17 @@ export function calcUop(answers: Answers, base: UopBase = 'employerCost'): Scena
   const annualTax = skalaAnnualTax(annualIncome, skala);
 
   const takeHomeMonthly = (annualGross - annualSocial - annualZdrowotna - annualTax) / 12;
+  const work = workNotes('uop', assessStatus(answers.stayBasis));
 
   return {
     id: 'uop',
     rangeMonthly: toRange(round2(takeHomeMonthly)),
     risk: 'green',
     riskReasonKey: 'risk.uop.standard',
-    noteKeys: base === 'employerCost' ? ['uop.employerCostBasis'] : [],
-    sources: sourcesOf(
-      'uop.employer_contributions',
-      'uop.employee_contributions',
-      'uop.pit',
-      'uop.annual_contribution_cap'
-    ),
+    noteKeys: [...work.noteKeys, ...(base === 'employerCost' ? ['uop.employerCostBasis'] : [])],
+    sources: [
+      ...sourcesOf('uop.employer_contributions', 'uop.employee_contributions', 'uop.pit', 'uop.annual_contribution_cap'),
+      ...work.sources,
+    ],
   };
 }

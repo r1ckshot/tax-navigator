@@ -1,5 +1,7 @@
 import { getParams, sourcesOf } from '@/lib/rules/types';
 import { toRange, round2, UNCERTAINTY } from '../range';
+import { assessStatus } from '../status';
+import { workNotes } from './status-gate';
 import type { Answers, ScenarioResult, SubformResult } from '../types';
 import { expenseRate, skalaAnnualTax, spanOf } from './shared';
 
@@ -63,7 +65,10 @@ export function calcIncubator(answers: Answers): ScenarioResult {
       }
     : { id: 'kup50', rangeMonthly: null, available: false, unavailableReasonKey: 'incubator.noCopyrightWork', sources };
 
-  const noteKeys = ['incubator.isEstimate', 'incubator.noZus'];
+  // Діяльність веде юрособа інкубатора, людина підписує з нею dzieło чи zlecenie,
+  // тобто потрібне право на працю, а не на JDG (EVIDENCE «Право працювати…», п. 6).
+  const work = workNotes('incubator', assessStatus(answers.stayBasis));
+  const noteKeys = [...work.noteKeys, 'incubator.isEstimate', 'incubator.noZus'];
   if (copyrightAvailable && annualKup > p.copyrightAnnualCap) noteKeys.push('incubator.copyrightCapExceeded');
 
   const subforms = [kup20, kup50];
@@ -75,6 +80,6 @@ export function calcIncubator(answers: Answers): ScenarioResult {
     riskReasonKey: 'risk.incubator.dependency',
     noteKeys,
     subforms,
-    sources,
+    sources: [...sources, ...work.sources],
   };
 }

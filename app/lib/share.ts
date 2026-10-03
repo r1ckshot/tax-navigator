@@ -1,7 +1,14 @@
 import type { Answers } from '@/lib/calc/types';
 import { quantizeRevenue } from '@/lib/calc/quantize';
 
+/**
+ * Підстава перебування їде в посиланні, як і решта відповідей: поширення — явна
+ * дія людини, а без підстави одержувач побачив би JDG без числа (DECISIONS
+ * 2026-10-03). Це код варіанта, не документ і не номер; сума доходу лишається
+ * квантизованою.
+ */
 const KEYS: Record<string, keyof Answers> = {
+  b: 'stayBasis',
   d: 'daysInPl',
   p: 'personalCenter',
   e: 'economicCenter',
@@ -16,6 +23,7 @@ const KEYS: Record<string, keyof Answers> = {
   j: 'jdgStatus',
   o: 'hadJdgInLast60Months',
   k: 'voluntarySickness',
+  c: 'clientCount',
 };
 
 export function encodeAnswers(answers: Answers): string {
