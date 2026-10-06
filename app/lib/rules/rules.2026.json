@@ -7,39 +7,39 @@
       "rule_id": "residency.days_threshold",
       "params": { "days": 183, "partialDayCountsAsFull": true },
       "source_url": "https://www.gov.pl/web/finanse/objasnienia-podatkowe-z-29-kwietnia-2021-r-ws-rezydencji-podatkowej-oraz-zakresu-obowiazku-podatkowego-osob-fizycznych-w-polsce",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "residency.special_norm_52zr",
       "params": { "validFrom": "2024-01-01", "validTo": "2026-12-31" },
       "source_url": "https://orka.sejm.gov.pl/proc10.nsf/ustawy/2172_u.htm",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "residency.treaty_tiebreakers",
       "params": { "order": ["permanentHome", "centerOfInterests", "habitualAbode", "citizenship"] },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19940630269",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
 
     {
       "rule_id": "common.minimum_wage",
       "params": { "monthly": 4806 },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "common.projected_average_wage",
       "params": { "monthly": 9420 },
       "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
 
     {
       "rule_id": "jdg.ryczalt.rate",
       "params": { "rateProgramming": 0.12, "rateNarrowSupport": 0.085, "annualLimit": 8517200 },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "jdg.zdrowotna.ryczalt",
@@ -53,13 +53,13 @@
         "deductibleShareOfRevenue": 0.5
       },
       "source_url": "https://stat.gov.pl/",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "jdg.liniowy",
       "params": { "rate": 0.19, "zdrowotnaRate": 0.049, "zdrowotnaMinMonthly": 432.54, "zdrowotnaAnnualDeductionCap": 14100 },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "jdg.skala",
@@ -73,7 +73,7 @@
         "zdrowotnaMinMonthly": 432.54
       },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "jdg.zus.stages",
@@ -88,7 +88,7 @@
         "priorBusinessLookbackMonths": 60
       },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "jdg.byly_pracodawca",
@@ -97,7 +97,7 @@
         "zusReliefLostOnPartialOverlap": true
       },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19981440930",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
 
     {
@@ -112,7 +112,7 @@
         "isEstimate": true
       },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19910800350",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
 
     {
@@ -125,7 +125,7 @@
         "fgsp": 0.001
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00274",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "uop.employee_contributions",
@@ -137,7 +137,7 @@
         "zdrowotnaDeductibleFromTax": false
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00274",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "uop.pit",
@@ -146,13 +146,13 @@
         "kwotaZmniejszajacaMonthly": 300
       },
       "source_url": "https://www.podatki.gov.pl/twoj-e-pit/pytania-i-odpowiedzi/koszty-uzyskania-przychodow",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "uop.annual_contribution_cap",
       "params": { "annualBaseCap": 282600, "appliesTo": ["emerytalne", "rentowe"] },
       "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
 
     {
@@ -165,7 +165,7 @@
         "unverifiedComponents": ["ZUS/zdrowotna для zakładu"]
       },
       "source_url": "https://eureka.mf.gov.pl",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "fop.esv_vz",
@@ -177,7 +177,7 @@
         "vzTiedToMartialLaw": true
       },
       "source_url": "https://zakon.rada.gov.ua/laws/show/2464-17",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "zlecenie.contributions",
@@ -199,7 +199,7 @@
         "choroboweVoluntary": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/0098",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "zlecenie.kup",
@@ -210,7 +210,7 @@
         "appliedAfterSocialContributions": true
       },
       "source_url": "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-umowy-zlecenia-lub-o-dzielo",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "zlecenie.zbieg_z_etatem",
@@ -220,7 +220,7 @@
         "zdrowotnaAlwaysDue": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/001785",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "zlecenie.przekwalifikowanie",
@@ -229,7 +229,7 @@
         "testIsFactsNotContractName": true
       },
       "source_url": "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
 
     {
@@ -243,7 +243,7 @@
         "countsAccruedNotReceived": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "nierejestrowana.zus",
@@ -255,7 +255,7 @@
         "zdrowotnaAlwaysDue": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "nierejestrowana.pit",
@@ -267,7 +267,7 @@
         "cashBasis": true
       },
       "source_url": "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-dzialalnosci-nierejestrowanej",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "nierejestrowana.cudzoziemcy",
@@ -277,7 +277,7 @@
         "ukrPeselEligible": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
-      "verified_at": "2026-10-02"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "status.business_right",
@@ -290,7 +290,7 @@
         "peselRequiredForCeidgFrom": "2026-11-01"
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00806",
-      "verified_at": "2026-10-03"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "status.work_right",
@@ -303,7 +303,7 @@
         "ukrWithoutProtectionTransitionYears": 3
       },
       "source_url": "https://api.sejm.gov.pl/eli/acts/DU/2025/621/text.pdf",
-      "verified_at": "2026-10-03"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "status.ukr_protection",
@@ -315,7 +315,7 @@
         "lostOnAnyResidencePermit": true
       },
       "source_url": "https://www.gov.pl/web/udsc/przedluzenie-ochrony-czasowej-do-4-marca-2028-r",
-      "verified_at": "2026-10-03"
+      "verified_at": "2026-10-06"
     },
     {
       "rule_id": "jdg.przekwalifikowanie",
@@ -328,7 +328,7 @@
         "decisionEffectiveFromIssueDate": true
       },
       "source_url": "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
-      "verified_at": "2026-10-03"
+      "verified_at": "2026-10-06"
     }
   ]
 }
