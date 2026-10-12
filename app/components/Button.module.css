@@ -7,6 +7,9 @@
  * `.group` на батьку (картка-посилання) вмикає той самий hover для кнопки
  * всередині: картка й кнопка поводяться як одне ціле. Сама кнопка в такому
  * разі — <span>, бо посилання в посиланні — невалідний HTML.
+ *
+ * Той самий клас стоїть і на <button> (анкета, результат): шрифт успадковується,
+ * недоступна кнопка блідне, а натиск опускає кнопку на 1px — рівень руху state.
  */
 .button {
   display: inline-flex;
@@ -17,14 +20,28 @@
   padding: 0.75rem 1.5rem;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
+  font-family: inherit;
   font-size: var(--text-md);
   font-weight: 600;
   line-height: 1.2;
   text-decoration: none;
+  cursor: pointer;
   transition:
     background-color var(--motion-state) ease,
     border-color var(--motion-state) ease,
-    color var(--motion-state) ease;
+    color var(--motion-state) ease,
+    opacity var(--motion-state) ease,
+    translate var(--motion-state) var(--ease-out);
+}
+
+/* Окрема властивість `translate`: `transform` зайнятий анімацією появи. */
+.button:active:not(:disabled) {
+  translate: 0 1px;
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .primary {
@@ -33,7 +50,7 @@
   color: var(--accent-ink);
 }
 
-.primary:hover,
+.primary:hover:not(:disabled),
 .group:hover .primary {
   background: var(--accent-hover);
 }
@@ -45,7 +62,7 @@
   color: var(--accent);
 }
 
-.secondary:hover,
+.secondary:hover:not(:disabled),
 .group:hover .secondary {
   border-color: var(--accent);
   background: var(--accent-soft);
@@ -56,9 +73,19 @@
   transition: transform var(--motion-state) var(--ease-out);
 }
 
-.arrow:hover::after,
+.arrow:hover:not(:disabled)::after,
 .group:hover .arrow::after {
   transform: translateX(3px);
+}
+
+/* Стрілка назад — для «Назад»: та сама механіка, дзеркально. */
+.back::before {
+  content: '←';
+  transition: transform var(--motion-state) var(--ease-out);
+}
+
+.back:hover:not(:disabled)::before {
+  transform: translateX(-3px);
 }
 
 .group {
@@ -68,7 +95,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .button,
-  .arrow::after {
+  .arrow::after,
+  .back::before {
     transition: none;
+  }
+
+  .button:active:not(:disabled) {
+    translate: none;
   }
 }

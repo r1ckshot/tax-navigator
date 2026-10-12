@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Metadata } from 'next';
+import button from '@/components/Button.module.css';
 import { ColorSwatch } from '@/components/ColorSwatch';
 import { RiskBadge } from '@/components/RiskBadge';
 import { t } from '@/lib/i18n/uk';
@@ -122,11 +123,13 @@ export default function TokensPage() {
           ))}
         </div>
         <div className={styles.row}>
-          <button type="button">{t('tokens.buttonDefault')}</button>
-          <button type="button" data-variant="primary">
+          <button type="button" className={button.secondary}>
+            {t('tokens.buttonDefault')}
+          </button>
+          <button type="button" className={`${button.primary} ${button.arrow}`}>
             {t('tokens.buttonPrimary')}
           </button>
-          <button type="button" disabled>
+          <button type="button" className={button.primary} disabled>
             {t('tokens.buttonDisabled')}
           </button>
         </div>

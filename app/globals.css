@@ -140,7 +140,7 @@
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --motion-enter: 560ms;
   --motion-soft: 300ms;
-  --motion-state: 200ms;
+  --motion-state: 100ms;
   --stagger: 70ms;
 }
 
@@ -255,7 +255,10 @@ a {
   outline-offset: 2px;
 }
 
-button {
+/* Голий <button> без класу — запасний вигляд. Вигляд кнопок продукту дає
+   `Button.module.css`; `:where` обнуляє специфічність, тож будь-який клас
+   модуля перемагає ці правила, включно з hover. */
+:where(button) {
   font: inherit;
   cursor: pointer;
   border-radius: var(--radius-sm);
@@ -267,29 +270,17 @@ button {
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
-button:hover:not(:disabled) {
+:where(button:hover:not(:disabled)) {
   border-color: var(--ink-muted);
 }
 
-button[data-variant='primary'] {
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-color: var(--accent);
-  font-weight: 600;
-}
-
-button[data-variant='primary']:hover:not(:disabled) {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-}
-
-button:disabled {
+:where(button:disabled) {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  button {
+  :where(button) {
     transition: none;
   }
 }
