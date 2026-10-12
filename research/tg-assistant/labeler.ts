@@ -55,6 +55,13 @@ const INCOME_TAX = ['=pit', 'podat', 'податок', 'податк', 'нало
 const FORM_CHOICE = ['форм оподатк', 'форм налогообл', 'form opodatk', 'вигідн', 'выгодн', 'opłaca', 'oplaca'];
 // `ryczał`, не `ryczałt`: «na ryczałcie» основу `ryczałt` не містить.
 const RYCZALT = ['ryczał', 'ryczal', 'ричалт', 'рычалт'];
+// Статус UKR — і є тимчасовий захист: PESEL UKR його маркер, а не окрема підстава.
+const UKR_STATUS = ['ochron czasow', 'тимчасов захист', 'временн защит', '=cukr', '=цукр', 'pesel ukr', 'песел ukr', 'песел укр', 'status ukr', 'статус ukr', 'статус укр'];
+// `інозем`, не `іноземц`: називний «іноземець» основи `іноземц` не містить.
+const FOREIGNER = ['cudzoziem', 'інозем', 'иностран', 'kart pobyt', 'карт побиту', 'карт побыту', ...UKR_STATUS];
+// Перша основа фрази вбирає чергування: `дозв` — і «дозвіл», і «дозволу».
+const WORK_PERMIT = ['zezwol na prac', 'дозв на робот', 'дозв на прац', 'разреш на работ', 'oświadcz o powierz', 'oswiadcz o powierz', 'powiadom o powierz'];
+const PIP = ['przekwalifik', 'перекваліф', 'переквалиф', '=pip', 'inspekcj pracy', 'інспекці праці', 'инспекци труд'];
 
 /**
  * Словник на правило. Ключ — `rule_id` із `rules.2026.json`; тест тримає
@@ -109,13 +116,22 @@ export const RULE_CLAUSES: Record<string, Clause[]> = {
   'zlecenie.contributions': [{ any: ZLECENIE, and: [...CONTRIBUTIONS, ...HEALTH] }],
   'zlecenie.kup': [{ any: ZLECENIE, and: ['koszt', '=kup', 'витрат', 'расход', ...INCOME_TAX] }, { any: ['autorsk', 'авторськ прав', 'авторск прав'] }],
   'zlecenie.zbieg_z_etatem': [{ any: ZLECENIE, and: UOP }, { any: ['zbieg tytuł', 'zbieg tytul'] }],
-  'zlecenie.przekwalifikowanie': [{ any: ['przekwalifik', 'перекваліф', 'переквалиф', '=pip', 'inspekcj pracy', 'інспекці праці', 'инспекци труд'] }],
+  'zlecenie.przekwalifikowanie': [{ any: PIP }],
+  // Без `=b2b` і JDG питання про PIP лишається за zlecenie: B2B — це JDG.
+  'jdg.przekwalifikowanie': [{ any: PIP, and: [...JDG, '=b2b'] }],
   'nierejestrowana.limit': [{ any: NIEREJ }],
   'nierejestrowana.zus': [{ any: NIEREJ, and: [...CONTRIBUTIONS, ...HEALTH] }],
   'nierejestrowana.pit': [{ any: NIEREJ, and: INCOME_TAX }],
   'nierejestrowana.cudzoziemcy': [
-    { any: NIEREJ, and: ['pesel', 'песел', 'cudzoziem', 'іноземц', 'иностран', 'українц', 'украинц', 'ukrai', 'kart pobyt', 'карт побиту', 'карт побыту', 'ochron czasow', 'тимчасов захист', 'временн защит'] },
+    { any: NIEREJ, and: ['pesel', 'песел', 'cudzoziem', 'інозем', 'иностран', 'українц', 'украинц', 'ukrai', 'kart pobyt', 'карт побиту', 'карт побыту', 'ochron czasow', 'тимчасов захист', 'временн защит'] },
   ],
+  // Право працювати й вести бізнес — тема 1.3: підстава перебування, не податок.
+  'status.business_right': [{ any: [...JDG, ...NIEREJ, '=ceidg'], and: FOREIGNER }],
+  'status.work_right': [
+    { any: [...WORK_PERMIT, 'право на робот', 'право на прац', 'прав працюват', 'прав работат', 'praw do prac'] },
+    { any: [...UOP, ...ZLECENIE], and: FOREIGNER },
+  ],
+  'status.ukr_protection': [{ any: UKR_STATUS }],
 };
 
 const phrases = new Map<string, RegExp>();

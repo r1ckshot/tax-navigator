@@ -35,9 +35,19 @@ describe('matchRules — AC-05', () => {
     // «na ryczałcie» не містить основи `ryczałt` — пастка, через яку основа коротша.
     ['ryczałt у місцевому відмінку + składka zdrowotna', 'Czy na ryczałcie płacę składkę zdrowotną od przychodu?', ['jdg.ryczalt.rate', 'jdg.zdrowotna.ryczalt']],
     ['ФОП і ЄСВ — два правила, у порядку матриці', 'Хтось знає, чи треба платити ЄСВ, якщо ФОП на паузі, а я в Польщі?', ['fop.zaklad_in_pl', 'fop.esv_vz']],
-    ['nierejestrowana з PESEL UKR', 'Czy mogę prowadzić działalność nierejestrowaną z PESEL UKR i ile mogę zarobić?', ['nierejestrowana.limit', 'nierejestrowana.cudzoziemcy']],
+    // Еталон ширшав разом із матрицею (тема 1.3): PESEL UKR — і є статус захисту, а право
+    // вести nierejestrowaną іноземцю дає саме status.business_right.
+    ['nierejestrowana з PESEL UKR', 'Czy mogę prowadzić działalność nierejestrowaną z PESEL UKR i ile mogę zarobić?', ['nierejestrowana.limit', 'nierejestrowana.cudzoziemcy', 'status.business_right', 'status.ukr_protection']],
     ['мінімалка у родовому відмінку', 'Від мінімальної зарплати рахується внесок?', ['common.minimum_wage']],
     ['UoP і PIT цілим словом', 'Mam UoP, jaki PIT zapłacę?', ['uop.pit']],
+    // Тема 1.3. «дозвіл на роботу» ловиться через `дозв`, «тимчасовому захисті» — фразою.
+    ['дозвіл на роботу на тимчасовому захисті', 'Чи потрібен дозвіл на роботу, якщо я на тимчасовому захисті?', ['status.work_right', 'status.ukr_protection']],
+    ['іноземець із kartą pobytu відкриває JDG', 'Czy cudzoziemiec z kartą pobytu może założyć działalność w CEIDG?', ['status.business_right']],
+    ['«іноземець» у називному: nierejestrowana', 'Іноземець на nierejestrowanej: скільки можна заробити?', ['nierejestrowana.limit', 'nierejestrowana.cudzoziemcy', 'status.business_right']],
+    ['zlecenie іноземця: друга клауза права працювати', 'Іноземець на umowie zlecenie: які складки?', ['zlecenie.contributions', 'status.work_right']],
+    // B2B — це JDG: PIP і B2B дають обидва правила перекваліфікації, UoP без податку нічого не додає.
+    ['PIP і B2B', 'PIP може перекваліфікувати мій B2B на umowę o pracę?', ['zlecenie.przekwalifikowanie', 'jdg.przekwalifikowanie']],
+    ['PIP без B2B і JDG лишається за zlecenie', 'PIP перевіряє zlecenie, що буде?', ['zlecenie.przekwalifikowanie']],
   ])('%s', (_, text, expected) => {
     expect(matchRules(text, MATRIX)).toEqual(expected);
   });
@@ -47,6 +57,8 @@ describe('matchRules — AC-05', () => {
     ['Mały ZUS Plus', 'Як відкрити Mały ZUS Plus і чи вийде дешевше?'],
     // `=pit` — ціле слово: `pitch` не робить питання про UoP податковим.
     ['pitch не PIT', 'Mam UoP, a pitch deck robić po polsku?'],
+    // `право на робот`, а не `робот`: пошук роботи — не питання про право працювати.
+    ['пошук роботи', 'Шукаю роботу в Польщі, де дивитись вакансії?'],
   ])('біла пляма: %s', (_, text) => {
     expect(matchRules(text, MATRIX)).toEqual([]);
   });
