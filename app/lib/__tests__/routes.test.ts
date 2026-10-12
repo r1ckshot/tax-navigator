@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import nextConfig from '../../../next.config.mjs';
-import { LEGACY_REDIRECTS, alternates, countryHref } from '../routes';
+import { BRAND_REWRITES, LEGACY_REDIRECTS, alternates, brandHref, countryHref } from '../routes';
 import { siteUrl } from '../site';
 
 describe('адреси /{мова}/poland (ADR-0003)', () => {
@@ -28,9 +28,9 @@ describe('редиректи зі старих адрес', () => {
     expect(await nextConfig.redirects?.()).toEqual(LEGACY_REDIRECTS);
   });
 
-  it('/ — тимчасовий (там буде лендінг бренду), анкета й джерела — постійні', () => {
+  it('анкета й джерела — постійні; / більше не редиректиться', () => {
     const bySource = Object.fromEntries(LEGACY_REDIRECTS.map((r) => [r.source, r]));
-    expect(bySource['/']).toEqual({ source: '/', destination: '/uk/poland', permanent: false });
+    expect(bySource['/']).toBeUndefined();
     expect(bySource['/questionnaire']).toEqual({
       source: '/questionnaire',
       destination: '/uk/poland/questionnaire',
@@ -51,6 +51,22 @@ describe('редиректи зі старих адрес', () => {
 
   it('404 без спільного кореневого layout вмикається прапором', () => {
     expect(nextConfig.experimental?.globalNotFound).toBe(true);
+  });
+});
+
+/**
+ * `/` — лендінг бренду (тема 2.2). Rewrite, а не редирект: адреса лишається
+ * `/`, а сторінку рендерить `app/[locale]/page.tsx` мовою за замовчуванням.
+ */
+describe('лендінг бренду', () => {
+  it('next.config.mjs віддає рівно BRAND_REWRITES', async () => {
+    expect(await nextConfig.rewrites?.()).toEqual(BRAND_REWRITES);
+  });
+
+  it('/ показує бренд мови за замовчуванням, інша мова — під своїм префіксом', () => {
+    expect(BRAND_REWRITES).toEqual([{ source: '/', destination: '/uk' }]);
+    expect(brandHref('uk')).toBe('/');
+    expect(brandHref('en' as never)).toBe('/en');
   });
 });
 

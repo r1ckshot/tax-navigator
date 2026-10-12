@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { DEFAULT_LOCALE, translator } from '@/lib/i18n';
-import { countryHref } from '@/lib/routes';
+import button from '@/components/Button.module.css';
+import { SiteHeader } from '@/components/SiteHeader';
+import { brandHref } from '@/lib/routes';
+import { fontFaces } from './fonts';
 
 /**
  * 404 для будь-якої адреси. Спільного кореневого layout немає — їх два,
@@ -16,13 +19,16 @@ export const metadata: Metadata = {
 
 export default function GlobalNotFound() {
   return (
-    <html lang={DEFAULT_LOCALE}>
+    <html lang={DEFAULT_LOCALE} style={fontFaces}>
       <body>
+        <SiteHeader />
         <main>
           <h1>{t('notFound.title')}</h1>
           <p>{t('notFound.lead')}</p>
           <p>
-            <a href={countryHref(DEFAULT_LOCALE)}>{t('notFound.home')}</a>
+            <a className={`${button.primary} ${button.arrow}`} href={brandHref(DEFAULT_LOCALE)}>
+              {t('notFound.home')}
+            </a>
           </p>
         </main>
       </body>

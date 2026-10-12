@@ -6,11 +6,12 @@
  * самий результат.
  */
 const LEGACY_REDIRECTS = [
-  // 307: `/` стане лендінгом бренду в темі 2.2, постійний редирект браузер закешував би.
-  { source: '/', destination: '/uk/poland', permanent: false },
   { source: '/questionnaire', destination: '/uk/poland/questionnaire', permanent: true },
   { source: '/sources', destination: '/uk/poland/sources', permanent: true },
 ];
+
+/** `/` — лендінг бренду мови за замовчуванням (`BRAND_REWRITES` у `routes.ts`). */
+const BRAND_REWRITES = [{ source: '/', destination: '/uk' }];
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -29,6 +30,10 @@ const nextConfig = {
 
   async redirects() {
     return LEGACY_REDIRECTS;
+  },
+
+  async rewrites() {
+    return BRAND_REWRITES;
   },
 };
 
