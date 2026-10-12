@@ -41,7 +41,7 @@ const dark = declarations(darkBlock);
  * Нова родина без запису тут класифікується як роль і валить тест «роль не
  * тримає hex» — тобто сама просить себе дописати.
  */
-const PALETTE_NAME = /^--(?:(?:stone|teal|green|amber|red)-\d{1,2}|white)$/;
+const PALETTE_NAME = /^--(?:(?:paper|navy|green|amber|red)-\d{1,2}|white)$/;
 const HEX = /#[0-9a-f]{3,8}\b/i;
 const RGB = /\brgba?\(/i;
 

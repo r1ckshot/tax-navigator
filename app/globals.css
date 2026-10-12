@@ -1,14 +1,17 @@
 /*
  * Дизайн-токени. Єдине джерело відступів, кольорів, радіусів і типографічної
- * шкали — компоненти не тримають ad-hoc значень, а посилаються сюди. Один teal-
- * акцент на нейтральній базі: колір довіри для фінансового інструменту, який не
- * конфліктує зі status-палітрою (🟢/🟡/🔴 лишаються тільки за змістом ризику).
+ * шкали — компоненти не тримають ad-hoc значень, а посилаються сюди.
+ *
+ * Напрям «Реєстр» (тема 2.2, DECISIONS 2026-10-03): теплий папір, чорнильно-
+ * синій акцент, сериф у заголовках, лінійки замість карток. Акцент не зелений
+ * і не червоний — ті кольори зайняті рівнями ризику (🟢/🟡/🔴 лише за змістом).
  *
  * Колір лежить двома шарами, і межа між ними перевіряється тестом
  * (app/__tests__/design-tokens.test.ts):
  *   палітра — сирі значення без жодного знання про призначення;
  *   ролі    — лише посилання на палітру, жодного hex.
  * Компоненти читають тільки ролі. Тема перемикає ролі, палітру не чіпає.
+ * Контраст ролей: node scripts/contrast.mjs app/globals.css
  */
 :root {
   color-scheme: light;
@@ -19,64 +22,73 @@
      відтінок не зсуває сусідів, а різниця чисел читається як відстань за
      контрастом. Тест перераховує світлоту і валиться, якщо імʼя збрехало. */
 
-  /* Теплі нейтральні — з довідника dataviz. */
-  --stone-99: #fefdfb;
-  --stone-96: #f5f4ef;
-  --stone-95: #f2f0ea;
-  --stone-91: #e7e4da;
-  --stone-90: #e3e1db;
-  --stone-84: #cdcbc2;
-  --stone-81: #c3c2b7;
-  --stone-64: #8f8d86;
-  --stone-60: #85837a;
-  --stone-44: #56534b;
-  --stone-38: #46453f;
-  --stone-31: #33322f;
-  --stone-26: #262521;
-  --stone-22: #1c1b18;
-  --stone-21: #1c1a13;
-  --stone-16: #100f0d;
+  /* Теплий папір: нейтральні з легкою жовтизною, як газетний аркуш. */
+  --paper-99: #fefcf8;
+  --paper-96: #f6f3ed;
+  --paper-95: #f4f1ec;
+  --paper-94: #f0ece3;
+  --paper-90: #e4dfd6;
+  --paper-84: #d0ccc2;
+  --paper-80: #c4c0ba;
+  --paper-70: #a4a19b;
+  --paper-51: #69665e;
+  --paper-42: #534f48;
+  --paper-39: #4a4742;
+  --paper-33: #383530;
+  --paper-23: #201e1a;
+  --paper-21: #1c1914;
+  --paper-20: #191713;
+  --paper-16: #110f0c;
   --white: #ffffff;
 
-  --teal-95: #e6f2f0;
-  --teal-85: #5eead4;
-  --teal-81: #9ecdc7;
-  --teal-78: #2dd4bf;
-  --teal-51: #0f766e;
-  --teal-42: #0b5c55;
-  --teal-41: #2a5551;
-  --teal-29: #12332f;
-  --teal-28: #06302c;
+  /* Чорнильно-синій — один акцент на всю систему. */
+  --navy-95: #ebf2fe;
+  --navy-86: #bed5fe;
+  --navy-83: #b5cbf3;
+  --navy-78: #9bbbf5;
+  --navy-45: #3c5582;
+  --navy-42: #214a9b;
+  --navy-36: #17397b;
+  --navy-29: #1d2d4c;
+  --navy-21: #0a1936;
 
-  --green-62: #0ca30c;
-  --amber-81: #fab219;
-  --red-57: #d03b3b;
+  --green-74: #61c568;
+  --green-54: #278733;
+  --amber-84: #fbc044;
+  --amber-79: #f3b01d;
+  --red-70: #ed756e;
+  --red-54: #c52c2a;
 
   /* ── Шар 2: ролі ─────────────────────────────────────────────────────────
      Імʼя за призначенням, значення — посилання на палітру. */
 
-  /* Поверхні й чорнило, трохи теплі. Поверхня навмисне не чисто-біла (#fff
-     «пече»), а фон сторінки помітно темніший — щоб картки читались. */
-  --surface: var(--stone-99);
-  --plane: var(--stone-91);
-  --sunken: var(--stone-95);
-  --ink: var(--stone-21);
-  --ink-secondary: var(--stone-44);
-  --ink-muted: var(--stone-60);
-  --hairline: var(--stone-90);
-  --hairline-strong: var(--stone-84);
+  /* Поверхня — найсвітліший аркуш, фон сторінки трохи темніший, щоб блоки на
+     ньому читались без тіні. */
+  --surface: var(--paper-99);
+  --plane: var(--paper-94);
+  --sunken: var(--paper-96);
+  --ink: var(--paper-21);
+  --ink-secondary: var(--paper-42);
+  --ink-muted: var(--paper-51);
+  --hairline: var(--paper-90);
+  --hairline-strong: var(--paper-84);
 
   /* Бренд-акцент — один, стриманий. Ніколи не «серія» в даних. */
-  --accent: var(--teal-51);
-  --accent-hover: var(--teal-42);
+  --accent: var(--navy-42);
+  --accent-hover: var(--navy-36);
   --accent-ink: var(--white);
-  --accent-soft: var(--teal-95);
-  --accent-border: var(--teal-81);
+  --accent-soft: var(--navy-95);
+  --accent-border: var(--navy-83);
 
   /* Status-палітра: фіксована, тільки значення ризику, ніколи не «серія». */
-  --risk-green: var(--green-62);
-  --risk-yellow: var(--amber-81);
-  --risk-red: var(--red-57);
+  --risk-green: var(--green-54);
+  --risk-yellow: var(--amber-79);
+  --risk-red: var(--red-54);
+
+  /* Шрифти: обличчя ставить `app/fonts.ts` змінними на <html>; тут лише
+     запасний стек на час завантаження й для сторінок без них. */
+  --font-display: var(--font-serif-face, Georgia), Georgia, 'Times New Roman', serif;
+  --font-body: var(--font-sans-face, system-ui), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* ── Шкали без ролей ─────────────────────────────────────────────────────
      Типографіка, відступи й радіуси — один шар свідомо: жодна з цих величин
@@ -108,17 +120,28 @@
   --space-7: 3rem;
 
   /* Радіуси. */
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
+  /* Радіуси малі: «Реєстр» тримається на лінійках, а не на картках. */
+  --radius-sm: 3px;
+  --radius: 4px;
+  --radius-lg: 6px;
 
   /* Підняття (тінь у світлій темі, рамка — у темній). Тінь — композит зі
      зсувом, розмиттям і альфою, не колір палітри; єдине місце, де rgba
      дозволено поза шаром 1. */
-  --shadow-sm: 0 1px 2px rgba(20, 19, 12, 0.05), 0 1px 3px rgba(20, 19, 12, 0.06);
-  --shadow-md: 0 2px 6px rgba(20, 19, 12, 0.06), 0 6px 20px rgba(20, 19, 12, 0.08);
+  --shadow-sm: 0 1px 2px rgba(40, 30, 10, 0.06);
+  --shadow-md: 0 1px 2px rgba(40, 30, 10, 0.05), 0 10px 30px rgba(40, 30, 10, 0.08);
 
   --gap: var(--space-4);
+
+  /* Рух — три рівні (DECISIONS 2026-10-12). Лише transform і opacity; цифри
+     результату, ризик і дисклеймер не анімуються взагалі.
+     enter — поява сторінки чи кроку; soft — пункти по черзі; state — наведення,
+     натиск, вибір (лише колір і 1px зсуву). */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --motion-enter: 560ms;
+  --motion-soft: 300ms;
+  --motion-state: 200ms;
+  --stagger: 70ms;
 }
 
 /* Темна тема — власні кроки палітри, а не автоматична інверсія. Перевизначає
@@ -127,23 +150,28 @@
   :root {
     color-scheme: dark;
 
-    --surface: var(--stone-26);
-    --plane: var(--stone-16);
-    --sunken: var(--stone-22);
-    --ink: var(--stone-96);
-    --ink-secondary: var(--stone-81);
-    --ink-muted: var(--stone-64);
-    --hairline: var(--stone-31);
-    --hairline-strong: var(--stone-38);
+    --surface: var(--paper-23);
+    --plane: var(--paper-16);
+    --sunken: var(--paper-20);
+    --ink: var(--paper-95);
+    --ink-secondary: var(--paper-80);
+    --ink-muted: var(--paper-70);
+    --hairline: var(--paper-33);
+    --hairline-strong: var(--paper-39);
 
-    --accent: var(--teal-78);
-    --accent-hover: var(--teal-85);
-    --accent-ink: var(--teal-28);
-    --accent-soft: var(--teal-29);
-    --accent-border: var(--teal-41);
+    --accent: var(--navy-78);
+    --accent-hover: var(--navy-86);
+    --accent-ink: var(--navy-21);
+    --accent-soft: var(--navy-29);
+    --accent-border: var(--navy-45);
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.5);
+    --risk-green: var(--green-74);
+    --risk-yellow: var(--amber-84);
+    --risk-red: var(--red-70);
+
+    /* На темному папері підняття дає рамка, тінь лише ледь відділяє. */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0);
+    --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -160,7 +188,7 @@ body {
   margin: 0;
   background: var(--plane);
   color: var(--ink);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
@@ -179,9 +207,24 @@ p {
   text-wrap: pretty;
 }
 
+/* Короткі тексти (пункти, підписи, клітинки) — рівними рядками, а не довгий
+   рядок і одне слово під ним. Де саме дозволено ламати, вирішує словник
+   (`i18n/typeset.ts`): прийменник і тире не лишаються в кінці рядка. */
+li,
+legend,
+summary,
+figcaption,
+th,
+td {
+  text-wrap: balance;
+}
+
+/* Заголовки — сериф із тонкою вагою: редакційний голос «Реєстру». */
 h1,
 h2,
 h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
   line-height: var(--leading-tight);
   letter-spacing: -0.01em;
   text-wrap: balance;
@@ -248,5 +291,43 @@ button:disabled {
 @media (prefers-reduced-motion: reduce) {
   button {
     transition: none;
+  }
+}
+
+/* Перехід між кроками анкети (View Transitions API, де є). Ім'я `step`
+   ставить Question.module.css. «Зменшити рух» — без анімації взагалі. */
+/* Стара картка лише гасне; нова з'являється одразу, а її вміст (питання,
+   варіанти) проявляється по черзі зсередини — Question.module.css. Висоту
+   між кроками плавно міняє група. */
+::view-transition-group(step) {
+  animation-duration: var(--motion-soft);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(step) {
+  animation: 160ms ease-in both stepOut;
+}
+
+::view-transition-new(step) {
+  animation: 160ms ease-out both stepEnter;
+}
+
+@keyframes stepOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes stepEnter {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

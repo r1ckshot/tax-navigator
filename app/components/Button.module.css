@@ -1,0 +1,74 @@
+/*
+ * Кнопка-посилання продукту. Одна форма, два рівні:
+ *   .primary   — заливка акцентом; одна на екран, головна дія;
+ *   .secondary — рамка без заливки, та сама форма; другорядна дія.
+ * Стрілка — `.arrow`, з відступом від тексту (gap), зсувається при наведенні.
+ *
+ * `.group` на батьку (картка-посилання) вмикає той самий hover для кнопки
+ * всередині: картка й кнопка поводяться як одне ціле. Сама кнопка в такому
+ * разі — <span>, бо посилання в посиланні — невалідний HTML.
+ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 48px;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    background-color var(--motion-state) ease,
+    border-color var(--motion-state) ease,
+    color var(--motion-state) ease;
+}
+
+.primary {
+  composes: button;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.primary:hover,
+.group:hover .primary {
+  background: var(--accent-hover);
+}
+
+.secondary {
+  composes: button;
+  border-color: var(--accent-border);
+  background: transparent;
+  color: var(--accent);
+}
+
+.secondary:hover,
+.group:hover .secondary {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.arrow::after {
+  content: '→';
+  transition: transform var(--motion-state) var(--ease-out);
+}
+
+.arrow:hover::after,
+.group:hover .arrow::after {
+  transform: translateX(3px);
+}
+
+.group {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .arrow::after {
+    transition: none;
+  }
+}

@@ -1,4 +1,5 @@
 import '../globals.css';
+import { fontFaces } from '../fonts';
 
 /**
  * Кореневий layout технічних сторінок без мови в адресі (`/tokens`). Окремий,
@@ -7,7 +8,7 @@ import '../globals.css';
  */
 export default function TechnicalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="uk">
+    <html lang="uk" style={fontFaces}>
       <body>{children}</body>
     </html>
   );

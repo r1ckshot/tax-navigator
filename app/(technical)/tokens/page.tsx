@@ -21,7 +21,7 @@ export const dynamic = 'force-static';
 
 const RISKS: Risk[] = ['green', 'yellow', 'red'];
 
-/** `--teal-51` → `teal-51`: у підписі ролі префікс лише шумить. */
+/** `--navy-42` → `navy-42`: у підписі ролі префікс лише шумить. */
 const bare = (name: string) => name.replace(/^--/, '');
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {

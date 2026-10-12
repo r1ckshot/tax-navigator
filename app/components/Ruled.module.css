@@ -1,0 +1,70 @@
+/*
+ * Список-реєстр: пункти під лінійками. Один зразок руху на весь продукт
+ * (DECISIONS 2026-10-03, напрям «Реєстр»): рядок проявляється, лінійка під ним
+ * прокреслюється зліва направо. Черговість задає позиція в списку (`--i` у
+ * style), а не значення: на лендінгу порядок варіантів фіксований і не має
+ * читатись як рейтинг. Лише transform і opacity — без перерахунку розмітки.
+ */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list > li {
+  position: relative;
+  animation: rise var(--motion-enter) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms + var(--ruled-delay, 0ms));
+}
+
+/* Лінійка — окремий шар, щоб прокреслюватись, а не зʼявлятись разом із рядком. */
+.list > li::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--hairline-strong);
+  transform-origin: left;
+  animation: draw 700ms cubic-bezier(0.6, 0, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + var(--ruled-delay, 0ms) + 160ms);
+}
+
+/* Лінійка чорнилом над реєстром (шапка колонки): прокреслюється так само,
+   як тонкі під рядками, але раніше за них. Затримка — `--ink-rule-delay`. */
+.inkRule {
+  position: relative;
+}
+
+.inkRule::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--ink);
+  transform-origin: left;
+  animation: draw 800ms cubic-bezier(0.6, 0, 0.2, 1) var(--ink-rule-delay, 180ms) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+}
+
+@keyframes draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* «Зменшити рух» — одразу кінцевий стан, без жодного кадру. */
+@media (prefers-reduced-motion: reduce) {
+  .list > li,
+  .list > li::after,
+  .inkRule::before {
+    animation: none;
+  }
+}

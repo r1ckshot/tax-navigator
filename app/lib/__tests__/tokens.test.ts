@@ -6,12 +6,12 @@ import { parseTokens } from '../tokens';
 const FIXTURE = `
 /* --ghost: #000000; коментар не декларація */
 :root {
-  --teal-51: #0f766e;
-  --stone-99: #fefdfb;
-  --stone-26: #262521;
-  --red-57: #d03b3b;
-  --surface: var(--stone-99);
-  --risk-red: var(--red-57);
+  --navy-42: #214a9b;
+  --paper-99: #fefcf8;
+  --paper-23: #201e1a;
+  --red-54: #c52c2a;
+  --surface: var(--paper-99);
+  --risk-red: var(--red-54);
   --text-sm: 0.88rem;
   --space-1: 0.25rem;
   --radius-sm: 6px;
@@ -21,7 +21,7 @@ const FIXTURE = `
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --surface: var(--stone-26);
+    --surface: var(--paper-23);
   }
 }
 button { color: var(--surface); }
@@ -31,15 +31,15 @@ describe('parseTokens: фікстура', () => {
   const dict = parseTokens(FIXTURE);
 
   it('палітра — лише родини палітри, коментар не рахується', () => {
-    expect(dict.palette.map((t) => t.name)).toEqual(['--teal-51', '--stone-99', '--stone-26', '--red-57']);
+    expect(dict.palette.map((t) => t.name)).toEqual(['--navy-42', '--paper-99', '--paper-23', '--red-54']);
   });
 
   it('роль із перевизначенням у темній темі бере темне посилання', () => {
-    expect(dict.colorRoles).toContainEqual({ name: '--surface', light: '--stone-99', dark: '--stone-26' });
+    expect(dict.colorRoles).toContainEqual({ name: '--surface', light: '--paper-99', dark: '--paper-23' });
   });
 
   it('роль без перевизначення лишається тією самою в обох темах', () => {
-    expect(dict.colorRoles).toContainEqual({ name: '--risk-red', light: '--red-57', dark: '--red-57' });
+    expect(dict.colorRoles).toContainEqual({ name: '--risk-red', light: '--red-54', dark: '--red-54' });
   });
 
   it('посилання не на палітру (--gap → --space-1) — не роль кольору', () => {
@@ -56,8 +56,8 @@ describe('parseTokens: фікстура', () => {
     const [lightOnly] = FIXTURE.split('@media');
     expect(parseTokens(lightOnly).colorRoles).toContainEqual({
       name: '--surface',
-      light: '--stone-99',
-      dark: '--stone-99',
+      light: '--paper-99',
+      dark: '--paper-99',
     });
   });
 });
@@ -66,17 +66,17 @@ describe('parseTokens: справжній globals.css', () => {
   const dict = parseTokens(readFileSync(join(process.cwd(), 'app', 'globals.css'), 'utf8'));
 
   it('розмір словника', () => {
-    // 16 stone + white + 9 teal + 3 статусні; 8 поверхонь + 5 акцент + 3 ризик;
+    // 16 paper + white + 9 navy + 6 статусних (крок на тему); 8 поверхонь + 5 акцент + 3 ризик;
     // 7 кеглів, 7 відступів, 3 радіуси. Змінився словник — число міняється свідомо.
-    expect(dict.palette).toHaveLength(29);
+    expect(dict.palette).toHaveLength(32);
     expect(dict.colorRoles).toHaveLength(16);
     expect(dict.text).toHaveLength(7);
     expect(dict.space).toHaveLength(7);
     expect(dict.radius).toHaveLength(3);
   });
 
-  it('акцент у двох темах вказує на різні кроки teal', () => {
-    expect(dict.colorRoles).toContainEqual({ name: '--accent', light: '--teal-51', dark: '--teal-78' });
+  it('акцент у двох темах вказує на різні кроки navy', () => {
+    expect(dict.colorRoles).toContainEqual({ name: '--accent', light: '--navy-42', dark: '--navy-78' });
   });
 
   it('кожна роль вказує на колір, що є в палітрі', () => {
