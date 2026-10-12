@@ -59,31 +59,31 @@ C4Container
 | Доступ до правил | `app/lib/rules/types.ts` | rules | — | `getRule`/`getParams`/`sourcesOf` (`:26,32,48`); кидає на невідомий `rule_id` (`:28`) |
 | Політика діапазонів | `app/lib/calc/range.ts` | calc | — | `UNCERTAINTY.ARITHMETIC=0.04`/`ESTIMATE=0.1` (`:13-16`), `toRange` (`:18`) |
 | Квантизація доходу | `app/lib/calc/quantize.ts` | calc | `storage.ts:2`, `schema.ts:3`, `Question.tsx:6` | `snapToStep` (`:27`), `quantizeRevenue` (`:34`), константи кроку 2 500 (`:14-16`) — єдине джерело |
-| Резидентство | `app/lib/calc/residency.ts` | calc | `app/[locale]/poland/questionnaire/Questionnaire.tsx:154` | `assessResidency` (`:13`), `homeInUaMatters` (`:63`), тай-брейки (`:77`) |
+| Резидентство | `app/lib/calc/residency.ts` | calc | `app/[locale]/poland/questionnaire/Questionnaire.tsx:184` | `assessResidency` (`:13`), `homeInUaMatters` (`:63`), тай-брейки (`:77`) |
 | ZUS | `app/lib/calc/zus.ts` | calc | `jdg.ts:39` | 4 етапи у фіксованому пріоритеті (`:28-67`) |
 | Право працювати | `app/lib/calc/status.ts` | calc | `scenarios/status-gate.ts` | `assessStatus` (`:82`): доступ до кожної форми за підставою перебування з `rule_id` (`BASIS_TO_RULE_CODE`, `:48`) |
 | Свіжість звірки | `app/lib/calc/freshness.ts` | calc | `app/lib/sources.ts` | `STALE_AFTER_DAYS` (`:11`), `isStale` (`:23`) |
-| Сценарії | `app/lib/calc/scenarios/` | calc | `app/[locale]/poland/questionnaire/Questionnaire.tsx:155` | Фасад `compareScenarios`, порядок `[fop, jdg, incubator, nierejestrowana, zlecenie, uop]` (`scenarios/index.ts:17-26`) |
-| Схема анкети | `app/lib/questions/schema.ts` | adapters | `app/[locale]/poland/questionnaire/Questionnaire.tsx:71` | **13 екранів** (`:48-265`), `visibleScreens` (`:275`), `resumeIndex` (`:294`) |
-| Чернетка | `app/lib/storage.ts` | adapters | `app/[locale]/poland/questionnaire/Questionnaire.tsx:60` | Ключ `tax-navigator:draft` (`:4`); SSR-guard + try/catch (`:19,24`) |
-| Share-лінк | `app/lib/share.ts` | adapters | `app/[locale]/poland/questionnaire/Questionnaire.tsx:55` | `encodeAnswers` (`:21`), `decodeAnswers` (`:33`), мапа коротких ключів (`:4-19`) |
+| Сценарії | `app/lib/calc/scenarios/` | calc | `app/[locale]/poland/questionnaire/Questionnaire.tsx:185` | Фасад `compareScenarios`, порядок `[fop, jdg, incubator, nierejestrowana, zlecenie, uop]` (`scenarios/index.ts:17-26`) |
+| Схема анкети | `app/lib/questions/schema.ts` | adapters | `app/[locale]/poland/questionnaire/Questionnaire.tsx:77` | **13 екранів** (`:48-265`), `visibleScreens` (`:275`), `resumeIndex` (`:294`) |
+| Чернетка | `app/lib/storage.ts` | adapters | `app/[locale]/poland/questionnaire/Questionnaire.tsx:66` | Ключ `tax-navigator:draft` (`:4`); SSR-guard + try/catch (`:19,24`) |
+| Share-лінк | `app/lib/share.ts` | adapters | `app/[locale]/poland/questionnaire/Questionnaire.tsx:61` | `encodeAnswers` (`:21`), `decodeAnswers` (`:33`), мапа коротких ключів (`:4-19`) |
 | Форматування | `app/lib/format.ts` | adapters | 3 компоненти | `Intl.NumberFormat('uk-UA')` (`:3-5`); нуль імпортів |
 | Каталог джерел | `app/lib/sources.ts` | adapters | `app/[locale]/poland/sources/page.tsx:52` | `buildSourceCatalog` (`:49`), порядок груп `GROUP_ORDER` (`:16`) |
 | Адреси | `app/lib/routes.ts` | adapters | сторінки, `next.config.mjs` | `countryHref` (`:14`), старі редиректи `LEGACY_REDIRECTS` (`:24`), canonical + hreflang `alternates` (`:36`) |
 | Базова адреса | `app/lib/site.ts` | adapters | `app/[locale]/layout.tsx` | `siteUrl(env)` (`:8`): `NEXT_PUBLIC_APP_URL` → прод Vercel → localhost |
 | Мови | `app/lib/i18n/index.ts` | див. §Звірка п.1 | layout-и, `I18nProvider.tsx` | Реєстр `DICTIONARIES` (`:12`) — увімкнені мови; `translator` (`:25`). Словник `uk.ts` (246 ключів), каркас `en.ts` (порожній, не увімкнений), `createT` з fallback на ключ (`translate.ts:14`) |
-| Компоненти | `app/components/` | presentation | `app/[locale]/poland/questionnaire/Questionnaire.tsx:160-167` | 11 штук + `I18nProvider` (`useT` `:23`, `useLocale` `:27`); текстові — `'use client'` |
-| Сторінки | `app/[locale]/poland/{page,questionnaire/page,sources/page}.tsx`, `app/(technical)/tokens/page.tsx` | presentation | `app/[locale]/layout.tsx`, `app/(technical)/layout.tsx` | Лендинг і джерела (server, мова з `params`), анкета (server-обгортка заради метаданих + клієнтський `Questionnaire.tsx:42`); 404 — `app/global-not-found.tsx` |
+| Компоненти | `app/components/` | presentation | `app/[locale]/poland/questionnaire/Questionnaire.tsx:207-254` | 11 штук + `I18nProvider` (`useT` `:23`, `useLocale` `:27`); текстові — `'use client'` |
+| Сторінки | `app/[locale]/poland/{page,questionnaire/page,sources/page}.tsx`, `app/(technical)/tokens/page.tsx` | presentation | `app/[locale]/layout.tsx`, `app/(technical)/layout.tsx` | Лендинг і джерела (server, мова з `params`), анкета (server-обгортка заради метаданих + клієнтський `Questionnaire.tsx:48`); 404 — `app/global-not-found.tsx` |
 
 ## Конвенції (цитовані — правила, яким має відповідати нова фіча)
 
 - **Формат даних-правил:** `rule_id` (крапкова ієрархія `домен.підтема.аспект`) + `params` + `source_url` + `verified_at` — `app/lib/rules/rules.2026.json:44-57`. Метаполя snake_case, усередині `params` camelCase (`:8,40,84`). Відкритий верхній tier = `null` (`:51`), читається як «остання смуга» (`app/lib/calc/scenarios/jdg.ts:91`). Інваріант «кожне правило має джерело» перевіряється `app/lib/calc/__tests__/rules.test.ts:5-10`
 - **Типізація `params` — на місці споживання, не в `rules/`:** локальні `interface *Params` у файлі сценарію (`app/lib/calc/scenarios/uop.ts:6-31`)
 - **Крайні випадки — три різні шаблони:** недоступність замість числа (`rangeMonthly: null` + `unavailableReasonKey`, `jdg.ts:66-68`); кламп арифметики (`Math.max(0, …)`, `shared.ts:26`, `jdg.ts:105`); порожній набір → `null`, не `Infinity` (`shared.ts:32`)
-- **Ідентифікатори:** `ScenarioId` (`calc/types.ts:52`) → файл `scenarios/<id>.ts` → експорт `calc<Pascal>` → i18n-ключ `scenario.<id>` (`i18n/uk.ts:236-241`). Екрани анкети — camelCase `id`, а `name` поля збігається з ключем `Answers` (`schema.ts:23`)
+- **Ідентифікатори:** `ScenarioId` (`calc/types.ts:52`) → файл `scenarios/<id>.ts` → експорт `calc<Pascal>` → i18n-ключ `scenario.<id>` (`i18n/uk.ts:238-243`). Екрани анкети — camelCase `id`, а `name` поля збігається з ключем `Answers` (`schema.ts:23`)
 - **Пізнє зв'язування через рядки:** calc повертає **ключі** i18n, не тексти (`fop.ts:19-24`, `zus.ts:34,47`), UI резолвить через `t()` з `useT()` (`ScenarioCard.tsx:27`). Частина ключів будується динамічно — `` t(`zus.stage.${zus.stage}`) `` (`jdg.ts:39`). **Типами це не перевіряється** — головне джерело тихих поломок при перейменуванні
 - **Тести:** `describe` описує правило, `it` містить очікуване число просто в заголовку (`benchmark.test.ts:32-34`). Еталон звіряється з **центром смуги** — `exact(range)` + `toBeCloseTo`, не `rangeContains` (`benchmark.test.ts:11-18`): смуга ±4% це продуктове рішення, а не допуск для арифметики. Спільні дані — `baseAnswers` + `withAnswers(patch)` (`__tests__/fixtures.ts:4,22`). Два різні еталони живуть поруч: ручний вивід із норми (`benchmark.test.ts:20-27`, джерело — `docs/EVIDENCE.md §6`) і відповідь державного калькулятора ZUS у фікстурі (`zus-state.test.ts:8-19`, збирає `scripts/fetch-zus-benchmark.mjs`)
-- **Стилі — варіанти через `data-*`, не класи-модифікатори:** `data-variant="primary"` (`app/[locale]/poland/questionnaire/Questionnaire.tsx:134`) → `button[data-variant='primary']` (`globals.css:274`); посилання-кнопки лендінгів і 404 — уже на `Button.module.css` (`.primary`/`.secondary`), кнопки анкети переходять на нього в сесії 11; те саме `data-risk` (`RiskBadge.tsx:27`), `data-empty` (`ComparisonTable.tsx:57`)
+- **Стилі — стан через `data-*`, вигляд через класи модулів:** кнопки всюди — класи `Button.module.css` (`.primary` `:47`, `.secondary` `:58`), і посилання, і `<button>` (`app/[locale]/poland/questionnaire/Questionnaire.tsx:140`); глобальний `button` загорнуто в `:where()` (`globals.css:261`), тож клас модуля завжди перемагає. Стан — `data-risk` (`RiskBadge.tsx:27`), `data-empty` (`ComparisonTable.tsx:67`)
 - **Локалізація:** усі тексти для людини — через `t()`, у `.tsx` немає кириличних літералів. З 2026-07-29 це **машинна** межа, не дисципліна: скан у `app/lib/__tests__/architecture.test.ts`. З 2026-10-03 `t` береться з мови адреси: компонент — `useT()`, серверна сторінка — `translator(locale)`; прямий імпорт `i18n/uk` поза `(technical)` ловить `app/lib/__tests__/i18n-locales.test.ts`, повноту кожної увімкненої мови — той самий файл
 - **Посилання між сторінками** — лише `countryHref(locale, …)` (`app/lib/routes.ts:14`), не рядок `/questionnaire`
 
@@ -92,7 +92,7 @@ C4Container
 | Сховище | Рушій | Доступ через | Нотатки |
 |---|---|---|---|
 | Чернетка анкети | `window.sessionStorage` | `app/lib/storage.ts:25` | Єдиний ключ `tax-navigator:draft`; **не** localStorage |
-| Share-лінк | URL query | `app/lib/share.ts:21,33` | Вхідний канал теж: має пріоритет над чернеткою (`app/[locale]/poland/questionnaire/Questionnaire.tsx:55-56`); шлях лінка — поточна адреса з мовою (`app/[locale]/poland/questionnaire/Questionnaire.tsx:102`) |
+| Share-лінк | URL query | `app/lib/share.ts:21,33` | Вхідний канал теж: має пріоритет над чернеткою (`app/[locale]/poland/questionnaire/Questionnaire.tsx:61-63`); шлях лінка — поточна адреса з мовою (`app/[locale]/poland/questionnaire/Questionnaire.tsx:106`) |
 | БД | — | — | Немає. Серверна БД лише Postgres і лише під платний tier або waitlist; `DATABASE_URL` прибрано з `.env.example` (DECISIONS 2026-09-16) |
 
 **Що свідомо не зберігається:** точна виручка. Квантизується до кроку 2 500 перед
@@ -106,22 +106,22 @@ C4Container
 - **Підхід до стилів:** CSS Modules, один файл на компонент — 11 файлів, разом 725 рядків. Імпорт незмінно `import styles from './X.module.css'`
 - **Спільні примітиви — чесна картина:**
   - `RiskBadge` (`RiskBadge.tsx:20`) і `SourceCitation` (`SourceCitation.tsx:9`) — **єдині два реально перевикористовувані** компоненти
-  - Кнопка — глобальний елементний стиль (`globals.css:258-289`), React-компонента `Button` **немає**: сторінки пишуть голий `<button data-variant>`
-  - **Примітиву картки немає.** Однаковий набір `--surface` + `--hairline` + радіус + `--shadow-sm` продубльовано в чотирьох місцях: `ComparisonTable.module.css:1-8`, `ResidencyVerdict.module.css:1-2`, `Question.module.css:1-6`, `questionnaire/page.module.css:46-54`. Лендінг Польщі з 2026-10-12 картки не має — шпальта з лінійками. З 2026-08-04 картка сценарію свого фону вже НЕ має — рамку й радіус тримає спільний контейнер `.cards`, а `ScenarioCard.module.css:7-10` лишає тільки лінійку між сусідами
-  - Слайдер — узагальнений, керується `SliderConfig` (`schema.ts:12-20`), обслуговує дві осі (виручка `:159-166`, дні `:74`), має `openEnded` для «+» (`Question.tsx:112`)
+  - Кнопка — CSS-модуль `Button.module.css` (класи, не React-компонента); голий `<button>` без класу бере запасний вигляд `:where(button)` (`globals.css:261-289`)
+  - **Примітив картки — аркуш `ruled.sheet` + `ruled.inkRule`/`ruled.inkEdge`** (`Ruled.module.css:43,73`): рамка з кутами `--radius-lg` і лінійка чорнилом зверху. Компонент дає лише фон і відступи (`ResidencyVerdict.module.css:5`). Лендінг Польщі з 2026-10-12 картки не має — шпальта з лінійками. З 2026-08-04 картка сценарію свого фону вже НЕ має — рамку й радіус тримає спільний контейнер `.cards`, а `ScenarioCard.module.css:7-10` лишає тільки лінійку між сусідами
+  - Слайдер — узагальнений, керується `SliderConfig` (`schema.ts:12-20`), обслуговує дві осі (виручка `:159-166`, дні `:74`), має `openEnded` для «+» (`Question.tsx:113`)
   - Акордеон — на нативному `<details>` (`ScenarioCard.tsx:32`), в окремий примітив не витягнутий
-  - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:33-86`) і таблиця підформ (`ScenarioCard.tsx:73-97`)
-- **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:253-256`), мінімум 44px на клікабельних (`globals.css:266`), `prefers-reduced-motion` у 4 файлах, `aria-live="polite"` на результаті (`app/[locale]/poland/questionnaire/Questionnaire.tsx:158`)
-- **Найближчий прецедент екрана:** результатний — `Result` (`app/[locale]/poland/questionnaire/Questionnaire.tsx:142-190`); простий статичний — `app/[locale]/poland/page.tsx:29-72`; інтерактивний кроковий — `Question` (`Question.tsx:30-46`)
+  - Таблиць дві незалежні: порівняльна (`ComparisonTable.tsx:46-99`) і таблиця підформ (`ScenarioCard.tsx:73-97`)
+- **A11y-конвенції наскрізні:** видимий фокус глобально (`globals.css:253-256`), мінімум 44px на клікабельних (`globals.css:269`), `prefers-reduced-motion` у кожному CSS-файлі з рухом (тест `app/__tests__/reduced-motion.test.ts`), `aria-live="polite"` на результаті (`app/[locale]/poland/questionnaire/Questionnaire.tsx:195`)
+- **Найближчий прецедент екрана:** результатний — `Result` (`app/[locale]/poland/questionnaire/Questionnaire.tsx:172-259`); простий статичний — `app/[locale]/poland/page.tsx:29-72`; інтерактивний кроковий — `Question` (`Question.tsx:31-47`)
 
 ## Де що лежить / найближчі прецеденти
 
 - **Новий сценарій розрахунку** → `app/lib/calc/scenarios/<id>.ts`, за зразком `uop.ts` (найповніший: локальні `*Params` `:6-12`, читання правил на початку `:41-45`, річна арифметика ÷12 `:60-63`, повернення з `toRange` + `risk` + `noteKeys` + `sourcesOf` `:67-76`). Реєстрація у фасаді — `scenarios/index.ts:5,12,15`. Пара-тест з еталоном у назві — `benchmark.test.ts:71-79`. Сценарій із підформами → `jdg.ts:54-89`; сценарій свідомо без числа → `fop.ts:18-49`
 - **Нове питання анкети** → `schema.ts`, за зразком екрана `jdgHistory` (`:249-264`). Чекліст із нього: поле в `Answers` (`calc/types.ts:49`) → екран у `SCREENS` → `showIf` → ключі в `uk.ts` (`:114-117`) → якщо їде в лінк, коротка літера в `KEYS` (`share.ts:24`) і для булевого — `BOOLEAN_KEYS` (`:49`) → тест на умовність (`questions.test.ts:36-49`) + оновити лічильники екранів (`:6-15`). Складніший прецедент, де `showIf` виведено з логіки калькуляції, — `homeInUa` (`schema.ts:131-144`) + `homeInUaMatters` (`residency.ts:63-70`)
-- **Новий екран** → складається з наявних примітивів (§Фронтенд), за зразком `Result` (`app/[locale]/poland/questionnaire/Questionnaire.tsx:142-190`)
+- **Новий екран** → складається з наявних примітивів (§Фронтенд), за зразком `Result` (`app/[locale]/poland/questionnaire/Questionnaire.tsx:172-259`)
 - **Нова сторінка країни** → `app/[locale]/poland/<назва>/page.tsx` з `generateMetadata` → `alternates(locale, …)`, значення в `CountryPage` (`app/lib/routes.ts:12`); серверна бере `translator(await resolveLocale(params))` (`app/[locale]/params.ts`), за зразком `app/[locale]/poland/sources/page.tsx`
 - **Нова мова** → словник у `app/lib/i18n/` + рядок у `DICTIONARIES` (`app/lib/i18n/index.ts:12`); маршрути не правляться (ADR-0003)
-- **Нова картка-компонент** → `app/components/`, за зразком `ResidencyVerdict.tsx:8-41` + однойменний `.module.css`
+- **Нова картка-компонент** → `app/components/`, за зразком `ResidencyVerdict.tsx:18-56` + однойменний `.module.css`
 
 ## Обмеження й відомий технічний борг
 

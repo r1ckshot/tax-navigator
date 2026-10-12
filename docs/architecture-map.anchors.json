@@ -68,26 +68,26 @@
   "Question.tsx:6": [
     "import { snapToStep } from '@/lib/calc/quantize';"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:154": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:184": [
     "const residency = assessResidency(answers);"
   ],
   "jdg.ts:39": [
     "* ust. 1 pkt 7a ustawy o PIP), і B2B названо прямо (art. 13 pkt 1). Критерії —"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:155": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:185": [
     "const scenarios = compareScenarios(answers);"
   ],
   "scenarios/index.ts:17-26": [
     "export function compareScenarios(answers: Answers): ScenarioResult[] {",
     "}"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:71": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:77": [
     "const screens = useMemo(() => visibleScreens(answers), [answers]);"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:60": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:66": [
     "const { answers: saved, step } = loadDraft();"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:55": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:61": [
     "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));"
   ],
   "app/[locale]/poland/sources/page.tsx:52": [
@@ -96,11 +96,11 @@
   "translate.ts:14": [
     "export function createT(dictionary: Dictionary): Translate {"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:160-167": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:207-254": [
     "<ResidencyVerdict result={residency} />",
-    "<ScenarioCard key={s.id} scenario={s} />"
+    "<EmailCta />"
   ],
-  "Questionnaire.tsx:42": [
+  "Questionnaire.tsx:48": [
     "export function Questionnaire() {"
   ],
   "app/lib/rules/rules.2026.json:44-57": [
@@ -134,7 +134,7 @@
   "calc/types.ts:52": [
     "clientCount?: ClientCount;"
   ],
-  "i18n/uk.ts:236-241": [
+  "i18n/uk.ts:238-243": [
     "'scenario.fop': 'Український ФОП',",
     "'scenario.uop': 'Трудовий договір (UoP)',"
   ],
@@ -172,17 +172,17 @@
     "*",
     "tiers: { annualRevenueUpTo: number | null; monthly: number }[];"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:134": [
-    "<button type=\"button\" data-variant=\"primary\" onClick={next} disabled={!canAdvance}>"
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:140": [
+    "<button type=\"button\" className={`${button.primary} ${button.arrow}`} onClick={next} disabled={!canAdvance}>"
   ],
-  "globals.css:274": [
-    "button[data-variant='primary'] {"
+  "globals.css:261": [
+    ":where(button) {"
   ],
   "RiskBadge.tsx:27": [
     "data-risk={risk}"
   ],
-  "ComparisonTable.tsx:57": [
-    "data-empty={s.rangeMonthly ? undefined : 'true'}"
+  "ComparisonTable.tsx:67": [
+    "<td role=\"cell\" className={styles.value} data-empty={s.rangeMonthly ? undefined : 'true'}>"
   ],
   "app/lib/routes.ts:14": [
     "export function countryHref(locale: Locale, page: CountryPage = 'home'): string {"
@@ -194,12 +194,12 @@
     "u: 'hasParallelUop',",
     "if (value === undefined) continue;"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:55-56": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:61-63": [
     "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));",
-    "if (Object.keys(fromLink).length > 0) {"
+    "setAnswers(fromLink);"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:102": [
-    "await navigator.clipboard.writeText(url);"
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:106": [
+    "const url = `${window.location.origin}${window.location.pathname}?${encodeAnswers(answers as Answers)}`;"
   ],
   "storage.ts:23": [
     "if (safe.monthlyRevenue !== undefined) safe.monthlyRevenue = quantizeRevenue(safe.monthlyRevenue);"
@@ -230,25 +230,16 @@
   "SourceCitation.tsx:9": [
     "export function SourceCitation({ sources }: { sources: Source[] }) {"
   ],
-  "globals.css:258-289": [
-    "button {",
-    "}"
+  "globals.css:261-289": [
+    ":where(button) {",
+    "ставить Question.module.css. «Зменшити рух» — без анімації взагалі. */"
   ],
-  "ComparisonTable.module.css:1-8": [
-    ".card {",
-    "}"
+  "Ruled.module.css:43-73": [
+    ".inkRule,",
+    ".sheet {"
   ],
-  "ResidencyVerdict.module.css:1-2": [
-    ".card {",
-    "background: var(--surface);"
-  ],
-  "Question.module.css:1-6": [
-    ".screen {",
-    "padding: var(--space-4) var(--space-5);"
-  ],
-  "questionnaire/page.module.css:46-54": [
-    ".cards {",
-    "}"
+  "ResidencyVerdict.module.css:5": [
+    ".card {"
   ],
   "ScenarioCard.module.css:7-10": [
     ".card {",
@@ -258,13 +249,13 @@
     "",
     "openEnded?: boolean;"
   ],
-  "Question.tsx:112": [
+  "Question.tsx:113": [
     "const atMax = Boolean(cfg.openEnded) && shown >= cfg.max;"
   ],
   "ScenarioCard.tsx:32": [
     "<details className={styles.card}>"
   ],
-  "ComparisonTable.tsx:33-86": [
+  "ComparisonTable.tsx:46-99": [
     "<table className={styles.table} role=\"table\">",
     "</table>"
   ],
@@ -276,13 +267,13 @@
     ":focus-visible {",
     "}"
   ],
-  "globals.css:266": [
+  "globals.css:269": [
     "min-height: 44px;"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:158": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:195": [
     "<main aria-live=\"polite\" className={styles.result}>"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:142-190": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:172-259": [
     "function Result({",
     "}"
   ],
@@ -290,7 +281,7 @@
     "export default async function Home({ params }: { params: LocaleParams }) {",
     "}"
   ],
-  "Question.tsx:30-46": [
+  "Question.tsx:31-47": [
     "export function Question({ screen, answers, onChange }: Props) {",
     "}"
   ],
@@ -330,7 +321,7 @@
   "app/lib/i18n/index.ts:12": [
     "export const DICTIONARIES = { uk } satisfies Record<string, Dictionary>;"
   ],
-  "ResidencyVerdict.tsx:8-41": [
+  "ResidencyVerdict.tsx:18-56": [
     "export function ResidencyVerdict({ result }: { result: ResidencyResult }) {",
     "}"
   ],
