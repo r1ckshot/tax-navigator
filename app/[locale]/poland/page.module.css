@@ -1,153 +1,119 @@
+/* Лендінг Польщі, напрям «Реєстр». Кольори — лише ролі з globals.css.
+   Телефон: одна колонка, порядок розмітки (заголовок → пояснення → кнопка →
+   що порівнюємо). ПК: дві колонки на один екран без прокрутки — ліворуч
+   теза й дія, праворуч реєстр шести варіантів. */
+
+.main {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 72rem;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+}
+
+/* ── Теза й дія ── */
+
 .hero {
-  margin-top: var(--space-6);
-  /* Низ вужчий за верх: під кнопкою стоїть рядок про джерела, і він має сидіти
-     рівно посередині між кнопкою і краєм картки (затверджений фрейм
-     design/sources.pen#uCOTE: 24px і 24px). */
-  padding: var(--space-7) var(--space-6) var(--space-5);
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  text-align: center;
+  display: grid;
+  gap: var(--space-5);
+  align-content: center;
 }
 
-.hero h1 {
-  font-size: var(--text-2xl);
-  margin-bottom: var(--space-4);
-}
-
-/* Стрілка UA↔PL — єдиний акцент у заголовку: вона й несе сенс «між двома
-   системами», тож саме її варто підсвітити, а не фарбувати весь рядок. */
-.arrow {
+.eyebrow {
+  margin: 0;
   color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-/* Головна теза — більша за пояснення й темніша: саме її читають, якщо читають
-   один рядок. Ширина вужча за .intro, щоб рядок ламався в передбачуваному місці. */
-.lead {
-  color: var(--ink);
-  font-size: var(--text-lg);
-  line-height: var(--leading-snug);
-  margin: 0 auto;
-  max-width: 30rem;
+/* Кегль тягнеться за шириною, а на ПК і за висотою екрана — щоб теза
+   вміщалась у перший екран і на ноутбуці з 768px. */
+.headline {
+  max-width: 17em;
+  white-space: pre-line;
+  margin: 0;
+  font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.side {
+  display: grid;
+  gap: var(--space-5);
 }
 
 .intro {
+  max-width: 32rem;
+  margin: 0;
   color: var(--ink-secondary);
   font-size: var(--text-md);
-  margin: var(--space-4) auto 0;
-  max-width: 34rem;
+  white-space: pre-line;
 }
 
-/* Шість сценаріїв — сітка 2 × 3, і пари не випадкові: своя діяльність (ФОП /
-   JDG) → фактури виставляє чужа юрособа (інкубатор / без реєстрації) → найм
-   (zlecenie / етат). Семантично лишається <ul>; роздільник живе в CSS, тож не
-   потрапляє в розмітку й не читається скрінрідером.
-
-   Саме СІТКА, а не flex-wrap із розривниками: розривник `flex-basis: 100%`
-   ламає рядок не на всякій ширині, і тоді розмітка й крапки розходяться —
-   на широкому екрані виходило 4 + 2 із дірою там, де мав бути роздільник.
-   У сітці місце кожного пункту задане, тож розійтися вони не можуть. */
-.scenarios {
+/* Телефон: кнопка на всю ширину (елемент сітки розтягується); на ПК —
+   за змістом. Вигляд кнопки — Button.module.css. */
+.actions {
   display: grid;
-  grid-template-columns: auto auto;
-  justify-content: center;
-  color: var(--ink);
-  font-size: var(--text-md);
-  font-weight: 500;
-  list-style: none;
-  margin: var(--space-4) 0 0;
-  padding: 0;
 }
 
-/* nowrap: назва «Договір-доручення (zlecenie)» достатньо довга, щоб перенос
-   розірвав її посеред — дужка з'їжджала на наступний рядок окремо від назви.
-   Відступ саме padding-ом, а не row-gap: сегменти лінії нижче мають зійтися в
-   суцільну, а gap розірвав би її на пунктир. */
-.scenarios li {
-  padding: var(--space-1) var(--space-3);
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Роздільник — вертикальна лінія по центру, тобто права межа лівої колонки.
-   Раніше тут була кругла крапка між назвами; вона працювала, поки список був
-   одним рядком, але в сітці 2 × 3 читалась як три окремі крапки замість однієї
-   осі. Лінія стоїть на межі колонок і не залежить від довжини назв. */
-.scenarios li:nth-child(odd) {
-  border-right: 1px solid var(--accent-border);
-}
-
-/* Телефон: дві колонки не влазять за побудовою — самі назви `nowrap`, а
-   найдовша пара («Договір-доручення (zlecenie)» + «Без реєстрації
-   (nierejestrowana)») довша за вʼюпорт. Дозволити перенос усередині назви не
-   можна: дужка з'їжджала б окремо від слова. Тож одна колонка, і роздільник
-   зникає разом із другою — розділяти вже нічого. */
-@media (max-width: 48rem) {
-  .scenarios {
-    grid-template-columns: auto;
-  }
-
-  .scenarios li:nth-child(odd) {
-    border-right: none;
-  }
-
-  /*
-   * Замість вертикальної осі — горизонтальні лінійки між пунктами. Той самий
-   * `--hairline`, що розділяє картки «Деталей» на екрані результату: лендинг і
-   * результат подають ті самі шість варіантів, тож і розділяються однаково.
-   * Кольорову лінію свідомо НЕ беремо: teal уже означає «дія/акцент», а
-   * статус-палітра зайнята рівнями ризику — третя роль кольору зробила б
-   * систему нечитабельною (обговорено з Mike 2026-08-04).
-   */
-  .scenarios li + li {
-    border-top: 1px solid var(--hairline);
-  }
-
-  .scenarios li {
-    padding-top: var(--space-2);
-    padding-bottom: var(--space-2);
-  }
-}
-
-/* Широкий: усі п'ять в один рядок, розрив не потрібен. */
-@media (min-width: 47.0625rem) {
-  .scenariosBreak {
-    display: none;
-  }
-}
-
-.cta {
-  margin: var(--space-5) auto 0;
-  max-width: none;
-}
-
-.cta button {
-  width: 100%;
-  font-size: var(--text-md);
-  padding: 0.8rem 1.5rem;
-}
-
-/* На ширших екранах кнопка не тягнеться на всю ширину — стає компактною. */
-@media (min-width: 30rem) {
-  .cta button {
-    width: auto;
-  }
-}
-
-/* Рядок довіри: текст і лінк на /sources окремими рядками, по центру, як уся
-   картка. Другорядний до кнопки, тож тихіший за неї, але кегль базовий, щоб
-   лінк не губився. */
 .trust {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  margin: var(--space-5) 0 0;
-  font-size: var(--text-base);
-  color: var(--ink-secondary);
+  max-width: 32rem;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  text-wrap: balance;
 }
 
-.trust a {
-  text-decoration: underline;
+/* ── Що порівнюємо: реєстр ── */
+
+.compared {
+  align-self: center;
+}
+
+/* Підпис над реєстром — як шапка колонки: лінійка чорнилом зверху, дрібні
+   великі літери. */
+.label {
+  --ink-rule-delay: 300ms;
+  margin: 0;
+  padding: var(--space-2) 0;
+  color: var(--ink-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Без нумерації: номер читався б як місце в рейтингу. */
+.scenarios {
+  --ruled-delay: 420ms;
+}
+
+.scenarios li {
+  padding: var(--space-3) 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+
+/* ПК: дві колонки на висоту екрана без шапки (шапка ~4.5rem). Вужчі по
+   висоті екрани прокручуються як звичайно — краще прокрутка, ніж обрізаний
+   текст. */
+@media (min-width: 60rem) {
+  .main {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    column-gap: clamp(3rem, 6vw, 6rem);
+    align-items: center;
+    min-height: calc(100dvh - 4.5rem);
+    padding-block: var(--space-6);
+  }
+
+  .headline {
+    font-size: clamp(2.4rem, 1rem + 1.6vw + 2.4vh, 3.6rem);
+  }
+
+  .actions {
+    justify-items: start;
+  }
 }
