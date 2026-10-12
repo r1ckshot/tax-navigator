@@ -104,7 +104,7 @@ Mike пише «Begin». Сесія:
 | # | Сесія | Модель · effort | Стан |
 |---|---|---|---|
 | 09 | [Три напрями стилю на превʼю](sessions/09-redesign-directions.md) | Opus · high | [x] |
-| 10 | [Айдентика і лендінги](sessions/10-redesign-identity.md) · Чекає: вибір Mike із сесії 09 | Opus · high | [ ] |
+| 10 | [Айдентика і лендінги](sessions/10-redesign-identity.md) | Opus · high | [x] |
 | 11 | [Анкета, результат, анімації](sessions/11-redesign-flow.md) | Opus · high | [ ] |
 | 12 | [Решта екранів, еталони, реліз](sessions/12-redesign-release.md) | Sonnet · high | [ ] |
 
@@ -206,6 +206,14 @@ Mike пересилає питання з чату → Claude пише черн�
 |---|---|---|---|
 | П1 | [Ставки й закони 2027: першоджерела](sessions/x1-rules-2027-sources.md) | Fable · high | [x] |
 | П2 | [Дані 2027, тести, анкета без 52zr](sessions/x2-rules-2027-data.md) · Чекає: obwieszczenie MRPiPS про 30-krotność на 2027 і доля друку 3147 у Сеймі | Opus · high | [ ] |
+
+### Тема П.3 — CI після мержу бот-PR
+Знайдено в сесії 10: `master` червоний з теми 1.3 (словник розмітки tg-assistant
+не знає 4 нових правил), а щоденна автозвірка підозріло коротка. Перед сесією 11.
+
+| # | Сесія | Модель · effort | Стан |
+|---|---|---|---|
+| П3 | [Розмітка tg-assistant і автозвірка](sessions/x3-ci-after-rules-merge.md) | Opus · high | [ ] |
 
 ### Тема П.2 — Зміна статусу українців
 **Тригер:** автозвірка бачить зміну акта про статус UKR / тимчасовий захист або
