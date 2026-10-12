@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, within, cleanup, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Questionnaire as QuestionnairePage } from '@/[locale]/poland/questionnaire/Questionnaire';
@@ -311,5 +311,42 @@ describe('шеринг на адресі з мовою', () => {
 
     expect(await screen.findByText(q('residency.plResident'))).toBeDefined();
     expect(tableText()).toBe(expected);
+  });
+});
+
+/**
+ * Перехід між кроками йде через View Transitions; «зменшити рух» мусить його
+ * обходити повністю — крок міняється одразу, без жодного кадру анімації.
+ * jsdom не має ні API, ні matchMedia, тож обидва підставляються тут.
+ */
+describe('зменшений рух: перехід між кроками', () => {
+  function stub(reduce: boolean) {
+    const startViewTransition = vi.fn((cb: () => void) => cb());
+    Object.assign(document, { startViewTransition });
+    window.matchMedia = vi.fn((query: string) => ({ matches: reduce && query.includes('reduce') })) as never;
+    return startViewTransition;
+  }
+
+  afterEach(() => {
+    delete (document as { startViewTransition?: unknown }).startViewTransition;
+    delete (window as { matchMedia?: unknown }).matchMedia;
+  });
+
+  it('без запиту на менше руху крок міняється через View Transition', async () => {
+    const transition = stub(false);
+    const user = userEvent.setup();
+    render(<QuestionnairePage />);
+    await answerAndAdvance(user, [t('q.days.gte183')]);
+    expect(transition).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('group', { name: t('q.centers.personal') })).toBeDefined();
+  });
+
+  it('із «зменшити рух» перехід не запускається, а крок однаково міняється', async () => {
+    const transition = stub(true);
+    const user = userEvent.setup();
+    render(<QuestionnairePage />);
+    await answerAndAdvance(user, [t('q.days.gte183')]);
+    expect(transition).not.toHaveBeenCalled();
+    expect(screen.getByRole('group', { name: t('q.centers.personal') })).toBeDefined();
   });
 });
