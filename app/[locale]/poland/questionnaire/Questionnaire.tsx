@@ -6,18 +6,33 @@ import { assessResidency } from '@/lib/calc/residency';
 import { compareScenarios } from '@/lib/calc/scenarios';
 import { visibleScreens, isScreenComplete, resumeIndex, type Draft } from '@/lib/questions/schema';
 import { decodeAnswers, encodeAnswers } from '@/lib/share';
-import { countryHref } from '@/lib/routes';
 import { clearDraft, loadDraft, saveDraft } from '@/lib/storage';
 import { Question } from '@/components/Question';
 import { Progress } from '@/components/Progress';
 import { ResidencyVerdict } from '@/components/ResidencyVerdict';
 import { ScenarioCard } from '@/components/ScenarioCard';
 import { ComparisonTable } from '@/components/ComparisonTable';
-import Link from 'next/link';
+import { flushSync } from 'react-dom';
 import { Disclaimer } from '@/components/Disclaimer';
 import { EmailCta } from '@/components/EmailCta';
-import { useLocale, useT } from '@/components/I18nProvider';
+import { useT } from '@/components/I18nProvider';
 import styles from './page.module.css';
+
+/**
+ * Зміна кроку через View Transitions API: браузер знімає стару картку, React
+ * синхронно рендерить нову, і CSS (`::view-transition-*(step)` у globals.css)
+ * анімує заміну. Без API (Firefox, jsdom) або з «зменшити рух» — звичайна
+ * миттєва зміна.
+ */
+function stepTransition(update: () => void) {
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (!doc.startViewTransition || reduced) {
+    update();
+    return;
+  }
+  doc.startViewTransition(() => flushSync(update));
+}
 
 /**
  * Анкета й результат — клієнтські: відповіді не залишають вкладку (ADR-0002).
@@ -65,12 +80,12 @@ export function Questionnaire() {
   function next() {
     if (!canAdvance) return;
     if (isLast) setDone(true);
-    else setIndex((i) => i + 1);
+    else stepTransition(() => setIndex((i) => i + 1));
   }
 
   function back() {
     if (done) setDone(false);
-    else setIndex((i) => Math.max(0, i - 1));
+    else stepTransition(() => setIndex((i) => Math.max(0, i - 1)));
   }
 
   function restart() {
@@ -136,7 +151,6 @@ function Result({
   shareNote: boolean;
 }) {
   const t = useT();
-  const locale = useLocale();
   const residency = assessResidency(answers);
   const scenarios = compareScenarios(answers);
 
@@ -154,10 +168,9 @@ function Result({
         ))}
       </div>
 
+      {/* Повний список джерел — у шапці («Джерела»); тут джерела стоять біля
+          своїх висновків у картках. */}
       <Disclaimer />
-      <p className={styles.sourcesLink}>
-        <Link href={countryHref(locale, 'sources')}>{t('sources.link')}</Link>
-      </p>
 
       <nav className={styles.nav}>
         <button type="button" onClick={onRestart}>
