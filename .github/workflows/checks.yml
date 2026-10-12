@@ -2,10 +2,12 @@
 # тож коміт, зроблений не в сесії Claude, не перевіряв ніхто. Перший такий автор —
 # бот автозвірки (`rules-verify.yml`).
 #
-# PR, відкритий GITHUB_TOKEN-ом, не запускає `pull_request`-workflow (захист GitHub
-# від рекурсії), але `workflow_dispatch` від того самого токена — запускає. Тому бот
-# після пушу сам викликає цей файл на своїй гілці; прогін висить на коміті гілки й
-# видно його в чеках PR. PAT чи GitHub App для цього не потрібні (DECISIONS 2026-10-02).
+# PR, відкритий GITHUB_TOKEN-ом, свого `pull_request`-прогону не отримує: GitHub
+# заводить його й лишає в `action_required` (0 с) до схвалення людиною. А
+# `workflow_dispatch` від того самого токена запускається одразу. Тому бот після пушу
+# сам викликає цей файл на своїй гілці; прогін висить на коміті гілки й видно його в
+# чеках PR, а `action_required`-дублікат схвалювати не треба: ruleset обов'язкових
+# чеків не має. PAT чи GitHub App для цього не потрібні (DECISIONS 2026-10-02).
 
 name: checks
 
@@ -33,6 +35,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            research/tg-assistant/package-lock.json
 
       - run: npm ci
 
@@ -44,3 +49,14 @@ jobs:
 
       - name: UI tests (jsdom)
         run: npm run test:ui
+
+      # Розмітка tg-assistant читає матрицю, і тест тримає словник рівно на її rule_id.
+      # Без цього кроку набір ганяв лише деплой після мержу: PR #139 додав чотири
+      # правила зеленим, а червоним став master.
+      - name: tg-assistant dependencies
+        run: npm ci --prefix research/tg-assistant
+
+      - name: tg-assistant typecheck and tests
+        run: |
+          npx tsc -p research/tg-assistant/tsconfig.json
+          npx vitest run --config research/tg-assistant/vitest.config.ts
