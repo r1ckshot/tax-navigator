@@ -13,7 +13,6 @@ export async function generateMetadata({ params }: { params: LocaleParams }): Pr
   const locale = await resolveLocale(params);
   const t = translator(locale);
   return {
-    title: `${t('sources.title')} · ${t('app.title')}`,
     alternates: alternates(locale, 'sources'),
   };
 }

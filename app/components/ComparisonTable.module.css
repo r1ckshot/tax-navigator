@@ -112,7 +112,7 @@
   border-top: 1px solid var(--hairline);
   font-size: var(--text-sm);
   color: var(--ink-muted);
-  /* Друге речення — з нового рядка: воно знімає інше непорозуміння, ніж перше. */
+  /* Речення — кожне з нового рядка (`\n` у словнику), як у дисклеймері. */
   white-space: pre-line;
   text-wrap: pretty;
 }

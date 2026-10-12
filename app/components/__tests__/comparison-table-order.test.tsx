@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { Questionnaire as QuestionnairePage } from '@/[locale]/poland/questionnaire/Questionnaire';
 import { compareScenarios } from '@/lib/calc/scenarios';
 import { baseAnswers } from '@/lib/calc/__tests__/fixtures';
-import { t } from '@/lib/i18n/uk';
+import { q, t } from '@/lib/__tests__/plain';
 
 /**
  * Мінімальний прохід до екрана результату (медіанний профіль, як baseAnswers
@@ -19,40 +19,40 @@ async function walkToResult() {
   const user = userEvent.setup();
   render(<QuestionnairePage />);
 
-  await user.click(screen.getByLabelText(t('q.days.gte183')));
+  await user.click(screen.getByLabelText(q('q.days.gte183')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(within(screen.getByRole('group', { name: t('q.centers.personal') })).getByLabelText(t('q.centers.pl')));
-  await user.click(within(screen.getByRole('group', { name: t('q.centers.economic') })).getByLabelText(t('q.centers.pl')));
+  await user.click(within(screen.getByRole('group', { name: t('q.centers.personal') })).getByLabelText(q('q.centers.pl')));
+  await user.click(within(screen.getByRole('group', { name: t('q.centers.economic') })).getByLabelText(q('q.centers.pl')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(screen.getByLabelText(t('q.special.no')));
+  await user.click(screen.getByLabelText(q('q.special.no')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(screen.getByLabelText(t('q.income.plClients')));
+  await user.click(screen.getByLabelText(q('q.income.plClients')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(screen.getByLabelText(t('q.uaFop.no')));
+  await user.click(screen.getByLabelText(q('q.uaFop.no')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(screen.getByLabelText(t('q.status.ukr')));
+  await user.click(screen.getByLabelText(q('q.status.ukr')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  fireEvent.change(screen.getByLabelText(t('q.revenue.label')), { target: { value: '15000' } });
+  fireEvent.change(screen.getByLabelText(q('q.revenue.label')), { target: { value: '15000' } });
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(within(screen.getByRole('group', { name: t('q.work.kind') })).getByLabelText(t('q.work.programming')));
-  await user.click(within(screen.getByRole('group', { name: t('q.work.expenses') })).getByLabelText(t('q.work.lt10')));
+  await user.click(within(screen.getByRole('group', { name: t('q.work.kind') })).getByLabelText(q('q.work.programming')));
+  await user.click(within(screen.getByRole('group', { name: t('q.work.expenses') })).getByLabelText(q('q.work.lt10')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(screen.getByLabelText(t('q.parallelUop.no')));
+  await user.click(screen.getByLabelText(q('q.parallelUop.no')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(screen.getByLabelText(t('q.formerEmployer.no')));
-  await user.click(screen.getByLabelText(t('q.clients.several')));
+  await user.click(screen.getByLabelText(q('q.formerEmployer.no')));
+  await user.click(screen.getByLabelText(q('q.clients.several')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(screen.getByLabelText(t('q.jdg.gt30')));
+  await user.click(screen.getByLabelText(q('q.jdg.gt30')));
   await user.click(screen.getByRole('button', { name: t('nav.showResult') }));
 }
 

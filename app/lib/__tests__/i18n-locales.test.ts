@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_LOCALE, DICTIONARIES, LOCALES, isLocale, translator } from '../i18n';
 import { uk } from '../i18n/uk';
 import { en } from '../i18n/en';
+import { plain } from './plain';
 
 /**
  * Каркас мов (ADR-0003): мова вмикається рядком у реєстрі `i18n/index.ts`, а
@@ -57,7 +58,10 @@ describe('каркас en', () => {
   });
 });
 
-describe('нова мова вмикається словником, без змін у маршрутах', () => {
+// Кожен тест імпортує layout з нуля після resetModules, а той тягне шапку з
+// next/link: під навантаженням (поруч `next dev`) імпорт не влазить у 5 с за
+// замовчуванням. Таймаут — на холодний імпорт, не на логіку.
+describe('нова мова вмикається словником, без змін у маршрутах', { timeout: 30_000 }, () => {
   afterEach(() => {
     vi.doUnmock('@/lib/i18n');
     vi.resetModules();
@@ -97,11 +101,15 @@ describe('нова мова вмикається словником, без зм
     const params = Promise.resolve({ locale: 'en' });
 
     const html = renderToStaticMarkup(await layout.default({ children: null, params }));
-    expect(html).toMatch(/^<html lang="en">/);
+    expect(html).toMatch(/^<html lang="en"[ >]/);
 
     const meta = await layout.generateMetadata({ params });
-    expect(meta.title).toBe(`EN ${uk['app.title']}`);
-    expect(meta.openGraph).toMatchObject({ locale: `EN ${uk['app.ogLocale']}` });
+    // Вкладка — лише назва бренду; опис країни — у прев'ю лінка.
+    expect(plain(String(meta.title))).toBe(plain(`EN ${uk['app.title']}`));
+    expect(plain(String((meta.openGraph as { title?: string }).title))).toBe(
+      plain(`EN ${uk['poland.title']} · EN ${uk['app.title']}`),
+    );
+    expect(plain(String((meta.openGraph as { locale?: string }).locale))).toBe(`EN ${uk['app.ogLocale']}`);
   });
 
   it('без підміни реєстру той самий layout дає лише uk', async () => {
@@ -109,7 +117,7 @@ describe('нова мова вмикається словником, без зм
     const layout = await import('@/[locale]/layout');
     expect(layout.generateStaticParams()).toEqual([{ locale: 'uk' }]);
     const html = renderToStaticMarkup(await layout.default({ children: null, params: Promise.resolve({ locale: 'uk' }) }));
-    expect(html).toMatch(/^<html lang="uk">/);
+    expect(html).toMatch(/^<html lang="uk"[ >]/);
   });
 });
 

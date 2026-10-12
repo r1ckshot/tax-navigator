@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { formatCount, formatDate, formatVars, pluralUk } from '../format';
 import { t } from '../i18n/uk';
+import { plain } from './plain';
 
 const RULES = ['{n} правило', '{n} правила', '{n} правил'] as const;
 
@@ -41,7 +42,7 @@ describe('дати з правил у тексті', () => {
   });
 
   it('t() підставляє змінні, а без значення лишає плейсхолдер видимим', () => {
-    expect(t('status.ukrProtection', { protectionUntil: '04.03.2028', abroadDays: '30' })).toContain('до 04.03.2028');
+    expect(plain(t('status.ukrProtection', { protectionUntil: '04.03.2028', abroadDays: '30' }))).toContain('до 04.03.2028');
     expect(t('status.ukrProtection', { abroadDays: '30' })).toContain('{protectionUntil}');
     expect(t('risk.uop.standard', { x: '1' })).toBe(t('risk.uop.standard'));
   });

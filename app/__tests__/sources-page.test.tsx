@@ -62,6 +62,6 @@ describe('/sources', () => {
 
   it('дисклеймер присутній', async () => {
     await renderOn('2026-09-15');
-    expect(screen.getByText(/Це інформаційний калькулятор орієнтовного характеру/)).toBeDefined();
+    expect(screen.getByText(/Це інформаційний калькулятор, цифри в ньому орієнтовні/)).toBeDefined();
   });
 });

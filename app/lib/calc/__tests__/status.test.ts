@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getParams } from '@/lib/rules/types';
 import { uk } from '@/lib/i18n/uk';
+import { plain } from '@/lib/__tests__/plain';
 import { assessStatus, BASIS_TO_RULE_CODE, type Access } from '../status';
 import { calcFop } from '../scenarios/fop';
 import { calcJdg } from '../scenarios/jdg';
@@ -281,7 +282,7 @@ describe('ризик B2B для JDG з 08.07.2026 (PRD AC-4)', () => {
 
   // Закон кількості замовників не називає (EVIDENCE п. 7) — текст не сміє казати інакше.
   it('текст не прирівнює одного замовника до перекваліфікації', () => {
-    expect(uk['risk.jdg.singleClient']).toMatch(/Кількості замовників закон не називає/);
+    expect(plain(uk['risk.jdg.singleClient'])).toMatch(/Кількості замовників закон не називає/);
     expect(uk['risk.jdg.singleClient']).toMatch(/припис/);
     expect(uk['risk.jdg.singleClient']).toMatch(/art\. 22 § 1/);
   });
