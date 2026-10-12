@@ -26,6 +26,15 @@
   cursor: pointer;
   list-style: none;
   min-height: 44px;
+  transition: background-color var(--motion-state) ease;
+}
+
+.summary:hover {
+  background: var(--sunken);
+}
+
+.summary:hover .chevron {
+  border-color: var(--ink);
 }
 
 .summary::-webkit-details-marker {
@@ -92,7 +101,9 @@
   border-right: 2px solid var(--ink-muted);
   border-bottom: 2px solid var(--ink-muted);
   transform: rotate(45deg);
-  transition: transform 150ms ease;
+  transition:
+    transform var(--motion-state) var(--ease-out),
+    border-color var(--motion-state) ease;
 }
 
 .card[open] .chevron {
@@ -102,6 +113,19 @@
 .body {
   padding: var(--space-4) var(--space-5) var(--space-5);
   border-top: 1px solid var(--hairline);
+}
+
+/* Розкриття: пункти й джерела проявляються рівнем soft. Висота стрибає одразу —
+   анімація висоти перераховувала б розмітку на кожному кадрі. */
+.card[open] .prose {
+  animation: proseIn var(--motion-soft) var(--ease-out) both;
+}
+
+@keyframes proseIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 
 /*
@@ -259,8 +283,21 @@
   color: var(--ink-secondary);
 }
 
-/* Коли пункти — перший блок картки (немає таблиці підформ), зайвий верхній відступ. */
-.notes:first-child {
+/*
+ * Пункти живуть в обгортці `.prose` (анімація розкриття), тож відступ від
+ * таблиці над ними дає обгортка. `.notes:first-child` тут не годиться: у
+ * `.prose` пункти перші завжди, і відступ зникав навіть після таблиці підформ.
+ * Коли таблиці немає, обгортка — перший блок картки, і відступ не потрібен.
+ */
+.prose {
+  margin-top: var(--space-4);
+}
+
+.prose:first-child {
+  margin-top: 0;
+}
+
+.prose .notes {
   margin-top: 0;
 }
 
@@ -295,7 +332,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .summary,
   .chevron {
     transition: none;
+  }
+
+  .card[open] .prose {
+    animation: none;
   }
 }

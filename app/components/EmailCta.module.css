@@ -1,8 +1,10 @@
+/* Аркуш «Реєстру»: лінійка чорнилом зверху, м'який акцентний фон відділяє
+   пропозицію від самого результату. Зміст по центру — це окрема пропозиція,
+   а не продовження тексту результату. */
 .cta {
-  margin-top: var(--space-6);
-  padding: var(--space-6) var(--space-5);
-  border: 1px solid var(--accent-border);
-  border-radius: var(--radius);
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--space-5) var(--space-5);
+  border-color: var(--accent-border);
   background: var(--accent-soft);
   text-align: center;
 }
@@ -12,6 +14,7 @@
 }
 
 .cta p {
+  max-width: 32rem;
   margin: var(--space-2) auto 0;
   color: var(--ink-secondary);
   font-size: var(--text-base);
@@ -29,19 +32,9 @@
   color: var(--accent);
 }
 
+/* Вигляд кнопки — Button.module.css; тут лише відступ від тексту й фон, щоб
+   рамка не зливалась із м'якою акцентною плашкою блоку. */
 .action {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
   margin-top: var(--space-4);
-  padding: 0.65rem 1.15rem;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.action:hover {
-  background: var(--accent-hover);
+  background: var(--surface);
 }
