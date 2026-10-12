@@ -27,7 +27,7 @@
   запитом Mike, вибірку розмічає Claude, теми підтверджує Mike
   ([WEEKLY.md](../research/tg-assistant/WEEKLY.md)). Деплой лише збирає образ;
   watch і on-call прибрані. Після мержу сесії 01 цикл на VPS зупиняє перший деплой.
-- `rules-change-monitor`: 26 з 26, розклад — `rules-verify.yml` щодня о 05:17 UTC
+- `rules-change-monitor`: 30 з 30, розклад — `rules-verify.yml` щодня о 05:17 UTC
   (1-ше число повний, понеділок легкий, вересень–січень щопонеділка повний; повтор
   недоступних джерел) — [sad.md §7](features/rules-change-monitor/sad.md). Збіг → бот-PR
   з `verified_at`, розбіжність чи змінений закон → issue → агент `investigate` → чернетка

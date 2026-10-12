@@ -103,6 +103,15 @@ jobs:
           node "$MONITOR/workflow.mjs" plan --date "$DATE" --event "$EVENT" --requested "$REQUESTED" \
             --state "$RUNNER_TEMP/rv-state/state.json" | tee -a "$GITHUB_OUTPUT"
 
+      # День без прогону — зелений job за 10–18 с. Без цього рядка його не відрізнити
+      # від прогону, що нічого не звірив.
+      - name: Summary (no run today)
+        if: steps.plan.outputs.mode == 'skip'
+        env:
+          REASON: ${{ steps.plan.outputs.reason }}
+        run: |
+          echo "### rules-verify: skip ($REASON)" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Cycle
         id: cycle
         if: steps.plan.outputs.mode != 'skip'
