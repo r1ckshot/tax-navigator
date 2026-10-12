@@ -1,19 +1,26 @@
+/*
+ * Прогрес у «Реєстрі» — лінійка, а не пігулка: тонка риса під шапкою кроку,
+ * пройдена частина прокреслена акцентом. Заповнення — `transform: scaleX`, не
+ * `width`: зміна ширини перераховувала б розмітку на кожному кадрі.
+ */
 .wrap {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
 .track {
-  height: 6px;
-  border-radius: 999px;
-  background: var(--hairline);
+  position: relative;
+  height: 2px;
+  background: var(--hairline-strong);
   overflow: hidden;
 }
 
 .fill {
-  height: 100%;
+  position: absolute;
+  inset: 0;
   background: var(--accent);
-  border-radius: 999px;
-  transition: width 240ms ease-out;
+  transform: scaleX(var(--progress, 0));
+  transform-origin: left;
+  transition: transform var(--motion-enter) var(--ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {

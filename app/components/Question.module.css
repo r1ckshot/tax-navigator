@@ -1,9 +1,11 @@
+/*
+ * Картка кроку — аркуш «Реєстру» (`ruled.sheet` + `ruled.inkEdge`): лінійка
+ * чорнилом зверху, як шапка колонки на лендінгу, тонкі краї й без тіні.
+ * Лінійка тут нерухома: прокреслювалась би на кожному кроці.
+ */
 .screen {
   background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-5) var(--space-5) var(--space-6);
   /* Ім'я для View Transitions: перехід між кроками анімує саме картку
      (globals.css, ::view-transition-*(step)). */
   view-transition-name: step;
@@ -18,9 +20,9 @@
 .eyebrow {
   margin: 0;
   font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
 }
@@ -40,7 +42,8 @@
   padding: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
+  letter-spacing: -0.01em;
   line-height: var(--leading-snug);
   text-wrap: balance;
 }
@@ -108,7 +111,7 @@
   box-shadow: inset 0 0 0 0.7rem var(--surface);
   cursor: pointer;
   transition:
-    box-shadow 260ms var(--ease-out),
+    box-shadow var(--motion-state) var(--ease-out),
     border-color var(--motion-state) ease;
 }
 
@@ -143,10 +146,14 @@
   flex-direction: column;
 }
 
+/* Питання слайдера — той самий заголовок, що й `legend` у варіантів. */
 .sliderLabel {
-  font-weight: 700;
-  font-size: var(--text-md);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-xl);
+  letter-spacing: -0.01em;
   line-height: var(--leading-snug);
+  text-wrap: balance;
 }
 
 .sliderValue {

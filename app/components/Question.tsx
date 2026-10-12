@@ -8,6 +8,7 @@ import type { Draft, Field, Screen, SliderConfig } from '@/lib/questions/schema'
 import { visibleFields } from '@/lib/questions/schema';
 import { formatMoney } from '@/lib/format';
 import motion from './Motion.module.css';
+import ruled from './Ruled.module.css';
 import styles from './Question.module.css';
 
 /** Позиція в черзі появи кроку (`Motion.module.css`, `.soft`). */
@@ -32,7 +33,7 @@ export function Question({ screen, answers, onChange }: Props) {
   const fields = visibleFields(screen, answers);
   const starts = fields.map((_, i) => 1 + fields.slice(0, i).reduce((n, f) => n + slots(f), 0));
   return (
-    <section className={styles.screen}>
+    <section className={`${ruled.inkEdge} ${ruled.sheet} ${styles.screen}`}>
       {/* Категорія кроку лишається h1 (семантика заголовка), але візуально — дрібний
           акцентний надрядок; головний візуальний акцент на самому питанні нижче. */}
       <h1 className={`${motion.soft} ${styles.eyebrow}`} style={at(0)}>
