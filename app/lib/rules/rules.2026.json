@@ -88,7 +88,7 @@
         "priorBusinessLookbackMonths": 60
       },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
-      "verified_at": "2026-10-12"
+      "verified_at": "2026-10-14"
     },
     {
       "rule_id": "jdg.byly_pracodawca",
@@ -97,7 +97,7 @@
         "zusReliefLostOnPartialOverlap": true
       },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19981440930",
-      "verified_at": "2026-10-12"
+      "verified_at": "2026-10-14"
     },
 
     {
@@ -290,7 +290,7 @@
         "peselRequiredForCeidgFrom": "2026-11-01"
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00806",
-      "verified_at": "2026-10-12"
+      "verified_at": "2026-10-14"
     },
     {
       "rule_id": "status.work_right",
