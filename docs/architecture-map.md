@@ -68,7 +68,7 @@ C4Container
 | Чернетка | `app/lib/storage.ts` | adapters | `app/[locale]/poland/questionnaire/Questionnaire.tsx:66` | Ключ `tax-navigator:draft` (`:4`); SSR-guard + try/catch (`:19,24`) |
 | Share-лінк | `app/lib/share.ts` | adapters | `app/[locale]/poland/questionnaire/Questionnaire.tsx:61` | `encodeAnswers` (`:21`), `decodeAnswers` (`:33`), мапа коротких ключів (`:4-19`) |
 | Форматування | `app/lib/format.ts` | adapters | 3 компоненти | `Intl.NumberFormat('uk-UA')` (`:3-5`); нуль імпортів |
-| Каталог джерел | `app/lib/sources.ts` | adapters | `app/[locale]/poland/sources/page.tsx:52` | `buildSourceCatalog` (`:49`), порядок груп `GROUP_ORDER` (`:16`) |
+| Каталог джерел | `app/lib/sources.ts` | adapters | `app/[locale]/poland/sources/page.tsx:57` | `buildSourceCatalog` (`:49`), порядок груп `GROUP_ORDER` (`:16`) |
 | Адреси | `app/lib/routes.ts` | adapters | сторінки, `next.config.mjs` | `countryHref` (`:14`), старі редиректи `LEGACY_REDIRECTS` (`:24`), canonical + hreflang `alternates` (`:36`) |
 | Базова адреса | `app/lib/site.ts` | adapters | `app/[locale]/layout.tsx` | `siteUrl(env)` (`:8`): `NEXT_PUBLIC_APP_URL` → прод Vercel → localhost |
 | Мови | `app/lib/i18n/index.ts` | див. §Звірка п.1 | layout-и, `I18nProvider.tsx` | Реєстр `DICTIONARIES` (`:12`) — увімкнені мови; `translator` (`:25`). Словник `uk.ts` (246 ключів), каркас `en.ts` (порожній, не увімкнений), `createT` з fallback на ключ (`translate.ts:14`) |

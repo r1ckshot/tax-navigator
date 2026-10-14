@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import button from '@/components/Button.module.css';
 import { ColorSwatch } from '@/components/ColorSwatch';
 import { RiskBadge } from '@/components/RiskBadge';
+import ruled from '@/components/Ruled.module.css';
 import { t } from '@/lib/i18n/uk';
 import { parseTokens, type Token } from '@/lib/tokens';
 import type { Risk } from '@/lib/calc/types';
@@ -27,7 +28,7 @@ const bare = (name: string) => name.replace(/^--/, '');
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section className={styles.section}>
+    <section className={`${ruled.inkEdge} ${ruled.sheet} ${styles.section}`}>
       <h2>{title}</h2>
       {hint && <p className={styles.hint}>{hint}</p>}
       {children}

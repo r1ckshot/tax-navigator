@@ -90,7 +90,7 @@
   "app/[locale]/poland/questionnaire/Questionnaire.tsx:61": [
     "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));"
   ],
-  "app/[locale]/poland/sources/page.tsx:52": [
+  "app/[locale]/poland/sources/page.tsx:57": [
     "const catalog = buildSourceCatalog(new Date());"
   ],
   "translate.ts:14": [
