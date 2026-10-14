@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Контраст ролей кольору за WCAG 2.x — для словника `app/globals.css` і для тем
-// напрямів редизайну (`app/(technical)/design-lab/*/theme.css`).
+// Контраст ролей кольору за WCAG 2.x — для словника `app/globals.css` і для будь-якої
+// теми в тому самому форматі.
 //
 //   node scripts/contrast.mjs <file.css> [<file.css> …]
 //
