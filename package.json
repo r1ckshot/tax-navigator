@@ -1,6 +1,6 @@
 {
   "name": "tax-navigator",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "scripts": {
     "dev": "node scripts/worktree-ports.mjs -- next dev",
@@ -15,6 +15,8 @@
     "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/source-serif-4": "^5.3.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

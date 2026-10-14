@@ -1,19 +1,27 @@
+/*
+ * Секція результату — аркуш «Реєстру»: верхній край дає лінійка чорнилом
+ * (`ruled.inkRule`, прокреслюється при появі), решта — тонка рамка без тіні.
+ */
 .card {
   margin: 0;
-  padding: var(--space-5);
+  padding: var(--space-5) var(--space-5) var(--space-4);
   background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+  /* Коли картка вища за зміст (ПК, поруч довгий вердикт), таблиця займає всю
+     висоту, і надлишок ділиться між рядками порівну — без порожнього низу. */
+  display: flex;
+  flex-direction: column;
 }
 
+/* Кожне речення — з нового рядка (`\n` у словнику), на будь-якій ширині. */
 .subtitle {
   margin: 0 0 var(--space-4);
   color: var(--ink-muted);
   font-size: var(--text-base);
+  white-space: pre-line;
 }
 
 .table {
+  flex: 1;
   width: 100%;
   border-collapse: collapse;
 }
@@ -40,6 +48,8 @@
 .table tbody tr:last-child th,
 .table tbody tr:last-child td {
   border-bottom: 0;
+  /* Під останнім рядком — уже низ картки, її відступу досить. */
+  padding-bottom: 0;
 }
 
 .table thead th:first-child,
@@ -101,18 +111,21 @@
 
 
 /*
- * Верхній відступ нульовий навмисно: останній рядок таблиці вже несе свій
- * `padding-bottom: space-3`, тож лінійка примітки лягає рівно там само, де
- * лягають лінійки між рядками. З `margin-top` вона відсувалась удвічі далі, і
- * останній варіант (UoP) виглядав відірваним від решти.
+ * Пояснення колонки ризику — той самий аркуш, що й секції поруч: лінійка
+ * чорнилом зверху (`ruled.inkRule`), тонка рамка. Кегль — як у пунктів
+ * вердикту: на ПК блок стоїть під ними й заповнює колонку текстом, а не
+ * порожнім місцем.
  */
 .riskNote {
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  background: var(--surface);
+  font-size: var(--text-base);
+  color: var(--ink-secondary);
+}
+
+.riskNote p {
   margin: 0;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--hairline);
-  font-size: var(--text-sm);
-  color: var(--ink-muted);
-  /* Друге речення — з нового рядка: воно знімає інше непорозуміння, ніж перше. */
+  /* Речення — кожне з нового рядка (`\n` у словнику), як у дисклеймері. */
   white-space: pre-line;
   text-wrap: pretty;
 }
@@ -206,10 +219,6 @@
     color: var(--ink-muted);
   }
 
-  /* Кожне речення підзаголовка — з нового рядка: на телефоні вони злипались. */
-  .subtitle {
-    white-space: pre-line;
-  }
 }
 
 .risk {
@@ -223,6 +232,21 @@
 .riskIcon {
   flex: none;
   line-height: 1;
+}
+
+/* Рівень без слова «ризик» — на ПК, під підписаною шапкою; на телефоні навпаки. */
+.riskLong {
+  display: none;
+}
+
+@media (max-width: 40rem) {
+  .riskLong {
+    display: inline;
+  }
+
+  .riskShort {
+    display: none;
+  }
 }
 
 /* Ті самі оптичні поправки, що і в RiskBadge: `●` малюється дрібнішим за

@@ -16,6 +16,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./app', import.meta.url)),
+      // Шрифти — перетворення компілятора Next, у тестах їх немає (app/fonts.ts).
+      'next/font/local': fileURLToPath(new URL('./app/__tests__/next-font-local.stub.ts', import.meta.url)),
     },
   },
 });

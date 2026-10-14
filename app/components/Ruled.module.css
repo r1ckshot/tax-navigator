@@ -1,0 +1,102 @@
+/*
+ * Список-реєстр: пункти під лінійками. Один зразок руху на весь продукт
+ * (DECISIONS 2026-10-03, напрям «Реєстр»): рядок проявляється, лінійка під ним
+ * прокреслюється зліва направо. Черговість задає позиція в списку (`--i` у
+ * style), а не значення: на лендінгу порядок варіантів фіксований і не має
+ * читатись як рейтинг. Лише transform і opacity — без перерахунку розмітки.
+ */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list > li {
+  position: relative;
+  animation: rise var(--motion-enter) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms + var(--ruled-delay, 0ms));
+}
+
+/* Лінійка — окремий шар, щоб прокреслюватись, а не зʼявлятись разом із рядком. */
+.list > li::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--hairline-strong);
+  transform-origin: left;
+  animation: draw 700ms cubic-bezier(0.6, 0, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + var(--ruled-delay, 0ms) + 160ms);
+}
+
+/*
+ * Лінійка чорнилом — шапка колонки на лендінгу й верхній край кожного аркуша
+ * (картки) продукту. Один механізм на всі місця, щоб кінці й кути всюди були
+ * однакові:
+ *   .inkRule — прокреслюється при появі (затримка — `--ink-rule-delay`);
+ *   .inkEdge — та сама лінійка без руху (крок анкети, дисклеймер, CTA).
+ * Кінці лінійки заокруглені. На аркуші (`.sheet`) вона лягає точно на зовнішній
+ * край бічних рамок і повторює заокруглення верхніх кутів.
+ */
+.inkRule,
+.inkEdge {
+  position: relative;
+}
+
+.inkRule::before,
+.inkEdge::before {
+  content: '';
+  position: absolute;
+  inset: var(--ink-rule-inset, 0 0 auto);
+  height: var(--ink-rule-box, 2px);
+  border-radius: var(--ink-rule-radius, 1px);
+  background: var(--ink);
+  /* Видима лише товщина лінійки (`--ink-rule-line`). На аркуші сама фігура
+     вища (`--ink-rule-box` = радіус кута): інакше браузер стиснув би
+     заокруглення до товщини лінійки, і кінці не лягли б на коло кута. */
+  clip-path: inset(0 0 calc(100% - var(--ink-rule-line, 2px)) 0);
+}
+
+.inkRule::before {
+  transform-origin: left;
+  animation: draw 1000ms cubic-bezier(0.45, 0, 0.15, 1) var(--ink-rule-delay, 180ms) both;
+}
+
+/*
+ * Аркуш: рівна тонка рамка з усіх боків, верхній край — лінійка (ставиться
+ * разом з .inkRule або .inkEdge) поверх верхньої межі, по тому самому колу
+ * кута. Верхня межа лишається саме для кутів: без неї браузер зводить бічну
+ * межу біля кута нанівець, і під кінцем лінійки зʼявлявся проміжок.
+ */
+.sheet {
+  --ink-rule-inset: -1px -1px auto;
+  --ink-rule-line: 4px;
+  --ink-rule-box: var(--radius-lg);
+  --ink-rule-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+}
+
+@keyframes draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* «Зменшити рух» — одразу кінцевий стан, без жодного кадру. */
+@media (prefers-reduced-motion: reduce) {
+  .list > li,
+  .list > li::after,
+  .inkRule::before {
+    animation: none;
+  }
+}

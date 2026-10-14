@@ -1,23 +1,44 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Answers } from '@/lib/calc/types';
 import { assessResidency } from '@/lib/calc/residency';
 import { compareScenarios } from '@/lib/calc/scenarios';
 import { visibleScreens, isScreenComplete, resumeIndex, type Draft } from '@/lib/questions/schema';
 import { decodeAnswers, encodeAnswers } from '@/lib/share';
-import { countryHref } from '@/lib/routes';
 import { clearDraft, loadDraft, saveDraft } from '@/lib/storage';
 import { Question } from '@/components/Question';
 import { Progress } from '@/components/Progress';
 import { ResidencyVerdict } from '@/components/ResidencyVerdict';
 import { ScenarioCard } from '@/components/ScenarioCard';
-import { ComparisonTable } from '@/components/ComparisonTable';
-import Link from 'next/link';
+import { ComparisonTable, RiskNote } from '@/components/ComparisonTable';
+import { flushSync } from 'react-dom';
 import { Disclaimer } from '@/components/Disclaimer';
 import { EmailCta } from '@/components/EmailCta';
-import { useLocale, useT } from '@/components/I18nProvider';
+import { useT } from '@/components/I18nProvider';
+import button from '@/components/Button.module.css';
+import motion from '@/components/Motion.module.css';
+import ruled from '@/components/Ruled.module.css';
 import styles from './page.module.css';
+
+/** Позиція в черзі появи (`Motion.module.css`). */
+const at = (i: number) => ({ '--i': i }) as CSSProperties;
+
+/**
+ * Зміна кроку через View Transitions API: браузер знімає стару картку, React
+ * синхронно рендерить нову, і CSS (`::view-transition-*(step)` у globals.css)
+ * анімує заміну. Без API (Firefox, jsdom) або з «зменшити рух» — звичайна
+ * миттєва зміна.
+ */
+function stepTransition(update: () => void) {
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (!doc.startViewTransition || reduced) {
+    update();
+    return;
+  }
+  doc.startViewTransition(() => flushSync(update));
+}
 
 /**
  * Анкета й результат — клієнтські: відповіді не залишають вкладку (ADR-0002).
@@ -65,12 +86,12 @@ export function Questionnaire() {
   function next() {
     if (!canAdvance) return;
     if (isLast) setDone(true);
-    else setIndex((i) => i + 1);
+    else stepTransition(() => setIndex((i) => i + 1));
   }
 
   function back() {
     if (done) setDone(false);
-    else setIndex((i) => Math.max(0, i - 1));
+    else stepTransition(() => setIndex((i) => Math.max(0, i - 1)));
   }
 
   function restart() {
@@ -92,7 +113,7 @@ export function Questionnaire() {
     }
   }
 
-  if (!hydrated) return <main />;
+  if (!hydrated) return <Skeleton />;
 
   if (done) {
     return <Result answers={answers as Answers} onRestart={restart} onShare={share} shareNote={shareNote} />;
@@ -113,13 +134,37 @@ export function Questionnaire() {
       </div>
 
       <nav className={styles.nav}>
-        <button type="button" onClick={back} disabled={index === 0}>
+        <button type="button" className={`${button.secondary} ${button.back}`} onClick={back} disabled={index === 0}>
           {t('nav.back')}
         </button>
-        <button type="button" data-variant="primary" onClick={next} disabled={!canAdvance}>
+        <button type="button" className={`${button.primary} ${button.arrow}`} onClick={next} disabled={!canAdvance}>
           {isLast ? t('nav.showResult') : t('nav.next')}
         </button>
       </nav>
+    </main>
+  );
+}
+
+/**
+ * Поки сторінка не знає, що показати (чернетка в sessionStorage і відповіді з
+ * лінка читаються лише в браузері), — нейтральні обриси: надрядок, заголовок,
+ * аркуш. Вони підходять і кроку анкети, і результату за лінком «Поділитися»,
+ * тож жоден із двох не підміняє форму іншого.
+ */
+function Skeleton() {
+  const t = useT();
+  return (
+    <main aria-busy="true" aria-label={t('questionnaire.loading')}>
+      <div aria-hidden="true">
+        <span className={styles.skeletonLine} style={{ width: '18%' }} />
+        <span className={`${styles.skeletonLine} ${styles.skeletonTitle}`} style={{ width: '60%' }} />
+        <div className={`${ruled.inkEdge} ${ruled.sheet} ${styles.skeletonCard}`}>
+          <span className={styles.skeletonLine} style={{ width: '40%' }} />
+          <span className={styles.skeletonBlock} />
+          <span className={styles.skeletonBlock} />
+          <span className={styles.skeletonBlock} />
+        </div>
+      </div>
     </main>
   );
 }
@@ -136,42 +181,79 @@ function Result({
   shareNote: boolean;
 }) {
   const t = useT();
-  const locale = useLocale();
   const residency = assessResidency(answers);
   const scenarios = compareScenarios(answers);
 
+  /*
+   * Дашборд: на ПК дві рівні колонки — ліворуч вердикт і пояснення ризику,
+   * праворуч таблиця порівняння; деталі — на всю ширину; внизу ліворуч
+   * дисклеймер і кнопки, праворуч лист очікування. На телефоні — порядок
+   * розмітки стовпчиком: пояснення ризику одразу під таблицею. Рух — лише в заголовках і лінійках: цифри, позначки ризику й
+   * дисклеймер стоять із першого кадру (DECISIONS 2026-10-12).
+   */
   return (
     <main aria-live="polite" className={styles.result}>
-      <div className={styles.stack}>
-        <ResidencyVerdict result={residency} />
-        <ComparisonTable scenarios={scenarios} />
+      <header className={styles.resultHead}>
+        <p className={`${motion.reveal} ${styles.resultEyebrow}`} style={at(0)}>
+          {t('result.eyebrow')}
+        </p>
+        <h1 className={`${motion.reveal} ${styles.resultTitle}`} style={at(1)}>
+          {t('result.title')}
+        </h1>
+      </header>
+
+      <div className={styles.dashboard}>
+        <div className={styles.verdict}>
+          <ResidencyVerdict result={residency} />
+        </div>
+        <div className={styles.compare}>
+          <ComparisonTable scenarios={scenarios} />
+        </div>
+        <div className={styles.note}>
+          <RiskNote />
+        </div>
+
+        <section className={styles.details} aria-labelledby="details-heading">
+          <h2 id="details-heading" className={`${motion.soft} ${styles.detailsHeading}`} style={at(6)}>
+            {t('scenarios.detailsTitle')}
+          </h2>
+          <div className={`${ruled.inkRule} ${ruled.sheet} ${styles.cards}`}>
+            {scenarios.map((s) => (
+              <ScenarioCard key={s.id} scenario={s} />
+            ))}
+          </div>
+        </section>
+
+        {/* Повний список джерел — у шапці («Джерела»); тут джерела стоять біля
+            своїх висновків у картках. */}
+        <div className={styles.closing}>
+          <div className={styles.disclaimer}>
+            <Disclaimer />
+          </div>
+
+          <div className={styles.actions}>
+            <nav className={styles.nav}>
+              <button type="button" className={button.secondary} onClick={onRestart}>
+                {t('nav.restart')}
+              </button>
+              <button type="button" className={button.primary} onClick={onShare}>
+                {t('nav.share')}
+              </button>
+            </nav>
+            <p aria-live="polite" className={styles.shareNote}>
+              {shareNote ? (
+                <span key="copied" className={motion.soft}>
+                  {t('nav.shareCopied')}
+                </span>
+              ) : (
+                ''
+              )}
+            </p>
+          </div>
+
+          <EmailCta />
+        </div>
       </div>
-
-      <h3 className={styles.detailsHeading}>{t('scenarios.detailsTitle')}</h3>
-      <div className={styles.cards}>
-        {scenarios.map((s) => (
-          <ScenarioCard key={s.id} scenario={s} />
-        ))}
-      </div>
-
-      <Disclaimer />
-      <p className={styles.sourcesLink}>
-        <Link href={countryHref(locale, 'sources')}>{t('sources.link')}</Link>
-      </p>
-
-      <nav className={styles.nav}>
-        <button type="button" onClick={onRestart}>
-          {t('nav.restart')}
-        </button>
-        <button type="button" data-variant="primary" onClick={onShare}>
-          {t('nav.share')}
-        </button>
-      </nav>
-      <p aria-live="polite" className={styles.shareNote}>
-        {shareNote ? t('nav.shareCopied') : ''}
-      </p>
-
-      <EmailCta />
     </main>
   );
 }

@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
+import type { CSSProperties } from 'react';
 import { Disclaimer } from '@/components/Disclaimer';
 import { FreshnessBadge } from '@/components/FreshnessBadge';
+import motion from '@/components/Motion.module.css';
+import ruled from '@/components/Ruled.module.css';
 import { STALE_AFTER_DAYS } from '@/lib/calc/freshness';
 import { formatCount } from '@/lib/format';
 import { translator, type Translate } from '@/lib/i18n';
@@ -9,11 +12,12 @@ import { buildSourceCatalog, type GroupId, type SourceEntry } from '@/lib/source
 import { resolveLocale, type LocaleParams } from '../../params';
 import styles from './page.module.css';
 
+const at = (i: number) => ({ '--i': i }) as CSSProperties;
+
 export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {
   const locale = await resolveLocale(params);
   const t = translator(locale);
   return {
-    title: `${t('sources.title')} · ${t('app.title')}`,
     alternates: alternates(locale, 'sources'),
   };
 }
@@ -55,9 +59,13 @@ export default async function SourcesPage({ params }: { params: LocaleParams }) 
   return (
     <main>
       <header className={styles.header}>
-        <h1>{t('sources.title')}</h1>
-        <p className={styles.lead}>{t('sources.lead')}</p>
-        <div className={styles.summary}>
+        <h1 className={motion.soft} style={at(0)}>
+          {t('sources.title')}
+        </h1>
+        <p className={`${motion.soft} ${styles.lead}`} style={at(1)}>
+          {t('sources.lead')}
+        </p>
+        <div className={`${motion.soft} ${styles.summary}`} style={at(2)}>
           <p>
             {count(t, 'sources.rules', catalog.ruleCount)} {count(t, 'sources.groups', catalog.groups.length)}
           </p>
@@ -66,11 +74,20 @@ export default async function SourcesPage({ params }: { params: LocaleParams }) 
         </div>
       </header>
 
-      {catalog.groups.map((group) => (
-        <section key={group.id} className={styles.group} aria-labelledby={`group-${group.id}`}>
+      {catalog.groups.map((group, i) => (
+        <section
+          key={group.id}
+          className={`${ruled.inkRule} ${ruled.sheet} ${styles.group}`}
+          style={{ '--ink-rule-delay': `${180 + i * 90}ms` } as CSSProperties}
+          aria-labelledby={`group-${group.id}`}
+        >
           <header className={styles.groupHeader}>
-            <h2 id={`group-${group.id}`}>{groupTitle(t, group.id)}</h2>
-            <span className={styles.groupCount}>{count(t, 'sources.rules', group.entries.length)}</span>
+            <h2 id={`group-${group.id}`} className={motion.soft} style={at(3 + i)}>
+              {groupTitle(t, group.id)}
+            </h2>
+            <span className={`${motion.soft} ${styles.groupCount}`} style={at(3 + i)}>
+              {count(t, 'sources.rules', group.entries.length)}
+            </span>
           </header>
           <ul className={styles.rows}>
             {group.entries.map((entry) => (

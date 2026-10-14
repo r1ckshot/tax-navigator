@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { useT } from './I18nProvider';
 import styles from './Progress.module.css';
 
@@ -20,7 +21,7 @@ export function Progress({ percent }: { percent: number }) {
         aria-valuemin={0}
         aria-valuemax={100}
       >
-        <div className={styles.fill} style={{ width: `${percent}%` }} />
+        <div className={styles.fill} style={{ '--progress': percent / 100 } as CSSProperties} />
       </div>
     </div>
   );

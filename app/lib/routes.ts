@@ -17,13 +17,26 @@ export function countryHref(locale: Locale, page: CountryPage = 'home'): string 
 }
 
 /**
+ * Лендінг бренду: мова за замовчуванням живе на `/`, решта — на `/{мова}`.
+ * Сторінка одна (`app/[locale]/page.tsx`), а `/` віддає її rewrite-ом, не
+ * редиректом: адреса в рядку лишається короткою, а лендінг ділить layout,
+ * шрифти й шапку з країною.
+ */
+export function brandHref(locale: Locale): string {
+  return locale === DEFAULT_LOCALE ? '/' : `/${locale}`;
+}
+
+/** `/` → сторінка бренду мови за замовчуванням. Копія — у `next.config.mjs`. */
+export const BRAND_REWRITES: ReadonlyArray<{ source: string; destination: string }> = [
+  { source: '/', destination: `/${DEFAULT_LOCALE}` },
+];
+
+/**
  * Старі адреси, які вже живуть у розісланих лінках, і куди вони ведуть.
  * `next.config.mjs` тримає копію (конфіг не імпортує TypeScript); тест
  * `routes.test.ts` звіряє, що вони не розійшлись.
  */
 export const LEGACY_REDIRECTS: ReadonlyArray<{ source: string; destination: string; permanent: boolean }> = [
-  // Тимчасовий: `/` стане лендінгом бренду в темі 2.2.
-  { source: '/', destination: countryHref(DEFAULT_LOCALE), permanent: false },
   { source: '/questionnaire', destination: countryHref(DEFAULT_LOCALE, 'questionnaire'), permanent: true },
   { source: '/sources', destination: countryHref(DEFAULT_LOCALE, 'sources'), permanent: true },
 ];

@@ -24,8 +24,16 @@ async function redirectOf(request: import('@playwright/test').APIRequestContext,
   return { status: response.status(), target: `${location.pathname}${location.search}` };
 }
 
-test('старі адреси: / тимчасово, анкета й джерела постійно, query на місці', async ({ request }) => {
-  expect(await redirectOf(request, '/')).toEqual({ status: 307, target: '/uk/poland' });
+test('/ — лендінг бренду без редиректу, адреса лишається /', async ({ page, request }) => {
+  expect((await request.get('/', { maxRedirects: 0 })).status()).toBe(200);
+  await page.goto('/');
+  expect(new URL(page.url()).pathname).toBe('/');
+  await expect(page.locator('a[href="/uk/poland"]').first()).toBeVisible();
+  const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+  expect(new URL(canonical ?? '').pathname).toBe('/');
+});
+
+test('старі адреси: анкета й джерела постійно, query на місці', async ({ request }) => {
   expect(await redirectOf(request, '/sources')).toEqual({ status: 308, target: '/uk/poland/sources' });
   expect(await redirectOf(request, `/questionnaire?${QUERY}`)).toEqual({
     status: 308,

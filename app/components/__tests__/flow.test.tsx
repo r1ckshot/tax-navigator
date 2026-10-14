@@ -1,11 +1,11 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, within, cleanup, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Questionnaire as QuestionnairePage } from '@/[locale]/poland/questionnaire/Questionnaire';
-import { t } from '@/lib/i18n/uk';
+import { plain, q, t } from '@/lib/__tests__/plain';
 
 /**
  * Проходить анкету так, як це робить людина: клікає варіанти й тисне «Далі».
@@ -14,7 +14,7 @@ import { t } from '@/lib/i18n/uk';
  */
 async function answerAndAdvance(user: ReturnType<typeof userEvent.setup>, labels: string[]) {
   for (const label of labels) {
-    await user.click(screen.getByLabelText(label));
+    await user.click(screen.getByLabelText(plain(label)));
   }
   const next = screen.queryByRole('button', { name: t('nav.next') });
   await user.click(next ?? screen.getByRole('button', { name: t('nav.showResult') }));
@@ -31,8 +31,8 @@ async function walkMedianPath(revenue = '15000', statusKey = 'q.status.ukr') {
   await answerAndAdvance(user, [t('q.days.gte183')]);
 
   // Екран «центри» має два поля — обираємо в кожному окремо.
-  await user.click(within(screen.getByRole('group', { name: t('q.centers.personal') })).getByLabelText(t('q.centers.pl')));
-  await user.click(within(screen.getByRole('group', { name: t('q.centers.economic') })).getByLabelText(t('q.centers.pl')));
+  await user.click(within(screen.getByRole('group', { name: t('q.centers.personal') })).getByLabelText(q('q.centers.pl')));
+  await user.click(within(screen.getByRole('group', { name: t('q.centers.economic') })).getByLabelText(q('q.centers.pl')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
   await answerAndAdvance(user, [t('q.special.no')]);
@@ -45,15 +45,15 @@ async function walkMedianPath(revenue = '15000', statusKey = 'q.status.ukr') {
   await answerAndAdvance(user, [t(statusKey)]);
 
   // Виручка — слайдер: задаємо значення напряму (квантизується до кроку 2500).
-  fireEvent.change(screen.getByLabelText(t('q.revenue.label')), { target: { value: revenue } });
+  fireEvent.change(screen.getByLabelText(q('q.revenue.label')), { target: { value: revenue } });
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
-  await user.click(within(screen.getByRole('group', { name: t('q.work.kind') })).getByLabelText(t('q.work.programming')));
-  await user.click(within(screen.getByRole('group', { name: t('q.work.expenses') })).getByLabelText(t('q.work.lt10')));
+  await user.click(within(screen.getByRole('group', { name: t('q.work.kind') })).getByLabelText(q('q.work.programming')));
+  await user.click(within(screen.getByRole('group', { name: t('q.work.expenses') })).getByLabelText(q('q.work.lt10')));
   await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
   await answerAndAdvance(user, [t('q.parallelUop.no')]);
-  const clients = screen.queryByLabelText(t('q.clients.several'));
+  const clients = screen.queryByLabelText(q('q.clients.several'));
   await answerAndAdvance(user, clients ? [t('q.formerEmployer.no'), t('q.clients.several')] : [t('q.formerEmployer.no')]);
   await answerAndAdvance(user, [t('q.jdg.gt30')]);
 
@@ -71,52 +71,55 @@ describe('анкета — наскрізний прохід', () => {
   it('одинадцять кроків доводять до результату з вердиктом і шістьма варіантами', async () => {
     await walkMedianPath();
 
-    expect(screen.getByText(t('residency.plResident'))).toBeDefined();
+    expect(screen.getByText(q('residency.plResident'))).toBeDefined();
     for (const id of ['fop', 'jdg', 'incubator', 'nierejestrowana', 'zlecenie', 'uop']) {
-      expect(screen.getAllByText(t(`scenario.${id}`)).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(q(`scenario.${id}`)).length).toBeGreaterThan(0);
     }
   });
 
   it('дисклеймер присутній на екрані результату', async () => {
     await walkMedianPath();
     // Текст містить \n (кожне речення з нового рядка), тож матчимо за фрагментом.
-    expect(screen.getByText(/Це інформаційний калькулятор орієнтовного характеру/)).toBeDefined();
+    expect(screen.getByText(/Це інформаційний калькулятор, цифри в ньому орієнтовні/)).toBeDefined();
   });
 
-  it('під дисклеймером лінк на повний список джерел', async () => {
+  // Повний список джерел — у шапці (тест SiteHeader у brand-page.test.tsx); на
+  // результаті джерела стоять біля висновків, а дисклеймер прямо про них каже.
+  it('дисклеймер каже, що біля кожного висновку є джерело; дубля лінку на список немає', async () => {
     await walkMedianPath();
-    expect(screen.getByRole('link', { name: t('sources.link') }).getAttribute('href')).toBe('/uk/poland/sources');
+    expect(screen.getByText(/Біля кожного висновку є посилання на джерело/)).toBeDefined();
+    expect(screen.queryByRole('link', { name: t('sources.link') })).toBeNull();
   });
 
   it('ФОП: злотова колонка без числа з поясненням чому', async () => {
     await walkMedianPath();
     // Саме уточнений напис, а не загальне «Без числового діапазону»: у картці
     // числа Є, тож порожня має читатись як «польське на руки», а не «взагалі».
-    expect(screen.getAllByText(t('fop.noPlTakeHome')).length).toBeGreaterThan(0);
-    expect(screen.getByText(t('fop.plSideNotVerified'))).toBeDefined();
+    expect(screen.getAllByText(q('fop.noPlTakeHome')).length).toBeGreaterThan(0);
+    expect(screen.getByText(q('fop.plSideNotVerified'))).toBeDefined();
   });
 
   // Валюта мусить бути підписана: та сама картка показує обидві, і сплутати їх
   // означало б показати гривню під злотовим заголовком.
   it('ФОП: український тягар видно двома підписаними валютами', async () => {
     await walkMedianPath();
-    expect(screen.getByText(t('fop.burden.label'))).toBeDefined();
-    expect(screen.getByText(t('fop.burden.esv'))).toBeDefined();
-    expect(screen.getAllByText(t('unit.uahMonth')).length).toBeGreaterThan(0);
+    expect(screen.getByText(q('fop.burden.label'))).toBeDefined();
+    expect(screen.getByText(q('fop.burden.esv'))).toBeDefined();
+    expect(screen.getAllByText(q('unit.uahMonth')).length).toBeGreaterThan(0);
   });
 
   it('на картці JDG видно підформи і примітку про IP Box', async () => {
     await walkMedianPath();
-    expect(screen.getByText(t('subform.ryczalt'))).toBeDefined();
-    expect(screen.getByText(t('subform.liniowy'))).toBeDefined();
-    expect(screen.getByText(t('jdg.ipBoxNotIncluded'))).toBeDefined();
+    expect(screen.getByText(q('subform.ryczalt'))).toBeDefined();
+    expect(screen.getByText(q('subform.liniowy'))).toBeDefined();
+    expect(screen.getByText(q('jdg.ipBoxNotIncluded'))).toBeDefined();
   });
 
   // Пояснення бази стоїть на обох картках найму (UoP і zlecenie) — там воно і
   // потрібне, бо саме там виручка ділиться на нарахування роботодавця.
   it('картки найму пояснюють базу порівняння, інакше воно лестило б B2B', async () => {
     await walkMedianPath();
-    expect(screen.getAllByText(t('uop.employerCostBasis')).length).toBe(2);
+    expect(screen.getAllByText(q('uop.employerCostBasis')).length).toBe(2);
   });
 
   // Питання про хворобову анкета ставить лише в контексті пільгового ZUS для JDG
@@ -125,9 +128,9 @@ describe('анкета — наскрізний прохід', () => {
   // якого вона не робила.
   it('zlecenie: підформи KUP і чесна примітка про невраховану хворобову', async () => {
     await walkMedianPath();
-    expect(screen.getAllByText(t('subform.kup20')).length).toBeGreaterThan(0);
-    expect(screen.getByText(t('zlecenie.choroboweSkipped'))).toBeDefined();
-    expect(screen.getByText(t('zlecenie.studentUnder26'))).toBeDefined();
+    expect(screen.getAllByText(q('subform.kup20')).length).toBeGreaterThan(0);
+    expect(screen.getByText(q('zlecenie.choroboweSkipped'))).toBeDefined();
+    expect(screen.getByText(q('zlecenie.studentUnder26'))).toBeDefined();
   });
 
   // Медіанний шлях відповідає «JDG понад 30 місяців», тож умова 60 місяців не
@@ -135,9 +138,9 @@ describe('анкета — наскрізний прохід', () => {
   // для більшості людей, а не крайній випадок, тому й перевіряється тут.
   it('nierejestrowana: замість числа названо причину, і пастка про ZUS видна', async () => {
     await walkMedianPath();
-    expect(screen.getAllByText(t('nierejestrowana.priorBusiness')).length).toBeGreaterThan(0);
-    expect(screen.getByText(t('nierejestrowana.zusOnServices'))).toBeDefined();
-    expect(screen.getByText(t('nierejestrowana.lookback60'))).toBeDefined();
+    expect(screen.getAllByText(q('nierejestrowana.priorBusiness')).length).toBeGreaterThan(0);
+    expect(screen.getByText(q('nierejestrowana.zusOnServices'))).toBeDefined();
+    expect(screen.getByText(q('nierejestrowana.lookback60'))).toBeDefined();
   });
 });
 
@@ -208,7 +211,7 @@ describe('право працювати на екрані результату (
     }
     // Найм лишається з числом і приміткою про дозвіл.
     expect(within(rowOf('uop')).getAllByRole('cell')[0].dataset.empty).toBeUndefined();
-    expect(screen.getAllByText(t('status.work.permitBound')).length).toBe(3);
+    expect(screen.getAllByText(q('status.work.permitBound')).length).toBe(3);
   });
 
   // PRD AC-5: строк захисту доходить до екрана датою з правила, а не плейсхолдером.
@@ -217,7 +220,7 @@ describe('право працювати на екрані результату (
     const notes = screen.getAllByText((_, el) => el?.tagName === 'LI' && /Тимчасовий захист діє до/.test(el.textContent ?? ''));
     expect(notes.length).toBeGreaterThan(0);
     for (const n of notes) {
-      expect(n.textContent).toMatch(/до \d{2}\.\d{2}\.\d{4}/);
+      expect(plain(n.textContent ?? "")).toMatch(/до \d{2}\.\d{2}\.\d{4}/);
       expect(n.textContent).not.toContain('{');
     }
   });
@@ -256,7 +259,7 @@ describe('український тягар ФОП', () => {
     await walkMedianPath();
 
     const burden = screen.getByRole('table', { name: t('fop.burden.label') });
-    expect(within(burden).getByText(t('fop.burden.esv'))).toBeDefined();
+    expect(within(burden).getByText(q('fop.burden.esv'))).toBeDefined();
     // Підпис мусить називати дію («сплачується») і бік («український»): саме цих двох
     // слів бракувало, коли 2 850 zł прочитались як дохід.
     expect(t('fop.burden.label')).toMatch(/сплачується/);
@@ -273,7 +276,7 @@ describe('приватність і прогрес', () => {
   it('прогрес зберігається між кроками; точна сума в сховище не потрапляє', async () => {
     const user = userEvent.setup();
     render(<QuestionnairePage />);
-    await user.click(screen.getByLabelText(t('q.days.gte183')));
+    await user.click(screen.getByLabelText(q('q.days.gte183')));
     await user.click(screen.getByRole('button', { name: t('nav.next') }));
 
     const saved = window.sessionStorage.getItem('tax-navigator:draft') ?? '';
@@ -306,7 +309,44 @@ describe('шеринг на адресі з мовою', () => {
     window.history.replaceState(null, '', `${link.pathname}${link.search}`);
     render(<QuestionnairePage />);
 
-    expect(await screen.findByText(t('residency.plResident'))).toBeDefined();
+    expect(await screen.findByText(q('residency.plResident'))).toBeDefined();
     expect(tableText()).toBe(expected);
+  });
+});
+
+/**
+ * Перехід між кроками йде через View Transitions; «зменшити рух» мусить його
+ * обходити повністю — крок міняється одразу, без жодного кадру анімації.
+ * jsdom не має ні API, ні matchMedia, тож обидва підставляються тут.
+ */
+describe('зменшений рух: перехід між кроками', () => {
+  function stub(reduce: boolean) {
+    const startViewTransition = vi.fn((cb: () => void) => cb());
+    Object.assign(document, { startViewTransition });
+    window.matchMedia = vi.fn((query: string) => ({ matches: reduce && query.includes('reduce') })) as never;
+    return startViewTransition;
+  }
+
+  afterEach(() => {
+    delete (document as { startViewTransition?: unknown }).startViewTransition;
+    delete (window as { matchMedia?: unknown }).matchMedia;
+  });
+
+  it('без запиту на менше руху крок міняється через View Transition', async () => {
+    const transition = stub(false);
+    const user = userEvent.setup();
+    render(<QuestionnairePage />);
+    await answerAndAdvance(user, [t('q.days.gte183')]);
+    expect(transition).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('group', { name: t('q.centers.personal') })).toBeDefined();
+  });
+
+  it('із «зменшити рух» перехід не запускається, а крок однаково міняється', async () => {
+    const transition = stub(true);
+    const user = userEvent.setup();
+    render(<QuestionnairePage />);
+    await answerAndAdvance(user, [t('q.days.gte183')]);
+    expect(transition).not.toHaveBeenCalled();
+    expect(screen.getByRole('group', { name: t('q.centers.personal') })).toBeDefined();
   });
 });

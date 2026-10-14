@@ -1,0 +1,39 @@
+/*
+ * Поява по черзі: елемент проявляється й підіймається на кілька пікселів.
+ * Черговість — `--i` у style (позиція в розмітці, не значення), крок —
+ * `--stagger`. Тривалість і крива — токени руху з globals.css.
+ *
+ * `.reveal` — рівень «enter» (перший екран сторінки), `.soft` — рівень «soft»
+ * (пункти списку, варіанти відповіді): коротше й на менший зсув.
+ */
+.reveal {
+  animation: reveal var(--motion-enter) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * var(--stagger) + var(--reveal-delay, 0ms));
+}
+
+.soft {
+  animation: softIn var(--motion-soft) var(--ease-out) both;
+  /* Каскад не довший за ~10 кроків: на довгому екрані не чекати. */
+  animation-delay: calc(min(var(--i, 0), 10) * 50ms + var(--reveal-delay, 0ms));
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes softIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .soft {
+    animation: none;
+  }
+}

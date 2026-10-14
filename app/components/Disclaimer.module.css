@@ -1,11 +1,9 @@
 .disclaimer {
   margin: var(--space-5) 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-5) var(--space-4);
   background: var(--surface);
   color: var(--ink-secondary);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   /* \n у тексті → кожне речення з нового рядка. */
   white-space: pre-line;
 }

@@ -13,15 +13,12 @@
   white-space: pre-line;
 }
 
-/* Той самий вигляд картки, що hero лендингу: сторінка має читатись частиною
-   продукту, а не окремим інструментом. */
+/* Той самий аркуш, що в продукті (`Ruled.module.css`), але лінійка нерухома:
+   сторінка технічна, рух тут нічого не пояснює. */
 .section {
   margin-top: var(--space-5);
   padding: var(--space-5);
   background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
 }
 
 .hint {

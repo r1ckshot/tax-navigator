@@ -22,7 +22,7 @@ export type TokenDictionary = {
 };
 
 /** Родини палітри перелічені явно — та сама межа, що в design-tokens.test.ts. */
-const PALETTE_NAME = /^--(?:(?:stone|teal|green|amber|red)-\d{1,2}|white)$/;
+const PALETTE_NAME = /^--(?:(?:paper|navy|green|amber|red)-\d{1,2}|white)$/;
 const DARK_THEME = '@media (prefers-color-scheme: dark)';
 
 function declarations(block: string): Token[] {
@@ -32,7 +32,7 @@ function declarations(block: string): Token[] {
   }));
 }
 
-/** `var(--teal-51)` → `--teal-51`; усе, що не є рівно одним посиланням, — null. */
+/** `var(--navy-42)` → `--navy-42`; усе, що не є рівно одним посиланням, — null. */
 function reference(value: string): string | null {
   return /^var\((--[\w-]+)\)$/.exec(value)?.[1] ?? null;
 }

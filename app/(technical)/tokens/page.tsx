@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Metadata } from 'next';
+import button from '@/components/Button.module.css';
 import { ColorSwatch } from '@/components/ColorSwatch';
 import { RiskBadge } from '@/components/RiskBadge';
+import ruled from '@/components/Ruled.module.css';
 import { t } from '@/lib/i18n/uk';
 import { parseTokens, type Token } from '@/lib/tokens';
 import type { Risk } from '@/lib/calc/types';
@@ -21,12 +23,12 @@ export const dynamic = 'force-static';
 
 const RISKS: Risk[] = ['green', 'yellow', 'red'];
 
-/** `--teal-51` → `teal-51`: у підписі ролі префікс лише шумить. */
+/** `--navy-42` → `navy-42`: у підписі ролі префікс лише шумить. */
 const bare = (name: string) => name.replace(/^--/, '');
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section className={styles.section}>
+    <section className={`${ruled.inkEdge} ${ruled.sheet} ${styles.section}`}>
       <h2>{title}</h2>
       {hint && <p className={styles.hint}>{hint}</p>}
       {children}
@@ -122,11 +124,13 @@ export default function TokensPage() {
           ))}
         </div>
         <div className={styles.row}>
-          <button type="button">{t('tokens.buttonDefault')}</button>
-          <button type="button" data-variant="primary">
+          <button type="button" className={button.secondary}>
+            {t('tokens.buttonDefault')}
+          </button>
+          <button type="button" className={`${button.primary} ${button.arrow}`}>
             {t('tokens.buttonPrimary')}
           </button>
-          <button type="button" disabled>
+          <button type="button" className={button.primary} disabled>
             {t('tokens.buttonDisabled')}
           </button>
         </div>
