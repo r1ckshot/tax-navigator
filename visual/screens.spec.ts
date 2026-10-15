@@ -122,6 +122,22 @@ test('словник дизайну', async ({ page }) => {
 });
 
 /**
+ * Сторінка з движка «B2B N zł» (тема 3.1): таблиця діапазонів, припущення,
+ * перелінковка. Дати звірки джерел замасковано з тієї ж причини, що на
+ * `/sources`: бот автозвірки рухає їх щомісяця, а верстка та сама.
+ */
+test('сторінка з движка, B2B 20 000 zł', async ({ page }) => {
+  await page.goto(`${countryHref('uk')}/b2b-20000-zl`);
+
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.getByRole('table')).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  const dates = page.locator('section[aria-labelledby="answer-sources"] span[class*="meta"]');
+  await expect(page).toHaveScreenshot('engine-page.png', { fullPage: true, mask: [dates] });
+});
+
+/**
  * Єдина сцена, чий вигляд залежить від дати: стан свіжості рахується від
  * `verified_at` до сьогодні. Правило, що стало давнім, змінює еталон — це не шум,
  * а сигнал звірити правила знову; оновлювати еталон після звірки, а не замість неї.
