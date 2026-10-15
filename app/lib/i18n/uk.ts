@@ -119,8 +119,11 @@ export const uk: Record<string, string> = typesetDictionary({
   // --- Питання ---
   'q.days.title': 'Час у Польщі',
   'q.days.label': 'Скільки днів цього року фізичного перебування в Польщі? Будь-яка частина дня рахується як цілий день.',
-  'q.days.lt183': 'Менше 183 днів',
-  'q.days.gte183': '183 дні або більше',
+  // Закон: резидент, хто в Польщі «dłużej niż 183 dni» (art. 3 ust. 1a pkt 2), тож
+  // рівно 183 — ще ні. Коди `lt183`/`gte183` старші за цей підпис і лишились, бо
+  // живуть у share-лінках; значення в них — «до 183 включно» і «понад 183».
+  'q.days.lt183': '183 дні або менше',
+  'q.days.gte183': 'Більше 183 днів',
   'q.days.unsure': 'Не знаю точно',
   'q.daysApprox.title': 'Уточнення',
   'q.daysApprox.label': 'Приблизно скільки днів вийде за рік?',
@@ -214,7 +217,8 @@ export const uk: Record<string, string> = typesetDictionary({
   'residency.title': 'Податкове резидентство',
   'residency.plResident': 'Ознаки вказують на податкове резидентство Польщі',
   'residency.plNonResident': 'Ознаки не вказують на податкове резидентство Польщі',
-  'residency.basis.days': '183 дні або більше на території Польщі',
+  // «dłużej niż 183 dni» (art. 3 ust. 1a pkt 2): рівно 183 — ще не резидент за днями.
+  'residency.basis.days': 'Понад 183 дні на території Польщі',
   'residency.basis.centerPersonal': 'Особистий центр життєвих інтересів у Польщі',
   'residency.basis.centerEconomic': 'Економічний центр життєвих інтересів у Польщі',
   'residency.basis.declaration52zr': 'Центр інтересів стверджено заявою за спецнормою art. 52zr',

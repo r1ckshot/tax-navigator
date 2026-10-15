@@ -3,7 +3,7 @@ import { assessResidency } from '../residency';
 import { withAnswers } from './fixtures';
 
 describe('резидентство — тест 183 днів', () => {
-  it('≥183 днів робить резидентом навіть без центру інтересів у PL', () => {
+  it('понад 183 дні робить резидентом навіть без центру інтересів у PL', () => {
     const r = assessResidency(
       withAnswers({ daysInPl: 'gte183', personalCenter: 'UA', economicCenter: 'UA', permanentHomeInUa: true })
     );
@@ -23,6 +23,17 @@ describe('резидентство — тест 183 днів', () => {
         })
       ).plResident
     ).toBe(false);
+  });
+
+  // Межа закону: «dłużej niż 183 dni» (art. 3 ust. 1a pkt 2 ustawy o PIT, EVIDENCE
+  // «… 183 дні», п. 4). Рівно 183 — ще не резидент за днями, 184 — уже так.
+  it('межа 183/184: рівно 183 дні — без підстави «дні», 184 — з нею', () => {
+    const at = (days: number) =>
+      assessResidency(withAnswers({ daysInPl: 'unsure', daysInPlApprox: days, personalCenter: 'UA', economicCenter: 'UA' }));
+    expect(at(183).basis).not.toContain('days');
+    expect(at(183).plResident).toBe(false);
+    expect(at(184).basis).toContain('days');
+    expect(at(184).plResident).toBe(true);
   });
 });
 
@@ -45,7 +56,7 @@ describe('резидентство — центр інтересів рахує�
     expect(r.basis).toEqual(['centerPersonal']);
   });
 
-  it('обидві осі в UA і <183 днів → не резидент PL', () => {
+  it('обидві осі в UA і 183 дні або менше → не резидент PL', () => {
     const r = assessResidency(
       withAnswers({ daysInPl: 'lt183', personalCenter: 'UA', economicCenter: 'UA' })
     );
