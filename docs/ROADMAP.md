@@ -119,7 +119,7 @@ Mike пише «Begin». Сесія:
 |---|---|---|---|
 | 13 | [Фундамент SEO, аналітика, шаблон сторінки](sessions/13-seo-foundation.md) | Opus · high | [x] |
 | 14 | [Сторінки за реальними питаннями](sessions/14-seo-question-pages.md) | Fable · high | [x] |
-| 15 | [Сторінки з движка, реліз](sessions/15-seo-engine-pages.md) | Sonnet · high | [ ] |
+| 15 | [Сторінки з движка, реліз](sessions/15-seo-engine-pages.md) | Sonnet · high | [x] |
 
 ## Фаза 4. Гайди
 
