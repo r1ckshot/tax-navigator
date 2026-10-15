@@ -307,3 +307,49 @@ describe('право працювати: підстави й строки', () =
     );
   });
 });
+
+describe('VAT і заява для банку (сесія 14, EVIDENCE «VAT на JDG, заява для банку, 183 дні»)', () => {
+  const vat = getParams<{
+    exemptionAnnualLimit: number;
+    returnNotEarlierThanYearsAfterYearEnd: number;
+    foreignPlaceOfSupplyOutsideLimit: boolean;
+    vatUeBeforeEuB2bServices: boolean;
+  }>('jdg.vat');
+
+  // art. 113 ust. 1 ustawy o VAT у редакції ustawy z 24.06.2025 (Dz.U. 2025 poz. 896), чинна з 01.01.2026.
+  it('ліміт звільнення від VAT — 240 000 zł', () => {
+    expect(vat.exemptionAnnualLimit).toBe(240_000);
+  });
+
+  // Ліміт 2017–2025 років досі стоїть у довідниках і навіть у пораднику podatki.gov.pl.
+  it('АНТИ-РЕГРЕС: у даних немає старого ліміту 200 000', () => {
+    expect(vat.exemptionAnnualLimit).not.toBe(200_000);
+  });
+
+  // art. 113 ust. 11: «niewcześniej niż po upływie roku, licząc od końca roku».
+  // Сторінка VAT пише це словами («через рік»), тож зміна числа мусить зламати тест.
+  it('повернення до звільнення — не раніше ніж через рік після кінця року', () => {
+    expect(vat.returnNotEarlierThanYearsAfterYearEnd).toBe(1);
+  });
+
+  // art. 96 ust. 5 pkt 2: zgłoszenie «przed dniem, w którym podatnik traci prawo do zwolnienia».
+  it('реєстрація платником VAT — до дня втрати звільнення', () => {
+    expect(getParams<{ registrationBeforeLosingExemption: boolean }>('jdg.vat').registrationBeforeLosingExemption).toBe(true);
+  });
+
+  it('послуги B2B за кордоном — поза лімітом, але VAT-UE до першої послуги в ЄС', () => {
+    expect(vat.foreignPlaceOfSupplyOutsideLimit).toBe(true);
+    expect(vat.vatUeBeforeEuB2bServices).toBe(true);
+  });
+
+  // art. 45 ustawy o wymianie informacji podatkowych.
+  it('нова заява про резидентство — протягом 30 днів після зміни обставин', () => {
+    expect(getParams<{ updateWithinDaysAfterChange: number }>('residency.crs_self_certification').updateWithinDaysAfterChange).toBe(30);
+  });
+
+  // art. 3 ust. 1a pkt 2 ustawy o PIT: «dłużej niż 183 dni» — рівно 183 ще не резидент;
+  // саму межу 183/184 тримає residency.test.ts.
+  it('поріг днів — 183', () => {
+    expect(getParams<{ days: number }>('residency.days_threshold').days).toBe(183);
+  });
+});

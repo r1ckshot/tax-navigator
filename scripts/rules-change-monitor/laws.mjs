@@ -36,6 +36,8 @@ export const ACTS = Object.freeze({
   pracaCudzoziemcow: { eli: "DU/2025/621", name: "ustawa o warunkach dopuszczalności powierzania pracy cudzoziemcom" },
   pip: { eli: "DU/2007/589", name: "ustawa o Państwowej Inspekcji Pracy" },
   reformaPip: { eli: "DU/2026/473", name: "ustawa z 11.03.2026 o zmianie ustawy o PIP" },
+  vat: { eli: "DU/2004/535", name: "ustawa o podatku od towarów i usług" },
+  wymianaInformacji: { eli: "DU/2017/648", name: "ustawa o wymianie informacji podatkowych z innymi państwami" },
 });
 
 /**
@@ -73,7 +75,7 @@ export function isDocument(law) {
   return law.method === "edition" && typeof EDITIONS[law.key]?.sha256 === "string";
 }
 
-/** Людська назва посилання: «ustawa o PIT, art. 3 ust. 2a». */
+/** Людська назва посилання: «ustawa o PIT, art. 3 ust. 1a pkt 2». */
 export function lawLabel(law) {
   const registry = law.method === "act" ? ACTS : EDITIONS;
   return `${registry[law.key].name}, ${law.where}`;
@@ -90,10 +92,20 @@ export function lawLabel(law) {
  */
 export const RULE_LAWS = Object.freeze({
   "residency.days_threshold": {
-    laws: [act("pit", "art. 3 ust. 2a"), edition("objasnieniaRezydencja", "с. 7–8, лічба днів: кожна частина дня — день")],
+    laws: [act("pit", "art. 3 ust. 1a pkt 2"), edition("objasnieniaRezydencja", "с. 7–8, лічба днів: кожна частина дня — день")],
   },
   "residency.special_norm_52zr": { laws: [act("pit", "art. 52zr")] },
   "residency.treaty_tiebreakers": { laws: [act("umowaPlUa", "art. 4 ust. 2")] },
+  "residency.crs_self_certification": {
+    laws: [act("wymianaInformacji", "art. 24 ust. 1 pkt 23 (резидентство за законом держави), art. 43 ust. 1 і 3, art. 45, art. 57")],
+  },
+  "jdg.vat": {
+    laws: [
+      act("vat", "art. 113 ust. 1, 4, 5, 9, 10, 11, 13 (звільнення, ліміт, відмова, винятки)"),
+      act("vat", "art. 2 pkt 9 і 22, art. 17 ust. 1 pkt 4, art. 28b ust. 1 (місце послуги, імпорт послуг)"),
+      act("vat", "art. 96 ust. 5, art. 97 ust. 3, art. 100 ust. 1 pkt 4 (реєстрація, VAT-UE)"),
+    ],
+  },
   "jdg.byly_pracodawca": {
     laws: [
       act("ryczalt", "art. 8 ust. 2"),

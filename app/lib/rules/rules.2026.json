@@ -26,6 +26,19 @@
     },
 
     {
+      "rule_id": "residency.crs_self_certification",
+      "params": {
+        "collectedAtAccountOpening": true,
+        "residenceByTaxLawOfThatState": true,
+        "countriesAndTinPerCountry": true,
+        "underCriminalLiability": true,
+        "updateWithinDaysAfterChange": 30
+      },
+      "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20170000648",
+      "source_title": "Ustawa o wymianie informacji podatkowych z innymi państwami",
+      "verified_at": "2026-10-15"
+    },
+    {
       "rule_id": "common.minimum_wage",
       "params": { "monthly": 4806 },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
@@ -111,6 +124,27 @@
       "verified_at": "2026-10-12"
     },
 
+    {
+      "rule_id": "jdg.vat",
+      "params": {
+        "exemptionAnnualLimit": 240000,
+        "limitProportionalWhenStartingMidYear": true,
+        "exemptionLostFromExceedingSale": true,
+        "registrationBeforeLosingExemption": true,
+        "inputVatNotDeductedWhenExempt": true,
+        "optOutBeforeMonthStart": true,
+        "returnNotEarlierThanYearsAfterYearEnd": 1,
+        "legalAndConsultingServicesExcluded": true,
+        "b2bServicesTaxedWhereClientIs": true,
+        "foreignPlaceOfSupplyOutsideLimit": true,
+        "vatUeBeforeEuB2bServices": true,
+        "vatUeBeforeImportOfServices": true,
+        "importOfServicesTaxedByBuyer": true
+      },
+      "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20040540535",
+      "source_title": "Ustawa o podatku od towarów i usług",
+      "verified_at": "2026-10-15"
+    },
     {
       "rule_id": "incubator.kup",
       "params": {

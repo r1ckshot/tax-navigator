@@ -7,21 +7,22 @@ const TODAY = new Date('2026-09-15T12:00:00Z');
 describe('buildSourceCatalog: поточний файл правил', () => {
   const catalog = buildSourceCatalog(TODAY);
 
-  it('усі 30 правил потрапляють на сторінку, жодне не губиться', () => {
-    expect(catalog.ruleCount).toBe(30);
+  it('усі 32 правила потрапляють на сторінку, жодне не губиться', () => {
+    expect(catalog.ruleCount).toBe(32);
     expect(catalog.groups.flatMap((g) => g.entries)).toHaveLength(RULES.rules.length);
   });
 
   // Еталон перелічено руками з rules.2026.json (перший сегмент rule_id).
   // status — правила права працювати (сесія 05 ROADMAP, 2026-10-03), на полотні
-  // їх ще немає; jdg виросла на jdg.przekwalifikowanie.
+  // їх ще немає; jdg виросла на jdg.przekwalifikowanie, а в сесії 14 — на jdg.vat;
+  // residency — на residency.crs_self_certification (заява для банку).
   it('9 груп у фіксованому порядку', () => {
     expect(catalog.groups.map((g) => [g.id, g.entries.length])).toEqual([
-      ['residency', 3],
+      ['residency', 4],
       ['status', 3],
       ['common', 2],
       ['fop', 2],
-      ['jdg', 7],
+      ['jdg', 8],
       ['incubator', 1],
       ['nierejestrowana', 4],
       ['zlecenie', 4],
