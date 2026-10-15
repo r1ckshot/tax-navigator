@@ -89,7 +89,7 @@
   min-width: 0;
 }
 
-.ruleId {
+.title {
   color: var(--ink);
   overflow-wrap: anywhere;
 }

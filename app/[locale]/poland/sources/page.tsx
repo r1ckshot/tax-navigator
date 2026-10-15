@@ -18,6 +18,8 @@ export async function generateMetadata({ params }: { params: LocaleParams }): Pr
   const locale = await resolveLocale(params);
   const t = translator(locale);
   return {
+    title: t('sources.title'),
+    description: t('sources.lead'),
     alternates: alternates(locale, 'sources'),
   };
 }
@@ -39,7 +41,7 @@ function SourceRow({ entry }: { entry: SourceEntry }) {
   return (
     <li className={styles.row}>
       <div className={styles.what}>
-        <code className={styles.ruleId}>{entry.ruleId}</code>
+        <span className={styles.title}>{entry.title}</span>
         <a href={entry.url} target="_blank" rel="noopener noreferrer">
           {entry.host}
         </a>

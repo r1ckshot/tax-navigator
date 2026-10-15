@@ -33,6 +33,7 @@ describe('buildSourceCatalog: поточний файл правил', () => {
     for (const entry of catalog.groups.flatMap((g) => g.entries)) {
       const rule = RULES.rules.find((r) => r.rule_id === entry.ruleId)!;
       expect(entry.url).toBe(rule.source_url);
+      expect(entry.title).toBe(rule.source_title);
       expect(entry.verifiedAt).toBe(rule.verified_at);
       expect(entry.host).toBe(new URL(rule.source_url).hostname);
     }
@@ -63,6 +64,7 @@ describe('buildSourceCatalog: розвилки', () => {
     rule_id,
     params: {},
     source_url: 'https://www.zus.pl/x',
+    source_title: 'ZUS',
     verified_at: '2026-07-18',
   });
 

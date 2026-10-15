@@ -26,6 +26,13 @@ describe('/sources', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(30);
   });
 
+  // Підпис — назва джерела, а не службовий `rule_id` (BACKLOG, сесія 13).
+  it('кожен рядок підписано назвою джерела, rule_id на сторінці не видно', async () => {
+    await renderOn('2026-09-15');
+    for (const rule of RULES.rules) expect(screen.getAllByText(rule.source_title).length).toBeGreaterThan(0);
+    for (const rule of RULES.rules) expect(screen.queryByText(rule.rule_id)).toBeNull();
+  });
+
   it('девʼять груп із лічильником у правильній формі', async () => {
     await renderOn('2026-09-15');
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(9);

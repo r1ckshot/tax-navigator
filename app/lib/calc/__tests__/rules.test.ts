@@ -14,6 +14,16 @@ describe('rules-as-data — дисципліна джерел', () => {
     }
   });
 
+  // Підпис джерела — те, що людина бачить під висновком замість `rule_id`.
+  // Порожній підпис чи сам `rule_id` повернули б службовий ярлик на екран.
+  it('кожне правило має назву джерела для людини, а не службовий ярлик', () => {
+    for (const rule of RULES.rules) {
+      expect(rule.source_title?.trim(), rule.rule_id).toBeTruthy();
+      expect(rule.source_title, rule.rule_id).not.toBe(rule.rule_id);
+      expect(rule.source_title, rule.rule_id).not.toMatch(/^[a-z_]+(\.[a-z_0-9]+)+$/);
+    }
+  });
+
   // Анти-регрес: sip.lex.pl — комерційна база за пейволом, і посилання на неї
   // тримало два правила ryczałtu на art. 8 ust. 1 pkt 6, який уже uchylony
   // (перезвірка 2026-10-01, EVIDENCE). Джерело для людини — державне: сторінка
