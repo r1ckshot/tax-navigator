@@ -14,13 +14,15 @@ import styles from './page.module.css';
 export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {
   const locale = await resolveLocale(params);
   const t = translator(locale);
+  // Вкладка головної — лише назва бренду (Mike); прев'ю лінка пояснює, що це.
+  // Решта сторінок має власні заголовки: за ними пошук ранжує сторінку.
   const title = t('brand.title');
   // Переноси рядків — для верстки сторінки; у метаописі й прев'ю вони зайві.
   const description = t('brand.lead').replace(/\n/g, ' ');
   // openGraph і twitter замінюють об'єкти з layout цілком, тож ключі layout
   // (locale, siteName, картка) повторені тут, щоб не загубитись.
   return {
-    title,
+    title: t('app.title'),
     description,
     alternates: { canonical: brandHref(locale) },
     openGraph: { type: 'website', locale: t('app.ogLocale'), siteName: t('app.title'), title, description },

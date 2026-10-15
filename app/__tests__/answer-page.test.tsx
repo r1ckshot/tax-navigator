@@ -59,6 +59,15 @@ describe('шаблон сторінки-відповіді: демо ryczalt-it'
   });
 });
 
+describe('головна: вкладка — лише назва бренду', () => {
+  it('<title> — «nettomap», прев\'ю лінка лишається з описом', async () => {
+    const { generateMetadata: brandMetadata } = await import('@/[locale]/page');
+    const meta = await brandMetadata({ params: Promise.resolve({ locale: 'uk' }) });
+    expect(meta.title).toBe(t('app.title'));
+    expect(meta.openGraph?.title).toBe(t('brand.title'));
+  });
+});
+
 describe('метадані сторінок країни', () => {
   it('кожна сторінка має власний заголовок вкладки', async () => {
     const p = Promise.resolve({ locale: 'uk' });
