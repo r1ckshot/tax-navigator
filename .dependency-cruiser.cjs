@@ -13,7 +13,8 @@
 /** Ядро: детерміновані розрахунки + дані правил. */
 const CORE = '^app/lib/(rules|calc)/';
 /** Адаптери введення/зберігання/лінка + presentation-хелпери. */
-const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site)\\.ts$|^app/lib/(questions|i18n)/';
+const ADAPTERS =
+  '^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site|seo|analytics|answer-page)\\.ts$|^app/lib/(questions|i18n|content)/';
 /**
  * Presentation: усе в `app/` поза `lib/` — компоненти, сторінки, layout-и й
  * хелпери маршрутів (`app/[locale]/params.ts`). Список за шаблоном імені
@@ -96,6 +97,15 @@ module.exports = {
     tsConfig: { fileName: 'tsconfig.json' },
     /** Без цього `import type` не видно, а майже всі межі тут — типові. */
     tsPreCompilationDeps: true,
+    /**
+     * Пакети, що віддають підшляхи лише через `exports` (`@vercel/analytics/next`),
+     * без цього не резолвляться: за замовчуванням dependency-cruiser поле
+     * `exports` не читає, а `next/link` знаходився лише тому, що лежить файлом.
+     */
+    enhancedResolveOptions: {
+      exportsFields: ['exports'],
+      conditionNames: ['import', 'require', 'node', 'default'],
+    },
     exclude: { path: '\\.next/' },
   },
 };

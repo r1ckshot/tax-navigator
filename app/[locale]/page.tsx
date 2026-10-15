@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: LocaleParams }): Pr
   // openGraph і twitter замінюють об'єкти з layout цілком, тож ключі layout
   // (locale, siteName, картка) повторені тут, щоб не загубитись.
   return {
-    title: t('app.title'),
+    title,
     description,
     alternates: { canonical: brandHref(locale) },
     openGraph: { type: 'website', locale: t('app.ogLocale'), siteName: t('app.title'), title, description },

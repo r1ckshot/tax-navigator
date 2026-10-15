@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import '../globals.css';
+import { Analytics } from '@/components/Analytics';
 import { I18nProvider } from '@/components/I18nProvider';
 import { SiteHeader } from '@/components/SiteHeader';
 import { fontFaces } from '../fonts';
@@ -29,7 +30,8 @@ export function generateStaticParams(): { locale: Locale }[] {
 export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {
   const t = translator(await resolveLocale(params));
   // Вкладка — лише назва бренду; прев'ю лінка — з описом країни.
-  const title = `${t('poland.title')} · ${t('app.title')}`;
+  // Без «· nettomap»: назву сайту пошук і месенджери показують окремо (`siteName`).
+  const title = t('poland.title');
   // Переноси рядків у тексті сторінки — для верстки; в прев'ю лінка вони зайві.
   const description = t('app.lead').replace(/\n/g, ' ');
   return {
@@ -60,6 +62,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
           <SiteHeader />
           {children}
         </I18nProvider>
+        <Analytics />
       </body>
     </html>
   );

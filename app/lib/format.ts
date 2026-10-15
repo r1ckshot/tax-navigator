@@ -38,3 +38,19 @@ export function pluralUk(n: number, forms: readonly [one: string, few: string, m
 export function formatCount(n: number, forms: readonly [one: string, few: string, many: string]): string {
   return pluralUk(n, forms).replace('{n}', String(n));
 }
+
+/**
+ * Сума з правила як є: до двох знаків після коми й без округлення до гривні —
+ * у тексті сторінки «498,35 zł» має збігатися з джерелом до копійки, на відміну
+ * від діапазонів результату (`formatMoney`).
+ */
+export function formatAmount(value: number): string {
+  const fraction = Number.isInteger(value) ? 0 : 2;
+  return new Intl.NumberFormat('uk-UA', { minimumFractionDigits: fraction, maximumFractionDigits: 2 }).format(value);
+}
+
+/** Частка з правила (0.12) → «12%», 0.085 → «8,5%». Множення дає 8.500000000000002, тож округлення. */
+export function formatPercent(share: number): string {
+  const percent = Math.round(share * 10_000) / 100;
+  return `${new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 2 }).format(percent)}%`;
+}

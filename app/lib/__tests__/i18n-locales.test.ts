@@ -107,7 +107,7 @@ describe('нова мова вмикається словником, без зм
     // Вкладка — лише назва бренду; опис країни — у прев'ю лінка.
     expect(plain(String(meta.title))).toBe(plain(`EN ${uk['app.title']}`));
     expect(plain(String((meta.openGraph as { title?: string }).title))).toBe(
-      plain(`EN ${uk['poland.title']} · EN ${uk['app.title']}`),
+      plain(`EN ${uk['poland.title']}`),
     );
     expect(plain(String((meta.openGraph as { locale?: string }).locale))).toBe(`EN ${uk['app.ogLocale']}`);
   });

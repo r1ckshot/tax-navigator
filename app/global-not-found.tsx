@@ -14,7 +14,7 @@ import { fontFaces } from './fonts';
 const t = translator(DEFAULT_LOCALE);
 
 export const metadata: Metadata = {
-  title: `${t('notFound.title')} · ${t('app.title')}`,
+  title: t('notFound.title'),
 };
 
 export default function GlobalNotFound() {

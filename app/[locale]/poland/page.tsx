@@ -14,7 +14,12 @@ import styles from './page.module.css';
 const SCENARIOS: ScenarioId[] = ['fop', 'jdg', 'incubator', 'nierejestrowana', 'zlecenie', 'uop'];
 
 export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {
-  return { alternates: alternates(await resolveLocale(params)) };
+  const locale = await resolveLocale(params);
+  const t = translator(locale);
+  return {
+    title: t('poland.title'),
+    alternates: alternates(locale),
+  };
 }
 
 /**

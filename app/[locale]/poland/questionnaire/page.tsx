@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { translator } from '@/lib/i18n';
 import { alternates } from '@/lib/routes';
 import { resolveLocale, type LocaleParams } from '../../params';
 import { Questionnaire } from './Questionnaire';
@@ -9,7 +10,12 @@ import { Questionnaire } from './Questionnaire';
  * для пошуку.
  */
 export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {
-  return { alternates: alternates(await resolveLocale(params), 'questionnaire') };
+  const locale = await resolveLocale(params);
+  const t = translator(locale);
+  return {
+    title: t('questionnaire.title'),
+    alternates: alternates(locale, 'questionnaire'),
+  };
 }
 
 export default function QuestionnairePage() {
