@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import AnswerPage, { generateMetadata, generateStaticParams } from '@/[locale]/poland/[slug]/page';
 import { RULES } from '@/lib/rules/types';
-import { plain, t } from '@/lib/__tests__/plain';
+import { plain, q, t } from '@/lib/__tests__/plain';
 
 afterEach(cleanup);
 
@@ -13,7 +13,11 @@ const params = (slug: string) => Promise.resolve({ locale: 'uk', slug });
 
 describe('шаблон сторінки-відповіді: демо ryczalt-it', () => {
   it('статичні адреси — рівно сторінки з реєстру', () => {
-    expect(generateStaticParams()).toEqual([{ locale: 'uk', slug: 'ryczalt-it' }]);
+    expect(generateStaticParams()).toEqual(
+      ['jdg-ukr-cukr', 'rezydentstvo-bank-broker', 'vat-jdg', 'pip-b2b', 'pilgovyi-zus', 'fop-chy-jdg', 'b2b-na-ruky', 'ryczalt-it'].map(
+        (slug) => ({ locale: 'uk', slug }),
+      ),
+    );
   });
 
   it('заголовок, числа з правил, без сирих плейсхолдерів', async () => {
@@ -39,12 +43,15 @@ describe('шаблон сторінки-відповіді: демо ryczalt-it'
     expect(block.textContent).toMatch(/звірено \d{2}\.\d{2}\.\d{4}/);
   });
 
-  it('кнопка веде в анкету з передзаповненням; дисклеймер на місці; гайду ще немає', async () => {
+  it('кнопка веде в анкету з передзаповненням; дисклеймер сторінки, не калькулятора; гайду ще немає', async () => {
     render(await AnswerPage({ params: params('ryczalt-it') }));
     expect(screen.getByRole('link', { name: t('app.start') }).getAttribute('href')).toBe(
       '/uk/poland/questionnaire?w=programming&start=1',
     );
-    expect(screen.getByText(/Це інформаційний калькулятор/)).toBeDefined();
+    expect(screen.getByText(q('answer.cta.text'))).toBeDefined();
+    // Рев'ю сесії 13, P2-2: сторінка не калькулятор.
+    expect(screen.getByText(/Це довідкова сторінка, а не податкова консультація/)).toBeDefined();
+    expect(screen.queryByText(/калькулятор/i)).toBeNull();
     expect(screen.queryByText(/гайд/i)).toBeNull();
   });
 
@@ -56,6 +63,22 @@ describe('шаблон сторінки-відповіді: демо ryczalt-it'
       canonical: '/uk/poland/ryczalt-it',
       languages: { uk: '/uk/poland/ryczalt-it', 'x-default': '/uk/poland/ryczalt-it' },
     });
+  });
+});
+
+describe('сторінка без передзаповнення: jdg-ukr-cukr', () => {
+  it('кнопка — звичайна анкета, текст біля неї не обіцяє вибраних відповідей', async () => {
+    render(await AnswerPage({ params: params('jdg-ukr-cukr') }));
+    expect(screen.getByRole('link', { name: t('app.start') }).getAttribute('href')).toBe('/uk/poland/questionnaire');
+    expect(screen.getByText(q('answer.cta.textBlank'))).toBeDefined();
+    expect(screen.queryByText(q('answer.cta.text'))).toBeNull();
+  });
+
+  it('дата з правила на сторінці, без сирих плейсхолдерів', async () => {
+    render(await AnswerPage({ params: params('jdg-ukr-cukr') }));
+    const text = plain(document.body.textContent ?? '');
+    expect(text).toContain('продовжено до 04.03.2028');
+    expect(text).not.toMatch(/\{\{|\}\}/);
   });
 });
 
@@ -80,7 +103,9 @@ describe('метадані сторінок країни', () => {
     expect(titles).toEqual([t('poland.title'), t('questionnaire.title'), t('sources.title')]);
     for (const title of titles) expect(String(title)).not.toContain('·');
     expect(new Set(titles).size).toBe(3);
-  });
+    // Три холодні динамічні імпорти сторінок: у девконтейнері (9p) це ~5–6 с,
+    // тобто впритул до дефолтних 5 с, а на CI — частки секунди.
+  }, 30_000);
 
   it('/tokens закрита від пошуку', async () => {
     const { metadata } = await import('@/(technical)/tokens/page');

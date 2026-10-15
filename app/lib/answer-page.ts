@@ -1,7 +1,7 @@
-import { ruleNumber } from '@/lib/calc/facts';
+import { ruleDate, ruleNumber } from '@/lib/calc/facts';
 import { sourceOf, type Source } from '@/lib/rules/types';
 import { ANSWER_PAGES, type AnswerPageContent, type Block } from '@/lib/content';
-import { formatAmount, formatPercent } from '@/lib/format';
+import { formatAmount, formatDate, formatPercent } from '@/lib/format';
 import { LOCALES, type Locale } from '@/lib/i18n';
 import { typeset } from '@/lib/i18n/typeset';
 import { answerAlternates, countryHref } from '@/lib/routes';
@@ -28,6 +28,9 @@ const FORMATS: Record<string, (value: number) => string> = {
   percent: formatPercent,
 };
 
+/** `{{date:status.ukr_protection/protectionUntil}}` → «04.03.2028»: дата з правила, не з тексту. */
+const DATE_FORMAT = 'date';
+
 export interface ResolvedBlock {
   kind: Block['kind'];
   text?: string;
@@ -43,6 +46,8 @@ export interface ResolvedAnswerPage {
   /** Джерело кожного числа на сторінці, кожне один раз, у порядку появи. */
   sources: Source[];
   questionnaireHref: string;
+  /** Чи несе кнопка відповіді з теми сторінки: від цього залежить текст біля неї. */
+  prefilled: boolean;
   guide?: string;
 }
 
@@ -59,6 +64,11 @@ function resolveText(text: string, sources: Map<string, Source>): string {
       return '';
     })
     .replace(PLACEHOLDER, (_match, format: string, ruleId: string, path: string) => {
+      if (format === DATE_FORMAT) {
+        const { value, source } = ruleDate(ruleId, path);
+        cite(source);
+        return formatDate(value);
+      }
       const formatter = FORMATS[format];
       if (!formatter) throw new Error(`Unknown number format "${format}" in {{${format}:${ruleId}/${path}}}`);
       const { value, source } = ruleNumber(ruleId, path);
@@ -72,17 +82,28 @@ function resolveText(text: string, sources: Map<string, Source>): string {
 export function resolveAnswerPage(locale: Locale, content: AnswerPageContent): ResolvedAnswerPage {
   const sources = new Map<string, Source>();
   const text = (t: string) => resolveText(t, sources);
+  const prefilled = Object.keys(content.prefill).length > 0;
+  // Порядок збірки — порядок читання: джерело, вперше назване в заголовку чи
+  // вступі, стоїть у блоці джерел раніше за джерела тіла.
+  const title = text(content.title);
+  const description = text(content.description);
+  const lead = text(content.lead);
   const body = content.body.map((block): ResolvedBlock =>
     block.kind === 'list' ? { kind: 'list', items: block.items.map(text) } : { kind: block.kind, text: text(block.text) },
   );
   return {
     slug: content.slug,
-    title: text(content.title),
-    description: text(content.description),
-    lead: text(content.lead),
+    title,
+    description,
+    lead,
     body,
     sources: [...sources.values()],
-    questionnaireHref: `${countryHref(locale, 'questionnaire')}?${encodePrefill(content.prefill)}`,
+    // Без відповідей із теми — звичайна анкета: позначка `start=1` без відповідей
+    // нічого не передзаповнює, а лише лишилась би в адресі.
+    questionnaireHref: prefilled
+      ? `${countryHref(locale, 'questionnaire')}?${encodePrefill(content.prefill)}`
+      : countryHref(locale, 'questionnaire'),
+    prefilled,
     guide: content.guide,
   };
 }
@@ -97,18 +118,21 @@ export function answerPageAlternates(locale: Locale, slug: string) {
 }
 
 /**
- * Посилання на норму («art. 8 ust. 2», «ст. 8») — адреса в законі, а не число
- * для читача; guard їх пропускає. Усе інше з цифрою — літерал.
+ * Посилання на норму («art. 8 ust. 2», «art. 22 § 1», «ст. 8») — адреса в
+ * законі, а не число для читача; guard їх пропускає. Усе інше з цифрою — літерал.
  */
 // `\b` не бачить кирилиці, тож межа слова — через `\p{L}`.
-const LEGAL_REFERENCE = /(?<!\p{L})(?:art\.|ust\.|pkt|ст\.|ч\.|п\.)\s*\d+\p{Ll}*/giu;
+const LEGAL_REFERENCE = /(?<!\p{L})(?:art\.|ust\.|pkt|ст\.|ч\.|п\.|§)\s*\d+\p{Ll}*/giu;
+
+/** Назви, де цифра — частина слова, а не число: «B2B». Список закритий, щоб guard не слабшав. */
+const NAMES_WITH_DIGITS = /(?<![\p{L}\d])B2B(?![\p{L}\d])/gu;
 
 /**
  * Цифри в тексті змісту поза плейсхолдерами. Порожньо — кожне число сторінки
  * прийшло з правила; інакше — список літералів для повідомлення тесту.
  */
 export function numberLiterals(text: string): string[] {
-  const stripped = text.replace(CITE, '').replace(PLACEHOLDER, '').replace(LEGAL_REFERENCE, '');
+  const stripped = text.replace(CITE, '').replace(PLACEHOLDER, '').replace(LEGAL_REFERENCE, '').replace(NAMES_WITH_DIGITS, '');
   return stripped.match(/\d[\d\s.,]*/g)?.map((m) => m.trim()) ?? [];
 }
 

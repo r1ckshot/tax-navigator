@@ -74,7 +74,7 @@ export default async function AnswerPage({ params }: { params: SlugParams }) {
 
       <section className={`${ruled.inkEdge} ${ruled.sheet} ${styles.cta}`} aria-labelledby="answer-cta">
         <h2 id="answer-cta">{t('answer.cta.title')}</h2>
-        <p>{t('answer.cta.text')}</p>
+        <p>{t(page.prefilled ? 'answer.cta.text' : 'answer.cta.textBlank')}</p>
         <Link className={`${button.primary} ${button.arrow}`} href={page.questionnaireHref}>
           {t('app.start')}
         </Link>
@@ -84,7 +84,7 @@ export default async function AnswerPage({ params }: { params: SlugParams }) {
 
       <Sources t={t} page={page} />
 
-      <Disclaimer />
+      <Disclaimer textKey="answer.disclaimer" />
     </main>
   );
 }

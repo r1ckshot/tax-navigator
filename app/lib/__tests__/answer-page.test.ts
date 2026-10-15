@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { ruleNumber } from '../calc/facts';
+import { ruleDate, ruleNumber } from '../calc/facts';
 import { ANSWER_PAGES, answerPage, type AnswerPageContent } from '../content';
 import { contentStrings, numberLiterals, resolveAnswerPage } from '../answer-page';
 import { formatAmount, formatPercent } from '../format';
 import { LOCALES } from '../i18n';
-import { RULES } from '../rules/types';
+import { RULES, getParams } from '../rules/types';
 import { COUNTRY_PAGES } from '../routes';
 import { decodeAnswers, isPrefill } from '../share';
 import { plain } from './plain';
@@ -25,11 +25,26 @@ describe('ruleNumber: число з правила разом із джерел�
   });
 
   it('немає шляху, не число, невідоме правило — виняток, а не undefined на сторінці', () => {
-    expect(() => ruleNumber('jdg.ryczalt.rate', 'rateNope')).toThrow(/No number/);
+    expect(() => ruleNumber('jdg.ryczalt.rate', 'rateNope')).toThrow(/No value/);
     // `null` у верхньому порозі — «без межі», а не нуль.
     expect(() => ruleNumber('jdg.zdrowotna.ryczalt', 'tiers.2.annualRevenueUpTo')).toThrow(/Not a number/);
     expect(() => ruleNumber('residency.days_threshold', 'partialDayCountsAsFull')).toThrow(/Not a number/);
     expect(() => ruleNumber('jdg.nope', 'x')).toThrow(/Unknown rule_id/);
+  });
+});
+
+describe('ruleDate: дата з правила разом із джерелом', () => {
+  it('ISO-дата і джерело правила', () => {
+    const { value, source } = ruleDate('status.ukr_protection', 'protectionUntil');
+    expect(value).toBe('2028-03-04');
+    expect(source.ruleId).toBe('status.ukr_protection');
+  });
+
+  it('не дата чи немає шляху — виняток', () => {
+    expect(() => ruleDate('status.ukr_protection', 'lostWhenAbroadDaysOver')).toThrow(/Not a date/);
+    expect(() => ruleDate('status.ukr_protection', 'nope')).toThrow(/No value/);
+    // Рядок, але не дата: код підстави — не дата для тексту.
+    expect(() => ruleDate('status.business_right', 'equalToPolesBases.0')).toThrow(/Not a date/);
   });
 });
 
@@ -57,6 +72,13 @@ describe('guard: у тексті сторінки немає власних ци
     expect(numberLiterals('art. 8 ust. 2 ustawy, ст. 8 ч. 5 Закону')).toEqual([]);
     expect(numberLiterals('у 2026 році')).toEqual(['2026']);
     expect(numberLiterals('за шкалою. {{cite:jdg.byly_pracodawca}}')).toEqual([]);
+    expect(numberLiterals('з {{date:status.ukr_protection/protectionUntil}}')).toEqual([]);
+  });
+
+  it('«art. 22 § 1» і «B2B» — не числа; список назв з цифрою закритий', () => {
+    expect(numberLiterals('Кодекс праці (art. 22 § 1), B2B через JDG')).toEqual([]);
+    expect(numberLiterals('PIT-37 і B2C2')).toEqual(['37', '2', '2']);
+    expect(numberLiterals('B2B2')).toEqual(['2', '2']);
   });
 
   // Головний guard: кожне число на кожній сторінці — з правила. Перевірено
@@ -98,15 +120,31 @@ describe('збірка сторінки', () => {
     }
   });
 
-  it('кнопка в анкету несе передзаповнення сторінки і лише його', () => {
+  it('кнопка в анкету несе передзаповнення сторінки і лише його; без нього — звичайна анкета', () => {
     for (const { locale, content } of allPages) {
-      const href = resolveAnswerPage(locale, content).questionnaireHref;
-      const [path, query] = href.split('?');
+      const page = resolveAnswerPage(locale, content);
+      const [path, query] = page.questionnaireHref.split('?');
       expect(path).toBe(`/${locale}/poland/questionnaire`);
+      if (Object.keys(content.prefill).length === 0) {
+        expect(page.prefilled, content.slug).toBe(false);
+        expect(query, content.slug).toBeUndefined();
+        continue;
+      }
+      expect(page.prefilled).toBe(true);
       expect(isPrefill(query)).toBe(true);
       expect(decodeAnswers(query)).toEqual(content.prefill);
     }
   });
+
+  // P0-2 (product-safety): сторінка порівнює й пояснює, а не обирає за людину.
+  it.each(allPages.map(({ locale, content }) => [`${locale}/${content.slug}`, content] as const))(
+    '%s: без слів-порад',
+    (_name, content: AnswerPageContent) => {
+      for (const text of contentStrings(content)) {
+        expect(text, text).not.toMatch(/краще|вигідн|рекоменд|радимо|раджу|оберіть|обирайте|слід обрати/i);
+      }
+    },
+  );
 });
 
 /**
@@ -164,5 +202,164 @@ describe('демо: ryczalt-it', () => {
 
   it('анкета відкривається з «програмуванням», без суми', () => {
     expect(page.questionnaireHref).toBe('/uk/poland/questionnaire?w=programming&start=1');
+  });
+});
+
+/**
+ * Сторінки сесії 14. Кожна показана цифра — з еталоном, виведеним із правила
+ * вручну: дата ISO → ДД.ММ.РРРР, частка → відсоток, сума → як у джерелі з
+ * нерозривним пробілом тисяч (у `plain` — звичайним). Звідки число — у дужках.
+ */
+const text = (slug: string) => {
+  const page = resolveAnswerPage('uk', answerPage('uk', slug)!);
+  return plain([page.title, page.lead, ...page.body.flatMap((b) => b.items ?? [b.text!])].join('\n'));
+};
+const sourceTitles = (slug: string) => resolveAnswerPage('uk', answerPage('uk', slug)!).sources.map((s) => s.title);
+
+describe('сторінка jdg-ukr-cukr', () => {
+  const t = text('jdg-ukr-cukr');
+
+  it('дати з правил статусу', () => {
+    expect(t).toContain('До 04.03.2026 включно JDG міг відкрити'); // business_right.ukrAnyLegalStayUntil 2026-03-04
+    expect(t).toContain('з 01.06.2025 іноземцю потрібна підстава з того самого переліку'); // appliesToNierejestrowanaFrom
+    expect(t).toContain('продовжено до 04.03.2028'); // ukr_protection.protectionUntil
+    expect(t).toContain('З 05.08.2026 новий захист'); // militaryObligationForNewFrom
+    expect(t).toContain('З 01.11.2026 іноземець'); // business_right.peselRequiredForCeidgFrom
+    expect(t).toContain('3 роки від 05.03.2026'); // work_right: transition 3 роки від ukrWithoutProtectionFrom
+  });
+
+  // Рев'ю сесії 14: CUKR — не підстава з art. 4 ust. 2, а окреме право art. 42w спецзакону.
+  it('CUKR не стоїть у переліку закону про іноземних підприємців', () => {
+    expect(t).toContain('Окремо таке саме право дає карта CUKR (art. 42w спецзакону)');
+    const list = t.split('\n').find((line) => line.startsWith('Громадяни ЄС'))!;
+    expect(list.split('Окремо')[0]).not.toContain('CUKR');
+  });
+
+  it('строки в днях', () => {
+    expect(t).toContain('більш ніж на 30 днів'); // ukr_protection.lostWhenAbroadDaysOver
+    expect(t).toContain('протягом 7 днів від початку роботи'); // work_right.temporaryProtectionNotificationDays
+  });
+
+  it('джерела: бізнес, захист, праця', () => {
+    expect(sourceTitles('jdg-ukr-cukr')).toEqual([
+      'Działalność gospodarcza cudzoziemców w Polsce',
+      'Przedłużenie ochrony czasowej do 4 marca 2028 r.',
+      'Ustawa z 20 marca 2025 r. o warunkach dopuszczalności powierzania pracy cudzoziemcom',
+    ]);
+  });
+});
+
+describe('сторінка rezydentstvo-bank-broker', () => {
+  const t = text('rezydentstvo-bank-broker');
+
+  it('понад 183 дні — за законом рівно 183 ще не резидент', () => {
+    expect(t).toContain('понад 183 дні за податковий рік'); // days_threshold.days, art. 3 ust. 1a pkt 2
+    expect(t).not.toMatch(/183 дні або більше|щонайменше 183/);
+  });
+
+  it('період спецнорми і строк нової заяви', () => {
+    expect(t).toContain('з 01.01.2024 до 31.12.2026'); // special_norm_52zr.validFrom / validTo
+    expect(t).toContain('протягом 30 днів'); // crs_self_certification.updateWithinDaysAfterChange
+  });
+
+  it('джерела: Objaśnienia, art. 52zr, договір PL-UA, закон про обмін інформацією', () => {
+    expect(sourceTitles('rezydentstvo-bank-broker')).toEqual([
+      'Objaśnienia podatkowe z 29 kwietnia 2021 r. ws. rezydencji podatkowej',
+      'Ustawa z 23 stycznia 2026 r. (art. 52zr ustawy o PIT)',
+      'Umowa między Polską a Ukrainą w sprawie unikania podwójnego opodatkowania (1993)',
+      'Ustawa o wymianie informacji podatkowych z innymi państwami',
+    ]);
+  });
+});
+
+describe('сторінка vat-jdg', () => {
+  const t = text('vat-jdg');
+
+  it('ліміт 240000 → «240 000 zł», старого 200 000 немає', () => {
+    // jdg.vat.exemptionAnnualLimit; обидва роки — art. 113 ust. 1 («w poprzednim ani bieżącym roku»).
+    expect(t).toContain('не перевищив 240 000 zł ні в попередньому, ні в поточному році');
+    expect(t).not.toContain('200 000');
+  });
+
+  it('«через рік» словами стоїть на правилі, де повернення — 1 рік', () => {
+    expect(getParams<{ returnNotEarlierThanYearsAfterYearEnd: number }>('jdg.vat').returnNotEarlierThanYearsAfterYearEnd).toBe(1);
+    expect(t).toContain('не раніше ніж через рік після кінця року');
+  });
+
+  it('джерело — закон про VAT', () => {
+    expect(sourceTitles('vat-jdg')).toEqual(['Ustawa o podatku od towarów i usług']);
+  });
+});
+
+describe('сторінка pip-b2b', () => {
+  it('дата реформи в заголовку і тексті (jdg.przekwalifikowanie.pipDecisionPowerFrom 2026-07-08)', () => {
+    const t = text('pip-b2b');
+    expect(t.split('\n')[0]).toBe('Перевірки PIP і B2B з 08.07.2026');
+    expect(t).toContain('чинних на 08.07.2026');
+    expect(sourceTitles('pip-b2b')).toEqual(['Reforma Państwowej Inspekcji Pracy']);
+  });
+});
+
+describe('сторінка pilgovyi-zus', () => {
+  const t = text('pilgovyi-zus');
+
+  it('строки етапів: 6 і 24 місяці, умова 60 місяців (jdg.zus.stages)', () => {
+    expect(t).toContain('перші 6 місяців не платить соціальних внесків');
+    expect(t).toContain('наступні 24 місяці платить знижені');
+    expect(t).toContain('останні 60 місяців');
+  });
+
+  it('суми: база 1441.8 і 456.18 / 420.86; база 5652 і 1926.76', () => {
+    // Закон: «zadeklarowana kwota, nieniższa jednak niż» — база мінімальна, не єдина.
+    expect(t).toContain('зниженої бази — щонайменше 1 441,80 zł');
+    expect(t).toContain('456,18 zł на місяць з добровільним хворобовим страхуванням');
+    expect(t).toContain('або 420,86 zł без нього');
+    expect(t).toContain('від бази щонайменше 5 652 zł');
+    expect(t).toContain('це 1 926,76 zł на місяць');
+  });
+});
+
+describe('сторінка fop-chy-jdg', () => {
+  const t = text('fop-chy-jdg');
+
+  it('українська сторона: ЄП 0.05, ВЗ 0.01, ЄСВ 0.22 і мінімум 1902.34 грн', () => {
+    expect(t).toContain('єдиний податок 5% доходу для третьої групи без ПДВ');
+    expect(t).toContain('військовий збір 1% доходу');
+    expect(t).toContain('ЄСВ 22% від бази — щонайменше 1 902,34 грн на місяць');
+  });
+
+  it('форми JDG: лінійний 0.19, шкала 0.12 і 0.32', () => {
+    expect(t).toContain('лінійний 19% від доходу або шкала 12% і 32%');
+  });
+
+  // Рев'ю сесії 14: «ФОП чи JDG» не каже напевно, що ФОП уже є, — без передзаповнення.
+  it('анкета відкривається без передзаповнення', () => {
+    expect(resolveAnswerPage('uk', answerPage('uk', 'fop-chy-jdg')!).questionnaireHref).toBe('/uk/poland/questionnaire');
+  });
+
+  it('джерело вступу (art. 3 ust. 1 — Objaśnienia) стоїть першим', () => {
+    expect(sourceTitles('fop-chy-jdg')[0]).toBe('Objaśnienia podatkowe z 29 kwietnia 2021 r. ws. rezydencji podatkowej');
+  });
+});
+
+describe('сторінка b2b-na-ruky', () => {
+  const t = text('b2b-na-ruky');
+
+  it('ставки трьох форм і поріг шкали (jdg.ryczalt.rate, jdg.liniowy, jdg.skala)', () => {
+    expect(t).toContain('12% від виручки за програмування');
+    expect(t).toContain('19% від доходу');
+    expect(t).toContain('12% до 120 000 zł доходу за рік і 32% з надлишку; неоподатковувана сума — 30 000 zł');
+  });
+
+  it('внески: повний ZUS 1926.76, здоровʼя 0.049 / 0.09 з мінімумом 432.54', () => {
+    expect(t).toContain('повні — щонайменше 1 926,76 zł на місяць');
+    // Рев'ю сесії 14: умови пільг не випадають (jdg.zus.stages.priorBusinessLookbackMonths).
+    expect(t).toContain('вела діяльність останні 60 місяців');
+    expect(t).toContain('4,9% доходу, але не менше 432,54 zł');
+    expect(t).toContain('9% доходу, але не менше 432,54 zł');
+  });
+
+  it('суми «на руки» сторінка не називає — лише складові', () => {
+    expect(t).not.toMatch(/на руки\s*(—|:)?\s*\d/);
   });
 });

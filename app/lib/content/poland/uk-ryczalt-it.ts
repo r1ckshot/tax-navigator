@@ -18,7 +18,7 @@ export const ryczaltIt: AnswerPageContent = {
   title: 'Ричалт {{percent:jdg.ryczalt.rate/rateProgramming}} для програміста на JDG',
   description:
     'Скільки податку на ричалті (ryczałt) у програміста, ліміт виручки і внесок на здоровʼя. Кожна цифра з посиланням на джерело.',
-  lead: 'Ричалт (ryczałt) — податок від усієї виручки JDG (przychód), а не від прибутку. Для послуг програмування ставка {{percent:jdg.ryczalt.rate/rateProgramming}}.',
+  lead: 'Ричалт (ryczałt) — податок від виручки JDG (przychód), а не від прибутку. Для послуг програмування ставка {{percent:jdg.ryczalt.rate/rateProgramming}}.',
   body: [
     { kind: 'h2', text: 'Як рахується податок' },
     {
