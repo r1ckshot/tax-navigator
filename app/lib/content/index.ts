@@ -9,7 +9,8 @@ import { rezydentstvoBank } from './poland/uk-rezydentstvo-bank';
 import { ryczaltIt } from './poland/uk-ryczalt-it';
 import { vatJdg } from './poland/uk-vat-jdg';
 
-export type { AnswerPageContent, Block } from './types';
+export { ENGINE_AMOUNTS, ENGINE_TEXTS, type EngineTexts } from './engine';
+export type { AnswerPageContent, Block, LinkItem } from './types';
 
 /**
  * Реєстр сторінок-відповідей Польщі за мовою. Нова сторінка — файл у

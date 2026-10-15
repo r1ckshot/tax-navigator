@@ -4,7 +4,7 @@ import { ANSWER_PAGES, type AnswerPageContent, type Block } from '@/lib/content'
 import { formatAmount, formatDate, formatPercent } from '@/lib/format';
 import { LOCALES, type Locale } from '@/lib/i18n';
 import { typeset } from '@/lib/i18n/typeset';
-import { answerAlternates, countryHref } from '@/lib/routes';
+import { answerAlternates, answerHref, countryHref } from '@/lib/routes';
 import { encodePrefill } from '@/lib/share';
 
 /**
@@ -31,10 +31,27 @@ const FORMATS: Record<string, (value: number) => string> = {
 /** `{{date:status.ukr_protection/protectionUntil}}` → «04.03.2028»: дата з правила, не з тексту. */
 const DATE_FORMAT = 'date';
 
+export interface ResolvedLink {
+  href: string;
+  text: string;
+}
+
+export interface ResolvedTable {
+  caption: string;
+  head: string[];
+  rows: string[][];
+}
+
+/**
+ * `table` і `links` вже без плейсхолдерів: таблицю будує лише движок
+ * (`engine-page.ts`), посилання — з файла змісту через `answerHref`.
+ */
 export interface ResolvedBlock {
-  kind: Block['kind'];
+  kind: Block['kind'] | 'table';
   text?: string;
   items?: string[];
+  links?: ResolvedLink[];
+  table?: ResolvedTable;
 }
 
 export interface ResolvedAnswerPage {
@@ -51,28 +68,30 @@ export interface ResolvedAnswerPage {
   guide?: string;
 }
 
+/** Людина бачить джерело, а не правило: два правила з однієї сторінки — один рядок. */
+export function cite(sources: Map<string, Source>, source: Source): void {
+  const key = source.url + source.title;
+  if (!sources.has(key)) sources.set(key, source);
+}
+
 /** Плейсхолдер → відформатоване число; джерело дописується в `sources`. */
-function resolveText(text: string, sources: Map<string, Source>): string {
-  // Людина бачить джерело, а не правило: два правила з однієї сторінки — один рядок.
-  const cite = (source: Source) => {
-    const key = source.url + source.title;
-    if (!sources.has(key)) sources.set(key, source);
-  };
+export function resolveText(text: string, sources: Map<string, Source>): string {
+  const citeTo = (source: Source) => cite(sources, source);
   const resolved = text
     .replace(CITE, (_match, ruleId: string) => {
-      cite(sourceOf(ruleId));
+      citeTo(sourceOf(ruleId));
       return '';
     })
     .replace(PLACEHOLDER, (_match, format: string, ruleId: string, path: string) => {
       if (format === DATE_FORMAT) {
         const { value, source } = ruleDate(ruleId, path);
-        cite(source);
+        citeTo(source);
         return formatDate(value);
       }
       const formatter = FORMATS[format];
       if (!formatter) throw new Error(`Unknown number format "${format}" in {{${format}:${ruleId}/${path}}}`);
       const { value, source } = ruleNumber(ruleId, path);
-      cite(source);
+      citeTo(source);
       return formatter(value);
     });
   if (resolved.includes('{{')) throw new Error(`Malformed placeholder in: ${text}`);
@@ -88,9 +107,16 @@ export function resolveAnswerPage(locale: Locale, content: AnswerPageContent): R
   const title = text(content.title);
   const description = text(content.description);
   const lead = text(content.lead);
-  const body = content.body.map((block): ResolvedBlock =>
-    block.kind === 'list' ? { kind: 'list', items: block.items.map(text) } : { kind: block.kind, text: text(block.text) },
-  );
+  const body = content.body.map((block): ResolvedBlock => {
+    switch (block.kind) {
+      case 'list':
+        return { kind: 'list', items: block.items.map(text) };
+      case 'links':
+        return { kind: 'links', links: block.items.map((item) => ({ href: answerHref(locale, item.to), text: text(item.text) })) };
+      default:
+        return { kind: block.kind, text: text(block.text) };
+    }
+  });
   return {
     slug: content.slug,
     title,
@@ -142,6 +168,6 @@ export function contentStrings(content: AnswerPageContent): string[] {
     content.title,
     content.description,
     content.lead,
-    ...content.body.flatMap((b) => (b.kind === 'list' ? b.items : [b.text])),
+    ...content.body.flatMap((b) => (b.kind === 'list' ? b.items : b.kind === 'links' ? b.items.map((i) => i.text) : [b.text])),
   ];
 }

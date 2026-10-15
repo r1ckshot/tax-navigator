@@ -69,6 +69,15 @@ export const jdgUkrCukr: AnswerPageContent = {
       kind: 'p',
       text: 'Так само {{amount:status.work_right/ukrWithoutProtectionTransitionYears}} роки від {{date:status.work_right/ukrWithoutProtectionFrom}} працюють українці без статусу UKR, але з легальним перебуванням (art. 41 закону про згортання спецзакону).',
     },
+    { kind: 'h2', text: 'Дивіться також' },
+    {
+      kind: 'links',
+      items: [
+        { to: 'fop-chy-jdg', text: 'ФОП чи JDG, коли живете в Польщі' },
+        { to: 'pilgovyi-zus', text: 'Пільговий ZUS: хто має право' },
+        { to: 'rezydentstvo-bank-broker', text: 'Заява про резидентство для банку' },
+      ],
+    },
   ],
   prefill: {},
 };

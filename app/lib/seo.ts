@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { localesOf } from '@/lib/answer-page';
 import { ANSWER_PAGES } from '@/lib/content';
+import { engineLocalesOf, engineSlugs } from '@/lib/engine-page';
 import { LOCALES } from '@/lib/i18n';
 import { COUNTRY_PAGES, alternates, answerAlternates, brandHref } from '@/lib/routes';
 
@@ -10,7 +11,7 @@ import { COUNTRY_PAGES, alternates, answerAlternates, brandHref } from '@/lib/ro
  * домен (тема 5.1) міняє змінну, а не цей файл.
  *
  * У карті — лише сторінки для людей з пошуку: лендінг бренду, лендінг країни,
- * анкета, джерела й кожна сторінка-відповідь. `/tokens` технічна і закрита
+ * анкета, джерела, кожна сторінка-відповідь і кожна сторінка з движка. `/tokens` технічна і закрита
  * `noindex`; share-лінки з відповідями — та сама анкета з query, окремих адрес
  * не мають.
  */
@@ -31,6 +32,11 @@ export function sitemapEntries(base: URL): MetadataRoute.Sitemap {
 
     for (const { slug } of ANSWER_PAGES[locale]) {
       const { canonical, languages } = answerAlternates(locale, slug, localesOf(slug));
+      entries.push({ url: abs(canonical), alternates: { languages: absAll(languages) } });
+    }
+
+    for (const slug of engineSlugs(locale)) {
+      const { canonical, languages } = answerAlternates(locale, slug, engineLocalesOf(slug));
       entries.push({ url: abs(canonical), alternates: { languages: absAll(languages) } });
     }
   }

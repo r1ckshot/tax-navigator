@@ -47,6 +47,15 @@ export const pipB2b: AnswerPageContent = {
       kind: 'p',
       text: 'Анкета рахує поруч із B2B і трудовий договір — на тих самих відповідях.',
     },
+    { kind: 'h2', text: 'Дивіться також' },
+    {
+      kind: 'links',
+      items: [
+        { to: 'b2b-na-ruky', text: 'З чого складається сума на руки на B2B' },
+        { to: 'fop-chy-jdg', text: 'ФОП чи JDG: порівняння правил' },
+        { to: 'questionnaire', text: 'Анкета: порівняння шести форм роботи' },
+      ],
+    },
   ],
   prefill: {},
 };

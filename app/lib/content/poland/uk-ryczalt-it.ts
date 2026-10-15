@@ -48,6 +48,15 @@ export const ryczaltIt: AnswerPageContent = {
       kind: 'p',
       text: 'Соціальні внески ZUS сплачуються окремо від податку й внеску на здоровʼя. Анкета показує їх разом і порівнює ричалт з іншими формами роботи. {{cite:jdg.zus.stages}}',
     },
+    { kind: 'h2', text: 'Дивіться також' },
+    {
+      kind: 'links',
+      items: [
+        { to: 'b2b-na-ruky', text: 'З чого складається сума на руки на B2B' },
+        { to: 'b2b-20000-zl', text: 'Приклад: скільки лишається з типової суми B2B' },
+        { to: 'vat-jdg', text: 'VAT на JDG: коли потрібна реєстрація' },
+      ],
+    },
   ],
   prefill: { workKind: 'programming' },
   guide: 'jdg',

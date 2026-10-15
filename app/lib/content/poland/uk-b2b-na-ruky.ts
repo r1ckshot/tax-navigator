@@ -47,6 +47,15 @@ export const b2bNaRuky: AnswerPageContent = {
       kind: 'p',
       text: 'Окремий ризик B2B — не податковий: з {{date:jdg.przekwalifikowanie/pipDecisionPowerFrom}} інспекція праці може рішенням визнати такий договір трудовим.',
     },
+    { kind: 'h2', text: 'Дивіться також' },
+    {
+      kind: 'links',
+      items: [
+        { to: 'b2b-20000-zl', text: 'Приклад: скільки лишається з типової суми B2B' },
+        { to: 'ryczalt-it', text: 'Ричалт для програміста: ставка й внески' },
+        { to: 'pip-b2b', text: 'Ризик B2B: коли інспекція праці може визнати договір трудовим' },
+      ],
+    },
   ],
   prefill: {},
 };

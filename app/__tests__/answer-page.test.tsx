@@ -14,9 +14,10 @@ const params = (slug: string) => Promise.resolve({ locale: 'uk', slug });
 describe('шаблон сторінки-відповіді: демо ryczalt-it', () => {
   it('статичні адреси — рівно сторінки з реєстру', () => {
     expect(generateStaticParams()).toEqual(
-      ['jdg-ukr-cukr', 'rezydentstvo-bank-broker', 'vat-jdg', 'pip-b2b', 'pilgovyi-zus', 'fop-chy-jdg', 'b2b-na-ruky', 'ryczalt-it'].map(
-        (slug) => ({ locale: 'uk', slug }),
-      ),
+      [
+        'jdg-ukr-cukr', 'rezydentstvo-bank-broker', 'vat-jdg', 'pip-b2b', 'pilgovyi-zus', 'fop-chy-jdg', 'b2b-na-ruky', 'ryczalt-it',
+        'b2b-10000-zl', 'b2b-15000-zl', 'b2b-20000-zl', 'b2b-25000-zl', 'b2b-30000-zl', 'b2b-40000-zl',
+      ].map((slug) => ({ locale: 'uk', slug })),
     );
   });
 
@@ -79,6 +80,57 @@ describe('сторінка без передзаповнення: jdg-ukr-cukr',
     const text = plain(document.body.textContent ?? '');
     expect(text).toContain('продовжено до 04.03.2028');
     expect(text).not.toMatch(/\{\{|\}\}/);
+  });
+});
+
+describe('сторінка з движка: b2b-15000-zl', () => {
+  it('заголовок, припущення, таблиця діапазонів з підписаними рядками', async () => {
+    render(await AnswerPage({ params: params('b2b-15000-zl') }));
+    expect(plain(screen.getByRole('heading', { level: 1 }).textContent ?? '')).toBe('B2B у Польщі: 15 000 zł на місяць — скільки лишається');
+    const table = screen.getByRole('table', { name: /Орієнтовна\s+сума/ });
+    const rows = within(table).getAllByRole('row').slice(1);
+    // Еталони виведено вручну: engine-page.test.ts, ричалт і шкала на 15 000 zł.
+    expect(rows.map((r) => plain(r.textContent ?? ''))).toEqual([
+      'JDG, ричалт9 353 – 10 132',
+      'JDG, лінійний податок9 113 – 9 872',
+      'JDG, шкала9 188 – 9 954',
+      'Трудовий договір, для порівняння8 370 – 9 067',
+    ]);
+    expect(within(table).getAllByRole('columnheader').map((h) => plain(h.textContent ?? ''))).toEqual(['Форма', 'Діапазон, zł на місяць']);
+  });
+
+  it('кнопка веде в анкету з профілем і сумою; дисклеймер сторінки; перелінковка', async () => {
+    render(await AnswerPage({ params: params('b2b-15000-zl') }));
+    const href = screen.getByRole('link', { name: t('app.start') }).getAttribute('href')!;
+    expect(href.startsWith('/uk/poland/questionnaire?')).toBe(true);
+    expect(href).toContain('r=15000');
+    expect(href).toContain('start=1');
+    expect(screen.getByText(/Це довідкова сторінка, а не податкова консультація/)).toBeDefined();
+    const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
+    expect(hrefs).toContain('/uk/poland/b2b-na-ruky');
+    expect(hrefs).toContain('/uk/poland/b2b-20000-zl');
+    expect(hrefs).not.toContain('/uk/poland/b2b-15000-zl');
+  });
+
+  it('метадані: заголовок із сумою, canonical і hreflang', async () => {
+    const meta = await generateMetadata({ params: params('b2b-15000-zl') });
+    expect(plain(String(meta.title))).toContain('15 000 zł');
+    expect(meta.alternates).toEqual({
+      canonical: '/uk/poland/b2b-15000-zl',
+      languages: { uk: '/uk/poland/b2b-15000-zl', 'x-default': '/uk/poland/b2b-15000-zl' },
+    });
+  });
+
+  it('суми, якої немає в наборі, — 404, а не порожній шаблон', async () => {
+    await expect(AnswerPage({ params: params('b2b-15001-zl') })).rejects.toThrow();
+  });
+});
+
+describe('перелінковка на сторінці-відповіді', () => {
+  it('блок «Дивіться також» — посилання, не URL у тексті', async () => {
+    render(await AnswerPage({ params: params('b2b-na-ruky') }));
+    const link = screen.getByRole('link', { name: /Приклад:\s+скільки\s+лишається/ });
+    expect(link.getAttribute('href')).toBe('/uk/poland/b2b-20000-zl');
   });
 });
 

@@ -57,6 +57,15 @@ export const rezydentstvoBank: AnswerPageContent = {
       kind: 'p',
       text: 'Якщо змінились обставини, що впливають на резидентство, або дані в заяві стали неактуальними, установу треба повідомити й подати оновлену заяву протягом {{amount:residency.crs_self_certification/updateWithinDaysAfterChange}} днів від дня зміни.',
     },
+    { kind: 'h2', text: 'Дивіться також' },
+    {
+      kind: 'links',
+      items: [
+        { to: 'jdg-ukr-cukr', text: 'Статус UKR і CUKR: чи можна відкрити JDG' },
+        { to: 'vat-jdg', text: 'VAT на JDG: коли потрібна реєстрація' },
+        { to: 'questionnaire', text: 'Анкета: порівняння шести форм роботи' },
+      ],
+    },
   ],
   prefill: {},
 };

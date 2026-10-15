@@ -33,4 +33,18 @@ export interface AnswerPageContent {
   guide?: string;
 }
 
-export type Block = { kind: 'h2'; text: string } | { kind: 'p'; text: string } | { kind: 'list'; items: string[] };
+/**
+ * Посилання на іншу сторінку країни: `to` — сегмент адреси після `/{мова}/poland/`
+ * (slug сторінки-відповіді, сторінки з движка або `questionnaire`). Адресу будує
+ * `answer-page.ts`, а тест не дає вказати сторінку, якої немає.
+ */
+export interface LinkItem {
+  to: string;
+  text: string;
+}
+
+export type Block =
+  | { kind: 'h2'; text: string }
+  | { kind: 'p'; text: string }
+  | { kind: 'list'; items: string[] }
+  | { kind: 'links'; items: LinkItem[] };

@@ -38,7 +38,7 @@ export interface Answers {
   /** Умовне: питається лише коли резидентство неоднозначне (див. homeInUaMatters). */
   permanentHomeInUa?: boolean;
   hasActiveUaFop: boolean;
-  /** Нетто без VAT. Живе лише в памʼяті — не зберігається і не йде в URL. */
+  /** Нетто без VAT. Не зберігається; в адресі лише кроком шкали 2 500 (`quantize.ts`), не точною сумою. */
   monthlyRevenue: number;
   workKind: WorkKind;
   expenseShare: ExpenseShare;

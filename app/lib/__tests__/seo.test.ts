@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { scrubEvent, scrubUrl } from '../analytics';
 import { ANSWER_PAGES } from '../content';
+import { engineSlugs } from '../engine-page';
 import { LOCALES } from '../i18n';
 import { COUNTRY_PAGES, alternates, answerAlternates } from '../routes';
 import { robotsRules, sitemapEntries } from '../seo';
@@ -33,6 +34,19 @@ describe('sitemap.xml', () => {
   it('кожна сторінка-відповідь з реєстру є в sitemap', () => {
     for (const locale of LOCALES) {
       for (const { slug } of ANSWER_PAGES[locale]) expect(urls).toContain(`https://nettomap.com/${locale}/poland/${slug}`);
+    }
+  });
+
+  it('кожна сторінка з движка є в sitemap, з hreflang', () => {
+    for (const locale of LOCALES) {
+      for (const slug of engineSlugs(locale)) {
+        const entry = sitemap.find((e) => e.url === `https://nettomap.com/${locale}/poland/${slug}`);
+        expect(entry, slug).toBeDefined();
+        expect(entry!.alternates?.languages).toEqual({
+          [locale]: `https://nettomap.com/${locale}/poland/${slug}`,
+          'x-default': `https://nettomap.com/uk/poland/${slug}`,
+        });
+      }
     }
   });
 

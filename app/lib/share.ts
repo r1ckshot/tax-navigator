@@ -63,7 +63,8 @@ const PREFILL = 'start';
 
 /**
  * Посилання зі сторінки-відповіді: лише відповіді, які випливають із теми
- * сторінки. Суми тут немає взагалі — її людина вводить сама.
+ * сторінки. Сума є лише на сторінках з движка, де вона — тема сторінки; на
+ * решті людина вводить її сама.
  */
 export function encodePrefill(prefill: Partial<Answers>): string {
   const params = new URLSearchParams();
@@ -72,6 +73,9 @@ export function encodePrefill(prefill: Partial<Answers>): string {
     if (value === undefined) continue;
     params.set(short, typeof value === 'boolean' ? (value ? '1' : '0') : String(value));
   }
+  // Сума — крок шкали, як і в share-лінку: сторінка з движка відкриває анкету
+  // з тією виручкою, з якої пораховано її числа.
+  if (prefill.monthlyRevenue !== undefined) params.set('r', String(quantizeRevenue(prefill.monthlyRevenue)));
   params.set(PREFILL, '1');
   return params.toString();
 }

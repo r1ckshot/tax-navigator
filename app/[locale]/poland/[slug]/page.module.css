@@ -24,8 +24,13 @@
   color: var(--ink-secondary);
 }
 
+/* Заголовок розділу відділяється від абзацу вище вагою й тонкою лінією, а не
+   кольором: текст лишається `--ink`, тож контраст не просідає. */
 .article h2 {
   margin-top: var(--space-6);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--hairline);
+  font-weight: 600;
 }
 
 .list {
@@ -35,6 +40,48 @@
 
 .list li + li {
   margin-top: var(--space-2);
+}
+
+/* Таблиця діапазонів: вужчий екран гортає її, а не розпирає сторінку. */
+.tableWrap {
+  margin: var(--space-4) 0;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+}
+
+.table caption {
+  padding-bottom: var(--space-2);
+  text-align: left;
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--hairline);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+}
+
+.table tbody th {
+  font-weight: 400;
+}
+
+.table td {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .cta {

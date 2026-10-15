@@ -14,7 +14,7 @@
 const CORE = '^app/lib/(rules|calc)/';
 /** Адаптери введення/зберігання/лінка + presentation-хелпери. */
 const ADAPTERS =
-  '^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site|seo|analytics|answer-page)\\.ts$|^app/lib/(questions|i18n|content)/';
+  '^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site|seo|analytics|answer-page|engine-page)\\.ts$|^app/lib/(questions|i18n|content)/';
 /**
  * Presentation: усе в `app/` поза `lib/` — компоненти, сторінки, layout-и й
  * хелпери маршрутів (`app/[locale]/params.ts`). Список за шаблоном імені

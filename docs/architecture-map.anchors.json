@@ -350,7 +350,7 @@
   ],
   ".dependency-cruiser.cjs:16-17": [
     "const ADAPTERS =",
-    "'^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site|seo|analytics|answer-page)\\\\.ts$|^app/lib/(questions|i18n|content)/';"
+    "'^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site|seo|analytics|answer-page|engine-page)\\\\.ts$|^app/lib/(questions|i18n|content)/';"
   ],
   "ARCHITECTURE.md:79-88": [
     "- `app/lib/i18n/uk.ts` лежить у `lib/`, але за роллю це presentation. Ядром не",
