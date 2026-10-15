@@ -103,7 +103,7 @@
   "Questionnaire.tsx:48": [
     "export function Questionnaire() {"
   ],
-  "app/lib/rules/rules.2026.json:50-64": [
+  "app/lib/rules/rules.2026.json:63-77": [
     "{",
     "},"
   ],
@@ -134,7 +134,7 @@
   "calc/types.ts:52": [
     "clientCount?: ClientCount;"
   ],
-  "i18n/uk.ts:246-251": [
+  "i18n/uk.ts:256-261": [
     "'scenario.fop': 'Український ФОП',",
     "'scenario.uop': 'Трудовий договір (UoP)',"
   ],
@@ -366,7 +366,7 @@
   "calc/types.ts:48": [
     "/** Умовне: лише коли jdgStatus === 'none' | 'lt6' | 'from6to30'. */"
   ],
-  "residency.test.ts:79": [
+  "residency.test.ts:90": [
     "it('житло в обох країнах, нічия по центру інтересів → вирішує звичайне перебування (дні)', () => {"
   ],
   "app/lib/calc/types.ts:48": [

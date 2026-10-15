@@ -44,6 +44,6 @@
 ## Готово коли
 
 - [x] Sitemap, robots, hreflang і canonical перевірені тестами (`seo.test.ts`, `answer-page.test.tsx`; живий `next dev` віддав обидва файли)
-- [ ] Аналітика працює на превʼю — чекає: Mike вмикає Web Analytics у Vercel; README/SPEC кажуть правду про дані — [x]
+- [x] Аналітика працює на превʼю (Mike, 2026-10-15: перегляд `/uk/poland/ryczalt-it` у дашборді Vercel, шлях без query); README/SPEC кажуть правду про дані
 - [x] Guard «число лише з правила» падає на числі-літералі (перевірено поломкою: «12%» у lead)
 - [x] `npm test` зелений; гілка запушена, чернетка PR відкрита
