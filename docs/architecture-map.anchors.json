@@ -1,5 +1,5 @@
 {
-  "package.json:35": [
+  "package.json:36": [
     "\"typescript\": \"^5.7.0\","
   ],
   "tsconfig.json:7": [
@@ -11,29 +11,29 @@
   "tsconfig.json:22": [
     "\"@/*\": [\"./app/*\"]"
   ],
-  "package.json:17": [
-    "\"dependencies\": {"
-  ],
-  "package.json:20": [
+  "package.json:21": [
     "\"next\": \"^15.1.0\","
   ],
-  "package.json:17-23": [
+  "package.json:22": [
+    "\"react\": \"^19.0.0\","
+  ],
+  "package.json:17-24": [
     "\"dependencies\": {",
     "},"
   ],
-  "package.json:36": [
+  "package.json:37": [
     "\"vitest\": \"^4.1.10\""
   ],
-  "package.json:27": [
+  "package.json:28": [
     "\"@testing-library/react\": \"^16.3.2\","
   ],
-  "package.json:34": [
+  "package.json:35": [
     "\"jsdom\": \"^29.1.1\","
   ],
-  "package.json:33": [
+  "package.json:34": [
     "\"dependency-cruiser\": \"^18.1.0\","
   ],
-  "package.json:25": [
+  "package.json:26": [
     "\"@playwright/test\": \"^1.62.1\","
   ],
   "package.json:5-15": [
@@ -55,9 +55,9 @@
   "next.config.mjs:28": [
     "globalNotFound: true,"
   ],
-  "SPEC.md:21-23": [
+  "SPEC.md:21-27": [
     "3. **Не бекенд.** Розрахунок детермінований і клієнтський; сервера, БД і",
-    "форма за посиланням, без даних анкети (DECISIONS 2026-09-17)."
+    "(DECISIONS 2026-10-15)."
   ],
   "storage.ts:2": [
     "import { quantizeRevenue } from '@/lib/calc/quantize';"
@@ -68,42 +68,42 @@
   "Question.tsx:6": [
     "import { snapToStep } from '@/lib/calc/quantize';"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:184": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:191": [
     "const residency = assessResidency(answers);"
   ],
   "jdg.ts:39": [
     "* ust. 1 pkt 7a ustawy o PIP), і B2B названо прямо (art. 13 pkt 1). Критерії —"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:185": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:192": [
     "const scenarios = compareScenarios(answers);"
   ],
   "scenarios/index.ts:17-26": [
     "export function compareScenarios(answers: Answers): ScenarioResult[] {",
     "}"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:77": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:84": [
     "const screens = useMemo(() => visibleScreens(answers), [answers]);"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:66": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:73": [
     "const { answers: saved, step } = loadDraft();"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:61": [
-    "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));"
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:62": [
+    "const fromLink = decodeAnswers(query);"
   ],
-  "app/[locale]/poland/sources/page.tsx:57": [
+  "app/[locale]/poland/sources/page.tsx:59": [
     "const catalog = buildSourceCatalog(new Date());"
   ],
   "translate.ts:14": [
     "export function createT(dictionary: Dictionary): Translate {"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:207-254": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:214-261": [
     "<ResidencyVerdict result={residency} />",
     "<EmailCta />"
   ],
   "Questionnaire.tsx:48": [
     "export function Questionnaire() {"
   ],
-  "app/lib/rules/rules.2026.json:44-57": [
+  "app/lib/rules/rules.2026.json:50-64": [
     "{",
     "},"
   ],
@@ -134,7 +134,7 @@
   "calc/types.ts:52": [
     "clientCount?: ClientCount;"
   ],
-  "i18n/uk.ts:238-243": [
+  "i18n/uk.ts:246-251": [
     "'scenario.fop': 'Український ФОП',",
     "'scenario.uop': 'Трудовий договір (UoP)',"
   ],
@@ -172,7 +172,7 @@
     "*",
     "tiers: { annualRevenueUpTo: number | null; monthly: number }[];"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:140": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:147": [
     "<button type=\"button\" className={`${button.primary} ${button.arrow}`} onClick={next} disabled={!canAdvance}>"
   ],
   "globals.css:261": [
@@ -194,11 +194,11 @@
     "u: 'hasParallelUop',",
     "if (value === undefined) continue;"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:61-63": [
-    "const fromLink = decodeAnswers(window.location.search.replace(/^\\?/, ''));",
-    "setAnswers(fromLink);"
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:62-69": [
+    "const fromLink = decodeAnswers(query);",
+    "} else if (Object.keys(fromLink).length > 0) {"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:106": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:113": [
     "const url = `${window.location.origin}${window.location.pathname}?${encodeAnswers(answers as Answers)}`;"
   ],
   "storage.ts:23": [
@@ -270,14 +270,14 @@
   "globals.css:269": [
     "min-height: 44px;"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:195": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:202": [
     "<main aria-live=\"polite\" className={styles.result}>"
   ],
-  "app/[locale]/poland/questionnaire/Questionnaire.tsx:172-259": [
+  "app/[locale]/poland/questionnaire/Questionnaire.tsx:179-266": [
     "function Result({",
     "}"
   ],
-  "app/[locale]/poland/page.tsx:29-72": [
+  "app/[locale]/poland/page.tsx:34-77": [
     "export default async function Home({ params }: { params: LocaleParams }) {",
     "}"
   ],
@@ -325,7 +325,7 @@
     "export function ResidencyVerdict({ result }: { result: ResidencyResult }) {",
     "}"
   ],
-  ".dependency-cruiser.cjs:26-34": [
+  ".dependency-cruiser.cjs:27-35": [
     "{",
     "},"
   ],
@@ -348,14 +348,15 @@
   "ARCHITECTURE.md:20": [
     "| **presentation** | `app/components/`, `app/[locale]/**` (продукт), `app/(technical)/**` (`/tokens`), `app/global-not-found.tsx`, `app/lib/i18n/` | React, CSS Modules, словники мов і їх реєстр | усе нижче |"
   ],
-  ".dependency-cruiser.cjs:16": [
-    "const ADAPTERS = '^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site)\\\\.ts$|^app/lib/(questions|i18n)/';"
+  ".dependency-cruiser.cjs:16-17": [
+    "const ADAPTERS =",
+    "'^app/lib/(storage|share|format|tokens|sources|waitlist|routes|site|seo|analytics|answer-page)\\\\.ts$|^app/lib/(questions|i18n|content)/';"
   ],
-  "ARCHITECTURE.md:78-87": [
+  "ARCHITECTURE.md:79-88": [
     "- `app/lib/i18n/uk.ts` лежить у `lib/`, але за роллю це presentation. Ядром не",
     "практичного ефекту. Лишаємо розбіжність назви, не поведінки."
   ],
-  "app/[locale]/layout.tsx:29": [
+  "app/[locale]/layout.tsx:30": [
     "export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {"
   ],
   "ARCHITECTURE.md:35-39": [
