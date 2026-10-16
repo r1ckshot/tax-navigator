@@ -86,7 +86,9 @@ export function resolveEnginePage(locale: Locale, amount: number): ResolvedAnswe
 
   const sources = new Map<string, Source>();
   const shown = formatMoney(answers.monthlyRevenue);
-  const text = (t: string) => resolveText(t, sources).replaceAll('{amount}', shown);
+  // Сума підставляється до типографіки: після неї «20 000 zł» уже не склеїти, і
+  // заголовок рветься між числом і одиницею.
+  const text = (t: string) => resolveText(t.replaceAll('{amount}', shown), sources);
 
   const title = text(texts.title);
   const description = text(texts.description);

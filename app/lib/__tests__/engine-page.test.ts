@@ -122,6 +122,14 @@ describe('сторінка = той самий розрахунок, що в а�
     });
   });
 
+  // Знайдено на скріншоті: заголовок рвався між «20 000» і «zł».
+  it('сума не відривається від «zł» у заголовку, підписі й припущеннях', () => {
+    const page = resolveEnginePage('uk', 20000);
+    const table = page.body.find((b) => b.kind === 'table')!.table!;
+    const list = page.body.find((b) => b.kind === 'list')!.items!;
+    for (const text of [page.title, table.caption, list[0]]) expect(text).toContain('20\u00A0000\u00A0zł');
+  });
+
   it('припущення називають профіль: резидент, програмування, повний ZUS, без пільг', () => {
     const items = resolveEnginePage('uk', 20000).body.find((b) => b.kind === 'list')!.items!.map(plain);
     expect(items).toEqual([
