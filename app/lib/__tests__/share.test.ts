@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { encodeAnswers, decodeAnswers } from '@/lib/share';
+import { encodeAnswers, decodeAnswers, encodePrefill, isPrefill } from '@/lib/share';
 import { quantizeRevenue } from '@/lib/calc/quantize';
 import { assessResidency } from '../calc/residency';
 import { compareScenarios } from '../calc/scenarios';
@@ -74,5 +74,19 @@ describe('шеринг — підстава перебування і замов
     const jdg = compareScenarios({ ...baseAnswers, ...decoded, stayBasis: undefined }).find((s) => s.id === 'jdg')!;
     expect(jdg.rangeMonthly).toBeNull();
     expect(jdg.noRangeReasonKey).toBe('status.business.unknown');
+  });
+});
+
+describe('передзаповнення зі сторінки-відповіді (сесія 13)', () => {
+  it('несе лише задані відповіді й позначку, суми немає', () => {
+    const query = encodePrefill({ workKind: 'programming', hasParallelUop: false });
+    expect(query).toBe('w=programming&u=0&start=1');
+    expect(decodeAnswers(query)).toEqual({ workKind: 'programming', hasParallelUop: false });
+    expect(isPrefill(query)).toBe(true);
+  });
+
+  it('share-лінк передзаповненням не є: анкета показує результат, а не перший крок', () => {
+    expect(isPrefill(encodeAnswers(baseAnswers))).toBe(false);
+    expect(isPrefill('')).toBe(false);
   });
 });

@@ -29,6 +29,7 @@ export type GroupId = (typeof GROUP_ORDER)[number];
 
 export interface SourceEntry {
   ruleId: string;
+  title: string;
   url: string;
   host: string;
   verifiedAt: string;
@@ -58,6 +59,7 @@ export function buildSourceCatalog(now: Date, rules: readonly Rule[] = RULES.rul
     const entries = byGroup.get(group) ?? [];
     entries.push({
       ruleId: rule.rule_id,
+      title: rule.source_title,
       url: rule.source_url,
       host: new URL(rule.source_url).hostname,
       verifiedAt: rule.verified_at,

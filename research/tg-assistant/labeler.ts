@@ -76,6 +76,11 @@ export const RULE_CLAUSES: Record<string, Clause[]> = {
   'residency.treaty_tiebreakers': [
     { any: ['подвійн оподатк', 'двойн налог', 'podwójn', 'podwojn', 'центр життєв', 'центр жизненн', 'ośrod interes', 'osrod interes', 'unikani opodatk'] },
   ],
+  // Заява для банку чи брокера: CRS прямо або резидентство поруч із рахунком.
+  'residency.crs_self_certification': [
+    { any: ['=crs', 'oświadcz o rezydencj', 'oswiadcz o rezydencj', 'self-certif', 'самосертиф'] },
+    { any: ['банк', 'брокер', 'bank', 'broker', '=ibkr', '=wise'], and: ['резидентств', 'резидентност', 'rezydencj', 'tax residen'] },
+  ],
   'common.minimum_wage': [
     { any: ['мінімалк', 'минималк', 'мінімальн зарплат', 'минимальн зарплат', 'minimaln wynagrodz', 'płac minimal', 'plac minimal'] },
   ],
@@ -95,6 +100,7 @@ export const RULE_CLAUSES: Record<string, Clause[]> = {
     { any: ['бывш'], and: ['работодат'] },
     { any: ['były', 'byly', 'byłym', 'bylym', 'byłego', 'bylego'], and: ['pracodaw'] },
   ],
+  'jdg.vat': [{ any: ['=vat', '=ват', '=пдв', '=ндс', 'vat-ue', 'vat ue', 'podatek od towar', 'zwolnieni podmiot', 'zwolnieni z vat'] }],
   'incubator.kup': [{ any: ['інкубатор', 'инкубатор', 'inkubator', '=aip'] }],
   'uop.employer_contributions': [
     { any: ['koszt pracodaw', 'brutto brutto', 'брутто брутто'] },

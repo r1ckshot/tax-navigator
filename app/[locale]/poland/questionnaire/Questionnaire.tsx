@@ -5,7 +5,7 @@ import type { Answers } from '@/lib/calc/types';
 import { assessResidency } from '@/lib/calc/residency';
 import { compareScenarios } from '@/lib/calc/scenarios';
 import { visibleScreens, isScreenComplete, resumeIndex, type Draft } from '@/lib/questions/schema';
-import { decodeAnswers, encodeAnswers } from '@/lib/share';
+import { decodeAnswers, encodeAnswers, isPrefill } from '@/lib/share';
 import { clearDraft, loadDraft, saveDraft } from '@/lib/storage';
 import { Question } from '@/components/Question';
 import { Progress } from '@/components/Progress';
@@ -56,10 +56,17 @@ export function Questionnaire() {
   // (зʼявився/зник умовний крок), а не позиція користувача.
   const progressRef = useRef({ index: 0, percent: 0 });
 
-  // Відновлення: спершу лінк (шеринг), інакше — прогрес сесії.
+  // Відновлення: спершу лінк (шеринг або передзаповнення), інакше — прогрес сесії.
   useEffect(() => {
-    const fromLink = decodeAnswers(window.location.search.replace(/^\?/, ''));
-    if (Object.keys(fromLink).length > 0) {
+    const query = window.location.search.replace(/^\?/, '');
+    const fromLink = decodeAnswers(query);
+    if (Object.keys(fromLink).length > 0 && isPrefill(query)) {
+      // Зі сторінки-відповіді: анкета з першого кроку з уже вибраним. Query
+      // знімається одразу, інакше F5 посеред анкети скинув би нові відповіді
+      // назад до передзаповнених.
+      setAnswers(fromLink);
+      window.history.replaceState(null, '', window.location.pathname);
+    } else if (Object.keys(fromLink).length > 0) {
       setAnswers(fromLink);
       setDone(true);
     } else {

@@ -16,7 +16,7 @@ feature-first усередині шарів. Обґрунтування вибо
 |---|---|---|---|
 | **rules** | `app/lib/rules/` | `rules.2026.json` (кожне правило = params + `source_url` + `verified_at`) і типи доступу до нього | нічого, крім себе |
 | **calc** | `app/lib/calc/` | резидентство, ZUS, 6 сценаріїв, діапазони — чисті функції | `rules/` |
-| **adapters** | `app/lib/questions/`, `storage.ts`, `share.ts`, `format.ts`, `tokens.ts`, `routes.ts`, `site.ts` | схема анкети, чернетка в `sessionStorage`, share-лінк, форматування, розбір словника токенів для `/tokens`, адреси `/{мова}/poland/…` і старі редиректи, базова адреса сайту з env | `calc/`, `rules/`, одне одного |
+| **adapters** | `app/lib/questions/`, `app/lib/content/`, `storage.ts`, `share.ts`, `format.ts`, `tokens.ts`, `routes.ts`, `site.ts`, `seo.ts`, `analytics.ts`, `answer-page.ts` | схема анкети, файли змісту сторінок-відповідей, чернетка в `sessionStorage`, share-лінк і передзаповнення, форматування, розбір словника токенів для `/tokens`, адреси `/{мова}/poland/…` і старі редиректи, базова адреса сайту з env, sitemap і robots, очищення адреси для аналітики, збірка сторінки-відповіді з правил | `calc/`, `rules/`, одне одного |
 | **presentation** | `app/components/`, `app/[locale]/**` (продукт), `app/(technical)/**` (`/tokens`), `app/global-not-found.tsx`, `app/lib/i18n/` | React, CSS Modules, словники мов і їх реєстр | усе нижче |
 
 ## Правило залежностей
@@ -50,7 +50,8 @@ presentation → adapters → calc → rules
 | Нове питання анкети | `questions/schema.ts` | впливає на висновок, інакше питати не треба |
 | Новий екран / вигляд | `components/` | не містить арифметики, лише показує |
 | Текст користувачу | `i18n/uk.ts` (і кожна увімкнена мова) | у компонентах немає рядків-літералів; компонент бере `useT()`, серверна сторінка — `translator(locale)` |
-| Нову сторінку країни | `app/[locale]/poland/<назва>/page.tsx` + `CountryPage` у `routes.ts` | посилання будуються `countryHref()`, не рядком |
+| Нову сторінку країни | `app/[locale]/poland/<назва>/page.tsx` + `CountryPage` і `COUNTRY_PAGES` у `routes.ts` | посилання будуються `countryHref()`, не рядком; тека без місця в `COUNTRY_PAGES` валить `seo.test.ts` |
+| Сторінку-відповідь (SEO) | файл у `lib/content/poland/` + рядок у `lib/content/index.ts` | числа — плейсхолдери `{{amount:rule_id/шлях}}`, твердження без числа — `{{cite:rule_id}}`; цифра-літерал валить `answer-page.test.ts` |
 | Нову мову | словник у `i18n/` + рядок у реєстрі `i18n/index.ts` | маршрути не правляться ([ADR-0003](docs/adr/0003-locale-country-routes.md)) |
 
 ## Чим це тримається

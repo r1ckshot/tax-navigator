@@ -42,13 +42,37 @@ export const LEGACY_REDIRECTS: ReadonlyArray<{ source: string; destination: stri
 ];
 
 /**
+ * Сторінка-відповідь: `/{мова}/poland/<slug>`. Slug не може збігтися зі
+ * статичною сторінкою країни — Next віддав би статичну, і сторінка зникла б
+ * мовчки (тест `answer-page.test.ts`).
+ */
+export const COUNTRY_PAGES: readonly Exclude<CountryPage, 'home'>[] = ['questionnaire', 'sources'];
+
+export function answerHref(locale: Locale, slug: string): string {
+  return `${countryHref(locale)}/${slug}`;
+}
+
+/**
  * Canonical і hreflang сторінки. Шляхи відносні: абсолютними їх робить
  * `metadataBase` з `siteUrl()`. `x-default` веде на мову за замовчуванням —
  * мова не обирається редиректом за IP (DECISIONS 2026-10-01).
  */
 export function alternates(locale: Locale, page: CountryPage = 'home') {
+  return alternatesOf(locale, (l) => countryHref(l, page), LOCALES);
+}
+
+/**
+ * Те саме для сторінки-відповіді, яка є лише в мовах, де її написано: hreflang
+ * не має вести на 404. Немає версії мовою за замовчуванням — `x-default` на
+ * першу наявну.
+ */
+export function answerAlternates(locale: Locale, slug: string, available: readonly Locale[]) {
+  return alternatesOf(locale, (l) => answerHref(l, slug), available);
+}
+
+function alternatesOf(locale: Locale, href: (l: Locale) => string, available: readonly Locale[]) {
   const languages: Record<string, string> = {};
-  for (const l of LOCALES) languages[l] = countryHref(l, page);
-  languages['x-default'] = countryHref(DEFAULT_LOCALE, page);
-  return { canonical: countryHref(locale, page), languages };
+  for (const l of available) languages[l] = href(l);
+  languages['x-default'] = href(available.includes(DEFAULT_LOCALE) ? DEFAULT_LOCALE : available[0]);
+  return { canonical: href(locale), languages };
 }

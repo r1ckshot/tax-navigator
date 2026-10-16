@@ -27,7 +27,7 @@ async function amendment(id) {
 
 const TODAY = '2026-10-01';
 const ruleAt = (verified_at) => ({ rule_id: 'residency.days_threshold', params: {}, source_url: 'https://www.gov.pl/x', verified_at });
-const PIT = act('pit', 'art. 3 ust. 2a');
+const PIT = act('pit', 'art. 3 ust. 1a pkt 2');
 
 describe('act: ustawa o PIT на справжній відповіді ELI 2026-10-01', () => {
   /**
@@ -42,7 +42,7 @@ describe('act: ustawa o PIT на справжній відповіді ELI 2026-
     const check = await checkAct({ rule: ruleAt('2026-07-18'), law: PIT, act: { meta: eli('DU/1991/350'), failure_reason: null }, amendment, today: TODAY });
     expect(check.state).toBe(STATES.NEEDS_CONFIRMATION);
     expect(check.amended.map((a) => a.id).sort()).toEqual(['DU/2026/1079', 'DU/2026/1098', 'DU/2026/1123', 'DU/2026/846']);
-    expect(check.failure_reason).toContain('перечитати art. 3 ust. 2a');
+    expect(check.failure_reason).toContain('перечитати art. 3 ust. 1a pkt 2');
     expect(check.fetched_from).toBe('https://api.sejm.gov.pl/eli/acts/DU/1991/350');
   });
 

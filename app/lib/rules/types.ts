@@ -9,6 +9,12 @@ export interface Rule<P = Record<string, unknown>> {
   rule_id: string;
   params: P;
   source_url: string;
+  /**
+   * Назва джерела для людини — заголовок сторінки чи назва акта мовою оригіналу,
+   * як у бібліографії. Під висновком і на сторінці-відповіді стоїть вона, а не
+   * службовий `rule_id`: читач із пошуку не має розшифровувати `status.business_right`.
+   */
+  source_title: string;
   verified_at: string;
 }
 
@@ -36,13 +42,14 @@ export function getParams<P>(ruleId: string): P {
 /** Джерело для цитати під висновком. */
 export interface Source {
   ruleId: string;
+  title: string;
   url: string;
   verifiedAt: string;
 }
 
 export function sourceOf(ruleId: string): Source {
   const rule = getRule(ruleId);
-  return { ruleId, url: rule.source_url, verifiedAt: rule.verified_at };
+  return { ruleId, title: rule.source_title, url: rule.source_url, verifiedAt: rule.verified_at };
 }
 
 export function sourcesOf(...ruleIds: string[]): Source[] {

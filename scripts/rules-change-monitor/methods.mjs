@@ -36,7 +36,7 @@ const page = (why) => ({ method: METHODS.PAGE, why });
 export const VERIFICATION = Object.freeze({
   "residency.days_threshold": {
     method: METHODS.ACT,
-    why: "183 дні — art. 3 ust. 2a ustawy o PIT; objaśnienia MF на gov.pl лежать PDF-вкладенням, у HTML сторінки числа немає",
+    why: "183 дні — art. 3 ust. 1a pkt 2 ustawy o PIT; objaśnienia MF на gov.pl лежать PDF-вкладенням, у HTML сторінки числа немає",
   },
   "residency.special_norm_52zr": {
     method: METHODS.ACT,
@@ -45,6 +45,10 @@ export const VERIFICATION = Object.freeze({
   "residency.treaty_tiebreakers": {
     method: METHODS.ACT,
     why: "порядок критеріїв — art. 4 umowy PL-UA (Dz.U. 1994 nr 63 poz. 269); isap за Imperva, ELI віддає той самий акт",
+  },
+  "residency.crs_self_certification": {
+    method: METHODS.ACT,
+    why: "заява для банку — art. 24, 43, 45 і 57 ustawy o wymianie informacji podatkowych; державної сторінки з цими правилами для людини немає",
   },
   "common.minimum_wage": page("zus.pl, таблиця складок 2026"),
   "common.projected_average_wage": page("zus.pl, розділ про ліміт річної бази"),
@@ -56,6 +60,10 @@ export const VERIFICATION = Object.freeze({
   "jdg.byly_pracodawca": {
     method: METHODS.ACT,
     why: "втрата ryczałtu при послугах колишньому роботодавцю — art. 8 ust. 2 ustawy o ryczałcie (ust. 1 pkt 6 uchylony); пільги ZUS — art. 18 Prawa przedsiębiorców і art. 18a ustawy o sus",
+  },
+  "jdg.vat": {
+    method: METHODS.ACT,
+    why: "ліміт 240 000 і винятки — art. 113 ustawy o VAT, реєстрація — art. 96 ust. 5, місце послуги й VAT-UE — art. 28b і 97; podatki.gov.pl називає лише ліміт",
   },
   "incubator.kup": page("ціни абонементу — сторінки самих інкубаторів (Bizky Prime — нижня межа, FBA.ink — верхня); KUP 20/50%, ліміт 120 000 і відсутність ZUS — act"),
   "uop.employer_contributions": page("biznes.gov.pl/00274: таблиця розподілу складок 2026"),

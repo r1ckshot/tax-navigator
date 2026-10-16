@@ -11,7 +11,9 @@ import type { Risk } from '@/lib/calc/types';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: `${t('tokens.title')} · ${t('app.title')}`,
+  title: t('tokens.title'),
+  // Технічна сторінка: не для пошуку і не в sitemap (`lib/seo.ts`).
+  robots: { index: false, follow: false },
 };
 
 /**

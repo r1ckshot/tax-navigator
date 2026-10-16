@@ -7,31 +7,49 @@
       "rule_id": "residency.days_threshold",
       "params": { "days": 183, "partialDayCountsAsFull": true },
       "source_url": "https://www.gov.pl/web/finanse/objasnienia-podatkowe-z-29-kwietnia-2021-r-ws-rezydencji-podatkowej-oraz-zakresu-obowiazku-podatkowego-osob-fizycznych-w-polsce",
+      "source_title": "Objaśnienia podatkowe z 29 kwietnia 2021 r. ws. rezydencji podatkowej",
       "verified_at": "2026-10-15"
     },
     {
       "rule_id": "residency.special_norm_52zr",
       "params": { "validFrom": "2024-01-01", "validTo": "2026-12-31" },
       "source_url": "https://orka.sejm.gov.pl/proc10.nsf/ustawy/2172_u.htm",
+      "source_title": "Ustawa z 23 stycznia 2026 r. (art. 52zr ustawy o PIT)",
       "verified_at": "2026-10-15"
     },
     {
       "rule_id": "residency.treaty_tiebreakers",
       "params": { "order": ["permanentHome", "centerOfInterests", "habitualAbode", "citizenship"] },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19940630269",
+      "source_title": "Umowa między Polską a Ukrainą w sprawie unikania podwójnego opodatkowania (1993)",
       "verified_at": "2026-10-15"
     },
 
     {
+      "rule_id": "residency.crs_self_certification",
+      "params": {
+        "collectedAtAccountOpening": true,
+        "residenceByTaxLawOfThatState": true,
+        "countriesAndTinPerCountry": true,
+        "underCriminalLiability": true,
+        "updateWithinDaysAfterChange": 30
+      },
+      "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20170000648",
+      "source_title": "Ustawa o wymianie informacji podatkowych z innymi państwami",
+      "verified_at": "2026-10-15"
+    },
+    {
       "rule_id": "common.minimum_wage",
       "params": { "monthly": 4806 },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
+      "source_title": "Nowe wysokości składek na ubezpieczenia społeczne w 2026 r.",
       "verified_at": "2026-10-15"
     },
     {
       "rule_id": "common.projected_average_wage",
       "params": { "monthly": 9420 },
       "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
+      "source_title": "30-krotność",
       "verified_at": "2026-10-15"
     },
 
@@ -39,6 +57,7 @@
       "rule_id": "jdg.ryczalt.rate",
       "params": { "rateProgramming": 0.12, "rateNarrowSupport": 0.085, "annualLimit": 8517200 },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
+      "source_title": "Stawki i limity",
       "verified_at": "2026-10-15"
     },
     {
@@ -53,12 +72,14 @@
         "deductibleShareOfRevenue": 0.5
       },
       "source_url": "https://stat.gov.pl/",
+      "source_title": "Główny Urząd Statystyczny",
       "verified_at": "2026-10-15"
     },
     {
       "rule_id": "jdg.liniowy",
       "params": { "rate": 0.19, "zdrowotnaRate": 0.049, "zdrowotnaMinMonthly": 432.54, "zdrowotnaAnnualDeductionCap": 14100 },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
+      "source_title": "Stawki i limity",
       "verified_at": "2026-10-15"
     },
     {
@@ -73,6 +94,7 @@
         "zdrowotnaMinMonthly": 432.54
       },
       "source_url": "https://www.podatki.gov.pl/podatki-firmowe/pit/stawki-i-limity",
+      "source_title": "Stawki i limity",
       "verified_at": "2026-10-15"
     },
     {
@@ -88,6 +110,7 @@
         "priorBusinessLookbackMonths": 60
       },
       "source_url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2026-r.",
+      "source_title": "Nowe wysokości składek na ubezpieczenia społeczne w 2026 r.",
       "verified_at": "2026-10-12"
     },
     {
@@ -97,9 +120,31 @@
         "zusReliefLostOnPartialOverlap": true
       },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19981440930",
+      "source_title": "Ustawa o zryczałtowanym podatku dochodowym od niektórych przychodów osiąganych przez osoby fizyczne",
       "verified_at": "2026-10-12"
     },
 
+    {
+      "rule_id": "jdg.vat",
+      "params": {
+        "exemptionAnnualLimit": 240000,
+        "limitProportionalWhenStartingMidYear": true,
+        "exemptionLostFromExceedingSale": true,
+        "registrationBeforeLosingExemption": true,
+        "inputVatNotDeductedWhenExempt": true,
+        "optOutBeforeMonthStart": true,
+        "returnNotEarlierThanYearsAfterYearEnd": 1,
+        "legalAndConsultingServicesExcluded": true,
+        "b2bServicesTaxedWhereClientIs": true,
+        "foreignPlaceOfSupplyOutsideLimit": true,
+        "vatUeBeforeEuB2bServices": true,
+        "vatUeBeforeImportOfServices": true,
+        "importOfServicesTaxedByBuyer": true
+      },
+      "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20040540535",
+      "source_title": "Ustawa o podatku od towarów i usług",
+      "verified_at": "2026-10-15"
+    },
     {
       "rule_id": "incubator.kup",
       "params": {
@@ -112,6 +157,7 @@
         "isEstimate": true
       },
       "source_url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19910800350",
+      "source_title": "Ustawa o podatku dochodowym od osób fizycznych",
       "verified_at": "2026-10-15"
     },
 
@@ -125,6 +171,7 @@
         "fgsp": 0.001
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00274",
+      "source_title": "Jakie składki na ubezpieczenia społeczne płaci przedsiębiorca do ZUS",
       "verified_at": "2026-10-15"
     },
     {
@@ -137,6 +184,7 @@
         "zdrowotnaDeductibleFromTax": false
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00274",
+      "source_title": "Jakie składki na ubezpieczenia społeczne płaci przedsiębiorca do ZUS",
       "verified_at": "2026-10-15"
     },
     {
@@ -146,12 +194,14 @@
         "kwotaZmniejszajacaMonthly": 300
       },
       "source_url": "https://www.podatki.gov.pl/twoj-e-pit/pytania-i-odpowiedzi/koszty-uzyskania-przychodow",
+      "source_title": "Koszty uzyskania przychodów",
       "verified_at": "2026-10-15"
     },
     {
       "rule_id": "uop.annual_contribution_cap",
       "params": { "annualBaseCap": 282600, "appliesTo": ["emerytalne", "rentowe"] },
       "source_url": "https://www.zus.pl/en/firmy/rozliczenia-z-zus/30-krotnosc",
+      "source_title": "30-krotność",
       "verified_at": "2026-10-15"
     },
 
@@ -165,6 +215,7 @@
         "unverifiedComponents": ["ZUS/zdrowotna для zakładu"]
       },
       "source_url": "https://eureka.mf.gov.pl",
+      "source_title": "Eureka: interpretacje podatkowe",
       "verified_at": "2026-10-06"
     },
     {
@@ -177,6 +228,7 @@
         "vzTiedToMartialLaw": true
       },
       "source_url": "https://zakon.rada.gov.ua/laws/show/2464-17",
+      "source_title": "Закон «Про збір та облік єдиного внеску на загальнообов’язкове державне соціальне страхування»",
       "verified_at": "2026-10-06"
     },
     {
@@ -199,6 +251,7 @@
         "choroboweVoluntary": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/0098",
+      "source_title": "Ile kosztuje współpracownik na zleceniu albo na umowie o dzieło",
       "verified_at": "2026-10-15"
     },
     {
@@ -210,6 +263,7 @@
         "appliedAfterSocialContributions": true
       },
       "source_url": "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-umowy-zlecenia-lub-o-dzielo",
+      "source_title": "Dochody z umowy zlecenia lub o dzieło",
       "verified_at": "2026-10-15"
     },
     {
@@ -220,6 +274,7 @@
         "zdrowotnaAlwaysDue": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/001785",
+      "source_title": "Zbieg tytułów do ubezpieczeń ZUS pracownika na etacie",
       "verified_at": "2026-10-15"
     },
     {
@@ -229,6 +284,7 @@
         "testIsFactsNotContractName": true
       },
       "source_url": "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
+      "source_title": "Reforma Państwowej Inspekcji Pracy",
       "verified_at": "2026-10-15"
     },
 
@@ -243,6 +299,7 @@
         "countsAccruedNotReceived": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
+      "source_title": "Działalność nierejestrowana i inne rodzaje działalności, których nie trzeba rejestrować",
       "verified_at": "2026-10-15"
     },
     {
@@ -255,6 +312,7 @@
         "zdrowotnaAlwaysDue": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
+      "source_title": "Działalność nierejestrowana i inne rodzaje działalności, których nie trzeba rejestrować",
       "verified_at": "2026-10-15"
     },
     {
@@ -267,6 +325,7 @@
         "cashBasis": true
       },
       "source_url": "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-dzialalnosci-nierejestrowanej",
+      "source_title": "Dochody z działalności nierejestrowanej w PIT",
       "verified_at": "2026-10-15"
     },
     {
@@ -277,6 +336,7 @@
         "ukrPeselEligible": true
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00115",
+      "source_title": "Działalność nierejestrowana i inne rodzaje działalności, których nie trzeba rejestrować",
       "verified_at": "2026-10-15"
     },
     {
@@ -290,6 +350,7 @@
         "peselRequiredForCeidgFrom": "2026-11-01"
       },
       "source_url": "https://www.biznes.gov.pl/pl/portal/00806",
+      "source_title": "Działalność gospodarcza cudzoziemców w Polsce",
       "verified_at": "2026-10-12"
     },
     {
@@ -303,6 +364,7 @@
         "ukrWithoutProtectionTransitionYears": 3
       },
       "source_url": "https://api.sejm.gov.pl/eli/acts/DU/2025/621/text.pdf",
+      "source_title": "Ustawa z 20 marca 2025 r. o warunkach dopuszczalności powierzania pracy cudzoziemcom",
       "verified_at": "2026-10-15"
     },
     {
@@ -315,6 +377,7 @@
         "lostOnAnyResidencePermit": true
       },
       "source_url": "https://www.gov.pl/web/udsc/przedluzenie-ochrony-czasowej-do-4-marca-2028-r",
+      "source_title": "Przedłużenie ochrony czasowej do 4 marca 2028 r.",
       "verified_at": "2026-10-15"
     },
     {
@@ -328,6 +391,7 @@
         "decisionEffectiveFromIssueDate": true
       },
       "source_url": "https://www.gov.pl/web/rodzina/reforma-panstwowej-inspekcji-pracy",
+      "source_title": "Reforma Państwowej Inspekcji Pracy",
       "verified_at": "2026-10-15"
     }
   ]

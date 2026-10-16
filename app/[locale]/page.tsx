@@ -14,6 +14,8 @@ import styles from './page.module.css';
 export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {
   const locale = await resolveLocale(params);
   const t = translator(locale);
+  // Вкладка головної — лише назва бренду (Mike); прев'ю лінка пояснює, що це.
+  // Решта сторінок має власні заголовки: за ними пошук ранжує сторінку.
   const title = t('brand.title');
   // Переноси рядків — для верстки сторінки; у метаописі й прев'ю вони зайві.
   const description = t('brand.lead').replace(/\n/g, ' ');

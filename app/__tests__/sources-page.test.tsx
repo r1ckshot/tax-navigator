@@ -19,25 +19,35 @@ afterEach(() => {
 });
 
 describe('/sources', () => {
-  it('кожне з 30 правил має лінк на свій source_url', async () => {
+  it('кожне з 32 правил має лінк на свій source_url', async () => {
     await renderOn('2026-09-15');
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     for (const rule of RULES.rules) expect(hrefs).toContain(rule.source_url);
-    expect(screen.getAllByRole('listitem')).toHaveLength(30);
+    expect(screen.getAllByRole('listitem')).toHaveLength(32);
+  });
+
+  // Підпис — назва джерела, а не службовий `rule_id` (BACKLOG, сесія 13).
+  it('кожен рядок підписано назвою джерела, rule_id на сторінці не видно', async () => {
+    await renderOn('2026-09-15');
+    for (const rule of RULES.rules) expect(screen.getAllByText(rule.source_title).length).toBeGreaterThan(0);
+    for (const rule of RULES.rules) expect(screen.queryByText(rule.rule_id)).toBeNull();
   });
 
   it('девʼять груп із лічильником у правильній формі', async () => {
     await renderOn('2026-09-15');
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(9);
+    // incubator 1; status 3; jdg 8 (з VAT, сесія 14); residency 4 (із заявою для
+    // банку), uop, zlecenie, nierejestrowana — по 4; common і fop — по 2.
     expect(screen.getByText('1 правило')).toBeDefined();
-    expect(screen.getAllByText('3 правила')).toHaveLength(2);
-    expect(screen.getByText('7 правил')).toBeDefined();
-    expect(screen.getAllByText('4 правила')).toHaveLength(3);
+    expect(screen.getAllByText('3 правила')).toHaveLength(1);
+    expect(screen.getByText('8 правил')).toBeDefined();
+    expect(screen.getAllByText('4 правила')).toHaveLength(4);
+    expect(screen.getAllByText('2 правила')).toHaveLength(2);
   });
 
   it('підсумок без розділювачів, поріг у тексті з того самого числа', async () => {
     await renderOn('2026-09-15');
-    expect(screen.getByText('30 правил у 9 групах')).toBeDefined();
+    expect(screen.getByText('32 правила у 9 групах')).toBeDefined();
     expect(screen.getByText('Через 90 днів без звірки правило позначається як давно не звірене.')).toBeDefined();
   });
 

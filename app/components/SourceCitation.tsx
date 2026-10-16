@@ -10,7 +10,9 @@ export function SourceCitation({ sources }: { sources: Source[] }) {
   const t = useT();
   if (sources.length === 0) return null;
 
-  const unique = Array.from(new Map(sources.map((s) => [s.url + s.ruleId, s])).values());
+  // Кілька правил часто стоять на одній сторінці (три ставки JDG — «Stawki i
+  // limity»): людина бачить джерело, а не правило, тож і повтор рахується за ним.
+  const unique = Array.from(new Map(sources.map((s) => [s.url + s.title, s])).values());
 
   return (
     <div className={styles.sources}>
@@ -19,9 +21,9 @@ export function SourceCitation({ sources }: { sources: Source[] }) {
       </span>
       <ul className={styles.list}>
         {unique.map((s) => (
-          <li key={s.ruleId + s.url}>
+          <li key={s.url + s.title}>
             <a href={s.url} target="_blank" rel="noopener noreferrer">
-              {s.ruleId}
+              {s.title}
             </a>
             {/* Тире живе в окремому span: на телефоні дата йде своїм рядком, і
                 тоді розділовий знак посеред рядка не потрібен. */}
