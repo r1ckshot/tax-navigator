@@ -151,11 +151,11 @@ test('джерела цифр', async ({ page }) => {
   await page.goto(countryHref('uk', 'sources'));
 
   await expect(page.getByRole('heading', { level: 2 })).toHaveCount(9);
-  await expect(page.getByRole('listitem')).toHaveCount(30);
+  await expect(page.getByRole('listitem')).toHaveCount(32);
   await expectNoHorizontalOverflow(page);
 
   const dates = page.locator('li span[class*="date"]');
-  await expect(dates).toHaveCount(30);
+  await expect(dates).toHaveCount(32);
   await expect(page).toHaveScreenshot('sources.png', { fullPage: true, mask: [dates] });
 });
 
