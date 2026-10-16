@@ -186,6 +186,25 @@ async function openQuestion(page: Page, id: string, answered: boolean) {
 
   const screen = visibleScreens(draft)[step];
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(t(screen.titleKey));
+  await settleAnimations(page);
+}
+
+/**
+ * Текст і видимість елемента не кажуть, що поява по черзі скінчилась: заголовок
+ * з `opacity: 0` у стартовій фазі анімації Playwright уже вважає видимим. На
+ * повільному раннері знімок ловив картку наполовину проявленою (лише блідий
+ * підпис, без питання й повзунка). Скінченні анімації чекаємо до кінця; нескінченні
+ * (скелетон `pulse`) не чекаємо — вони не скінчаться ніколи.
+ */
+async function settleAnimations(page: Page) {
+  await page.evaluate(() =>
+    Promise.allSettled(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished),
+    ),
+  );
 }
 
 test('анкета, перший крок з вибраною відповіддю', async ({ page }) => {
